@@ -3,12 +3,42 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="The Foundation: An open, auditable economic research instrument evaluating the economic condition of the bottom 30% of Americans.">
+  <meta name="description" content="The Foundation: An open, deterministic economic research instrument measuring the economic condition of the bottom 30% of Americans.">
+  <meta name="theme-color" content="#f59e0b">
+  
+  <!-- Canonical & Social Metadata -->
+  <link rel="canonical" href="https://sumosizedginger.github.io/foundation/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="The Foundation">
+  <meta property="og:title" content="The Foundation — Economic Health from the Bottom 30% Up">
+  <meta property="og:description" content="A public, reproducible research instrument tracking the Bottom 30% Population Anchor, Survival Floor, and economic pressures.">
+  <meta property="og:url" content="https://sumosizedginger.github.io/foundation/">
+  <meta property="og:image" content="https://sumosizedginger.github.io/foundation/assets/og-preview.svg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="The Foundation — Economic Health from the Bottom 30% Up">
+  <meta name="twitter:description" content="A public, reproducible research instrument tracking the Bottom 30% Population Anchor, Survival Floor, and economic pressures.">
+  <meta name="twitter:image" content="https://sumosizedginger.github.io/foundation/assets/og-preview.svg">
+
   <title>The Foundation — Economic Health from the Bottom 30% Up</title>
+  
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="site.webmanifest">
   <link rel="stylesheet" href="assets/app.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+
+  <!-- JSON-LD Structured Metadata -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ResearchProject",
+    "name": "The Foundation",
+    "url": "https://sumosizedginger.github.io/foundation/",
+    "description": "An open economic measurement instrument evaluating the bottom 30% of Americans using official microdata.",
+    "publisher": {
+      "@type": "Organization",
+      "name": "The Foundation"
+    }
+  }
+  </script>
 </head>
 <body>
   <header class="site-header">
@@ -30,14 +60,14 @@
       <p class="eyebrow">ECONOMIC RESEARCH INSTRUMENT</p>
       <h1>How are the bottom 30% actually doing?</h1>
       <p class="lede">
-        The roof does not prove the foundation is sound. We track the economic condition of Americans with the least financial margin using deterministic calculations and verified public data.
+        The roof does not prove the foundation is sound. We evaluate economic health from the position of Americans with the least financial margin using deterministic calculations and verified public data.
       </p>
       <div class="status-strip" id="stage-status" aria-live="polite">
-        <span>Loading verified instrument status…</span>
+        <span id="stage-status-text">Loading instrument data…</span>
       </div>
     </section>
 
-    <!-- QUESTION 1 & 2: WHO ARE WE MEASURING? & CAN THEY AFFORD BASIC LIFE? (DUAL AXIS) -->
+    <!-- QUESTION 1 & 2: DUAL AXIS -->
     <section class="section" id="dual-axis">
       <div class="section-header">
         <p class="eyebrow">THE DUAL-AXIS ECONOMIC FRAMEWORK</p>
@@ -53,18 +83,16 @@
           <div>
             <div class="panel-tag">
               <span>AXIS 1 · POPULATION ANCHOR</span>
-              <span class="badge verified" id="anchor-badge">VERIFIED</span>
+              <span class="badge verified" id="anchor-badge">—</span>
             </div>
             <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 0.4rem;">Bottom-30 Per-Person Income Cutoff</h3>
-            <div class="metric-number" id="cutoff-value">$21,800</div>
-            <p class="metric-sub" id="cutoff-monthly">≈ $1,817 per person / month</p>
-            <p class="metric-sub" id="cutoff-detail" style="font-size: 0.88rem;">
-              Derived from 2025 CPS ASEC microdata (2024 income year) ranking 337.7M represented persons by household money income per capita.
-            </p>
+            <div class="metric-number" id="cutoff-value">—</div>
+            <p class="metric-sub" id="cutoff-monthly">—</p>
+            <p class="metric-sub" id="cutoff-detail" style="font-size: 0.88rem;">Loading verified CPS ASEC anchor…</p>
           </div>
           <div class="metric-footer">
             <span>Source: U.S. Census Bureau (CPS ASEC)</span>
-            <button class="btn-link" onclick="openProvenance('population_anchor')">Inspect Provenance →</button>
+            <button type="button" class="btn-link" id="btn-inspect-anchor">Inspect Provenance →</button>
           </div>
         </article>
 
@@ -73,18 +101,16 @@
           <div>
             <div class="panel-tag">
               <span>AXIS 2 · SURVIVAL FLOOR</span>
-              <span class="badge research" id="survival-badge">RESEARCH ESTIMATE</span>
+              <span class="badge research" id="survival-badge">—</span>
             </div>
             <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 0.4rem;">Single-Adult Basic Survival Cost</h3>
-            <div class="metric-number" id="survival-value">$27,960</div>
-            <p class="metric-sub" id="survival-monthly">≈ $2,330 per month</p>
-            <p class="metric-sub" id="survival-detail" style="font-size: 0.88rem;">
-              Modeled unavoidable baseline necessities (housing, food, utilities, transit, healthcare, taxes) from HUD, USDA, EIA, BLS, and MEPS.
-            </p>
+            <div class="metric-number" id="survival-value">—</div>
+            <p class="metric-sub" id="survival-monthly">—</p>
+            <p class="metric-sub" id="survival-detail" style="font-size: 0.88rem;">Loading basic necessities floor…</p>
           </div>
           <div class="metric-footer">
             <span>Status: Research Baseline</span>
-            <button class="btn-link" onclick="openProvenance('survival_floor')">Inspect Components →</button>
+            <button type="button" class="btn-link" id="btn-inspect-survival">Inspect Components →</button>
           </div>
         </article>
       </div>
@@ -93,18 +119,18 @@
       <div class="axis-summary" id="axis-summary-box">
         <div>
           <p class="summary-stat-label">Single-Adult Survival Gap</p>
-          <p class="summary-stat-val negative" id="survival-gap-val">-$6,160 / yr</p>
+          <p class="summary-stat-val negative" id="survival-gap-val">—</p>
           <p class="summary-stat-desc">Population Anchor − Survival Floor</p>
         </div>
         <div>
           <p class="summary-stat-label">Basic Adequacy Ratio</p>
-          <p class="summary-stat-val negative" id="adequacy-ratio-val">0.78 (78%)</p>
-          <p class="summary-stat-desc">Cutoff covers 78% of single-adult floor</p>
+          <p class="summary-stat-val negative" id="adequacy-ratio-val">—</p>
+          <p class="summary-stat-desc">Cutoff share of single-adult floor</p>
         </div>
         <div>
           <p class="summary-stat-label">Composite Foundation Score</p>
           <p class="summary-stat-val" style="color: var(--muted);" id="composite-score-val">PRELAUNCH</p>
-          <p class="summary-stat-desc">Locked until validation gates pass</p>
+          <p class="summary-stat-desc">Locked in prelaunch research</p>
         </div>
       </div>
     </section>
@@ -123,60 +149,23 @@
         <table>
           <thead>
             <tr>
-              <th>Household Size</th>
-              <th>Composition Profile</th>
-              <th class="text-right">Equivalent Household Income at Bottom-30 Boundary</th>
-              <th class="text-right">Household Survival Floor (Research Estimate)</th>
-              <th class="text-right">Survival Gap</th>
-              <th class="text-right">Adequacy Ratio</th>
+              <th scope="col">Household Size</th>
+              <th scope="col">Composition Profile</th>
+              <th scope="col" class="text-right">Equivalent Household Income at Bottom-30 Boundary</th>
+              <th scope="col" class="text-right">Household Survival Floor (Research Estimate)</th>
+              <th scope="col" class="text-right">Survival Gap</th>
+              <th scope="col" class="text-right">Adequacy Ratio</th>
             </tr>
           </thead>
           <tbody id="household-matrix-body">
             <tr>
-              <td class="mono">1</td>
-              <td>1 Adult</td>
-              <td class="mono text-right">$21,800</td>
-              <td class="mono text-right">$27,960</td>
-              <td class="mono text-right" style="color: var(--danger);">-$6,160</td>
-              <td class="mono text-right" style="color: var(--danger);">0.78 (78%)</td>
-            </tr>
-            <tr>
-              <td class="mono">2</td>
-              <td>2 Adults / 1 Adult + 1 Child</td>
-              <td class="mono text-right">$43,600</td>
-              <td class="mono text-right">$39,800</td>
-              <td class="mono text-right" style="color: var(--good);">+$3,800</td>
-              <td class="mono text-right" style="color: var(--good);">1.10 (110%)</td>
-            </tr>
-            <tr>
-              <td class="mono">3</td>
-              <td>2 Adults + 1 Child / 1 Adult + 2 Children</td>
-              <td class="mono text-right">$65,400</td>
-              <td class="mono text-right">$53,200</td>
-              <td class="mono text-right" style="color: var(--good);">+$12,200</td>
-              <td class="mono text-right" style="color: var(--good);">1.23 (123%)</td>
-            </tr>
-            <tr>
-              <td class="mono">4</td>
-              <td>2 Adults + 2 Children</td>
-              <td class="mono text-right">$87,200</td>
-              <td class="mono text-right">$68,300</td>
-              <td class="mono text-right" style="color: var(--good);">+$18,900</td>
-              <td class="mono text-right" style="color: var(--good);">1.28 (128%)</td>
-            </tr>
-            <tr>
-              <td class="mono">5</td>
-              <td>2 Adults + 3 Children</td>
-              <td class="mono text-right">$109,000</td>
-              <td class="mono text-right">$81,500</td>
-              <td class="mono text-right" style="color: var(--good);">+$27,500</td>
-              <td class="mono text-right" style="color: var(--good);">1.34 (134%)</td>
+              <td colspan="6">Loading household matrix…</td>
             </tr>
           </tbody>
         </table>
       </div>
       <p style="font-size: 0.84rem; color: var(--subtle); margin-top: 0.75rem;">
-        * Note: "Equivalent household income at the Bottom-30 boundary" reflects per-person ranking math ($21,800 × size). It is NOT a poverty threshold or adequacy claim.
+        * Note: "Equivalent household income at the Bottom-30 boundary" reflects per-person ranking math. It is NOT a poverty threshold or adequacy claim.
       </p>
     </section>
 
@@ -186,46 +175,12 @@
         <p class="eyebrow">INCOME DISTRIBUTION</p>
         <h2 class="section-title">3. Where is the rest of the ladder?</h2>
         <p class="section-desc">
-          Weighted person-level income distribution across the represented U.S. population (2024 income year / 2025 CPS ASEC).
+          Weighted person-level income distribution across the represented U.S. population.
         </p>
       </div>
 
       <div class="quantiles-grid" id="quantiles-grid">
-        <div class="quantile-card">
-          <p class="quantile-p">P10</p>
-          <p class="quantile-val">$10,000</p>
-          <p class="quantile-desc">Deep Foundation</p>
-        </div>
-        <div class="quantile-card">
-          <p class="quantile-p">P20</p>
-          <p class="quantile-val">$15,896</p>
-          <p class="quantile-desc">Lower Tier</p>
-        </div>
-        <div class="quantile-card anchor">
-          <p class="quantile-p">P30 · ANCHOR</p>
-          <p class="quantile-val" style="color: var(--accent);">$21,800</p>
-          <p class="quantile-desc" style="color: var(--accent);">Bottom 30% Boundary</p>
-        </div>
-        <div class="quantile-card">
-          <p class="quantile-p">P40</p>
-          <p class="quantile-val">$28,000</p>
-          <p class="quantile-desc">Near Foundation</p>
-        </div>
-        <div class="quantile-card">
-          <p class="quantile-p">P50</p>
-          <p class="quantile-val">$35,037</p>
-          <p class="quantile-desc">National Median</p>
-        </div>
-        <div class="quantile-card">
-          <p class="quantile-p">P75</p>
-          <p class="quantile-val">$61,640</p>
-          <p class="quantile-desc">Upper Middle</p>
-        </div>
-        <div class="quantile-card">
-          <p class="quantile-p">P90</p>
-          <p class="quantile-val">$100,100</p>
-          <p class="quantile-desc">Top 10% Cutoff</p>
-        </div>
+        <p>Loading quantiles…</p>
       </div>
     </section>
 
@@ -240,7 +195,7 @@
       </div>
 
       <div class="signals-grid" id="signals-grid">
-        <!-- Dynamically populated by app.js with verified BLS signals -->
+        <p>Loading pressure observations…</p>
       </div>
     </section>
 
@@ -275,12 +230,10 @@
         <article class="metric-panel">
           <p class="panel-tag">LATEST CHANGES</p>
           <ul id="latest-changes-list" style="list-style: none; font-size: 0.88rem; color: var(--muted); margin: 0.6rem 0; display: flex; flex-direction: column; gap: 0.4rem;">
-            <li>• Reproduced 2025 CPS ASEC (2024 Income) Population Anchor: $21,800.00/yr.</li>
-            <li>• Modeled Single-Adult Survival Floor: $27,960.00/yr (RESEARCH ESTIMATE).</li>
-            <li>• Ingested 9 verified BLS National Economic Pressure Signals.</li>
+            <li>• Loading pipeline updates…</li>
           </ul>
           <div class="metric-footer">
-            <span id="site-as-of">As of: 2026-08-13</span>
+            <span id="site-as-of">As of: —</span>
             <a class="btn-link" href="history.html">View History →</a>
           </div>
         </article>
@@ -288,15 +241,15 @@
     </section>
   </main>
 
-  <!-- PROVENANCE MODAL -->
-  <div class="modal-backdrop" id="provenance-modal" aria-hidden="true" role="dialog" aria-modal="true">
+  <!-- PROVENANCE MODAL (WCAG 2.2 AA) -->
+  <div class="modal-backdrop" id="provenance-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modal-title">
     <div class="modal-content">
-      <button class="modal-close" onclick="closeProvenance()" aria-label="Close modal">×</button>
+      <button type="button" class="modal-close" id="modal-close-btn" aria-label="Close modal">×</button>
       <p class="eyebrow" id="modal-eyebrow">DATA PROVENANCE</p>
       <h3 style="font-size: 1.4rem; font-weight: 800; margin: 0.25rem 0 1.25rem;" id="modal-title">Metric Provenance</h3>
       
       <div id="modal-body">
-        <!-- Injected via JavaScript -->
+        <!-- Injected via safe DOM construction -->
       </div>
     </div>
   </div>
@@ -306,7 +259,7 @@
       <p style="font-weight: 800; color: var(--text); margin-bottom: 0.25rem;">THE FOUNDATION</p>
       <p>An open, deterministic, auditable economic research instrument.</p>
       <p style="margin-top: 0.5rem; font-size: 0.8rem;">
-        Code: <a href="https://github.com/sumosizedginger/foundation/blob/main/LICENSE.md">Apache 2.0</a> · 
+        Code: <a href="https://github.com/sumosizedginger/foundation/blob/main/LICENSE">Apache 2.0</a> · 
         Methodology: <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> · 
         Brand identity reserved.
       </p>

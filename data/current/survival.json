@@ -6,35 +6,46 @@
     "stage": "prelaunch"
   },
   "survival_floor": {
+    "adequacy_percent": 78,
     "adequacy_ratio": 0.78,
     "benchmark_comparisons": {
       "mit_living_wage": {
-        "author": "Dr. Amy Glasmeier / MIT",
-        "estimated_single_adult_national": 42500.0,
-        "methodological_divergence": "MIT Living Wage includes civic engagement expenses, unsubsidized healthcare premiums, and county-level cost aggregation, whereas The Foundation Survival Floor models bare-minimum survival needs assuming ACA subsidies and strict home meal preparation.",
+        "author": "Dr. Amy Glasmeier / Massachusetts Institute of Technology",
+        "estimated_single_adult_annual": 42500.0,
+        "geography": "United States (Population-weighted national aggregation)",
+        "methodological_divergence": "MIT Living Wage includes civic engagement expenses, unsubsidized commercial healthcare premiums, and county-level cost aggregation, whereas The Foundation Survival Floor models bare-minimum survival needs assuming ACA subsidies and strict home meal preparation.",
         "name": "MIT Living Wage Calculator",
+        "reference_year": 2024,
+        "retrieved_at": "2026-08-13T00:00:00Z",
         "url": "https://livingwage.mit.edu/"
       },
       "official_poverty_measure": {
-        "author": "U.S. Census Bureau / HHS",
-        "methodological_divergence": "The OPM is based on 1963 food expenditure multiplied by 3 and indexed by headline CPI-U. It severely underestimates modern housing, transportation, utility, and healthcare requirements.",
+        "author": "U.S. Census Bureau / U.S. Dept. of Health & Human Services",
+        "estimated_single_adult_annual": 15650.0,
+        "geography": "United States (National)",
+        "methodological_divergence": "The OPM is based on the 1963 food-to-income multiplier (3x food) indexed by headline CPI-U. It severely underestimates modern housing, transportation, utility, and healthcare requirements.",
         "name": "Official Poverty Measure (OPM)",
-        "single_adult_threshold": 15650.0,
+        "reference_year": 2024,
+        "retrieved_at": "2026-08-13T00:00:00Z",
         "url": "https://aspe.hhs.gov/poverty-guidelines"
       },
       "united_way_alice": {
         "author": "United Way",
-        "estimated_single_adult_national": 31200.0,
-        "methodological_divergence": "ALICE includes an explicit 10% miscellaneous contingency buffer and technology line items. When ALICE contingency is excluded, the baseline aligns closely with The Foundation's $27,960 estimate.",
-        "name": "United For ALICE Survival Budget",
+        "estimated_single_adult_annual": 31200.0,
+        "geography": "United States (County-level weighted average)",
+        "methodological_divergence": "ALICE includes an explicit 10% miscellaneous contingency reserve and higher technology allowances. When ALICE contingency is excluded, the baseline aligns closely with The Foundation's $27,960 estimate.",
+        "name": "United For ALICE Household Survival Budget",
+        "reference_year": 2024,
+        "retrieved_at": "2026-08-13T00:00:00Z",
         "url": "https://www.unitedforalice.org/"
       }
     },
-    "calculated_at": "2026-08-13T22:24:22+00:00",
+    "calculated_at": "2026-08-13T22:44:59+00:00",
     "components": [
       {
         "annual_cost": 13200.0,
         "category": "housing",
+        "category_label": "Shelter (Rent & Core Utilities)",
         "method": "National baseline for 40th-percentile efficiency/1-bedroom rental unit including essential utilities.",
         "monthly_cost": 1100.0,
         "notes": "Housing cost varies substantially by region; national baseline represents median cross-market entry rental.",
@@ -45,6 +56,7 @@
       {
         "annual_cost": 3600.0,
         "category": "food",
+        "category_label": "Food at Home",
         "method": "USDA monthly cost of food for single adult (age 19-50) with official +20% 1-person household size adjustment.",
         "monthly_cost": 300.0,
         "notes": "Assumes 100% home meal preparation using low-cost, nutritious staple food basket.",
@@ -55,6 +67,7 @@
       {
         "annual_cost": 2640.0,
         "category": "utilities_tech",
+        "category_label": "Utilities & Connectivity",
         "method": "Basic household electric, heating/cooling, water/sewer, and minimum broadband connectivity baseline.",
         "monthly_cost": 220.0,
         "notes": "Reflects unavoidable residential utility costs not included in base rent.",
@@ -65,6 +78,7 @@
       {
         "annual_cost": 3840.0,
         "category": "transportation",
+        "category_label": "Transportation",
         "method": "Basic operating costs for reliable used commuting vehicle (fuel, liability insurance, basic maintenance) or transit pass.",
         "monthly_cost": 320.0,
         "notes": "Does not assume new vehicle purchase or comprehensive insurance.",
@@ -75,6 +89,7 @@
       {
         "annual_cost": 1680.0,
         "category": "healthcare",
+        "category_label": "Healthcare",
         "method": "Out-of-pocket medical expenses plus subsidized ACA benchmark Silver health insurance premium.",
         "monthly_cost": 140.0,
         "notes": "Assumes eligibility for income-based Affordable Care Act premium tax credits (APTC).",
@@ -85,6 +100,7 @@
       {
         "annual_cost": 3000.0,
         "category": "taxes_unavoidables",
+        "category_label": "Taxes & Unavoidable Basics",
         "method": "Mandatory FICA payroll taxes (7.65% on earned income) plus state/local sales taxes and unavoidable personal hygiene/cleaning supplies.",
         "monthly_cost": 250.0,
         "notes": "Assumes standard deduction eliminates federal income tax liability at this earnings level.",
@@ -95,6 +111,7 @@
     ],
     "household_matrix": [
       {
+        "adequacy_percent": 78,
         "adequacy_ratio": 0.78,
         "components": {
           "childcare": 0.0,
@@ -107,6 +124,7 @@
         },
         "composition_label": "1 Adult",
         "household_size": 1,
+        "is_adequate": false,
         "population_anchor_annual": 21800.0,
         "population_anchor_monthly": 1816.67,
         "status": "research_estimate",
@@ -116,6 +134,7 @@
         "survival_gap_monthly": -513.33
       },
       {
+        "adequacy_percent": 110,
         "adequacy_ratio": 1.1,
         "components": {
           "childcare": 0.0,
@@ -128,6 +147,7 @@
         },
         "composition_label": "2 Adults / 1 Adult + 1 Child",
         "household_size": 2,
+        "is_adequate": true,
         "population_anchor_annual": 43600.0,
         "population_anchor_monthly": 3633.33,
         "status": "research_estimate",
@@ -137,6 +157,7 @@
         "survival_gap_monthly": 316.67
       },
       {
+        "adequacy_percent": 123,
         "adequacy_ratio": 1.23,
         "components": {
           "childcare": 6000.0,
@@ -149,6 +170,7 @@
         },
         "composition_label": "2 Adults + 1 Child / 1 Adult + 2 Children",
         "household_size": 3,
+        "is_adequate": true,
         "population_anchor_annual": 65400.0,
         "population_anchor_monthly": 5450.0,
         "status": "research_estimate",
@@ -158,6 +180,7 @@
         "survival_gap_monthly": 1016.67
       },
       {
+        "adequacy_percent": 128,
         "adequacy_ratio": 1.28,
         "components": {
           "childcare": 12000.0,
@@ -170,6 +193,7 @@
         },
         "composition_label": "2 Adults + 2 Children",
         "household_size": 4,
+        "is_adequate": true,
         "population_anchor_annual": 87200.0,
         "population_anchor_monthly": 7266.67,
         "status": "research_estimate",
@@ -179,6 +203,7 @@
         "survival_gap_monthly": 1575.0
       },
       {
+        "adequacy_percent": 134,
         "adequacy_ratio": 1.34,
         "components": {
           "childcare": 16000.0,
@@ -191,6 +216,7 @@
         },
         "composition_label": "2 Adults + 3 Children",
         "household_size": 5,
+        "is_adequate": true,
         "population_anchor_annual": 109000.0,
         "population_anchor_monthly": 9083.33,
         "status": "research_estimate",

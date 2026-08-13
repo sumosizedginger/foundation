@@ -31,6 +31,9 @@ where = ["src"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
+markers = [
+  "integration: marks tests as requiring real Census/BLS external archives (deselect with '-m \"not integration\"')",
+]
 
 [tool.ruff]
 line-length = 100

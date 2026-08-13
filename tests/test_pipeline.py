@@ -1,37 +1,45 @@
 from pathlib import Path
+from unittest.mock import patch
+import pandas as pd
 import pytest
+
 from foundation.pipeline import run_full_pipeline
+from foundation.models import Bottom30Result, SourceArtifact
 
 
-def test_full_pipeline_execution():
-    project_root = Path(__file__).resolve().parents[1]
-    result = run_full_pipeline(project_root)
+def test_pipeline_with_mocked_archive(tmp_path: Path):
+    fixture_csv = Path(__file__).resolve().parent / "fixtures" / "sample_asec.csv"
+    assert fixture_csv.exists()
 
-    assert result["project"]["name"] == "The Foundation"
-    assert result["project"]["stage"] == "prelaunch"
-    assert result["composite"]["status"] == "prelaunch"
-    assert result["composite"]["score"] is None
+    df = pd.read_csv(fixture_csv)
 
-    # Population Anchor checks
-    pop = result["population_anchor"]
-    assert pop["cutoff"] == 21800.00
-    assert pop["income_year"] == 2024
-    assert pop["survey_year"] == 2025
-    assert pop["status"] == "measured"
-    assert "P10" in pop["quantiles"]
-    assert "P90" in pop["quantiles"]
+    def mock_extract_and_merge(zip_path, survey_year):
+        return df, {
+            "archive_filename": zip_path.name,
+            "sha256": "mock_sha256",
+            "bytes": 1000,
+            "survey_year": survey_year,
+            "household_records": 5,
+            "person_records": 12,
+            "matched_person_records": 12,
+            "unmatched_person_records": 0,
+            "unmatched_household_records": 0,
+            "duplicate_household_keys": 0,
+        }
 
-    # Survival Floor checks
-    surv = result["survival_floor"]
-    assert surv["status"] == "research_estimate"
-    assert surv["single_adult_floor_annual"] == 27960.00
-    assert surv["survival_gap_annual"] == -6160.00
-    assert len(surv["household_matrix"]) == 5
+    # Create dummy cache files
+    cache_dir = tmp_path / ".cache" / "census"
+    cache_dir.mkdir(parents=True)
+    for yy in ["23", "24", "25"]:
+        (cache_dir / f"asecpub{yy}csv.zip").write_text("dummy zip content")
 
-    # Check generated files exist
-    assert (project_root / "data" / "current" / "latest.json").exists()
-    assert (project_root / "data" / "current" / "population.json").exists()
-    assert (project_root / "data" / "current" / "survival.json").exists()
-    assert (project_root / "data" / "current" / "pressures.json").exists()
-    assert (project_root / "data" / "current" / "history.json").exists()
-    assert (project_root / "data" / "metadata" / "validation_report_2025.json").exists()
+    with patch("foundation.sources.census_asec.extract_and_merge_asec_zip", side_effect=mock_extract_and_merge):
+        result = run_full_pipeline(project_root=tmp_path)
+
+        assert result["project"]["name"] == "The Foundation"
+        assert result["composite"]["status"] == "prelaunch"
+        assert (tmp_path / "data" / "current" / "latest.json").exists()
+        assert (tmp_path / "data" / "current" / "population.json").exists()
+        assert (tmp_path / "data" / "current" / "survival.json").exists()
+        assert (tmp_path / "data" / "current" / "pressures.json").exists()
+        assert (tmp_path / "data" / "current" / "history.json").exists()

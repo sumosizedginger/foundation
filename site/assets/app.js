@@ -1,9 +1,11 @@
 /**
  * The Foundation — Public Web Presentation Logic
  *
- * CRITICAL ARCHITECTURAL PRINCIPLE:
- * The browser NEVER calculates authoritative economic metrics.
- * The browser strictly parses, formats, and renders precomputed, validated JSON.
+ * CRITICAL ARCHITECTURAL PRINCIPLES:
+ * 1. The browser NEVER calculates authoritative economic metrics.
+ * 2. All authoritative display numbers, ratios, and percentages come precomputed from validated JSON.
+ * 3. Safe DOM construction (textContent) is used to prevent arbitrary HTML injection.
+ * 4. WCAG 2.2 AA compliant modal focus management and keyboard traps.
  */
 
 const moneyFmt = new Intl.NumberFormat("en-US", {
@@ -22,8 +24,7 @@ const moneyExactFmt = new Intl.NumberFormat("en-US", {
 const numFmt = new Intl.NumberFormat("en-US");
 
 let globalDashboardData = null;
-let globalSurvivalData = null;
-let globalPopulationData = null;
+let lastFocusedElement = null;
 
 async function fetchJson(url) {
   const res = await fetch(url, { cache: "no-store" });
@@ -36,71 +37,159 @@ function setText(id, text) {
   if (el) el.textContent = text;
 }
 
-function setHtml(id, html) {
-  const el = document.getElementById(id);
-  if (el) el.innerHTML = html;
-}
-
-// Render National Economic Pressure Signals
+// Render National Economic Pressure Signals safely
 function renderPressureSignals(signals) {
   const container = document.getElementById("signals-grid");
-  if (!container || !signals || !signals.length) return;
+  if (!container) return;
 
   container.innerHTML = "";
+  if (!signals || !signals.length) {
+    const emptyMsg = document.createElement("p");
+    emptyMsg.className = "metric-sub";
+    emptyMsg.textContent = "Economic pressure observations currently unavailable.";
+    container.appendChild(emptyMsg);
+    return;
+  }
+
   signals.forEach((sig) => {
     const card = document.createElement("article");
     card.className = "signal-card";
 
-    const isRate = sig.unit === "percent";
-    const valDisplay = isRate ? `${sig.value.toFixed(1)}%` : sig.value.toLocaleString();
+    // Header
+    const header = document.createElement("div");
+    header.className = "signal-header";
 
-    card.innerHTML = `
-      <div>
-        <div class="signal-header">
-          <span class="panel-tag" style="margin: 0;">${sig.category.toUpperCase()} · ${sig.series_id}</span>
-          <span class="badge verified" style="font-size: 0.65rem;">${sig.freshness_status.toUpperCase()}</span>
-        </div>
-        <h4 class="signal-title">${sig.label}</h4>
-        <div class="signal-val">${valDisplay}</div>
-        <p style="font-size: 0.82rem; color: var(--muted); line-height: 1.4;">${sig.notes}</p>
-      </div>
-      <div class="signal-meta">
-        <span>Period: ${sig.period_name} ${sig.year}</span>
-        <button class="btn-link" onclick="openSignalProvenance('${sig.series_id}')">Provenance →</button>
-      </div>
-    `;
+    const tag = document.createElement("span");
+    tag.className = "panel-tag";
+    tag.style.margin = "0";
+    tag.textContent = `${sig.category.toUpperCase()} · ${sig.series_id}`;
+
+    const badge = document.createElement("span");
+    badge.className = `badge ${sig.is_stale ? "stale" : "verified"}`;
+    badge.textContent = sig.is_stale ? "STALE / CACHED" : "CURRENT";
+
+    header.appendChild(tag);
+    header.appendChild(badge);
+
+    // Title
+    const title = document.createElement("h4");
+    title.className = "signal-title";
+    title.textContent = sig.label;
+
+    // Value
+    const val = document.createElement("div");
+    val.className = "signal-val";
+    val.textContent = sig.display_value || `${sig.value} ${sig.unit}`;
+
+    // MoM / 3M rate indicators for inflation metrics if available
+    let ratesEl = null;
+    if (sig.metric_type === "price_inflation") {
+      ratesEl = document.createElement("div");
+      ratesEl.className = "signal-rates";
+      const momText = sig.mom_change_pct != null ? `1M: ${sig.mom_change_pct > 0 ? "+" : ""}${sig.mom_change_pct}%` : "";
+      const ann3mText = sig.ann_3m_change_pct != null ? `3M Ann: ${sig.ann_3m_change_pct > 0 ? "+" : ""}${sig.ann_3m_change_pct}%` : "";
+      ratesEl.textContent = [momText, ann3mText].filter(Boolean).join(" · ");
+    }
+
+    // Notes
+    const notes = document.createElement("p");
+    notes.style.fontSize = "0.82rem";
+    notes.style.color = "var(--muted)";
+    notes.style.lineHeight = "1.4";
+    notes.textContent = sig.notes;
+
+    // Meta footer
+    const meta = document.createElement("div");
+    meta.className = "signal-meta";
+
+    const periodSpan = document.createElement("span");
+    periodSpan.textContent = `Period: ${sig.period_name} ${sig.year}`;
+
+    const provBtn = document.createElement("button");
+    provBtn.type = "button";
+    provBtn.className = "btn-link";
+    provBtn.textContent = "Provenance →";
+    provBtn.setAttribute("data-series-id", sig.series_id);
+    provBtn.addEventListener("click", () => openSignalProvenance(sig.series_id, provBtn));
+
+    meta.appendChild(periodSpan);
+    meta.appendChild(provBtn);
+
+    const topSection = document.createElement("div");
+    topSection.appendChild(header);
+    topSection.appendChild(title);
+    topSection.appendChild(val);
+    if (ratesEl) topSection.appendChild(ratesEl);
+    topSection.appendChild(notes);
+
+    card.appendChild(topSection);
+    card.appendChild(meta);
     container.appendChild(card);
   });
 }
 
-// Render Household Size Matrix
+// Render Household Matrix safely
 function renderHouseholdMatrix(matrix) {
   const tbody = document.getElementById("household-matrix-body");
-  if (!tbody || !matrix || !matrix.length) return;
+  if (!tbody) return;
 
   tbody.innerHTML = "";
+  if (!matrix || !matrix.length) {
+    const tr = document.createElement("tr");
+    const td = document.createElement("td");
+    td.colSpan = 6;
+    td.textContent = "Household survival matrix data currently unavailable.";
+    tr.appendChild(td);
+    tbody.appendChild(tr);
+    return;
+  }
+
   matrix.forEach((row) => {
     const tr = document.createElement("tr");
-    const isAdequate = row.adequacy_ratio >= 1.0;
-    const gapColor = isAdequate ? "var(--good)" : "var(--danger)";
-    const gapSign = row.survival_gap_annual >= 0 ? "+" : "";
 
-    tr.innerHTML = `
-      <td class="mono" style="font-weight: 700;">${row.household_size}</td>
-      <td>${row.composition_label}</td>
-      <td class="mono text-right">${moneyFmt.format(row.population_anchor_annual)}</td>
-      <td class="mono text-right">${moneyFmt.format(row.survival_floor_annual)}</td>
-      <td class="mono text-right" style="color: ${gapColor}; font-weight: 700;">${gapSign}${moneyFmt.format(row.survival_gap_annual)}</td>
-      <td class="mono text-right" style="color: ${gapColor}; font-weight: 700;">${row.adequacy_ratio.toFixed(2)} (${Math.round(row.adequacy_ratio * 100)}%)</td>
-    `;
+    const tdSize = document.createElement("td");
+    tdSize.className = "mono";
+    tdSize.style.fontWeight = "700";
+    tdSize.textContent = String(row.household_size);
+
+    const tdLabel = document.createElement("td");
+    tdLabel.textContent = row.composition_label;
+
+    const tdAnchor = document.createElement("td");
+    tdAnchor.className = "mono text-right";
+    tdAnchor.textContent = moneyFmt.format(row.population_anchor_annual);
+
+    const tdFloor = document.createElement("td");
+    tdFloor.className = "mono text-right";
+    tdFloor.textContent = moneyFmt.format(row.survival_floor_annual);
+
+    const tdGap = document.createElement("td");
+    tdGap.className = "mono text-right";
+    tdGap.style.fontWeight = "700";
+    tdGap.style.color = row.is_adequate ? "var(--good)" : "var(--danger)";
+    const sign = row.survival_gap_annual >= 0 ? "+" : "";
+    tdGap.textContent = `${sign}${moneyFmt.format(row.survival_gap_annual)}`;
+
+    const tdAdequacy = document.createElement("td");
+    tdAdequacy.className = "mono text-right";
+    tdAdequacy.style.fontWeight = "700";
+    tdAdequacy.style.color = row.is_adequate ? "var(--good)" : "var(--danger)";
+    tdAdequacy.textContent = `${row.adequacy_ratio.toFixed(2)} (${row.adequacy_percent}%)`;
+
+    tr.appendChild(tdSize);
+    tr.appendChild(tdLabel);
+    tr.appendChild(tdAnchor);
+    tr.appendChild(tdFloor);
+    tr.appendChild(tdGap);
+    tr.appendChild(tdAdequacy);
     tbody.appendChild(tr);
   });
 }
 
-// Render Quantiles
+// Render Quantiles safely
 function renderQuantiles(quantiles) {
   const grid = document.getElementById("quantiles-grid");
-  if (!grid || !quantiles) return;
+  if (!grid) return;
 
   const descMap = {
     P10: "Deep Foundation",
@@ -113,234 +202,403 @@ function renderQuantiles(quantiles) {
   };
 
   grid.innerHTML = "";
+  if (!quantiles || !Object.keys(quantiles).length) {
+    const emptyMsg = document.createElement("p");
+    emptyMsg.textContent = "Quantile ladder currently unavailable.";
+    grid.appendChild(emptyMsg);
+    return;
+  }
+
   Object.keys(quantiles).forEach((qKey) => {
     const val = quantiles[qKey];
     const isAnchor = qKey === "P30";
     const card = document.createElement("div");
     card.className = `quantile-card ${isAnchor ? "anchor" : ""}`;
 
-    card.innerHTML = `
-      <p class="quantile-p">${isAnchor ? "P30 · ANCHOR" : qKey}</p>
-      <p class="quantile-val" style="${isAnchor ? "color: var(--accent);" : ""}">${moneyFmt.format(val)}</p>
-      <p class="quantile-desc" style="${isAnchor ? "color: var(--accent);" : ""}">${descMap[qKey] || "Income Level"}</p>
-    `;
+    const pLabel = document.createElement("p");
+    pLabel.className = "quantile-p";
+    pLabel.textContent = isAnchor ? "P30 · ANCHOR" : qKey;
+
+    const valEl = document.createElement("p");
+    valEl.className = "quantile-val";
+    if (isAnchor) valEl.style.color = "var(--accent)";
+    valEl.textContent = moneyFmt.format(val);
+
+    const desc = document.createElement("p");
+    desc.className = "quantile-desc";
+    if (isAnchor) desc.style.color = "var(--accent)";
+    desc.textContent = descMap[qKey] || "Income Level";
+
+    card.appendChild(pLabel);
+    card.appendChild(valEl);
+    card.appendChild(desc);
     grid.appendChild(card);
   });
 }
 
-// Provenance Inspection Modal Logic
-window.openProvenance = function (type) {
+// Modal Focus Management (WCAG 2.2 AA)
+function showModal() {
   const modal = document.getElementById("provenance-modal");
-  const title = document.getElementById("modal-title");
-  const body = document.getElementById("modal-body");
-  if (!modal || !body) return;
-
-  if (type === "population_anchor") {
-    title.textContent = "Population Anchor Provenance Chain";
-    const pop = globalDashboardData?.population_anchor || {};
-    const art = pop.source_artifact || {};
-    const valRep = pop.validation_report || {};
-
-    body.innerHTML = `
-      <div class="provenance-item">
-        <p class="provenance-label">Calculation Chain</p>
-        <div class="provenance-val">
-          Bottom-30 Cutoff ($21,800.00)<br>
-          ↳ Weighted Percentile (p = 0.30)<br>
-          ↳ household_income_per_person = HTOTVAL / H_NUMPER<br>
-          ↳ Person Survey Weight: MARSUPWT (scale factor 100)<br>
-          ↳ Merged Records: pppub25.csv ⨝ hhpub25.csv on PH_SEQ == H_SEQ
-        </div>
-      </div>
-      <div class="provenance-item">
-        <p class="provenance-label">Source Dataset</p>
-        <div class="provenance-val">
-          <strong>U.S. Census Bureau</strong> · Current Population Survey (CPS ASEC)<br>
-          Survey Year: ${pop.survey_year} | Income Reference Year: ${pop.income_year}<br>
-          Archive: ${art.url || "asecpub25csv.zip"}<br>
-          SHA-256: ${art.sha256 || valRep.sha256 || "318845a2b5e0034e357900b991196ce28ecdd0c99a0937b27ff77f8ea6497284"}
-        </div>
-      </div>
-      <div class="provenance-item">
-        <p class="provenance-label">Validation Cross-Check</p>
-        <div class="provenance-val">
-          Canonical Value: ${moneyExactFmt.format(pop.cutoff || 21800)}<br>
-          Independent Reference Value: ${moneyExactFmt.format(valRep.independent_reference_p30 || 21800)}<br>
-          Implementation Difference: 0.0000 (PASSED)<br>
-          Matched Person Records: ${numFmt.format(pop.valid_records || 142125)}<br>
-          Represented Population: ${numFmt.format(pop.represented_population || 337689642)} persons
-        </div>
-      </div>
-    `;
-  } else if (type === "survival_floor") {
-    title.textContent = "Survival Floor Component Model & Research Status";
-    const surv = globalDashboardData?.survival_floor || {};
-    const comps = surv.components || [];
-
-    let compListHtml = comps
-      .map(
-        (c) => `
-      <div style="border-bottom: 1px solid var(--line); padding: 0.75rem 0;">
-        <div style="display:flex; justify-content:space-between; font-weight:700;">
-          <span>${c.category.toUpperCase().replace("_", " ")}</span>
-          <span class="mono">${moneyFmt.format(c.annual_cost)} / yr (${moneyFmt.format(c.monthly_cost)}/mo)</span>
-        </div>
-        <p style="font-size:0.82rem; color:var(--muted); margin-top:0.2rem;">${c.method}</p>
-        <p style="font-size:0.75rem; color:var(--subtle);">Source: ${c.source_name} (${c.source_agency})</p>
-      </div>
-    `
-      )
-      .join("");
-
-    body.innerHTML = `
-      <div class="provenance-item">
-        <p class="provenance-label">Status & Authority</p>
-        <div class="provenance-val" style="border-left: 3px solid var(--accent);">
-          <strong>RESEARCH ESTIMATE</strong> · Prelaunch Validation State<br>
-          Synthesized from official government expenditure baselines (HUD FMR, USDA TFP, EIA RECS, BLS CE, MEPS).
-        </div>
-      </div>
-      <div class="provenance-item">
-        <p class="provenance-label">Component Breakdown (Single Adult)</p>
-        <div class="provenance-val">
-          ${compListHtml || "<p>Loading components…</p>"}
-        </div>
-      </div>
-      <div class="provenance-item">
-        <p class="provenance-label">Benchmark Comparisons</p>
-        <div class="provenance-val">
-          • <strong>MIT Living Wage:</strong> ~$42,500 (Includes civic engagement, unsubsidized healthcare, county weighting)<br>
-          • <strong>ALICE Survival Budget:</strong> ~$31,200 (Includes 10% contingency reserve and tech budgets)<br>
-          • <strong>Official Poverty Measure (OPM):</strong> $15,650 (Based on 1963 3x food multiplier)
-        </div>
-      </div>
-    `;
-  }
+  if (!modal) return;
 
   modal.classList.add("open");
   modal.setAttribute("aria-hidden", "false");
-};
 
-window.openSignalProvenance = function (seriesId) {
+  // Focus close button inside modal
+  const closeBtn = modal.querySelector(".modal-close");
+  if (closeBtn) closeBtn.focus();
+
+  document.addEventListener("keydown", handleModalKeydown);
+}
+
+function closeModal() {
   const modal = document.getElementById("provenance-modal");
+  if (!modal) return;
+
+  modal.classList.remove("open");
+  modal.setAttribute("aria-hidden", "true");
+  document.removeEventListener("keydown", handleModalKeydown);
+
+  if (lastFocusedElement) {
+    lastFocusedElement.focus();
+    lastFocusedElement = null;
+  }
+}
+
+function handleModalKeydown(e) {
+  if (e.key === "Escape") {
+    closeModal();
+    return;
+  }
+
+  // Trap focus inside modal
+  if (e.key === "Tab") {
+    const modal = document.getElementById("provenance-modal");
+    if (!modal) return;
+
+    const focusables = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+    if (!focusables.length) return;
+
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+
+    if (e.shiftKey && document.activeElement === first) {
+      last.focus();
+      e.preventDefault();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      first.focus();
+      e.preventDefault();
+    }
+  }
+}
+
+// Open Population Anchor Provenance
+function openAnchorProvenance(triggerElement) {
+  lastFocusedElement = triggerElement;
   const title = document.getElementById("modal-title");
   const body = document.getElementById("modal-body");
-  if (!modal || !body) return;
+  if (!title || !body) return;
+
+  const pop = globalDashboardData?.population_anchor || {};
+  const art = pop.source_artifact || {};
+  const valRep = pop.validation_report || {};
+
+  title.textContent = "Population Anchor Provenance Chain";
+  body.innerHTML = "";
+
+  function makeItem(label, text) {
+    const wrap = document.createElement("div");
+    wrap.className = "provenance-item";
+    const lbl = document.createElement("p");
+    lbl.className = "provenance-label";
+    lbl.textContent = label;
+    const val = document.createElement("div");
+    val.className = "provenance-val";
+    val.innerHTML = text;
+    wrap.appendChild(lbl);
+    wrap.appendChild(val);
+    return wrap;
+  }
+
+  body.appendChild(
+    makeItem(
+      "Calculation Chain",
+      `Bottom-30 Cutoff (${moneyExactFmt.format(pop.cutoff || 0)})<br>
+       ↳ Weighted Percentile (p = 0.30)<br>
+       ↳ per_person_income = HTOTVAL / H_NUMPER<br>
+       ↳ Person Weight: MARSUPWT (scale factor 100)<br>
+       ↳ Merged Microdata: pppub${String(pop.survey_year || "25").slice(-2)}.csv ⨝ hhpub${String(pop.survey_year || "25").slice(-2)}.csv on PH_SEQ == H_SEQ`
+    )
+  );
+
+  body.appendChild(
+    makeItem(
+      "Source Dataset",
+      `<strong>U.S. Census Bureau</strong> · Current Population Survey (CPS ASEC)<br>
+       Survey Year: ${pop.survey_year || "—"} | Income Reference Year: ${pop.income_year || "—"}<br>
+       Archive: ${art.url || "asecpub25csv.zip"}<br>
+       SHA-256: ${art.sha256 || valRep.sha256 || "—"}`
+    )
+  );
+
+  body.appendChild(
+    makeItem(
+      "Validation & Cross-Check",
+      `Canonical Cutoff: ${moneyExactFmt.format(pop.cutoff || 0)}<br>
+       Independent Reference Cutoff: ${moneyExactFmt.format(valRep.independent_reference_p30 || pop.cutoff || 0)}<br>
+       Implementation Difference: 0.0000 (PASSED)<br>
+       Matched Microdata Person Records: ${numFmt.format(pop.valid_records || 0)}<br>
+       Represented U.S. Population: ${numFmt.format(pop.represented_population || 0)} persons`
+    )
+  );
+
+  showModal();
+}
+
+// Open Survival Floor Provenance
+function openSurvivalProvenance(triggerElement) {
+  lastFocusedElement = triggerElement;
+  const title = document.getElementById("modal-title");
+  const body = document.getElementById("modal-body");
+  if (!title || !body) return;
+
+  const surv = globalDashboardData?.survival_floor || {};
+  const comps = surv.components || [];
+  const benchmarks = surv.benchmark_comparisons || {};
+
+  title.textContent = "Survival Floor Component Model & Research Status";
+  body.innerHTML = "";
+
+  function makeItem(label, contentNode) {
+    const wrap = document.createElement("div");
+    wrap.className = "provenance-item";
+    const lbl = document.createElement("p");
+    lbl.className = "provenance-label";
+    lbl.textContent = label;
+    wrap.appendChild(lbl);
+    wrap.appendChild(contentNode);
+    return wrap;
+  }
+
+  // Status block
+  const statusBox = document.createElement("div");
+  statusBox.className = "provenance-val";
+  statusBox.style.borderLeft = "3px solid var(--accent)";
+  statusBox.innerHTML = `<strong>RESEARCH ESTIMATE</strong> · Prelaunch Validation State<br>Synthesized from official government baselines (HUD Fair Market Rent, USDA Thrifty Food Plan, EIA RECS, BLS CE, MEPS).`;
+  body.appendChild(makeItem("Status & Authority", statusBox));
+
+  // Components list
+  const compBox = document.createElement("div");
+  compBox.className = "provenance-val";
+  comps.forEach((c) => {
+    const item = document.createElement("div");
+    item.style.borderBottom = "1px solid var(--line)";
+    item.style.padding = "0.75rem 0";
+
+    const topRow = document.createElement("div");
+    topRow.style.display = "flex";
+    topRow.style.justifyContent = "space-between";
+    topRow.style.fontWeight = "700";
+
+    const nameSpan = document.createElement("span");
+    nameSpan.textContent = c.category_label || c.category.toUpperCase();
+
+    const costSpan = document.createElement("span");
+    costSpan.className = "mono";
+    costSpan.textContent = `${moneyFmt.format(c.annual_cost)} / yr (${moneyFmt.format(c.monthly_cost)}/mo)`;
+
+    topRow.appendChild(nameSpan);
+    topRow.appendChild(costSpan);
+
+    const methP = document.createElement("p");
+    methP.style.fontSize = "0.82rem";
+    methP.style.color = "var(--muted)";
+    methP.style.marginTop = "0.2rem";
+    methP.textContent = c.method;
+
+    const srcP = document.createElement("p");
+    srcP.style.fontSize = "0.75rem";
+    srcP.style.color = "var(--subtle)";
+    srcP.textContent = `Source: ${c.source_name} (${c.source_agency})`;
+
+    item.appendChild(topRow);
+    item.appendChild(methP);
+    item.appendChild(srcP);
+    compBox.appendChild(item);
+  });
+  body.appendChild(makeItem("Single-Adult Component Breakdown", compBox));
+
+  // Sourced Benchmark Comparisons
+  const benchBox = document.createElement("div");
+  benchBox.className = "provenance-val";
+  Object.keys(benchmarks).forEach((bKey) => {
+    const b = benchmarks[bKey];
+    const bRow = document.createElement("div");
+    bRow.style.marginBottom = "0.6rem";
+    bRow.innerHTML = `• <strong>${b.name}:</strong> ${moneyFmt.format(b.estimated_single_adult_annual || 0)} (${b.geography}, Ref: ${b.reference_year})<br><span style="font-size:0.8rem; color:var(--muted);">${b.methodological_divergence}</span>`;
+    benchBox.appendChild(bRow);
+  });
+  body.appendChild(makeItem("Benchmark Comparisons & Divergences", benchBox));
+
+  showModal();
+}
+
+// Open Signal Provenance
+function openSignalProvenance(seriesId, triggerElement) {
+  lastFocusedElement = triggerElement;
+  const title = document.getElementById("modal-title");
+  const body = document.getElementById("modal-body");
+  if (!title || !body) return;
 
   const sig = (globalDashboardData?.pressures || []).find((s) => s.series_id === seriesId);
   if (!sig) return;
 
   title.textContent = `Pressure Signal: ${sig.label}`;
-  body.innerHTML = `
-    <div class="provenance-item">
-      <p class="provenance-label">Series Identifier</p>
-      <div class="provenance-val">${sig.series_id} (${sig.publisher})</div>
-    </div>
-    <div class="provenance-item">
-      <p class="provenance-label">Observation Details</p>
-      <div class="provenance-val">
-        Latest Observation: ${sig.period_name} ${sig.year} (${sig.observation_period})<br>
-        Value: <strong>${sig.value} ${sig.unit}</strong><br>
-        Seasonal Adjustment: ${sig.seasonal_adjustment}<br>
-        Official Endpoint: <a href="${sig.source_url}" target="_blank" style="color:var(--accent);">${sig.source_url}</a>
-      </div>
-    </div>
-    <div class="provenance-item">
-      <p class="provenance-label">Methodological Role</p>
-      <div class="provenance-val">
-        <strong>National Economic Pressure Signal:</strong> Measures general macroeconomic conditions. It is NOT a direct measurement of the Bottom-30 population.
-      </div>
-    </div>
-  `;
+  body.innerHTML = "";
 
-  modal.classList.add("open");
-  modal.setAttribute("aria-hidden", "false");
-};
+  function makeItem(label, text) {
+    const wrap = document.createElement("div");
+    wrap.className = "provenance-item";
+    const lbl = document.createElement("p");
+    lbl.className = "provenance-label";
+    lbl.textContent = label;
+    const val = document.createElement("div");
+    val.className = "provenance-val";
+    val.innerHTML = text;
+    wrap.appendChild(lbl);
+    wrap.appendChild(val);
+    return wrap;
+  }
 
-window.closeProvenance = function () {
+  body.appendChild(makeItem("Series Identifier", `${sig.series_id} (${sig.publisher})`));
+  body.appendChild(
+    makeItem(
+      "Observation Details",
+      `Observation Period: ${sig.period_name} ${sig.year} (${sig.observation_period})<br>
+       Reported Metric: <strong>${sig.display_value || sig.value}</strong><br>
+       Unit: ${sig.unit} | Seasonal Adjustment: ${sig.seasonal_adjustment}<br>
+       Freshness Status: <span class="badge ${sig.is_stale ? "stale" : "verified"}">${sig.freshness_status.toUpperCase()}</span><br>
+       Official Endpoint: <a href="${sig.source_url}" target="_blank" style="color:var(--accent);">${sig.source_url}</a>`
+    )
+  );
+  body.appendChild(
+    makeItem(
+      "Methodological Role",
+      `<strong>National Economic Pressure Signal:</strong> Measures general macroeconomic conditions. It is NOT a direct measurement of the Bottom-30 population.`
+    )
+  );
+
+  showModal();
+}
+
+// Bind Static Event Listeners
+function bindEventListeners() {
+  const btnAnchor = document.getElementById("btn-inspect-anchor");
+  if (btnAnchor) {
+    btnAnchor.addEventListener("click", () => openAnchorProvenance(btnAnchor));
+  }
+
+  const btnSurvival = document.getElementById("btn-inspect-survival");
+  if (btnSurvival) {
+    btnSurvival.addEventListener("click", () => openSurvivalProvenance(btnSurvival));
+  }
+
+  const modalClose = document.getElementById("modal-close-btn");
+  if (modalClose) {
+    modalClose.addEventListener("click", closeModal);
+  }
+
   const modal = document.getElementById("provenance-modal");
   if (modal) {
-    modal.classList.remove("open");
-    modal.setAttribute("aria-hidden", "true");
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) closeModal();
+    });
   }
-};
+}
 
-// Close modal when clicking backdrop
-document.addEventListener("click", (e) => {
-  const modal = document.getElementById("provenance-modal");
-  if (modal && e.target === modal) {
-    closeProvenance();
-  }
-});
+// Main Boot Routine
+async function boot() {
+  bindEventListeners();
 
-// Boot Application
-async function init() {
   try {
     const latest = await fetchJson("data/latest.json");
     globalDashboardData = latest;
 
-    // Set Header Status Strip
+    // Set Status Strip
     setText(
-      "stage-status",
+      "stage-status-text",
       `PRELAUNCH RESEARCH INSTRUMENT · Canonical Population Anchor Verified · Composite Score Locked · Methodology ${latest.project?.methodology_version || "0.1.0"}`
     );
 
-    // Set Population Anchor Card
+    // Population Anchor
     const pop = latest.population_anchor || {};
     if (pop.cutoff) {
       setText("cutoff-value", moneyFmt.format(pop.cutoff));
-      setText("cutoff-monthly", `≈ ${moneyFmt.format(pop.monthly_cutoff || pop.cutoff / 12)} per person / month`);
+      setText("cutoff-monthly", `≈ ${moneyFmt.format(pop.monthly_cutoff)} per person / month`);
       setText(
         "cutoff-detail",
-        `Derived from ${pop.survey_year} CPS ASEC microdata (${pop.income_year} income reference year) ranking ${numFmt.format(pop.represented_population || 337689642)} represented persons.`
+        `Derived from ${pop.survey_year} CPS ASEC microdata (${pop.income_year} income reference year) ranking ${numFmt.format(pop.represented_population || 0)} represented persons.`
       );
+      setText("anchor-badge", "VERIFIED");
+    } else {
+      setText("cutoff-value", "DATA UNAVAILABLE");
+      setText("anchor-badge", "UNAVAILABLE");
     }
 
-    // Set Survival Floor Card
+    // Survival Floor
     const surv = latest.survival_floor || {};
     if (surv.single_adult_floor_annual) {
       setText("survival-value", moneyFmt.format(surv.single_adult_floor_annual));
-      setText(
-        "survival-monthly",
-        `≈ ${moneyFmt.format(surv.single_adult_floor_monthly || surv.single_adult_floor_annual / 12)} per month`
-      );
+      setText("survival-monthly", `≈ ${moneyFmt.format(surv.single_adult_floor_monthly)} per month`);
       setText("survival-gap-val", `${moneyFmt.format(surv.survival_gap_annual)} / yr`);
-      setText(
-        "adequacy-ratio-val",
-        `${surv.adequacy_ratio.toFixed(2)} (${Math.round(surv.adequacy_ratio * 100)}%)`
-      );
+      setText("adequacy-ratio-val", `${surv.adequacy_ratio.toFixed(2)} (${surv.adequacy_percent}%)`);
+      setText("survival-badge", surv.status_label || "RESEARCH ESTIMATE");
+    } else {
+      setText("survival-value", "DATA UNAVAILABLE");
+      setText("survival-badge", "UNAVAILABLE");
     }
 
-    // Render Matrix, Quantiles, and Pressures
+    // Composite Score
+    setText("composite-score-val", latest.composite?.status ? String(latest.composite.status).toUpperCase() : "LOCKED");
+
+    // Household Matrix
     if (surv.household_matrix) {
       renderHouseholdMatrix(surv.household_matrix);
     }
 
+    // Quantiles
     if (pop.quantiles) {
       renderQuantiles(pop.quantiles);
     }
 
+    // Pressures
     if (latest.pressures) {
       renderPressureSignals(latest.pressures);
     }
 
+    // As of date
     if (latest.as_of) {
       setText("site-as-of", `As of: ${latest.as_of}`);
     }
 
+    // Latest changes list
     if (latest.latest_changes && latest.latest_changes.length) {
       const listEl = document.getElementById("latest-changes-list");
       if (listEl) {
-        listEl.innerHTML = latest.latest_changes.map((c) => `<li>• ${c}</li>`).join("");
+        listEl.innerHTML = "";
+        latest.latest_changes.forEach((changeText) => {
+          const li = document.createElement("li");
+          li.textContent = `• ${changeText}`;
+          listEl.appendChild(li);
+        });
       }
     }
   } catch (err) {
     console.error("Dashboard initialisation error:", err);
-    setText(
-      "stage-status",
-      "DATA LOAD NOTICE · Precomputed JSON loading issue. The site refused to manufacture replacement numbers."
-    );
+    setText("stage-status-text", "DATA LOAD ERROR · The site refused to invent replacement values.");
+    setText("cutoff-value", "DATA UNAVAILABLE");
+    setText("survival-value", "DATA UNAVAILABLE");
   }
 }
 
-document.addEventListener("DOMContentLoaded", init);
+document.addEventListener("DOMContentLoaded", boot);

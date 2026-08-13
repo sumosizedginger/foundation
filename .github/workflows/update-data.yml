@@ -1,22 +1,20 @@
-name: Update Foundation Data
+name: Scheduled Economic Data Update
 
 on:
+  schedule:
+    # Run every Wednesday morning at 12:00 UTC (post BLS / Census regular release windows)
+    - cron: "0 12 * * 3"
   workflow_dispatch:
-    inputs:
-      survey_year:
-        description: "CPS ASEC survey year"
-        required: true
-        default: "2025"
-      income_year:
-        description: "Income reference year"
-        required: true
-        default: "2024"
 
 permissions:
   contents: write
 
+concurrency:
+  group: "data-update"
+  cancel-in-progress: false
+
 jobs:
-  update:
+  update-and-publish:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -26,39 +24,28 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: "pip"
 
-      - name: Install
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -e ".[dev]"
 
-      - name: Validate before update
+      - name: Run Full Foundation Pipeline Update
         run: |
-          foundation validate
-          pytest
+          python scripts/update_foundation.py
+          pytest -m "not integration"
+          python scripts/build_site.py
+          python scripts/verify_repo.py
 
-      - name: Update Bottom-30 population anchor
+      - name: Commit and Push Verified Updates
         run: |
-          foundation bottom30 \
-            --survey-year "${{ inputs.survey_year }}" \
-            --income-year "${{ inputs.income_year }}"
-
-      - name: Build site
-        run: python scripts/build_site.py
-
-      - name: Validate after update
-        run: pytest
-
-      - name: Commit changed validated data
-        shell: bash
-        run: |
-          if git diff --quiet; then
-            echo "No changes to commit."
-            exit 0
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/ site/data/
+          if git diff --staged --quiet; then
+            echo "No data changes detected."
+          else
+            git commit -m "chore(data): automated deterministic pipeline update [skip ci]"
+            git push origin main
           fi
-
-          git config user.name "foundation-data-bot"
-          git config user.email "foundation-data-bot@users.noreply.github.com"
-          git add data/current site/data
-          git commit -m "data: update Foundation population anchor"
-          git push

@@ -1,0 +1,16 @@
+{
+  "name": "The Foundation",
+  "short_name": "Foundation",
+  "description": "An open, deterministic economic research instrument centered on the bottom 30% of Americans.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#07090b",
+  "theme_color": "#f59e0b",
+  "icons": [
+    {
+      "src": "assets/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

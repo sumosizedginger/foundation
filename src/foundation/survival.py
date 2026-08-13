@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any
 from foundation.config import definitions
 from foundation.models import (
+    BenchmarkComparison,
     HouseholdSurvivalFloor,
     SurvivalComponent,
     SurvivalFloorResult,
@@ -19,6 +20,7 @@ def get_survival_floor_components(reference_year: int = 2024) -> list[SurvivalCo
     return [
         SurvivalComponent(
             category="housing",
+            category_label="Shelter (Rent & Core Utilities)",
             annual_cost=13200.0,
             monthly_cost=1100.0,
             source_name="Fair Market Rents (FMR) & ACS Median Gross Rent",
@@ -29,6 +31,7 @@ def get_survival_floor_components(reference_year: int = 2024) -> list[SurvivalCo
         ),
         SurvivalComponent(
             category="food",
+            category_label="Food at Home",
             annual_cost=3600.0,
             monthly_cost=300.0,
             source_name="Thrifty Food Plan (TFP)",
@@ -39,6 +42,7 @@ def get_survival_floor_components(reference_year: int = 2024) -> list[SurvivalCo
         ),
         SurvivalComponent(
             category="utilities_tech",
+            category_label="Utilities & Connectivity",
             annual_cost=2640.0,
             monthly_cost=220.0,
             source_name="Residential Energy Consumption Survey (RECS) & CE Survey",
@@ -49,6 +53,7 @@ def get_survival_floor_components(reference_year: int = 2024) -> list[SurvivalCo
         ),
         SurvivalComponent(
             category="transportation",
+            category_label="Transportation",
             annual_cost=3840.0,
             monthly_cost=320.0,
             source_name="Consumer Expenditure Survey (CE) - Lowest Two Income Quintiles",
@@ -59,6 +64,7 @@ def get_survival_floor_components(reference_year: int = 2024) -> list[SurvivalCo
         ),
         SurvivalComponent(
             category="healthcare",
+            category_label="Healthcare",
             annual_cost=1680.0,
             monthly_cost=140.0,
             source_name="Medical Expenditure Panel Survey (MEPS) & ACA Benchmark Subsidies",
@@ -69,6 +75,7 @@ def get_survival_floor_components(reference_year: int = 2024) -> list[SurvivalCo
         ),
         SurvivalComponent(
             category="taxes_unavoidables",
+            category_label="Taxes & Unavoidable Basics",
             annual_cost=3000.0,
             monthly_cost=250.0,
             source_name="FICA Statutory Payroll Tax & BLS Essential Household Supplies",
@@ -165,6 +172,7 @@ def calculate_household_survival_matrix(
         pop_anchor = float(size * population_anchor_per_person)
         gap = round(pop_anchor - total_floor, 2)
         ratio = round(pop_anchor / total_floor, 2) if total_floor > 0 else 0.0
+        adequacy_pct = int(round(ratio * 100))
 
         matrix.append(
             HouseholdSurvivalFloor(
@@ -177,6 +185,8 @@ def calculate_household_survival_matrix(
                 survival_gap_annual=gap,
                 survival_gap_monthly=round(gap / 12.0, 2),
                 adequacy_ratio=ratio,
+                adequacy_percent=adequacy_pct,
+                is_adequate=ratio >= 1.0,
                 components=comps,  # type: ignore
                 status="research_estimate",
             )
@@ -184,40 +194,49 @@ def calculate_household_survival_matrix(
     return matrix
 
 
-def get_benchmark_comparisons() -> dict[str, Any]:
-    """Return external benchmark models and document methodological divergences."""
+def get_benchmark_comparisons() -> dict[str, BenchmarkComparison]:
+    """Return sourced, versioned external benchmark data objects explaining methodological divergences."""
     return {
-        "mit_living_wage": {
-            "name": "MIT Living Wage Calculator",
-            "author": "Dr. Amy Glasmeier / MIT",
-            "url": "https://livingwage.mit.edu/",
-            "estimated_single_adult_national": 42500.0,
-            "methodological_divergence": (
-                "MIT Living Wage includes civic engagement expenses, unsubsidized healthcare premiums, "
+        "mit_living_wage": BenchmarkComparison(
+            name="MIT Living Wage Calculator",
+            author="Dr. Amy Glasmeier / Massachusetts Institute of Technology",
+            url="https://livingwage.mit.edu/",
+            geography="United States (Population-weighted national aggregation)",
+            reference_year=2024,
+            retrieved_at="2026-08-13T00:00:00Z",
+            estimated_single_adult_annual=42500.0,
+            methodological_divergence=(
+                "MIT Living Wage includes civic engagement expenses, unsubsidized commercial healthcare premiums, "
                 "and county-level cost aggregation, whereas The Foundation Survival Floor models bare-minimum "
                 "survival needs assuming ACA subsidies and strict home meal preparation."
             ),
-        },
-        "united_way_alice": {
-            "name": "United For ALICE Survival Budget",
-            "author": "United Way",
-            "url": "https://www.unitedforalice.org/",
-            "estimated_single_adult_national": 31200.0,
-            "methodological_divergence": (
-                "ALICE includes an explicit 10% miscellaneous contingency buffer and technology line items. "
+        ),
+        "united_way_alice": BenchmarkComparison(
+            name="United For ALICE Household Survival Budget",
+            author="United Way",
+            url="https://www.unitedforalice.org/",
+            geography="United States (County-level weighted average)",
+            reference_year=2024,
+            retrieved_at="2026-08-13T00:00:00Z",
+            estimated_single_adult_annual=31200.0,
+            methodological_divergence=(
+                "ALICE includes an explicit 10% miscellaneous contingency reserve and higher technology allowances. "
                 "When ALICE contingency is excluded, the baseline aligns closely with The Foundation's $27,960 estimate."
             ),
-        },
-        "official_poverty_measure": {
-            "name": "Official Poverty Measure (OPM)",
-            "author": "U.S. Census Bureau / HHS",
-            "url": "https://aspe.hhs.gov/poverty-guidelines",
-            "single_adult_threshold": 15650.0,
-            "methodological_divergence": (
-                "The OPM is based on 1963 food expenditure multiplied by 3 and indexed by headline CPI-U. "
+        ),
+        "official_poverty_measure": BenchmarkComparison(
+            name="Official Poverty Measure (OPM)",
+            author="U.S. Census Bureau / U.S. Dept. of Health & Human Services",
+            url="https://aspe.hhs.gov/poverty-guidelines",
+            geography="United States (National)",
+            reference_year=2024,
+            retrieved_at="2026-08-13T00:00:00Z",
+            estimated_single_adult_annual=15650.0,
+            methodological_divergence=(
+                "The OPM is based on the 1963 food-to-income multiplier (3x food) indexed by headline CPI-U. "
                 "It severely underestimates modern housing, transportation, utility, and healthcare requirements."
             ),
-        },
+        ),
     }
 
 
@@ -233,6 +252,7 @@ def calculate_survival_floor(
     single_adult_floor = sum(c.annual_cost for c in components)
     gap = round(population_anchor_annual - single_adult_floor, 2)
     ratio = round(population_anchor_annual / single_adult_floor, 2)
+    adequacy_pct = int(round(ratio * 100))
     household_matrix = calculate_household_survival_matrix(population_anchor_annual)
     benchmarks = get_benchmark_comparisons()
 
@@ -241,12 +261,14 @@ def calculate_survival_floor(
 
     return SurvivalFloorResult(
         status="research_estimate",
+        status_label="RESEARCH ESTIMATE",
         reference_year=reference_year,
         single_adult_floor_annual=round(single_adult_floor, 2),
         single_adult_floor_monthly=round(single_adult_floor / 12.0, 2),
         population_anchor_annual=round(population_anchor_annual, 2),
         survival_gap_annual=gap,
         adequacy_ratio=ratio,
+        adequacy_percent=adequacy_pct,
         components=components,
         household_matrix=household_matrix,
         methodology_version=methodology_version,

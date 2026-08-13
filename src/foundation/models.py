@@ -112,6 +112,7 @@ class Bottom30Result:
 @dataclass(frozen=True)
 class SurvivalComponent:
     category: str
+    category_label: str
     annual_cost: float
     monthly_cost: float
     source_name: str
@@ -135,6 +136,8 @@ class HouseholdSurvivalFloor:
     survival_gap_annual: float
     survival_gap_monthly: float
     adequacy_ratio: float
+    adequacy_percent: int
+    is_adequate: bool
     components: dict[str, float]
     status: str
 
@@ -143,35 +146,53 @@ class HouseholdSurvivalFloor:
 
 
 @dataclass(frozen=True)
+class BenchmarkComparison:
+    name: str
+    author: str
+    url: str
+    geography: str
+    reference_year: int
+    retrieved_at: str
+    estimated_single_adult_annual: float
+    methodological_divergence: str
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass(frozen=True)
 class SurvivalFloorResult:
-    status: str  # e.g. "research_estimate"
+    status: str
+    status_label: str
     reference_year: int
     single_adult_floor_annual: float
     single_adult_floor_monthly: float
     population_anchor_annual: float
     survival_gap_annual: float
     adequacy_ratio: float
+    adequacy_percent: int
     components: list[SurvivalComponent]
     household_matrix: list[HouseholdSurvivalFloor]
     methodology_version: str
     calculated_at: str
-    benchmark_comparisons: dict[str, Any]
+    benchmark_comparisons: dict[str, BenchmarkComparison]
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "status": self.status,
-            "status_label": "RESEARCH ESTIMATE",
+            "status_label": self.status_label,
             "reference_year": self.reference_year,
             "single_adult_floor_annual": self.single_adult_floor_annual,
             "single_adult_floor_monthly": self.single_adult_floor_monthly,
             "population_anchor_annual": self.population_anchor_annual,
             "survival_gap_annual": self.survival_gap_annual,
             "adequacy_ratio": self.adequacy_ratio,
+            "adequacy_percent": self.adequacy_percent,
             "components": [c.to_dict() for c in self.components],
             "household_matrix": [h.to_dict() for h in self.household_matrix],
             "methodology_version": self.methodology_version,
             "calculated_at": self.calculated_at,
-            "benchmark_comparisons": self.benchmark_comparisons,
+            "benchmark_comparisons": {k: v.to_dict() for k, v in self.benchmark_comparisons.items()},
         }
 
 
@@ -184,13 +205,19 @@ class EconomicPressureObservation:
     year: int
     period_name: str
     value: float
+    display_value: str
     unit: str
+    metric_type: str  # "rate", "level", "price_inflation"
+    mom_change_pct: float | None  # 1-month % change
+    ann_3m_change_pct: float | None  # 3-month annualized % change
+    yoy_change_pct: float | None  # 12-month % change
     direction_desired: str  # "lower_is_better" or "higher_is_better"
     publisher: str
     source_url: str
     seasonal_adjustment: str
     retrieved_at: str
-    freshness_status: str  # "current", "aging", "stale"
+    freshness_status: str  # "current", "stale", "cached"
+    is_stale: bool
     notes: str
 
     def to_dict(self) -> dict[str, Any]:
