@@ -1,240 +1,73 @@
-# Approved Data Sources — V0.1
+# Approved Data Sources
 
-This document defines source priority and intended use. Machine-readable entries live in `config/sources.yml`.
-
-## Source policy
-
-Prefer original publishers.
-
-Aggregators may be used to discover a series or cross-check a value, but the production pipeline should fetch from the original publisher whenever practical.
-
-A source may not be silently replaced.
-
-If a source becomes unavailable or materially changes its methodology, the affected metric must fail closed until reviewed.
+**Version:** `0.2.0-draft`  
+**Purpose:** Official data source registry for The Foundation's Population Anchor and Minimum Sustainable Living Cost models.
 
 ---
 
-## 1. U.S. Census Bureau — CPS ASEC
-
-**Role:** Canonical Bottom-30 population definition and annual household money-income distribution.
-
-**Primary dataset:** Current Population Survey Annual Social and Economic Supplement public-use microdata.
-
-**Official dataset page:**
-https://www.census.gov/data/datasets/time-series/demo/cps/cps-asec.html
-
-**2025 CSV archive:**
-https://www2.census.gov/programs-surveys/cps/datasets/2025/march/asecpub25csv.zip
-
-The 2025 CSV includes replicate weights.
-
-**V0.1 fields of interest:**
-
-- `HTOTVAL` — household income amount
-- `H_NUMPER` — number of persons in household
-- `MARSUPWT` — March supplement person weight
-- `H_SEQ` — household sequence identifier
-
-**Cadence:** Annual.
-
-**Critical warning:** Survey year and income reference year differ. Do not label prior-year annual money income as current-year measured income.
-
-**Production rule:** Download official archive, record SHA-256, process locally, preserve download metadata. The large raw archive does not need to be committed to Git.
+## 1. Population Anchor Source
+* **Publisher:** U.S. Census Bureau
+* **Dataset:** Current Population Survey — Annual Social & Economic Supplement (CPS ASEC) Public Use Microdata
+* **Variables:** `HTOTVAL`, `H_NUMPER`, `MARSUPWT`, `H_SEQ`, `PH_SEQ`, `A_LINENO`
+* **Cadence:** Annual (March Supplement)
+* **Official URL:** `https://www.census.gov/data/datasets/time-series/demo/cps/cps-asec.html`
 
 ---
 
-## 2. Bureau of Labor Statistics
+## 2. Minimum Sustainable Living Cost — Production Sources
 
-**Role:** Labor-market conditions, underutilization, participation, employment, earnings, CPI and related official series.
+### 2.1 Housing (Shelter & Core Utilities)
+* **Publisher:** U.S. Department of Housing and Urban Development (HUD)
+* **Dataset:** Fair Market Rents (FMR) at the 40th percentile (1-Bedroom)
+* **Geographic Resolution:** County / HUD FMR Area (All 50 states + DC)
+* **Vintages:** FY 2024 (Time-Comparable), FY 2026 (Current)
+* **Official URL:** `https://www.huduser.gov/portal/datasets/fmr.html`
 
-**API:**
-https://www.bls.gov/developers/
+### 2.2 Food
+* **Publisher:** U.S. Department of Agriculture (USDA) Food and Nutrition Service / CNPP
+* **Dataset:** USDA Low-Cost Food Plan (Primary Sustainable Baseline) & Thrifty Food Plan (Sensitivity Bound)
+* **Profile:** Single adult age 19–50 (+20% 1-person size adjustment, adult gender midpoint)
+* **Geographic Resolution:** National baseline with official Alaska/Hawaii regional supplements
+* **Official URL:** `https://www.fns.usda.gov/cnpp/usda-food-plans-cost-food-monthly-reports`
 
-**Data API overview:**
-https://www.bls.gov/bls/api_features.htm
+### 2.3 Transportation (Automobile Baseline)
+* **Publishers:** Federal Highway Administration (FHWA), Energy Information Administration (EIA), National Association of Insurance Commissioners (NAIC), Bureau of Labor Statistics (BLS)
+* **Datasets:**
+  * Annual Necessary Mileage: FHWA National Household Travel Survey (NHTS)
+  * Retail Gasoline Prices: EIA Petroleum & Other Liquids Data (State/Regional weekly/monthly averages)
+  * Automobile Insurance: NAIC Auto Insurance Database Report / State Insurance Commissioner filings
+  * Maintenance, Repairs & Tires: BLS Consumer Expenditure Survey (Single-adult consumer units)
+  * Vehicle Replacement Reserve: BLS CE / Federal Reserve used vehicle depreciation schedule
 
-**Important API note:** BLS documents both unregistered and registered modes with different capabilities/limits. The pipeline must not require a registration key for core V0.1 operation unless a specific required feature forces it.
+### 2.4 Healthcare (Unsubsidized Insurance & Expected Out-of-Pocket)
+* **Publishers:** Centers for Medicare & Medicaid Services (CMS), State-Based Health Insurance Exchanges, Agency for Healthcare Research and Quality (AHRQ)
+* **Datasets:**
+  * Premium: CMS Marketplace Plan Public Use Files (PUF) / State Exchange PUFs (Age 40 single non-smoker, lowest-cost adequate Silver plan)
+  * Expected Out-of-Pocket Utilization: Medical Expenditure Panel Survey (MEPS) Household Component (Expected annual OOP for non-elderly single adults)
 
-**Candidate measures:**
+### 2.5 Connectivity, Household Essentials & Clothing
+* **Publishers:** BLS Consumer Expenditure Survey, Federal Communications Commission (FCC)
+* **Datasets:**
+  * Broadband & Mobile Phone: FCC Urban Broadband Rate Survey & BLS CE Telecommunications
+  * Personal Hygiene, Cleaning Supplies & Basic Apparel: Restricted necessity sub-basket from BLS CE single-person consumer unit microdata
 
-- U-6 labor underutilization
-- labor-force participation
-- employment-population ratio
-- people not in labor force who want a job
-- involuntary part-time work
-- CPI components relevant to lower-resource households
+### 2.6 Social Participation & Recreation
+* **Publishers:** Bureau of Labor Statistics (BLS), Bureau of Economic Analysis (BEA)
+* **Datasets:**
+  * Modest Recreation & Social Participation: BLS CE Survey P25 expenditure among single-adult positive spenders in basic recreation/social categories
+  * Regional Cost Adjustment: BEA Regional Price Parities (RPP)
 
-**Cadence:** Mostly monthly; some releases more frequent.
+### 2.7 Population Weights
+* **Publisher:** U.S. Census Bureau
+* **Dataset:** American Community Survey (ACS) 1-Year / 5-Year Data
+* **Variables:** Adult population (age 18+) by county / FMR area for all 3,143+ counties/equivalents
 
-**Rule:** Series IDs must be verified against official BLS documentation before being added to `config/indicators.yml`.
-
----
-
-## 3. Federal Reserve Board
-
-**Role:** Household financial well-being, distributional financial accounts, debt-service and wealth measures.
-
-**Candidate sources:**
-
-- Distributional Financial Accounts
-- Survey of Household Economics and Decisionmaking
-- Financial Accounts of the United States
-
-**Main site:**
-https://www.federalreserve.gov/data.htm
-
-**Cadence:** Varies from quarterly to annual.
-
-**Use cases:**
-
-- bottom-group wealth;
-- liquid asset distribution;
-- retirement position;
-- emergency-expense resilience;
-- household debt-service burden.
-
----
-
-## 4. Federal Reserve Bank of New York
-
-**Role:** Household debt/credit and heterogeneity research/data.
-
-**Candidate sources:**
-
-- Household Debt and Credit
-- Economic Heterogeneity Indicators
-
-**Main research/data site:**
-https://www.newyorkfed.org/research
-
-**Cadence:** Varies.
-
-**Rule:** Prefer downloadable first-party data over copying values from narrative articles.
+### 2.8 Statutory Tax Tables
+* **Publishers:** Internal Revenue Service (IRS), Federation of Tax Administrators (FTA), State Departments of Revenue
+* **Datasets:** Federal standard deduction, federal tax brackets, FICA statutory rates, state standard deductions, personal exemptions, state income tax rate schedules, and local income tax rules for 2024 and 2026.
 
 ---
 
-## 5. Federal Reserve Bank of Atlanta
-
-**Role:** Wage distribution and labor-market distribution.
-
-**Candidate source:**
-Wage Growth Tracker.
-
-**Official page:**
-https://www.atlantafed.org/research-and-data/data/wage-growth-tracker
-
-**Use:** Bottom wage-quartile growth and related distributional wage signals.
-
-**Rule:** Record exactly which population slice the source publishes. Do not relabel a bottom quartile as "our Bottom 30%."
-
----
-
-## 6. Bureau of Economic Analysis
-
-**Role:** Regional price parity and national/regional income context.
-
-**Official site:**
-https://www.bea.gov/data
-
-**Use in V0.1:** Context only unless a metric is explicitly approved.
-
-**Future use:** State/local Foundation versions and cost-of-living adjustment.
-
----
-
-## 7. U.S. Energy Information Administration
-
-**Role:** High-frequency energy/fuel price pressure.
-
-**Open data:**
-https://www.eia.gov/opendata/
-
-**Use:** Daily/weekly pressure signals when directly relevant to household transportation or utility costs.
-
-**Rule:** Energy movement may affect Daily Pressure but must not dominate a slow-moving structural Foundation score merely because it updates more often.
-
----
-
-## 8. Housing sources
-
-Housing is methodologically dangerous because many useful datasets are private-sector products with differing reuse terms.
-
-### Preferred first-party/public candidates
-
-- Census housing data
-- HUD
-- Federal Reserve
-- FHFA
-- Freddie Mac/Fannie Mae public datasets where appropriate
-
-### Redfin
-
-Redfin publishes a public Data Center with downloadable housing-market information.
-
-Official data center:
-https://www.redfin.com/news/data-center/
-
-Before production ingestion:
-
-1. review current reuse/automation terms;
-2. record allowed use;
-3. do not redistribute restricted raw data;
-4. prefer derived observations with source attribution when permitted.
-
-No scraper may be introduced merely because a download endpoint is inconvenient.
-
----
-
-## 9. Census Household Trends and Outlook Pulse / related household surveys
-
-**Role:** More current household stress signals such as difficulty paying expenses, food sufficiency and housing pressure.
-
-**Rule:** Survey redesigns must be treated as possible structural breaks. Do not splice incompatible designs into a time series without documentation.
-
----
-
-## 10. Source metadata requirements
-
-Every production observation must store at least:
-
-```yaml
-source_id:
-publisher:
-dataset:
-series_or_variable:
-source_url:
-reference_period:
-release_date:
-retrieved_at:
-unit:
-population:
-geography:
-status:
-methodology_version:
-```
-
-Where possible also store:
-
-```yaml
-raw_file_sha256:
-source_revision:
-seasonal_adjustment:
-notes:
-```
-
----
-
-## 11. Forbidden production sources
-
-Do not use as canonical inputs:
-
-- unsourced social-media posts;
-- AI-generated summaries;
-- SEO statistics pages;
-- scraped chart pixels;
-- secondary news articles when the original release is available;
-- a different dataset substituted merely because its number looks plausible.
-
-News can explain events.
-
-News does not replace the underlying measurement source.
+## 3. High-Frequency Economic Pressure Signals
+* **Publisher:** Bureau of Labor Statistics (BLS)
+* **Series:** U-6 (`LNS13327709`), Participation (`LNS11300000`), Employment-Population (`LNS12300000`), Want a Job (`LNS15026639`), CPI All Items (`CUSR0000SA0`), CPI Shelter (`CUSR0000SAH1`), CPI Food at Home (`CUSR0000SAF11`), CPI Medical Care (`CUSR0000SAM`), CPI Gasoline (`CUSR0000SETB01`).

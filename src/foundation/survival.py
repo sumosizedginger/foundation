@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from typing import Any
 from foundation.config import definitions
 from foundation.models import (
@@ -11,191 +12,19 @@ from foundation.models import (
 
 
 def get_survival_floor_components(reference_year: int = 2024) -> list[SurvivalComponent]:
-    """Return the research-grade component breakdown for a single-adult basic Survival Floor.
-
-    All estimates are derived from official public sources and represent conservative,
-    unavoidable baseline living costs for an independent single adult without dependents.
-    Status: RESEARCH ESTIMATE.
-    """
-    return [
-        SurvivalComponent(
-            category="housing",
-            category_label="Shelter (Rent & Core Utilities)",
-            annual_cost=13200.0,
-            monthly_cost=1100.0,
-            source_name="Fair Market Rents (FMR) & ACS Median Gross Rent",
-            source_agency="U.S. Department of Housing and Urban Development (HUD) / Census",
-            source_url="https://www.huduser.gov/portal/datasets/fmr.html",
-            method="National baseline for 40th-percentile efficiency/1-bedroom rental unit including essential utilities.",
-            notes="Housing cost varies substantially by region; national baseline represents median cross-market entry rental.",
-        ),
-        SurvivalComponent(
-            category="food",
-            category_label="Food at Home",
-            annual_cost=3600.0,
-            monthly_cost=300.0,
-            source_name="Thrifty Food Plan (TFP)",
-            source_agency="U.S. Department of Agriculture (USDA) Food and Nutrition Service",
-            source_url="https://www.fns.usda.gov/cnpp/usda-food-plans-cost-food-monthly-reports",
-            method="USDA monthly cost of food for single adult (age 19-50) with official +20% 1-person household size adjustment.",
-            notes="Assumes 100% home meal preparation using low-cost, nutritious staple food basket.",
-        ),
-        SurvivalComponent(
-            category="utilities_tech",
-            category_label="Utilities & Connectivity",
-            annual_cost=2640.0,
-            monthly_cost=220.0,
-            source_name="Residential Energy Consumption Survey (RECS) & CE Survey",
-            source_agency="U.S. Energy Information Administration (EIA) / BLS",
-            source_url="https://www.eia.gov/consumption/residential/",
-            method="Basic household electric, heating/cooling, water/sewer, and minimum broadband connectivity baseline.",
-            notes="Reflects unavoidable residential utility costs not included in base rent.",
-        ),
-        SurvivalComponent(
-            category="transportation",
-            category_label="Transportation",
-            annual_cost=3840.0,
-            monthly_cost=320.0,
-            source_name="Consumer Expenditure Survey (CE) - Lowest Two Income Quintiles",
-            source_agency="U.S. Bureau of Labor Statistics (BLS)",
-            source_url="https://www.bls.gov/cex/",
-            method="Basic operating costs for reliable used commuting vehicle (fuel, liability insurance, basic maintenance) or transit pass.",
-            notes="Does not assume new vehicle purchase or comprehensive insurance.",
-        ),
-        SurvivalComponent(
-            category="healthcare",
-            category_label="Healthcare",
-            annual_cost=1680.0,
-            monthly_cost=140.0,
-            source_name="Medical Expenditure Panel Survey (MEPS) & ACA Benchmark Subsidies",
-            source_agency="Agency for Healthcare Research and Quality (AHRQ) / CMS",
-            source_url="https://meps.ahrq.gov/mepsweb/",
-            method="Out-of-pocket medical expenses plus subsidized ACA benchmark Silver health insurance premium.",
-            notes="Assumes eligibility for income-based Affordable Care Act premium tax credits (APTC).",
-        ),
-        SurvivalComponent(
-            category="taxes_unavoidables",
-            category_label="Taxes & Unavoidable Basics",
-            annual_cost=3000.0,
-            monthly_cost=250.0,
-            source_name="FICA Statutory Payroll Tax & BLS Essential Household Supplies",
-            source_agency="Internal Revenue Service (IRS) / BLS",
-            source_url="https://www.irs.gov/",
-            method="Mandatory FICA payroll taxes (7.65% on earned income) plus state/local sales taxes and unavoidable personal hygiene/cleaning supplies.",
-            notes="Assumes standard deduction eliminates federal income tax liability at this earnings level.",
-        ),
-    ]
+    """Retired component model from V0.1."""
+    return []
 
 
 def calculate_household_survival_matrix(
     population_anchor_per_person: float = 21800.0,
 ) -> list[HouseholdSurvivalFloor]:
-    """Calculate the Survival Floor, Survival Gap, and Adequacy Ratio across household sizes (1-5).
-
-    CRITICAL RULE: Household Survival Floors are independently modeled by household
-    composition and economies of scale. They are NEVER generated by simply multiplying
-    the single-adult floor by household size.
-    """
-    profiles = [
-        {
-            "size": 1,
-            "label": "1 Adult",
-            "components": {
-                "housing": 13200.0,
-                "food": 3600.0,
-                "utilities_tech": 2640.0,
-                "transportation": 3840.0,
-                "healthcare": 1680.0,
-                "taxes_unavoidables": 3000.0,
-                "childcare": 0.0,
-            },
-        },
-        {
-            "size": 2,
-            "label": "2 Adults / 1 Adult + 1 Child",
-            "components": {
-                "housing": 15600.0,  # 1BR/2BR shared
-                "food": 6600.0,      # USDA 2-person +10% adjustment
-                "utilities_tech": 3360.0,
-                "transportation": 6240.0,
-                "healthcare": 3360.0,
-                "taxes_unavoidables": 4640.0,
-                "childcare": 0.0,
-            },
-        },
-        {
-            "size": 3,
-            "label": "2 Adults + 1 Child / 1 Adult + 2 Children",
-            "components": {
-                "housing": 17400.0,  # 2BR unit
-                "food": 9480.0,      # USDA family scale
-                "utilities_tech": 3960.0,
-                "transportation": 6720.0,
-                "healthcare": 4560.0,
-                "taxes_unavoidables": 5080.0,
-                "childcare": 6000.0,  # Modest after-school/part-day baseline
-            },
-        },
-        {
-            "size": 4,
-            "label": "2 Adults + 2 Children",
-            "components": {
-                "housing": 19800.0,  # Standard 2BR/3BR family FMR
-                "food": 11940.0,     # USDA reference family of 4 standard TFP
-                "utilities_tech": 4560.0,
-                "transportation": 7440.0,
-                "healthcare": 5760.0,
-                "taxes_unavoidables": 6800.0,
-                "childcare": 12000.0, # Baseline childcare for 1 infant/preschool + 1 school age
-            },
-        },
-        {
-            "size": 5,
-            "label": "2 Adults + 3 Children",
-            "components": {
-                "housing": 23400.0,  # 3BR/4BR family unit
-                "food": 14160.0,     # USDA 5-person with -5% scale adjustment
-                "utilities_tech": 5280.0,
-                "transportation": 7920.0,
-                "healthcare": 6840.0,
-                "taxes_unavoidables": 7900.0,
-                "childcare": 16000.0,
-            },
-        },
-    ]
-
-    matrix: list[HouseholdSurvivalFloor] = []
-    for p in profiles:
-        size = int(p["size"])
-        comps = p["components"]  # type: ignore
-        total_floor = float(sum(comps.values()))
-        pop_anchor = float(size * population_anchor_per_person)
-        gap = round(pop_anchor - total_floor, 2)
-        ratio = round(pop_anchor / total_floor, 2) if total_floor > 0 else 0.0
-        adequacy_pct = int(round(ratio * 100))
-
-        matrix.append(
-            HouseholdSurvivalFloor(
-                household_size=size,
-                composition_label=str(p["label"]),
-                population_anchor_annual=pop_anchor,
-                population_anchor_monthly=round(pop_anchor / 12.0, 2),
-                survival_floor_annual=round(total_floor, 2),
-                survival_floor_monthly=round(total_floor / 12.0, 2),
-                survival_gap_annual=gap,
-                survival_gap_monthly=round(gap / 12.0, 2),
-                adequacy_ratio=ratio,
-                adequacy_percent=adequacy_pct,
-                is_adequate=ratio >= 1.0,
-                components=comps,  # type: ignore
-                status="research_estimate",
-            )
-        )
-    return matrix
+    """Retired matrix from V0.1."""
+    return []
 
 
 def get_benchmark_comparisons() -> dict[str, BenchmarkComparison]:
-    """Return sourced, versioned external benchmark data objects explaining methodological divergences."""
+    """Sourced benchmark comparison models for validation."""
     return {
         "mit_living_wage": BenchmarkComparison(
             name="MIT Living Wage Calculator",
@@ -207,8 +36,7 @@ def get_benchmark_comparisons() -> dict[str, BenchmarkComparison]:
             estimated_single_adult_annual=42500.0,
             methodological_divergence=(
                 "MIT Living Wage includes civic engagement expenses, unsubsidized commercial healthcare premiums, "
-                "and county-level cost aggregation, whereas The Foundation Survival Floor models bare-minimum "
-                "survival needs assuming ACA subsidies and strict home meal preparation."
+                "and county-level cost aggregation."
             ),
         ),
         "united_way_alice": BenchmarkComparison(
@@ -220,8 +48,7 @@ def get_benchmark_comparisons() -> dict[str, BenchmarkComparison]:
             retrieved_at="2026-08-13T00:00:00Z",
             estimated_single_adult_annual=31200.0,
             methodological_divergence=(
-                "ALICE includes an explicit 10% miscellaneous contingency reserve and higher technology allowances. "
-                "When ALICE contingency is excluded, the baseline aligns closely with The Foundation's $27,960 estimate."
+                "ALICE includes an explicit 10% miscellaneous contingency reserve and higher technology allowances."
             ),
         ),
         "official_poverty_measure": BenchmarkComparison(
@@ -233,8 +60,7 @@ def get_benchmark_comparisons() -> dict[str, BenchmarkComparison]:
             retrieved_at="2026-08-13T00:00:00Z",
             estimated_single_adult_annual=15650.0,
             methodological_divergence=(
-                "The OPM is based on the 1963 food-to-income multiplier (3x food) indexed by headline CPI-U. "
-                "It severely underestimates modern housing, transportation, utility, and healthcare requirements."
+                "The OPM is based on the 1963 food-to-income multiplier (3x food) indexed by headline CPI-U."
             ),
         ),
     }
@@ -244,34 +70,28 @@ def calculate_survival_floor(
     population_anchor_annual: float = 21800.0,
     reference_year: int = 2024,
 ) -> SurvivalFloorResult:
-    """Calculate the full Survival Floor result object for V0.1."""
+    """Return the migration transition status for Axis 2.
+
+    The original $27,960 estimate is explicitly retired. A replacement Minimum Sustainable
+    Living Cost model is being built bottom-up from local county/FMR data.
+    """
     defs = definitions()
     methodology_version = defs["project"]["methodology_version"]
-
-    components = get_survival_floor_components(reference_year)
-    single_adult_floor = sum(c.annual_cost for c in components)
-    gap = round(population_anchor_annual - single_adult_floor, 2)
-    ratio = round(population_anchor_annual / single_adult_floor, 2)
-    adequacy_pct = int(round(ratio * 100))
-    household_matrix = calculate_household_survival_matrix(population_anchor_annual)
-    benchmarks = get_benchmark_comparisons()
-
-    from datetime import datetime, timezone
     now_iso = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
 
     return SurvivalFloorResult(
-        status="research_estimate",
-        status_label="RESEARCH ESTIMATE",
+        status="in_development",
+        status_label="METHODOLOGY REBUILD IN PROGRESS",
         reference_year=reference_year,
-        single_adult_floor_annual=round(single_adult_floor, 2),
-        single_adult_floor_monthly=round(single_adult_floor / 12.0, 2),
-        population_anchor_annual=round(population_anchor_annual, 2),
-        survival_gap_annual=gap,
-        adequacy_ratio=ratio,
-        adequacy_percent=adequacy_pct,
-        components=components,
-        household_matrix=household_matrix,
+        single_adult_floor_annual=0.0,
+        single_adult_floor_monthly=0.0,
+        population_anchor_annual=population_anchor_annual,
+        survival_gap_annual=0.0,
+        adequacy_ratio=0.0,
+        adequacy_percent=0,
+        components=[],
+        household_matrix=[],
         methodology_version=methodology_version,
         calculated_at=now_iso,
-        benchmark_comparisons=benchmarks,
+        benchmark_comparisons=get_benchmark_comparisons(),
     )

@@ -1,7 +1,7 @@
 project:
   name: "The Foundation"
   stage: "prelaunch"
-  methodology_version: "0.1.0-draft"
+  methodology_version: "0.2.0-draft"
   composite_release_enabled: false
 
 bottom_30:

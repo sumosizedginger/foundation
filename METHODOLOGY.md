@@ -1,182 +1,194 @@
-# Methodology — V0.1
+# Methodology Specification
 
-Status: **CANONICAL POPULATION ANCHOR VERIFIED · SURVIVAL AXIS RESEARCH ESTIMATE · COMPOSITE-SCORE LOCKED**
-
-The Foundation is a public, deterministic, auditable economic research instrument designed to evaluate economic health from the vantage point of the bottom 30% of Americans.
+**Version:** `0.2.0-draft`  
+**Status:** In Progress (Owner Authorized Methodology Migration)  
+**Supersedes:** `0.1.0-draft` (Survival Floor numeric modeling superseded by D-015; Population Anchor preserved)
 
 ---
 
-## 1. Dual-Axis Economic Framework
+## 1. Executive Summary & Dual-Axis Economic Framework
 
-The dashboard evaluates the economic condition of the foundation along two distinct axes:
+The Foundation is a public, deterministic, auditable economic research instrument designed to measure the economic health of the bottom 30% of Americans.
+
+The framework operates on two distinct, un-conflated economic axes:
 
 ```text
-+------------------------------------------------------------------------------------+
-|  AXIS 1: POPULATION ANCHOR (Who are the Bottom 30%?)                                |
-|  Defines the reference population via person-ranked per-person household income.   |
-|  2024 Income Reference Value: $21,800 per person per year (VERIFIED).              |
-+------------------------------------------------------------------------------------+
-                                      vs.
-+------------------------------------------------------------------------------------+
-|  AXIS 2: SURVIVAL FLOOR (Can they afford basic life?)                               |
-|  Models the resources required to cover unavoidable baseline living necessities.   |
-|  Single-Adult Baseline Value: $27,960 per year (RESEARCH ESTIMATE).                |
-+------------------------------------------------------------------------------------+
-                                       ||
-                                       vv
-+------------------------------------------------------------------------------------+
-|  SURVIVAL GAP: Population Anchor - Survival Floor = -$6,160/year                   |
-|  ADEQUACY RATIO: Population Anchor / Survival Floor = 0.78 (78% of basic needs)     |
-+------------------------------------------------------------------------------------+
+┌────────────────────────────────────────────────────────────────────────┐
+│                                AXIS 1                                  │
+│                       POPULATION ANCHOR                                │
+│                     "Who are the Bottom 30%?"                          │
+│                                                                        │
+│   • Ranked by per-person household money income (HTOTVAL / H_NUMPER)   │
+│   • Weighted 30th percentile using Census CPS ASEC person weights      │
+│   • Verified 2024 Income Reference Value: $21,800.00 / person / year   │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    │
+                       COMPARED DETERMINISTICALLY (2024)
+                                    │
+┌───────────────────────────────────┴────────────────────────────────────┐
+│                                AXIS 2                                  │
+│                  MINIMUM SUSTAINABLE LIVING COST                       │
+│              "What does basic independent life cost?"                  │
+│                                                                        │
+│   • Gross income required for 1 independent adult to maintain a        │
+│     minimally sustainable life without public benefits or debt         │
+│   • Built bottom-up from county/local housing, food, auto, health,     │
+│     essentials, social participation, and local/state/federal taxes    │
+│   • Aggregated using ACS adult population weights (P25, Median, P75)   │
+└────────────────────────────────────────────────────────────────────────┘
 ```
 
-### What the Population Anchor Is NOT:
-* It is **NOT** a poverty threshold;
-* It is **NOT** a living-wage threshold;
-* It is **NOT** a survival threshold;
-* It is **NOT** a statement that $21,800 is sufficient;
-* It is **NOT** the Foundation composite score.
+* **Survival Gap (2024 Time-Comparable):** `2024 Population Anchor − 2024 Minimum Sustainable Living Cost`
+* **Adequacy Ratio (2024 Time-Comparable):** `2024 Population Anchor / 2024 Minimum Sustainable Living Cost`
 
 ---
 
-## 2. Canonical Bottom-30 Population Anchor
+## 2. Historical Audit Trail & Retirement of V0.1 Survival Floor
 
-### The Core Formula
-
-The Bottom 30% is the lowest weighted 30% of **persons** when each person is assigned their household's annual money income divided by the number of people in that household:
-
-$$\text{per\_person\_household\_income}_i = \frac{\text{HTOTVAL}_h}{\text{H\_NUMPER}_h}$$
-
-Where:
-- $\text{HTOTVAL}_h$ = Total annual household money income for household $h$.
-- $\text{H\_NUMPER}_h$ = Total number of people living in and supported by household $h$.
-- Every person $i$ in household $h$ receives the identical per-person income value.
-
-### Person-Weighted Percentile Ranking
-
-Persons are sorted in ascending order by their per-person household income and evaluated using the official March supplement person survey weight ($\text{MARSUPWT}$).
-
-The weighted inverse empirical cumulative distribution determines the cutoff:
-
-$$\text{Target Weight} = 0.30 \times \sum_{i} \text{MARSUPWT}_i$$
-
-The canonical Population Anchor is the first observation at which cumulative survey weight is greater than or equal to the target weight.
-
-### Why Persons are Ranked Rather Than Households
-
-A household with five people represents five human beings experiencing the economic reality of those shared resources. Ranking households equally would treat a single-person household with $60,000 as equivalent in population weight to a family of six with $60,000. The Foundation measures humans.
-
-### Why No Equivalence Scale
-
-Standard equivalence scales (such as the OECD or square-root scales) adjust household resources by treating children or additional adults as fractional persons.
-
-The Foundation deliberately rejects equivalence scales in V0.1:
-- One supported human counts as one supported human.
-- $80,000 supporting 4 people ($20,000/person) is not treated as equivalent to $80,000 supporting 1 person ($80,000/person).
-- This is a normative design decision that maintains complete transparency.
+| Methodology Version | Status | Effective Dates | Survival Floor / Living Cost Status | Population Anchor Status |
+| :---: | :---: | :---: | :--- | :--- |
+| `0.1.0-draft` | Retired / Superseded | 2026-08-13 | **$27,960 Single-Adult Floor (RETIRED)**<br>Constructed as a national synthesized constant with ACA subsidies ($140/mo health), simplified $320/mo transit, and $3,000 national tax constant. Rejected under D-015 for insufficiently defensible local, healthcare, benefit, and tax assumptions. | **$21,800.00 (VERIFIED)**<br>Canonical person-weighted P30 of per-person household income from 2025 CPS ASEC. |
+| `0.2.0-draft` | Active Draft | 2026-08-13+ | **Minimum Sustainable Living Cost (IN PROGRESS)**<br>Bottom-up local county/FMR modeling, benefit-neutral unsubsidized healthcare, explicit automobile ownership model, visible social/recreation component, and deterministic gross-income tax solver across 50 states + DC. | **$21,800.00 (VERIFIED)**<br>Preserved unchanged. |
 
 ---
 
-## 3. The Second Economic Axis: Survival Floor
+## 3. Axis 1 · Canonical Bottom-30 Population Anchor
 
-The Survival Floor estimates the minimum annual resources required for an independent household to cover basic unavoidable living necessities without government cash assistance or debt.
+### 3.1 Formula
+For each person $i$ residing in household $h$:
 
-### Single-Adult Research Baseline ($27,960 / year)
+$$\text{per\_person\_income}_{i} = \frac{\text{HTOTVAL}_{h}}{\text{H\_NUMPER}_{h}}$$
 
-Status: `RESEARCH ESTIMATE` (Prelaunch validation state).
+where:
+* $\text{HTOTVAL}_{h}$ is the total money income of the household from all survey-defined cash sources before taxes.
+* $\text{H\_NUMPER}_{h}$ is the total number of persons living in household $h$.
 
-| Component | Annual Cost | Monthly Cost | Primary Public Source | Methodology & Standards |
-| :--- | :---: | :---: | :--- | :--- |
-| **Housing** | $13,200 | $1,100 | HUD Fair Market Rents / ACS Median Rent | 40th percentile efficiency/1BR rental baseline including essential utilities. |
-| **Food** | $3,600 | $300 | USDA Thrifty Food Plan (FNS/CNPP) | Monthly cost of food for single adult (age 19–50) with official +20% 1-person adjustment. |
-| **Utilities & Telecom** | $2,640 | $220 | EIA RECS & BLS Consumer Expenditure | Residential electric, heating/cooling, water/sewer, and basic broadband. |
-| **Transportation** | $3,840 | $320 | BLS Consumer Expenditure Survey | Operating costs for reliable used commuting vehicle (gas, liability insurance, basic maintenance) or transit. |
-| **Healthcare** | $1,680 | $140 | MEPS / AHRQ & ACA Benchmark Subsidies | Out-of-pocket medical expenses plus subsidized ACA Silver benchmark health insurance premium. |
-| **Taxes & Basics** | $3,000 | $250 | IRS Statutory FICA & BLS Supplies | Mandatory FICA payroll taxes (7.65% = $2,139) plus state/local sales taxes and essential hygiene supplies. |
-| **Total Floor** | **$27,960** | **$2,330** | **Synthesized Government Baseline** | **Bare-minimum survival floor for independent single adult.** |
+### 3.2 Ranking & Quantile Calculation
+Every individual in the civilian noninstitutional population is ranked in ascending order by their assigned $\text{per\_person\_income}_{i}$ and weighted by their official CPS ASEC person supplement weight $\text{MARSUPWT}_{i}$ (scaled by $\frac{1}{100}$).
 
----
+The Population Anchor $P_{30}$ is the income cutoff where cumulative represented population weight reaches 30%:
 
-## 4. Household-Size Matrix
+$$P_{30} = \inf \left\{ y \in \mathbb{R} : \frac{\sum_{i: \text{income}_i \le y} \text{MARSUPWT}_i}{\sum_{i} \text{MARSUPWT}_i} \ge 0.30 \right\}$$
 
-Household Survival Floors are **independently modeled by household composition** and reflect genuine economies of scale (e.g. shared housing and utilities).
-
-> [!IMPORTANT]
-> Household Survival Floors must **NEVER** be generated by simply multiplying the single-adult floor by household size.
-
-### Matrix: Equivalent Boundary vs. Survival Floor (2024 Reference Year)
-
-| Household Size | Composition Profile | Equivalent Household Income at Bottom-30 Boundary | Household Survival Floor (Research Estimate) | Survival Gap | Adequacy Ratio |
-| :---: | :--- | :---: | :---: | :---: | :---: |
-| **1** | 1 Adult | $21,800 | $27,960 | **-$6,160** | **0.78 (78%)** |
-| **2** | 2 Adults / 1 Adult + 1 Child | $43,600 | $39,800 | **+$3,800** | **1.10 (110%)** |
-| **3** | 2 Adults + 1 Child / 1 Adult + 2 Kids | $65,400 | $53,200 | **+$12,200** | **1.23 (123%)** |
-| **4** | 2 Adults + 2 Children | $87,200 | $68,300 | **+$18,900** | **1.28 (128%)** |
-| **5** | 2 Adults + 3 Children | $109,000 | $81,500 | **+$27,500** | **1.34 (134%)** |
-
-*Note: The equivalent household income column is explicitly labeled "Equivalent household income at the Bottom-30 boundary" and is NOT a poverty threshold.*
+### 3.3 Strict Rules
+1. **Person Unit:** We rank human beings, not households.
+2. **Negative Incomes Retained:** Negative cash incomes (e.g. self-employment or farm losses) are valid economic positions and are never clamped to zero.
+3. **No Equivalence Scale:** We do not treat children or secondary adults as fractional humans. One supported human equals one human.
 
 ---
 
-## 5. Benchmark Comparisons & Methodological Divergences
+## 4. Axis 2 · Minimum Sustainable Living Cost
 
-The Foundation Survival Floor is compared against leading external research benchmarks:
+### 4.1 Canonical Definition
+> The **Minimum Sustainable Living Cost** is the gross money income required for one independent adult to maintain a minimally sustainable life without means-tested public assistance, debt-financing ordinary necessities, financial support from another person, roommates, or shared household income.
 
-1. **MIT Living Wage Calculator (Dr. Amy Glasmeier)**
-   - *Estimated National Single Adult*: ~$42,500/year.
-   - *Methodological Divergence*: MIT includes civic engagement expenses, unsubsidized health insurance, and county-level cost aggregation, whereas The Foundation models bare-minimum survival assuming ACA subsidies and strict home meal preparation.
-2. **United For ALICE Survival Budget (United Way)**
-   - *Estimated National Single Adult*: ~$31,200/year.
-   - *Methodological Divergence*: ALICE includes an explicit 10% miscellaneous contingency reserve and higher technology allowances. When the contingency buffer is removed, ALICE aligns closely with The Foundation's $27,960 baseline.
-3. **Official Poverty Measure (OPM — Census/HHS)**
-   - *2024 Single Adult Threshold*: $15,650/year.
-   - *Methodological Divergence*: OPM relies on the 1963 food-to-income multiplier (3x food) and severely underestimates modern housing, transportation, utility, and healthcare requirements.
+### 4.2 Excluded Benefits (Benefit-Neutral Baseline)
+The baseline represents independent economic self-sufficiency and strictly **excludes**:
+* SNAP (Food Stamps)
+* Medicaid / Medicare
+* Affordable Care Act (ACA) Premium Tax Credits / Cost-Sharing Subsidies
+* Housing vouchers / Section 8 / public housing subsidies
+* Low Income Home Energy Assistance Program (LIHEAP)
+* Cash welfare assistance (TANF / General Assistance)
+* Refundable means-tested tax credits (e.g., EITC, Additional Child Tax Credit)
+* Private charity, food pantries, or family financial transfers
+* Credit card or personal debt used to finance recurring consumption
 
----
+*Note: Standard statutory tax deductions (e.g. federal standard deduction) and statutory marginal tax brackets are standard tax law, not means-tested benefits, and apply normally.*
 
-## 6. Complete Income Quantile Ladder
-
-To contextualize the Bottom 30% relative to the rest of American society, the production pipeline computes weighted person-income quantiles from official CPS ASEC microdata:
-
-| Quantile | Description | 2024 Income (Survey 2025) | 2023 Income (Survey 2024) | 2022 Income (Survey 2023) |
-| :--- | :--- | :---: | :---: | :---: |
-| **P10** | 10th Percentile (Extreme Foundation) | $10,000.00 | $9,133.60 | $8,513.75 |
-| **P20** | 20th Percentile | $15,896.00 | $15,000.00 | $14,000.00 |
-| **P30** | **Population Anchor (Bottom-30 Cutoff)** | **$21,800.00** | **$20,688.00** | **$19,304.60** |
-| **P40** | 40th Percentile | $28,000.00 | $26,377.00 | $24,655.75 |
-| **P50** | 50th Percentile (National Median) | $35,036.50 | $32,851.80 | $30,634.00 |
-| **P75** | 75th Percentile (Upper Middle) | $61,640.00 | $57,548.00 | $53,045.50 |
-| **P90** | 90th Percentile (Top 10% Boundary) | $100,100.00 | $94,500.00 | $87,690.67 |
-
----
-
-## 7. Historical Constant Dollar Translation
-
-When evaluating historical changes in the Population Anchor, values are presented in both **nominal dollars** and **inflation-adjusted constant dollars** (base year: 2024) using official BLS CPI-U series:
-
-$$\text{Constant 2024 Dollars} = \text{Nominal Value}_t \times \left(\frac{\text{CPI-U}_{2024}}{\text{CPI-U}_t}\right)$$
-
-| Survey Year | Income Year | Nominal Cutoff | Constant 2024 Dollars | CPI-U Index | Real Purchasing Power Change |
-| :---: | :---: | :---: | :---: | :---: | :---: |
-| 2023 | 2022 | $19,304.60 | $20,717.34 | 292.655 | Baseline |
-| 2024 | 2023 | $20,688.00 | $21,324.78 | 304.702 | +2.9% |
-| 2025 | 2024 | $21,800.00 | $21,800.00 | 314.072 | +2.2% (+5.2% over 2022) |
-
-> [!WARNING]
-> Never imply that a rising nominal cutoff represents economic improvement. Real purchasing power must always be examined.
+### 4.3 What is Included (Minimally Sustainable Life)
+* Independent standard-quality housing (1-bedroom rental)
+* Adequate, nutritious food (100% home meal preparation baseline)
+* Reliable automobile transportation (mileage, fuel, insurance, maintenance, replacement reserve)
+* Unsubsidized comprehensive health insurance (adequate Silver Marketplace plan) plus realistic out-of-pocket medical utilization
+* Mobile phone and broadband connectivity
+* Essential clothing, footwear, laundry, personal hygiene, and household cleaning supplies
+* Ordinary household replacement items
+* Modest, visible social participation and recreation (nonzero)
+* All mandatory federal, state, and local taxes required to generate the necessary disposable income.
 
 ---
 
-## 8. National Economic Pressure Signals
+## 5. Geographic & Time Architecture
 
-General economic series (such as BLS U-6, Labor Force Participation, Employment-Population Ratio, and CPI sub-indices) are explicitly designated as **National Economic Pressure Signals**.
+### 5.1 Local Resolution & Population Weighting
+* **Primary Geographic Unit:** County / HUD Fair Market Rent (FMR) Area across all 50 states plus the District of Columbia.
+* **State Aggregation:** Local county living costs are aggregated to the state level using Census ACS adult-population weights ($w_c$):
+  * **State P25:** 25th percentile of local living costs.
+  * **State Median (Primary Reference):** Population-weighted 50th percentile.
+  * **State P75:** 75th percentile of local living costs.
+  * **State Minimum & Maximum:** Lowest and highest observed county floors in the state.
+* **National Aggregation:** National P25, Median, and P75 are calculated by aggregating all local county observations weighted by national adult population. No single national "average rent" or national basket is ever used.
 
-They provide vital high-frequency macro context, but they are **not** Bottom-30 specific measures and are never misrepresented as such.
+### 5.2 Vintage Architecture
+1. **2024 Time-Comparable Vintage:** Built from 2024 source inputs (or deflated using component-specific CPI/RPP where appropriate) to provide an exact temporal match for the 2024 Population Anchor ($21,800).
+2. **2026 Current Living Cost Vintage:** Built from current 2026 source data (FY2026 FMR, 2026 USDA Food Plans, 2026 CMS Marketplace Rates).
+*The 2026 Current Living Cost is never subtracted from the 2024 Population Anchor.*
 
 ---
 
-## 9. Composite Foundation Score: Locked in Prelaunch
+## 6. Component Model Specifications
 
-The composite Foundation Score remains **locked in PRELAUNCH / RESEARCH**.
+### 6.1 Housing Model
+* **Unit Type:** Independent standard-quality 1-Bedroom rental apartment.
+* **Primary Source:** HUD Fair Market Rents (FMR) at the 40th percentile.
+* **Gross-Rent Utility Accounting:** HUD FMR includes shelter rent plus tenant-paid essential utilities (water, sewer, trash, heating, electricity). Utility expenses covered by FMR are not added separately to avoid double-counting.
 
-No provisional score or fake 0–100 number is generated or published. It will remain locked until all release gates in `VALIDATION.md` (normalization freezing, weight sensitivity analysis, double-counting review, and owner authorization) are fulfilled.
+### 6.2 Food Model
+* **Primary Sustainable Baseline:** USDA Low-Cost Food Plan (Single adult age 19–50 with official +20% 1-person size adjustment).
+* **Sensitivity Bound:** USDA Thrifty Food Plan.
+* **Profile:** Transparent midpoint between adult male and adult female monthly expenditure baselines. Alaska and Hawaii adjusted via USDA regional reports.
+
+### 6.3 Transportation Model (Automobile Baseline)
+* **Model Structure:** Independent automobile ownership model reflecting annual necessary miles ($M \approx 10,000\text{–}12,000\text{ miles/yr}$):
+  $$\text{AutoCost} = \text{Fuel} + \text{Auto Insurance} + \text{Routine Maintenance/Tires} + \text{Registration/Fees} + \text{Vehicle Replacement Reserve}$$
+* **Sources:** FHWA/NHTS travel surveys, EIA state/regional gasoline prices, NAIC/state insurance commissioner rate data, BLS Consumer Expenditure used-vehicle depreciation baselines.
+
+### 6.4 Healthcare Model
+* **Profile:** Unsubsidized adult (age 40, single, non-smoker, no dependents).
+* **Plan Tier:** Lowest-cost adequate Silver-level Marketplace plan (CMS Exchange Public Use Files / State Exchange PUFs). Bronze plans with catastrophic deductibles that render ordinary care unusable are rejected.
+* **Out-of-Pocket Utilization:** Realistic expected non-catastrophic annual out-of-pocket medical expenditure modeled from MEPS (Medical Expenditure Panel Survey).
+* **Sensitivity Tiers:** Low utilization, typical utilization, higher utilization.
+
+### 6.5 Connectivity & Essentials
+* **Connectivity:** 1 mobile phone line (unlimited talk/text/basic data) + entry-level fixed residential broadband (BLS CE / FCC urban broadband rate benchmark).
+* **Essentials:** Restrictive basket of personal hygiene, toiletries, cleaning products, laundry, and basic apparel/footwear replacement using BLS CE single-person consumer unit microdata.
+
+### 6.6 Social & Recreation
+* **Methodology:** Explicit, visible component based on conservative lower-quartile (P25) recreational and social participation expenditures among positive-spending single-person consumer units in the BLS Consumer Expenditure Survey, adjusted regionally via BEA Regional Price Parities (RPP).
+
+### 6.7 Resilience & Irregular Expenses
+* **Methodology:** Explicitly models unavoidable irregular replacements (minor appliances, emergency car repairs, unexpected household basics) ensuring zero double-counting against vehicle depreciation and MEPS out-of-pocket models.
+
+---
+
+## 7. Deterministic Tax Engine
+
+Taxes are solved dynamically. For any geography $g$ and reference year $y$, core required net disposable income is:
+
+$$\text{NetNeeds}(g, y) = \text{Housing} + \text{Food} + \text{Transportation} + \text{Healthcare} + \text{Connectivity/Essentials} + \text{Social/Recreation} + \text{Resilience}$$
+
+The Minimum Sustainable Living Cost is the minimum gross income $G$ satisfying:
+
+$$G - \text{Taxes}(G, g, y) \ge \text{NetNeeds}(g, y)$$
+
+where $\text{Taxes}(G, g, y)$ computes:
+1. Employee Social Security FICA (6.2% up to statutory cap)
+2. Employee Medicare FICA (1.45%)
+3. Federal Statutory Income Tax (incorporating federal standard deduction and marginal brackets)
+4. State Statutory Income Tax (incorporating state standard deductions, personal exemptions, and state marginal brackets)
+5. Local Income/Earnings Taxes (where applicable at the county/city level).
+
+---
+
+## 8. Validation Gates (Release Criteria)
+
+Before any Minimum Sustainable Living Cost estimate is promoted to `VERIFIED`:
+1. All 50 states plus DC fully modeled from local county/FMR data.
+2. Complete provenance artifacts (URL, retrieval timestamp, SHA-256 hash, parser version).
+3. Independent reproduction of tax root-finding solver.
+4. Independent reproduction of county-to-state and state-to-national population weighting.
+5. Strict temporal separation between 2024 and 2026 vintages.
+6. Benchmark comparisons documented against MIT Living Wage and United For ALICE.
+7. Sensitivity analysis completed across food plans, healthcare utilization tiers, and mileage baselines.
+8. Explicit owner review and authorization.

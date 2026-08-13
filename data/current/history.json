@@ -2,7 +2,7 @@
   "base_constant_dollar_year": 2024,
   "project": {
     "composite_release_enabled": false,
-    "methodology_version": "0.1.0-draft",
+    "methodology_version": "0.2.0-draft",
     "name": "The Foundation",
     "stage": "prelaunch"
   },

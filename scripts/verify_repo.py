@@ -63,8 +63,8 @@ def main() -> int:
     if latest["population_anchor"]["cutoff"] != 21800.00:
         raise SystemExit(f"Unexpected Population Anchor cutoff: {latest['population_anchor']['cutoff']}")
 
-    if latest["survival_floor"]["status"] != "research_estimate":
-        raise SystemExit(f"Survival floor must be research_estimate, got: {latest['survival_floor']['status']}")
+    if latest["survival_floor"]["status"] not in ("in_development", "research_estimate"):
+        raise SystemExit(f"Survival floor must be in_development or research_estimate, got: {latest['survival_floor']['status']}")
 
     print("Repository structural, schema, and release-gate verification passed.")
     return 0

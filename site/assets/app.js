@@ -138,7 +138,10 @@ function renderHouseholdMatrix(matrix) {
     const tr = document.createElement("tr");
     const td = document.createElement("td");
     td.colSpan = 6;
-    td.textContent = "Household survival matrix data currently unavailable.";
+    td.style.padding = "2rem";
+    td.style.textAlign = "center";
+    td.style.color = "var(--muted)";
+    td.textContent = "Methodology rebuild in progress. Household matrices will be computed bottom-up from county living costs upon validation.";
     tr.appendChild(td);
     tbody.appendChild(tr);
     return;
@@ -244,7 +247,6 @@ function showModal() {
   modal.classList.add("open");
   modal.setAttribute("aria-hidden", "false");
 
-  // Focus close button inside modal
   const closeBtn = modal.querySelector(".modal-close");
   if (closeBtn) closeBtn.focus();
 
@@ -271,7 +273,6 @@ function handleModalKeydown(e) {
     return;
   }
 
-  // Trap focus inside modal
   if (e.key === "Tab") {
     const modal = document.getElementById("provenance-modal");
     if (!modal) return;
@@ -363,10 +364,9 @@ function openSurvivalProvenance(triggerElement) {
   if (!title || !body) return;
 
   const surv = globalDashboardData?.survival_floor || {};
-  const comps = surv.components || [];
   const benchmarks = surv.benchmark_comparisons || {};
 
-  title.textContent = "Survival Floor Component Model & Research Status";
+  title.textContent = "Minimum Sustainable Living Cost — Methodology Migration";
   body.innerHTML = "";
 
   function makeItem(label, contentNode) {
@@ -384,49 +384,10 @@ function openSurvivalProvenance(triggerElement) {
   const statusBox = document.createElement("div");
   statusBox.className = "provenance-val";
   statusBox.style.borderLeft = "3px solid var(--accent)";
-  statusBox.innerHTML = `<strong>RESEARCH ESTIMATE</strong> · Prelaunch Validation State<br>Synthesized from official government baselines (HUD Fair Market Rent, USDA Thrifty Food Plan, EIA RECS, BLS CE, MEPS).`;
-  body.appendChild(makeItem("Status & Authority", statusBox));
-
-  // Components list
-  const compBox = document.createElement("div");
-  compBox.className = "provenance-val";
-  comps.forEach((c) => {
-    const item = document.createElement("div");
-    item.style.borderBottom = "1px solid var(--line)";
-    item.style.padding = "0.75rem 0";
-
-    const topRow = document.createElement("div");
-    topRow.style.display = "flex";
-    topRow.style.justifyContent = "space-between";
-    topRow.style.fontWeight = "700";
-
-    const nameSpan = document.createElement("span");
-    nameSpan.textContent = c.category_label || c.category.toUpperCase();
-
-    const costSpan = document.createElement("span");
-    costSpan.className = "mono";
-    costSpan.textContent = `${moneyFmt.format(c.annual_cost)} / yr (${moneyFmt.format(c.monthly_cost)}/mo)`;
-
-    topRow.appendChild(nameSpan);
-    topRow.appendChild(costSpan);
-
-    const methP = document.createElement("p");
-    methP.style.fontSize = "0.82rem";
-    methP.style.color = "var(--muted)";
-    methP.style.marginTop = "0.2rem";
-    methP.textContent = c.method;
-
-    const srcP = document.createElement("p");
-    srcP.style.fontSize = "0.75rem";
-    srcP.style.color = "var(--subtle)";
-    srcP.textContent = `Source: ${c.source_name} (${c.source_agency})`;
-
-    item.appendChild(topRow);
-    item.appendChild(methP);
-    item.appendChild(srcP);
-    compBox.appendChild(item);
-  });
-  body.appendChild(makeItem("Single-Adult Component Breakdown", compBox));
+  statusBox.innerHTML = `<strong>METHODOLOGY REBUILD IN PROGRESS (0.2.0-draft)</strong><br>
+    The initial $27,960 single-adult estimate was retired under Decision D-015 because its housing, healthcare, transportation, benefit-treatment, and single-national-constant assumptions were insufficiently defensible.<br><br>
+    A replacement model is being constructed bottom-up from county-level HUD Fair Market Rents, USDA Food Plans, unsubsidized CMS Silver Marketplace health premiums, MEPS expected utilization, explicit auto ownership costs, and a deterministic gross-income tax solver across all 50 states + DC.`;
+  body.appendChild(makeItem("Methodology Status", statusBox));
 
   // Sourced Benchmark Comparisons
   const benchBox = document.createElement("div");
@@ -438,7 +399,7 @@ function openSurvivalProvenance(triggerElement) {
     bRow.innerHTML = `• <strong>${b.name}:</strong> ${moneyFmt.format(b.estimated_single_adult_annual || 0)} (${b.geography}, Ref: ${b.reference_year})<br><span style="font-size:0.8rem; color:var(--muted);">${b.methodological_divergence}</span>`;
     benchBox.appendChild(bRow);
   });
-  body.appendChild(makeItem("Benchmark Comparisons & Divergences", benchBox));
+  body.appendChild(makeItem("Validation Benchmark Targets", benchBox));
 
   showModal();
 }
@@ -527,7 +488,7 @@ async function boot() {
     // Set Status Strip
     setText(
       "stage-status-text",
-      `PRELAUNCH RESEARCH INSTRUMENT · Canonical Population Anchor Verified · Composite Score Locked · Methodology ${latest.project?.methodology_version || "0.1.0"}`
+      `PRELAUNCH RESEARCH INSTRUMENT · Canonical Population Anchor Verified · Living Cost Migration in Progress · Methodology ${latest.project?.methodology_version || "0.2.0-draft"}`
     );
 
     // Population Anchor
@@ -545,9 +506,19 @@ async function boot() {
       setText("anchor-badge", "UNAVAILABLE");
     }
 
-    // Survival Floor
+    // Survival Floor / Living Cost
     const surv = latest.survival_floor || {};
-    if (surv.single_adult_floor_annual) {
+    if (surv.status === "in_development") {
+      setText("survival-value", "UNDER REBUILD");
+      setText("survival-monthly", "0.2.0-draft Architecture In Progress");
+      setText(
+        "survival-detail",
+        "The initial $27,960 model did not meet The Foundation's validation standard. A replacement model is being built bottom-up from local county housing, food, transportation, healthcare, and tax data across all 50 states + DC."
+      );
+      setText("survival-gap-val", "IN REBUILD");
+      setText("adequacy-ratio-val", "IN REBUILD");
+      setText("survival-badge", "REBUILD IN PROGRESS");
+    } else if (surv.single_adult_floor_annual) {
       setText("survival-value", moneyFmt.format(surv.single_adult_floor_annual));
       setText("survival-monthly", `≈ ${moneyFmt.format(surv.single_adult_floor_monthly)} per month`);
       setText("survival-gap-val", `${moneyFmt.format(surv.survival_gap_annual)} / yr`);
@@ -562,9 +533,7 @@ async function boot() {
     setText("composite-score-val", latest.composite?.status ? String(latest.composite.status).toUpperCase() : "LOCKED");
 
     // Household Matrix
-    if (surv.household_matrix) {
-      renderHouseholdMatrix(surv.household_matrix);
-    }
+    renderHouseholdMatrix(surv.household_matrix || []);
 
     // Quantiles
     if (pop.quantiles) {
@@ -594,7 +563,7 @@ async function boot() {
       }
     }
   } catch (err) {
-    console.error("Dashboard initialisation error:", err);
+    console.error("Dashboard initialization error:", err);
     setText("stage-status-text", "DATA LOAD ERROR · The site refused to invent replacement values.");
     setText("cutoff-value", "DATA UNAVAILABLE");
     setText("survival-value", "DATA UNAVAILABLE");
