@@ -3,12 +3,6 @@ name: Deploy Pages
 on:
   push:
     branches: ["main"]
-    paths:
-      - "site/**"
-      - "data/current/**"
-      - "data/metadata/**"
-      - "scripts/build_site.py"
-      - ".github/workflows/deploy-pages.yml"
   workflow_dispatch:
 
 permissions:
