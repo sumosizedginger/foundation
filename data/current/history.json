@@ -1,0 +1,101 @@
+{
+  "base_constant_dollar_year": 2024,
+  "project": {
+    "composite_release_enabled": false,
+    "methodology_version": "0.1.0-draft",
+    "name": "The Foundation",
+    "stage": "prelaunch"
+  },
+  "vintages": [
+    {
+      "archive_sha256": "d2e000250782adfb0f10c6fb0cffca5a3a776ee46f73111c1d8157e84a282f16",
+      "constant_2024_dollars": 20717.34,
+      "cpi_base_year": 2024,
+      "cpi_u_index": 292.655,
+      "income_year": 2022,
+      "methodology_version": "0.1.0-draft",
+      "nominal_cutoff": 19304.6,
+      "quantiles_constant_2024": {
+        "P10": 9136.8,
+        "P20": 15024.54,
+        "P30": 20717.34,
+        "P40": 26460.1,
+        "P50": 32875.85,
+        "P75": 56927.46,
+        "P90": 94108.03
+      },
+      "quantiles_nominal": {
+        "P10": 8513.75,
+        "P20": 14000.0,
+        "P30": 19304.6,
+        "P40": 24655.75,
+        "P50": 30634.0,
+        "P75": 53045.5,
+        "P90": 87690.67
+      },
+      "represented_population": 330631702.0,
+      "source_archive": "asecpub23csv.zip",
+      "survey_year": 2023
+    },
+    {
+      "archive_sha256": "cdb39cdac34bef991206d738ffae2bb0e6fc8daec02c8e31a1e0c326d9c6be4b",
+      "constant_2024_dollars": 21324.18,
+      "cpi_base_year": 2024,
+      "cpi_u_index": 304.702,
+      "income_year": 2023,
+      "methodology_version": "0.1.0-draft",
+      "nominal_cutoff": 20688.0,
+      "quantiles_constant_2024": {
+        "P10": 9414.47,
+        "P20": 15461.27,
+        "P30": 21324.18,
+        "P40": 27188.13,
+        "P50": 33862.04,
+        "P75": 59317.68,
+        "P90": 97406.0
+      },
+      "quantiles_nominal": {
+        "P10": 9133.6,
+        "P20": 15000.0,
+        "P30": 20688.0,
+        "P40": 26377.0,
+        "P50": 32851.8,
+        "P75": 57548.0,
+        "P90": 94500.0
+      },
+      "represented_population": 332382485.0,
+      "source_archive": "asecpub24csv.zip",
+      "survey_year": 2024
+    },
+    {
+      "archive_sha256": "318845a2b5e0034e357900b991196ce28ecdd0c99a0937b27ff77f8ea6497284",
+      "constant_2024_dollars": 21800.0,
+      "cpi_base_year": 2024,
+      "cpi_u_index": 314.072,
+      "income_year": 2024,
+      "methodology_version": "0.1.0-draft",
+      "nominal_cutoff": 21800.0,
+      "quantiles_constant_2024": {
+        "P10": 10000.0,
+        "P20": 15896.0,
+        "P30": 21800.0,
+        "P40": 28000.0,
+        "P50": 35036.5,
+        "P75": 61640.0,
+        "P90": 100100.0
+      },
+      "quantiles_nominal": {
+        "P10": 10000.0,
+        "P20": 15896.0,
+        "P30": 21800.0,
+        "P40": 28000.0,
+        "P50": 35036.5,
+        "P75": 61640.0,
+        "P90": 100100.0
+      },
+      "represented_population": 337689642.0,
+      "source_archive": "asecpub25csv.zip",
+      "survey_year": 2025
+    }
+  ]
+}

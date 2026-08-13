@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Historical vintages and real constant-dollar comparisons for The Foundation.">
+  <title>History & Revisions — The Foundation</title>
+  <link rel="stylesheet" href="assets/app.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="index.html">
+      THE FOUNDATION
+      <span class="brand-badge">HISTORICAL VINTAGES</span>
+    </a>
+    <nav aria-label="Primary Navigation">
+      <a href="index.html">Dashboard</a>
+      <a href="methodology.html">Methodology</a>
+      <a href="sources.html">Sources & Audit</a>
+      <a aria-current="page" href="history.html">History</a>
+    </nav>
+  </header>
+
+  <main style="max-width: 1040px;">
+    <section class="section" style="padding-top: 3.5rem;">
+      <p class="eyebrow">HISTORICAL CONTINUITY</p>
+      <h1>Real purchasing power over nominal illusion.</h1>
+      <p class="lede">
+        A rising nominal income cutoff does not guarantee economic improvement. Historical comparisons default to real constant 2024 dollars using the official BLS Consumer Price Index (CPI-U).
+      </p>
+    </section>
+
+    <!-- SECTION 1: HISTORICAL POPULATION ANCHOR TABLE -->
+    <section class="section" style="padding-top: 2.5rem;">
+      <h2 class="section-title">Verified Population Anchor Vintages</h2>
+      <p style="margin: 0.8rem 0; color: #cbd5e1;">
+        Every annual vintage is preserved immutably.
+      </p>
+
+      <div class="table-wrap" style="margin-top: 1.25rem;">
+        <table>
+          <thead>
+            <tr>
+              <th>Survey Year</th>
+              <th>Income Year</th>
+              <th class="text-right">Nominal Cutoff (P30)</th>
+              <th class="text-right">Constant 2024 Dollars</th>
+              <th class="text-right">CPI-U Index</th>
+              <th class="text-right">Represented Population</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="mono">2025</td>
+              <td class="mono">2024</td>
+              <td class="mono text-right" style="font-weight: 700; color: var(--accent);">$21,800.00</td>
+              <td class="mono text-right" style="font-weight: 700; color: var(--accent);">$21,800.00</td>
+              <td class="mono text-right">314.072</td>
+              <td class="mono text-right">337,689,642</td>
+              <td><span class="badge verified">Verified</span></td>
+            </tr>
+            <tr>
+              <td class="mono">2024</td>
+              <td class="mono">2023</td>
+              <td class="mono text-right">$20,688.00</td>
+              <td class="mono text-right" style="color: var(--info); font-weight: 700;">$21,324.78</td>
+              <td class="mono text-right">304.702</td>
+              <td class="mono text-right">332,382,485</td>
+              <td><span class="badge verified">Verified</span></td>
+            </tr>
+            <tr>
+              <td class="mono">2023</td>
+              <td class="mono">2022</td>
+              <td class="mono text-right">$19,304.60</td>
+              <td class="mono text-right" style="color: var(--info); font-weight: 700;">$20,717.34</td>
+              <td class="mono text-right">292.655</td>
+              <td class="mono text-right">330,631,702</td>
+              <td><span class="badge verified">Verified</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size: 0.84rem; color: var(--subtle); margin-top: 0.75rem;">
+        * Note: Nominal cutoff grew +12.9% from 2022 to 2024 ($19,305 to $21,800), while real purchasing power grew +5.2% ($20,717.34 to $21,800.00 in constant 2024 dollars).
+      </p>
+    </section>
+
+    <!-- SECTION 2: HISTORICAL QUANTILES EVOLUTION -->
+    <section class="section" style="padding-top: 2.5rem;">
+      <h2 class="section-title">Income Quantile Evolution (Constant 2024 Dollars)</h2>
+      
+      <div class="table-wrap" style="margin-top: 1.25rem;">
+        <table>
+          <thead>
+            <tr>
+              <th>Quantile</th>
+              <th class="text-right">2022 Income (2024$)</th>
+              <th class="text-right">2023 Income (2024$)</th>
+              <th class="text-right">2024 Income (2024$)</th>
+              <th class="text-right">2-Year Real Change</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="mono">P10 (10th)</td>
+              <td class="mono text-right">$9,136.56</td>
+              <td class="mono text-right">$9,414.54</td>
+              <td class="mono text-right">$10,000.00</td>
+              <td class="mono text-right" style="color:var(--good); font-weight:700;">+9.5%</td>
+            </tr>
+            <tr>
+              <td class="mono">P20 (20th)</td>
+              <td class="mono text-right">$15,024.16</td>
+              <td class="mono text-right">$15,461.22</td>
+              <td class="mono text-right">$15,896.00</td>
+              <td class="mono text-right" style="color:var(--good); font-weight:700;">+5.8%</td>
+            </tr>
+            <tr style="background: rgba(245, 158, 11, 0.08); font-weight: 700;">
+              <td class="mono" style="color:var(--accent);">P30 (ANCHOR)</td>
+              <td class="mono text-right" style="color:var(--accent);">$20,717.39</td>
+              <td class="mono text-right" style="color:var(--accent);">$21,324.78</td>
+              <td class="mono text-right" style="color:var(--accent);">$21,800.00</td>
+              <td class="mono text-right" style="color:var(--good); font-weight:700;">+5.2%</td>
+            </tr>
+            <tr>
+              <td class="mono">P40 (40th)</td>
+              <td class="mono text-right">$26,460.62</td>
+              <td class="mono text-right">$27,188.42</td>
+              <td class="mono text-right">$28,000.00</td>
+              <td class="mono text-right" style="color:var(--good); font-weight:700;">+5.8%</td>
+            </tr>
+            <tr>
+              <td class="mono">P50 (Median)</td>
+              <td class="mono text-right">$32,876.12</td>
+              <td class="mono text-right">$33,862.46</td>
+              <td class="mono text-right">$35,036.50</td>
+              <td class="mono text-right" style="color:var(--good); font-weight:700;">+6.6%</td>
+            </tr>
+            <tr>
+              <td class="mono">P75 (75th)</td>
+              <td class="mono text-right">$56,926.85</td>
+              <td class="mono text-right">$59,318.57</td>
+              <td class="mono text-right">$61,640.00</td>
+              <td class="mono text-right" style="color:var(--good); font-weight:700;">+8.3%</td>
+            </tr>
+            <tr>
+              <td class="mono">P90 (90th)</td>
+              <td class="mono text-right">$94,107.57</td>
+              <td class="mono text-right">$97,406.84</td>
+              <td class="mono text-right">$100,100.00</td>
+              <td class="mono text-right" style="color:var(--good); font-weight:700;">+6.4%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- SECTION 3: REVISION POLICY -->
+    <section class="section" style="padding-top: 2.5rem; margin-bottom: 4rem;">
+      <h2 class="section-title">Revision Policy</h2>
+      <p style="margin: 0.8rem 0; color: #cbd5e1;">
+        History should not rewrite itself silently. When upstream agencies revise historical data or when methodology changes occur, The Foundation preserves both the originally published vintage and the revised vintage under a recorded methodology version.
+      </p>
+    </section>
+  </main>
+
+  <footer>
+    <div>
+      <p style="font-weight: 800; color: var(--text); margin-bottom: 0.25rem;">THE FOUNDATION</p>
+      <p>An open, deterministic, auditable economic research instrument.</p>
+    </div>
+    <div style="text-align: right;">
+      <p><a href="index.html">Dashboard</a> · <a href="methodology.html">Methodology</a> · <a href="sources.html">Sources</a></p>
+    </div>
+  </footer>
+</body>
+</html>

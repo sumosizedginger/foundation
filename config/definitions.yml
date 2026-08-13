@@ -1,0 +1,24 @@
+project:
+  name: "The Foundation"
+  stage: "prelaunch"
+  methodology_version: "0.1.0-draft"
+  composite_release_enabled: false
+
+bottom_30:
+  population_unit: "person"
+  ranking_value: "household_money_income_per_person"
+  percentile: 0.30
+  formula: "HTOTVAL / H_NUMPER"
+  household_income_variable: "HTOTVAL"
+  household_person_count_variable: "H_NUMPER"
+  person_weight_variable: "MARSUPWT"
+  household_id_variable: "H_SEQ"
+  equivalence_scale: false
+  negative_income_policy: "retain_if_source_valid"
+  missing_policy: "exclude_and_report"
+  percentile_convention: "first cumulative weight >= target"
+
+display:
+  money_rounding: 100
+  composite_precision: 0
+  show_fake_precision: false

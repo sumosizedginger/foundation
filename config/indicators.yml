@@ -1,0 +1,130 @@
+indicators:
+  bottom30_cutoff:
+    label: "Bottom-30 per-person household money-income cutoff"
+    role: "anchor"
+    source: "census_asec"
+    status: "enabled"
+    frequency: "annual"
+    population_match: "canonical"
+    direction: "not_scored"
+    composite_weight: 0
+    note: "Official CPS ASEC microdata weighted 30th percentile per person."
+
+  survival_floor:
+    label: "Single-Adult Basic Living Survival Floor"
+    role: "survival_floor"
+    source: "hud_usda_bls_eia_meps"
+    status: "research_estimate"
+    frequency: "annual"
+    population_match: "independent_single_adult"
+    direction: "not_scored"
+    composite_weight: 0
+    note: "Research estimate synthesized from official government baselines (HUD FMR, USDA TFP, EIA, BLS CE, MEPS)."
+
+  u6:
+    label: "U-6 Labor Underutilization Rate"
+    role: "pressure"
+    source: "bls"
+    status: "enabled"
+    series_id: "LNS13327709"
+    frequency: "monthly"
+    population_match: "broad_proxy"
+    direction: "lower_is_better"
+    composite_weight: null
+    note: "National Economic Pressure Signal (broad labor force, not Bottom-30 specific)."
+
+  labor_force_participation:
+    label: "Labor Force Participation Rate"
+    role: "pressure"
+    source: "bls"
+    status: "enabled"
+    series_id: "LNS11300000"
+    frequency: "monthly"
+    population_match: "broad_proxy"
+    direction: "higher_is_better"
+    composite_weight: null
+    note: "National Economic Pressure Signal."
+
+  employment_population:
+    label: "Employment-Population Ratio"
+    role: "pressure"
+    source: "bls"
+    status: "enabled"
+    series_id: "LNS12300000"
+    frequency: "monthly"
+    population_match: "broad_proxy"
+    direction: "higher_is_better"
+    composite_weight: null
+    note: "National Economic Pressure Signal."
+
+  want_job:
+    label: "People Outside Labor Force Who Want a Job"
+    role: "pressure"
+    source: "bls"
+    status: "enabled"
+    series_id: "LNS15026639"
+    frequency: "monthly"
+    population_match: "broad_proxy"
+    direction: "lower_is_better"
+    composite_weight: null
+    note: "National Economic Pressure Signal."
+
+  cpi_all:
+    label: "CPI-U All Items"
+    role: "pressure"
+    source: "bls"
+    status: "enabled"
+    series_id: "CUSR0000SA0"
+    frequency: "monthly"
+    population_match: "broad_proxy"
+    direction: "lower_is_better"
+    composite_weight: null
+    note: "Headline inflation for urban consumers."
+
+  cpi_food_home:
+    label: "CPI — Food at Home"
+    role: "pressure"
+    source: "bls"
+    status: "enabled"
+    series_id: "CUSR0000SAF11"
+    frequency: "monthly"
+    population_match: "broad_proxy"
+    direction: "lower_is_better"
+    composite_weight: null
+    note: "Grocery price inflation. High impact on lower-income budgets."
+
+  cpi_shelter:
+    label: "CPI — Shelter"
+    role: "pressure"
+    source: "bls"
+    status: "enabled"
+    series_id: "CUSR0000SAH1"
+    frequency: "monthly"
+    population_match: "broad_proxy"
+    direction: "lower_is_better"
+    composite_weight: null
+    note: "Residential rent and owner equivalent rent."
+
+  cpi_medical:
+    label: "CPI — Medical Care"
+    role: "pressure"
+    source: "bls"
+    status: "enabled"
+    series_id: "CUSR0000SAM"
+    frequency: "monthly"
+    population_match: "broad_proxy"
+    direction: "lower_is_better"
+    composite_weight: null
+    note: "Healthcare service and drug price inflation."
+
+  cpi_gasoline:
+    label: "CPI — Gasoline (All Types)"
+    role: "pressure"
+    source: "bls"
+    status: "enabled"
+    series_id: "CUSR0000SETB01"
+    frequency: "monthly"
+    population_match: "broad_proxy"
+    direction: "lower_is_better"
+    composite_weight: null
+    note: "Commuting fuel price pressure."

@@ -1,0 +1,99 @@
+sources:
+  census_asec:
+    publisher: "U.S. Census Bureau"
+    enabled: true
+    role: "population_anchor"
+    official_page: "https://www.census.gov/data/datasets/time-series/demo/cps/cps-asec.html"
+    archive_url_template: "https://www2.census.gov/programs-surveys/cps/datasets/{survey_year}/march/asecpub{yy}csv.zip"
+    allowed_domains:
+      - "www.census.gov"
+      - "www2.census.gov"
+    cadence: "annual"
+    required_variables:
+      - "HTOTVAL"
+      - "H_NUMPER"
+      - "MARSUPWT"
+      - "H_SEQ"
+    production_priority: 1
+
+  bls:
+    publisher: "U.S. Bureau of Labor Statistics"
+    enabled: true
+    role: "labor_and_prices"
+    api_base: "https://api.bls.gov/publicAPI/v2/timeseries/data/"
+    official_page: "https://www.bls.gov/developers/"
+    allowed_domains:
+      - "api.bls.gov"
+      - "www.bls.gov"
+    cadence: "monthly"
+    production_priority: 1
+
+  hud:
+    publisher: "U.S. Department of Housing and Urban Development"
+    enabled: true
+    role: "housing_survival_baseline"
+    official_page: "https://www.huduser.gov/portal/datasets/fmr.html"
+    allowed_domains:
+      - "www.huduser.gov"
+    cadence: "annual"
+    production_priority: 1
+
+  usda:
+    publisher: "U.S. Department of Agriculture — Food and Nutrition Service"
+    enabled: true
+    role: "food_survival_baseline"
+    official_page: "https://www.fns.usda.gov/cnpp/usda-food-plans-cost-food-monthly-reports"
+    allowed_domains:
+      - "www.fns.usda.gov"
+    cadence: "monthly"
+    production_priority: 1
+
+  eia:
+    publisher: "U.S. Energy Information Administration"
+    enabled: true
+    role: "utilities_energy_baseline"
+    official_page: "https://www.eia.gov/consumption/residential/"
+    allowed_domains:
+      - "www.eia.gov"
+    cadence: "annual"
+    production_priority: 2
+
+  meps:
+    publisher: "Agency for Healthcare Research and Quality (AHRQ)"
+    enabled: true
+    role: "healthcare_survival_baseline"
+    official_page: "https://meps.ahrq.gov/mepsweb/"
+    allowed_domains:
+      - "meps.ahrq.gov"
+    cadence: "annual"
+    production_priority: 2
+
+  federal_reserve:
+    publisher: "Board of Governors of the Federal Reserve System"
+    enabled: true
+    role: "wealth_and_resilience"
+    official_page: "https://www.federalreserve.gov/data.htm"
+    allowed_domains:
+      - "www.federalreserve.gov"
+    cadence: "varies"
+    production_priority: 1
+
+  nyfed:
+    publisher: "Federal Reserve Bank of New York"
+    enabled: true
+    role: "debt_and_heterogeneity"
+    official_page: "https://www.newyorkfed.org/research"
+    allowed_domains:
+      - "www.newyorkfed.org"
+    cadence: "varies"
+    production_priority: 1
+
+  atlantafed:
+    publisher: "Federal Reserve Bank of Atlanta"
+    enabled: true
+    role: "wage_distribution"
+    official_page: "https://www.atlantafed.org/research-and-data/data/wage-growth-tracker"
+    allowed_domains:
+      - "www.atlantafed.org"
+    cadence: "monthly"
+    production_priority: 1

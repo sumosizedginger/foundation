@@ -1,0 +1,17 @@
+.venv/
+.cache/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.egg-info/
+.env
+*.zip
+*.gz
+*.sas7bdat
+raw/
+data/raw/
+site/data/*.tmp
+.DS_Store
+Thumbs.db

@@ -1,0 +1,19 @@
+status: "provisional_not_for_public_composite"
+
+pillars:
+  work: 0.25
+  cost_of_life: 0.20
+  housing: 0.20
+  resilience: 0.15
+  ownership: 0.10
+  mobility: 0.10
+
+rules:
+  composite_release_enabled: false
+  require_sensitivity_analysis: true
+  require_double_counting_review: true
+  owner_approval_required: true
+
+note: >
+  These values are research placeholders retained from initial design discussion.
+  They are not authorized as an official scoring model.

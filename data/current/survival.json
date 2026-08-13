@@ -1,0 +1,212 @@
+{
+  "project": {
+    "composite_release_enabled": false,
+    "methodology_version": "0.1.0-draft",
+    "name": "The Foundation",
+    "stage": "prelaunch"
+  },
+  "survival_floor": {
+    "adequacy_ratio": 0.78,
+    "benchmark_comparisons": {
+      "mit_living_wage": {
+        "author": "Dr. Amy Glasmeier / MIT",
+        "estimated_single_adult_national": 42500.0,
+        "methodological_divergence": "MIT Living Wage includes civic engagement expenses, unsubsidized healthcare premiums, and county-level cost aggregation, whereas The Foundation Survival Floor models bare-minimum survival needs assuming ACA subsidies and strict home meal preparation.",
+        "name": "MIT Living Wage Calculator",
+        "url": "https://livingwage.mit.edu/"
+      },
+      "official_poverty_measure": {
+        "author": "U.S. Census Bureau / HHS",
+        "methodological_divergence": "The OPM is based on 1963 food expenditure multiplied by 3 and indexed by headline CPI-U. It severely underestimates modern housing, transportation, utility, and healthcare requirements.",
+        "name": "Official Poverty Measure (OPM)",
+        "single_adult_threshold": 15650.0,
+        "url": "https://aspe.hhs.gov/poverty-guidelines"
+      },
+      "united_way_alice": {
+        "author": "United Way",
+        "estimated_single_adult_national": 31200.0,
+        "methodological_divergence": "ALICE includes an explicit 10% miscellaneous contingency buffer and technology line items. When ALICE contingency is excluded, the baseline aligns closely with The Foundation's $27,960 estimate.",
+        "name": "United For ALICE Survival Budget",
+        "url": "https://www.unitedforalice.org/"
+      }
+    },
+    "calculated_at": "2026-08-13T22:24:22+00:00",
+    "components": [
+      {
+        "annual_cost": 13200.0,
+        "category": "housing",
+        "method": "National baseline for 40th-percentile efficiency/1-bedroom rental unit including essential utilities.",
+        "monthly_cost": 1100.0,
+        "notes": "Housing cost varies substantially by region; national baseline represents median cross-market entry rental.",
+        "source_agency": "U.S. Department of Housing and Urban Development (HUD) / Census",
+        "source_name": "Fair Market Rents (FMR) & ACS Median Gross Rent",
+        "source_url": "https://www.huduser.gov/portal/datasets/fmr.html"
+      },
+      {
+        "annual_cost": 3600.0,
+        "category": "food",
+        "method": "USDA monthly cost of food for single adult (age 19-50) with official +20% 1-person household size adjustment.",
+        "monthly_cost": 300.0,
+        "notes": "Assumes 100% home meal preparation using low-cost, nutritious staple food basket.",
+        "source_agency": "U.S. Department of Agriculture (USDA) Food and Nutrition Service",
+        "source_name": "Thrifty Food Plan (TFP)",
+        "source_url": "https://www.fns.usda.gov/cnpp/usda-food-plans-cost-food-monthly-reports"
+      },
+      {
+        "annual_cost": 2640.0,
+        "category": "utilities_tech",
+        "method": "Basic household electric, heating/cooling, water/sewer, and minimum broadband connectivity baseline.",
+        "monthly_cost": 220.0,
+        "notes": "Reflects unavoidable residential utility costs not included in base rent.",
+        "source_agency": "U.S. Energy Information Administration (EIA) / BLS",
+        "source_name": "Residential Energy Consumption Survey (RECS) & CE Survey",
+        "source_url": "https://www.eia.gov/consumption/residential/"
+      },
+      {
+        "annual_cost": 3840.0,
+        "category": "transportation",
+        "method": "Basic operating costs for reliable used commuting vehicle (fuel, liability insurance, basic maintenance) or transit pass.",
+        "monthly_cost": 320.0,
+        "notes": "Does not assume new vehicle purchase or comprehensive insurance.",
+        "source_agency": "U.S. Bureau of Labor Statistics (BLS)",
+        "source_name": "Consumer Expenditure Survey (CE) - Lowest Two Income Quintiles",
+        "source_url": "https://www.bls.gov/cex/"
+      },
+      {
+        "annual_cost": 1680.0,
+        "category": "healthcare",
+        "method": "Out-of-pocket medical expenses plus subsidized ACA benchmark Silver health insurance premium.",
+        "monthly_cost": 140.0,
+        "notes": "Assumes eligibility for income-based Affordable Care Act premium tax credits (APTC).",
+        "source_agency": "Agency for Healthcare Research and Quality (AHRQ) / CMS",
+        "source_name": "Medical Expenditure Panel Survey (MEPS) & ACA Benchmark Subsidies",
+        "source_url": "https://meps.ahrq.gov/mepsweb/"
+      },
+      {
+        "annual_cost": 3000.0,
+        "category": "taxes_unavoidables",
+        "method": "Mandatory FICA payroll taxes (7.65% on earned income) plus state/local sales taxes and unavoidable personal hygiene/cleaning supplies.",
+        "monthly_cost": 250.0,
+        "notes": "Assumes standard deduction eliminates federal income tax liability at this earnings level.",
+        "source_agency": "Internal Revenue Service (IRS) / BLS",
+        "source_name": "FICA Statutory Payroll Tax & BLS Essential Household Supplies",
+        "source_url": "https://www.irs.gov/"
+      }
+    ],
+    "household_matrix": [
+      {
+        "adequacy_ratio": 0.78,
+        "components": {
+          "childcare": 0.0,
+          "food": 3600.0,
+          "healthcare": 1680.0,
+          "housing": 13200.0,
+          "taxes_unavoidables": 3000.0,
+          "transportation": 3840.0,
+          "utilities_tech": 2640.0
+        },
+        "composition_label": "1 Adult",
+        "household_size": 1,
+        "population_anchor_annual": 21800.0,
+        "population_anchor_monthly": 1816.67,
+        "status": "research_estimate",
+        "survival_floor_annual": 27960.0,
+        "survival_floor_monthly": 2330.0,
+        "survival_gap_annual": -6160.0,
+        "survival_gap_monthly": -513.33
+      },
+      {
+        "adequacy_ratio": 1.1,
+        "components": {
+          "childcare": 0.0,
+          "food": 6600.0,
+          "healthcare": 3360.0,
+          "housing": 15600.0,
+          "taxes_unavoidables": 4640.0,
+          "transportation": 6240.0,
+          "utilities_tech": 3360.0
+        },
+        "composition_label": "2 Adults / 1 Adult + 1 Child",
+        "household_size": 2,
+        "population_anchor_annual": 43600.0,
+        "population_anchor_monthly": 3633.33,
+        "status": "research_estimate",
+        "survival_floor_annual": 39800.0,
+        "survival_floor_monthly": 3316.67,
+        "survival_gap_annual": 3800.0,
+        "survival_gap_monthly": 316.67
+      },
+      {
+        "adequacy_ratio": 1.23,
+        "components": {
+          "childcare": 6000.0,
+          "food": 9480.0,
+          "healthcare": 4560.0,
+          "housing": 17400.0,
+          "taxes_unavoidables": 5080.0,
+          "transportation": 6720.0,
+          "utilities_tech": 3960.0
+        },
+        "composition_label": "2 Adults + 1 Child / 1 Adult + 2 Children",
+        "household_size": 3,
+        "population_anchor_annual": 65400.0,
+        "population_anchor_monthly": 5450.0,
+        "status": "research_estimate",
+        "survival_floor_annual": 53200.0,
+        "survival_floor_monthly": 4433.33,
+        "survival_gap_annual": 12200.0,
+        "survival_gap_monthly": 1016.67
+      },
+      {
+        "adequacy_ratio": 1.28,
+        "components": {
+          "childcare": 12000.0,
+          "food": 11940.0,
+          "healthcare": 5760.0,
+          "housing": 19800.0,
+          "taxes_unavoidables": 6800.0,
+          "transportation": 7440.0,
+          "utilities_tech": 4560.0
+        },
+        "composition_label": "2 Adults + 2 Children",
+        "household_size": 4,
+        "population_anchor_annual": 87200.0,
+        "population_anchor_monthly": 7266.67,
+        "status": "research_estimate",
+        "survival_floor_annual": 68300.0,
+        "survival_floor_monthly": 5691.67,
+        "survival_gap_annual": 18900.0,
+        "survival_gap_monthly": 1575.0
+      },
+      {
+        "adequacy_ratio": 1.34,
+        "components": {
+          "childcare": 16000.0,
+          "food": 14160.0,
+          "healthcare": 6840.0,
+          "housing": 23400.0,
+          "taxes_unavoidables": 7900.0,
+          "transportation": 7920.0,
+          "utilities_tech": 5280.0
+        },
+        "composition_label": "2 Adults + 3 Children",
+        "household_size": 5,
+        "population_anchor_annual": 109000.0,
+        "population_anchor_monthly": 9083.33,
+        "status": "research_estimate",
+        "survival_floor_annual": 81500.0,
+        "survival_floor_monthly": 6791.67,
+        "survival_gap_annual": 27500.0,
+        "survival_gap_monthly": 2291.67
+      }
+    ],
+    "methodology_version": "0.1.0-draft",
+    "population_anchor_annual": 21800.0,
+    "reference_year": 2024,
+    "single_adult_floor_annual": 27960.0,
+    "single_adult_floor_monthly": 2330.0,
+    "status": "research_estimate",
+    "status_label": "RESEARCH ESTIMATE",
+    "survival_gap_annual": -6160.0
+  }
+}

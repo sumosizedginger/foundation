@@ -1,0 +1,30 @@
+{
+  "archive_filename": "asecpub24csv.zip",
+  "calculated_at": "2026-08-13T22:24:19+00:00",
+  "canonical_p30": 20688.0,
+  "duplicate_household_keys": 0,
+  "household_records": 89473,
+  "implementation_diff": 0.0,
+  "income_year": 2023,
+  "independent_reference_p30": 20688.0,
+  "matched_person_records": 144265,
+  "methodology_version": "0.1.0-draft",
+  "parser_version": "1.0.0",
+  "person_records": 144265,
+  "quantiles": {
+    "P10": 9133.6,
+    "P20": 15000.0,
+    "P30": 20688.0,
+    "P40": 26377.0,
+    "P50": 32851.8,
+    "P75": 57548.0,
+    "P90": 94500.0
+  },
+  "raw_marsupwt_total": 33238248508.0,
+  "scaled_represented_population": 332382485.0,
+  "sha256": "cdb39cdac34bef99dd0940ab28e306f692404c2eea44d85dfd634214872a0a09",
+  "survey_year": 2024,
+  "unmatched_household_records": 33222,
+  "unmatched_person_records": 0,
+  "weight_scale": 100
+}
