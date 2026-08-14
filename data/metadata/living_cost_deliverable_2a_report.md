@@ -1,8 +1,6 @@
 # Deliverable 2A closeout
 
-**Parent commit:** `ea4c58be1387fb7a0de0cd1f0c0502d8c794bb48`
-
-**This closeout is committed with the regenerated reports on the same branch. After push, `git rev-parse HEAD` is the exact SHA.**
+**Exact commit SHA:** `b2a30ef4b87a2db38eb5f7d982e0e8b5c9b63b4c`
 
 **NO MINIMUM SUSTAINABLE LIVING COST HEADLINE WAS CALCULATED OR PUBLISHED.**
 
