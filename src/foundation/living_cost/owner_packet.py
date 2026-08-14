@@ -1,0 +1,196 @@
+"""Owner decision packet for unresolved living-cost methodology choices."""
+
+from __future__ import annotations
+
+import json
+from datetime import UTC, datetime
+from pathlib import Path
+from typing import Any
+
+DECISIONS: list[dict[str, Any]] = [
+    {
+        "id": "OD-001",
+        "question": "Which ACS adult-population vintage should weight both 2024 and 2026 cost distributions?",
+        "why_it_matters": "Changing weights between vintages confounds cost change with population-mix change.",
+        "option_a": "Freeze 2024 ACS 5-Year adult 18+ for both cost years (implemented as the current candidate).",
+        "option_b": "Use 2023 ACS 5-Year for both years.",
+        "option_c": "Use a different vintage for each cost year.",
+        "recommended": "A",
+        "directional_effect": "Holds geography mix constant so 2024 vs 2026 cost movement is a cost change.",
+        "source_support": "Census ACS 5-Year B01001 official summary file acsdt5y2024-b01001.dat.",
+        "sensitivity_plan": "Recompute state ranks with 2023 ACS weights after owner approval.",
+    },
+    {
+        "id": "OD-002",
+        "question": "Which MEPS OOP statistic is the headline healthcare utilization amount?",
+        "why_it_matters": "Mean is pulled by high spenders; median is more typical; P75 is a stress case.",
+        "option_a": "Weighted mean among adults 18-64 with private insurance.",
+        "option_b": "Weighted median among the same population.",
+        "option_c": "Publish mean as primary with median/P75 sensitivity.",
+        "recommended": "C",
+        "directional_effect": "Mean raises healthcare vs median.",
+        "source_support": "MEPS HC-251 2023 Full Year Consolidated (newest official FY file; 2024 FY due later).",
+        "sensitivity_plan": "Report mean, median, P75 once microdata parse is validated.",
+    },
+    {
+        "id": "OD-003",
+        "question": "Is observed NHTS mileage the living-cost mileage, or is a lower minimum-necessary mileage required?",
+        "why_it_matters": "Observed 1-person/1-worker households travel far more than a commuting-only floor.",
+        "option_a": "Use measured NHTS weighted mean/median as mobility requirement.",
+        "option_b": "Define a separate MINIMUM NECESSARY MILEAGE assumption below observed travel.",
+        "option_c": "Use NHTS P25 as a conservative observed standard.",
+        "recommended": "C pending owner review; do not treat observed mean as 'necessary'.",
+        "directional_effect": "Observed mean (~19,400 mi in current extract) raises transportation vs P25.",
+        "source_support": "2022 NHTS V2.1 hhv2pub+vehv2pub; ANNMILES; WTHHFIN; HHSIZE=1; WRKCOUNT=1.",
+        "sensitivity_plan": "Publish P25/median/mean/P75 of observed miles; owner picks headline.",
+    },
+    {
+        "id": "OD-004",
+        "question": "What is the reference used vehicle and EPA combined MPG?",
+        "why_it_matters": "MPG scales fuel cost. 28 MPG in code is unsupported.",
+        "option_a": "EPA compact/midsize used-car combined MPG near the fleet median.",
+        "option_b": "Keep 28 MPG as ESTIMATED until EPA table is frozen.",
+        "option_c": "Use a documented specific model-year compact sedan.",
+        "recommended": "A after EPA table extract; until then ESTIMATED_OWNER_REVIEW.",
+        "directional_effect": "Higher MPG lowers fuel cost.",
+        "source_support": "EPA fueleconomy.gov public data; not yet frozen.",
+        "sensitivity_plan": "24 / 28 / 32 MPG.",
+    },
+    {
+        "id": "OD-005",
+        "question": "How should the vehicle replacement reserve be set?",
+        "why_it_matters": "The $1,600 path (10k-2k)/5 is normative, not measured.",
+        "option_a": "Acquisition minus salvage over usable years, all assumptions listed.",
+        "option_b": "BLS CE vehicle-purchase P25 among single-person units annualized.",
+        "option_c": "No reserve until owner approves a formula.",
+        "recommended": "A as ESTIMATED_OWNER_REVIEW; do not publish $1,600 as measured.",
+        "directional_effect": "Shorter life or higher acquisition raises annual reserve.",
+        "source_support": "None measured. Retired prototype used 10k/5yr/2k salvage.",
+        "sensitivity_plan": "Acquisition 8k/10k/12k; life 5/7/10 years.",
+    },
+    {
+        "id": "OD-006",
+        "question": "What public source replaces licensed NAIC auto-insurance averages?",
+        "why_it_matters": "Insurance is mandatory where auto is the baseline.",
+        "option_a": "Licensed NAIC Auto Insurance Database Report if owner supplies artifact.",
+        "option_b": "State DOI public average-premium tables where they exist.",
+        "option_c": "Leave LICENSING_REVIEW / SOURCE_GAP; no commercial quote sites.",
+        "recommended": "C until a reusable public series is inventoried.",
+        "directional_effect": "Missing insurance blocks VALIDATED transportation.",
+        "source_support": "NAIC is licensed. No fabricated content.naic.org CSV.",
+        "sensitivity_plan": "If owner licenses NAIC, ingest once with honest provenance.",
+    },
+    {
+        "id": "OD-007",
+        "question": "What is the maintenance + tires + repairs standard?",
+        "why_it_matters": "$1,200 in code is unsupported.",
+        "option_a": "BLS CE vehicle-maintenance/tires P25 among single-person positive spenders.",
+        "option_b": "Keep a labeled ESTIMATED reserve until CE parse is approved.",
+        "option_c": "Split ordinary maintenance, tires, and repairs if CE UCC codes support it.",
+        "recommended": "A+C after CE variables are verified against the official dictionary.",
+        "directional_effect": "P25 is below mean maintenance spend.",
+        "source_support": "BLS CE PUMD; official download currently 403 from this client.",
+        "sensitivity_plan": "P20/P25/P30 once CE archive is retrieved.",
+    },
+    {
+        "id": "OD-008",
+        "question": "Which recreation percentile is the headline Social & Recreation amount?",
+        "why_it_matters": "Recreation must stay nonzero and modest.",
+        "option_a": "Weighted P25 among single-person positive spenders.",
+        "option_b": "P20.",
+        "option_c": "P30.",
+        "recommended": "A; publish P20/P25/P30 for review and do not freeze one.",
+        "directional_effect": "Higher percentile raises Social & Recreation.",
+        "source_support": "BLS CE Interview PUMD documented UCC/FMLI allowlist.",
+        "sensitivity_plan": "P20/P25/P30 once CE is retrieved.",
+    },
+    {
+        "id": "OD-009",
+        "question": "What is the minimum connectivity standard?",
+        "why_it_matters": "Zero internet is not a sustainable adult life.",
+        "option_a": "One prepaid/postpaid mobile line + one residential broadband plan at a documented low-cost official series.",
+        "option_b": "Mobile-only.",
+        "option_c": "Broadband-only.",
+        "recommended": "A as Foundation minimum-service selection, not a measured typical bill.",
+        "directional_effect": "Adding both line and broadband raises connectivity.",
+        "source_support": "FCC Urban Rate Survey / ACS computer-internet tables are candidates; not frozen.",
+        "sensitivity_plan": "Mobile-only vs mobile+broadband.",
+    },
+    {
+        "id": "OD-010",
+        "question": "How should lagging 2026 structural sources be translated?",
+        "why_it_matters": "Relabeling 2024 observations as 2026 is forbidden.",
+        "option_a": "LATEST_AVAILABLE for structural survey files; RULE_YEAR for tax; YTD for monthly prices.",
+        "option_b": "CPI-update every lagged dollar series.",
+        "option_c": "Refuse 2026 costs until every source has a 2026 observation.",
+        "recommended": "A with explicit project_cost_year / source_data_year / translation_method on every component.",
+        "directional_effect": "CPI-updating raises 2026 vs holding latest available.",
+        "source_support": "GROK.MD §25 translation methods.",
+        "sensitivity_plan": "Show 2026 under LATEST_AVAILABLE vs CPI_UPDATED.",
+    },
+    {
+        "id": "OD-011",
+        "question": "How should municipal earned-income taxes that do not map to county geography be handled?",
+        "why_it_matters": "NYC and Philadelphia are not statewide.",
+        "option_a": "Attach tax only to counties that contain the taxing city; other counties UNAVAILABLE for local tax.",
+        "option_b": "Ignore municipal taxes until a place-level geography is authorized.",
+        "option_c": "Invent a statewide average local tax.",
+        "recommended": "A. Never C.",
+        "directional_effect": "A raises living cost only in affected counties.",
+        "source_support": "GROK.MD local-tax classification A/B/C/D.",
+        "sensitivity_plan": "Compare county results with and without municipal overlay.",
+    },
+    {
+        "id": "OD-012",
+        "question": "Is an additional resilience reserve required after vehicle/health/clothing replacement is already annualized?",
+        "why_it_matters": "An extra 5%/10%/$1,200 buffer double-counts if replacement is already inside components.",
+        "option_a": "No extra reserve until a documented uncovered irregular cost is identified.",
+        "option_b": "Add a small ESTIMATED reserve after an overlap audit.",
+        "option_c": "Add 5% of net needs.",
+        "recommended": "A.",
+        "directional_effect": "Any extra reserve raises gross required income.",
+        "source_support": "GROK.MD resilience section; retired buffers are not authorized.",
+        "sensitivity_plan": "None until owner requests one.",
+    },
+]
+
+
+def write_owner_decision_packet(metadata_dir: Path) -> dict[str, Any]:
+    payload = {
+        "report_type": "living_cost_owner_decisions_pending",
+        "generated_at": datetime.now(UTC).replace(microsecond=0).isoformat(),
+        "headline_calculated": False,
+        "decisions": DECISIONS,
+    }
+    metadata_dir.mkdir(parents=True, exist_ok=True)
+    (metadata_dir / "living_cost_owner_decisions_pending.json").write_text(
+        json.dumps(payload, indent=2), encoding="utf-8"
+    )
+    lines = [
+        "# Living-cost owner decisions pending",
+        "",
+        "No Minimum Sustainable Living Cost headline was calculated or published.",
+        "",
+    ]
+    for item in DECISIONS:
+        lines.extend(
+            [
+                f"## {item['id']} — {item['question']}",
+                "",
+                f"**Why it matters:** {item['why_it_matters']}",
+                "",
+                f"- Option A: {item['option_a']}",
+                f"- Option B: {item['option_b']}",
+                f"- Option C: {item['option_c']}",
+                "",
+                f"**Recommended:** {item['recommended']}",
+                f"**Directional effect:** {item['directional_effect']}",
+                f"**Source support:** {item['source_support']}",
+                f"**Sensitivity:** {item['sensitivity_plan']}",
+                "",
+            ]
+        )
+    (metadata_dir / "living_cost_owner_decisions_pending.md").write_text(
+        "\n".join(lines), encoding="utf-8"
+    )
+    return payload

@@ -33,11 +33,16 @@ def download_file(
 
     headers = {
         "User-Agent": (
-            "The-Foundation/0.2 (+https://github.com/sumosizedginger/foundation; "
-            "public economic measurement research)"
-        )
+            "Mozilla/5.0 (compatible; The-Foundation/0.2; "
+            "+https://github.com/sumosizedginger/foundation)"
+        ),
+        "Accept": "*/*",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Referer": f"{url.rsplit('/', 1)[0]}/",
     }
-    with requests.get(url, stream=True, timeout=timeout, headers=headers) as response:
+    with requests.get(
+        url, stream=True, timeout=timeout, headers=headers, allow_redirects=True
+    ) as response:
         response.raise_for_status()
         content_type = response.headers.get("content-type")
 

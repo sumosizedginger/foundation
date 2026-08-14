@@ -18,27 +18,28 @@ import zipfile
 from pathlib import Path
 
 from foundation.living_cost.models import ComponentStatus, LivingCostComponentObservation
-from foundation.sources.acquisition import record_unretrieved
 
 logger = logging.getLogger(__name__)
 
 NHTS_LANDING = "https://nhts.ornl.gov/downloads"
 
 
+NHTS_2022_CSV_ZIP = "https://nhts.ornl.gov/assets/2022/download/csv.zip"
+
+
 def download_fhwa_nhts_artifact(year: int, cache_dir: Path, force_download: bool = False):
-    """Do not retrieve an unverified NHTS zip path."""
-    del cache_dir, force_download
+    """Official 2022 NextGen NHTS V2.1 public-use CSV zip."""
     if year not in (2024, 2026):
         raise ValueError(f"Unsupported FHWA NHTS reference year: {year}")
-    return record_unretrieved(
-        f"fhwa_nhts_{year}",
-        status="SOURCE_GAP",
-        resolved_url=NHTS_LANDING,
-        notes=(
-            "2022 NHTS V2.1 CSV exists on the official downloads page, but the previously "
-            "hardcoded assets/2022/download/csv.zip path was not proven. Resolve the exact "
-            "V2.1 CSV zip from the landing page before retrieving."
-        ),
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    from foundation.sources.acquisition import acquire_source
+
+    return acquire_source(
+        source_id=f"fhwa_nhts_{year}",
+        url=NHTS_2022_CSV_ZIP,
+        cache_dir=cache_dir,
+        expected_filename="nhts_2022_csv.zip",
+        force_download=force_download,
     )
 
 
@@ -67,7 +68,7 @@ def parse_fhwa_nhts_mileage(
             status=ComponentStatus.UNAVAILABLE,
             source_id="fhwa_nhts_2022",
             source_variable="ANNMILES",
-            source_url=NHTS_LANDING,
+            source_url=NHTS_2022_CSV_ZIP,
             source_release="FHWA NHTS 2022",
             source_reference_period="2022",
             retrieved_at=retrieved_at,
@@ -83,36 +84,28 @@ def parse_fhwa_nhts_mileage(
     try:
         with zipfile.ZipFile(zip_path) as z:
             # Look for the household public file. Names can vary, e.g., hhpub.csv or hhpub22.csv
-            hh_files = [f for f in z.namelist() if "hhpub" in f.lower() and f.endswith(".csv")]
+            hh_files = [
+                f
+                for f in z.namelist()
+                if f.lower().endswith(".csv") and ("hhpub" in f.lower() or "hhv2pub" in f.lower())
+            ]
             if not hh_files:
-                raise FileNotFoundError("Could not find hhpub.csv inside NHTS ZIP.")
+                raise FileNotFoundError("Could not find household public CSV inside NHTS ZIP.")
 
+            import io
+
+            eligible: dict[str, float] = {}
             with z.open(hh_files[0]) as fh:
-                import io
-
                 text_fh = io.TextIOWrapper(fh, encoding="utf-8-sig", errors="replace")
                 reader = csv.DictReader(text_fh)
-
                 for row in reader:
-                    # Filter for 1-worker, 1-adult (HHSIZE) households
                     wrkcount = str(row.get("WRKCOUNT", "")).strip()
                     hhsize = str(row.get("HHSIZE", "")).strip()
-
                     if wrkcount != "1" or hhsize != "1":
                         continue
-
-                    miles_str = row.get("ANNMILES", "-1")
-                    try:
-                        miles = float(miles_str)
-                    except ValueError:
-                        continue
-
-                    # Missing values in NHTS are often negative (e.g., -9)
-                    if miles < 0:
-                        continue
-
-                    weight_str = str(row.get("WTHHFIN", "")).strip()
-                    if not weight_str:
+                    hid = str(row.get("HOUSEID") or "").strip()
+                    weight_str = str(row.get("WTHHFIN") or "").strip()
+                    if not hid or not weight_str:
                         continue
                     try:
                         weight = float(weight_str)
@@ -120,10 +113,40 @@ def parse_fhwa_nhts_mileage(
                         continue
                     if weight <= 0:
                         continue
+                    eligible[hid] = weight
 
-                    weighted_miles_sum += miles * weight
-                    total_weights += weight
-                    sample_size += 1
+            veh_files = [
+                f
+                for f in z.namelist()
+                if f.lower().endswith(".csv") and ("vehv2pub" in f.lower() or "vehpub" in f.lower())
+            ]
+            if not veh_files:
+                raise FileNotFoundError("Could not find vehicle public CSV inside NHTS ZIP.")
+            miles_by_hh: dict[str, float] = {}
+            with z.open(veh_files[0]) as fh:
+                text_fh = io.TextIOWrapper(fh, encoding="utf-8-sig", errors="replace")
+                reader = csv.DictReader(text_fh)
+                for row in reader:
+                    hid = str(row.get("HOUSEID") or "").strip()
+                    if hid not in eligible:
+                        continue
+                    miles_str = str(row.get("ANNMILES") or "").strip()
+                    if not miles_str:
+                        continue
+                    try:
+                        miles = float(miles_str)
+                    except ValueError:
+                        continue
+                    if miles < 0:
+                        continue
+                    miles_by_hh[hid] = miles_by_hh.get(hid, 0.0) + miles
+
+            for hid, weight in eligible.items():
+                if hid not in miles_by_hh:
+                    continue
+                weighted_miles_sum += miles_by_hh[hid] * weight
+                total_weights += weight
+                sample_size += 1
 
     except (OSError, ValueError, KeyError, csv.Error, zipfile.BadZipFile, UnicodeError) as e:
         logger.error(f"Failed to process NHTS ZIP: {e}")
@@ -141,7 +164,7 @@ def parse_fhwa_nhts_mileage(
             status=ComponentStatus.UNAVAILABLE,
             source_id="fhwa_nhts_2022",
             source_variable="ANNMILES",
-            source_url=NHTS_LANDING,
+            source_url=NHTS_2022_CSV_ZIP,
             source_release="FHWA NHTS 2022",
             source_reference_period="2022",
             retrieved_at=retrieved_at,
@@ -165,7 +188,7 @@ def parse_fhwa_nhts_mileage(
             status=ComponentStatus.UNAVAILABLE,
             source_id="fhwa_nhts_2022",
             source_variable="ANNMILES",
-            source_url=NHTS_LANDING,
+            source_url=NHTS_2022_CSV_ZIP,
             source_release="FHWA NHTS 2022",
             source_reference_period="2022",
             retrieved_at=retrieved_at,
@@ -190,7 +213,7 @@ def parse_fhwa_nhts_mileage(
         status=ComponentStatus.MEASURED,
         source_id="fhwa_nhts_2022",
         source_variable="ANNMILES_WRKCOUNT1_HHSIZE1",
-        source_url=NHTS_LANDING,
+        source_url=NHTS_2022_CSV_ZIP,
         source_release="FHWA NHTS 2022",
         source_reference_period="2022",
         retrieved_at=retrieved_at,

@@ -1,7 +1,7 @@
 {
   "manifest_type": "living_cost_source_manifest",
   "methodology_version": "0.2.0-draft",
-  "generated_at": "2026-08-14T14:43:13+00:00",
+  "generated_at": "2026-08-14T17:01:56+00:00",
   "source_count": 15,
   "sources": [
     {
@@ -17,12 +17,12 @@
       "source_vintage_note": "Official county workbook FMR2024_final_revised.xlsx",
       "parser_version": "0.2.0-draft",
       "retrieved_at": null,
-      "sha256": null,
-      "byte_size": null,
-      "local_cache_filename": null,
-      "validation_status": "PARSER_READY_NOT_RETRIEVED",
-      "resolved_url": null,
-      "retrieval_notes": null
+      "sha256": "0a6634d5745e07f0638efe2aca65161b4b8d6982ebd4d257e8191ed18ecfbf98",
+      "byte_size": 364595,
+      "local_cache_filename": "FMR2024_final_revised.xlsx",
+      "validation_status": "RETRIEVED_UNVALIDATED",
+      "resolved_url": "https://www.huduser.gov/portal/datasets/fmr/fmr2024/FMR2024_final_revised.xlsx",
+      "retrieval_notes": "Cache hit without provenance sidecar; retrieved_at unknown."
     },
     {
       "source_id": "hud_fmr_2026",
@@ -37,12 +37,12 @@
       "source_vintage_note": "Official county workbook FY26_FMRs_revised.xlsx",
       "parser_version": "0.2.0-draft",
       "retrieved_at": null,
-      "sha256": null,
-      "byte_size": null,
-      "local_cache_filename": null,
-      "validation_status": "PARSER_READY_NOT_RETRIEVED",
-      "resolved_url": null,
-      "retrieval_notes": null
+      "sha256": "0b130fd046c7bedbee5d206ab55654d390d27da423ff22e307e0698fbb56ad9c",
+      "byte_size": 367248,
+      "local_cache_filename": "FY26_FMRs_revised.xlsx",
+      "validation_status": "RETRIEVED_UNVALIDATED",
+      "resolved_url": "https://www.huduser.gov/portal/datasets/fmr/fmr2026/FY26_FMRs_revised.xlsx",
+      "retrieval_notes": "Cache hit without provenance sidecar; retrieved_at unknown."
     },
     {
       "source_id": "census_acs5_2024",
@@ -57,12 +57,12 @@
       "source_vintage_note": "Weight source vintage is 2023 ACS 5-Year. This is not a 2024 Census file.",
       "parser_version": "0.2.0-draft",
       "retrieved_at": null,
-      "sha256": null,
-      "byte_size": null,
-      "local_cache_filename": null,
-      "validation_status": "SOURCE_GAP",
-      "resolved_url": "https://api.census.gov/data/2023/acs/acs5?get=NAME,B01001_001E,B01001_003E,B01001_004E,B01001_005E,B01001_006E,B01001_027E,B01001_028E,B01001_029E,B01001_030E&for=county:*",
-      "retrieval_notes": "Census API now requires CENSUS_API_KEY. Unauthenticated requests return an HTML 'Missing Key' page, which is not ACS data."
+      "sha256": "1637b18a96881b81e050df1cd3d5ac38a33208b9b69b40e1dbeb3c4e13718f0e",
+      "byte_size": 200356282,
+      "local_cache_filename": "acsdt5y2024-b01001.dat",
+      "validation_status": "RETRIEVED_UNVALIDATED",
+      "resolved_url": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b01001.dat",
+      "retrieval_notes": "Cache hit without provenance sidecar; retrieved_at unknown."
     },
     {
       "source_id": "census_acs5_2026",
@@ -77,12 +77,12 @@
       "source_vintage_note": "2026 cost year uses the same 2023 ACS 5-Year weight vintage as 2024. Not a 2026 Census file.",
       "parser_version": "0.2.0-draft",
       "retrieved_at": null,
-      "sha256": null,
-      "byte_size": null,
-      "local_cache_filename": null,
-      "validation_status": "SOURCE_GAP",
-      "resolved_url": "https://api.census.gov/data/2023/acs/acs5?get=NAME,B01001_001E,B01001_003E,B01001_004E,B01001_005E,B01001_006E,B01001_027E,B01001_028E,B01001_029E,B01001_030E&for=county:*",
-      "retrieval_notes": "Census API now requires CENSUS_API_KEY. Unauthenticated requests return an HTML 'Missing Key' page, which is not ACS data."
+      "sha256": "1637b18a96881b81e050df1cd3d5ac38a33208b9b69b40e1dbeb3c4e13718f0e",
+      "byte_size": 200356282,
+      "local_cache_filename": "acsdt5y2024-b01001.dat",
+      "validation_status": "RETRIEVED_UNVALIDATED",
+      "resolved_url": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b01001.dat",
+      "retrieval_notes": "Cache hit without provenance sidecar; retrieved_at unknown."
     },
     {
       "source_id": "cms_marketplace_puf_2024",
@@ -136,13 +136,13 @@
       "parser_identifier": "foundation.sources.meps.parse_meps_oop_csv",
       "source_vintage_note": "2022 MEPS data year used as OOP source vintage for 2024 cost year.",
       "parser_version": "0.2.0-draft",
-      "retrieved_at": "2026-08-14T14:41:44+00:00",
-      "sha256": "aa17c8bacf091adbeacbef411cf3630759fe49c30ab4765a5964dacaa745938e",
-      "byte_size": 6123666,
-      "local_cache_filename": "h243dat.zip",
+      "retrieved_at": null,
+      "sha256": "ad0edc2e34b28b90c8c89f43869f4e90338c93c97c0bfc2cad73140b96edd55a",
+      "byte_size": 5037048,
+      "local_cache_filename": "h251dat.zip",
       "validation_status": "RETRIEVED_UNVALIDATED",
-      "resolved_url": "https://meps.ahrq.gov/mepsweb/data_files/pufs/h243/h243dat.zip",
-      "retrieval_notes": "MEPS HC-243 data year 2022 used as OOP source vintage for project cost year 2024. This is not a 2024 MEPS file."
+      "resolved_url": "https://meps.ahrq.gov/mepsweb/data_files/pufs/h251/h251dat.zip",
+      "retrieval_notes": "MEPS HC-251 data year 2023 used as OOP source vintage for project cost year 2024. This is not a 2024 MEPS file."
     },
     {
       "source_id": "usda_food_low_cost_2024",
@@ -177,12 +177,12 @@
       "source_vintage_note": "",
       "parser_version": "0.2.0-draft",
       "retrieved_at": null,
-      "sha256": null,
-      "byte_size": null,
-      "local_cache_filename": null,
-      "validation_status": "SOURCE_GAP",
-      "resolved_url": "https://www.eia.gov/petroleum/gasdiesel/",
-      "retrieval_notes": "EIA gasoline landing page is official. A guessed psw18vwall.csv path is not an accepted production retrieve URL. Use EIA Open Data / a documented download once the exact series and geography are confirmed. PADD/regional is not state-measured."
+      "sha256": "658c4b7a34f3f466246f3ac762a880f4fd53cf56f7ab2505ff213f5905e0ff6c",
+      "byte_size": 7461376,
+      "local_cache_filename": "pswrgvwall.xls",
+      "validation_status": "RETRIEVED_UNVALIDATED",
+      "resolved_url": "https://www.eia.gov/petroleum/gasdiesel/xls/pswrgvwall.xls",
+      "retrieval_notes": "Cache hit without provenance sidecar; retrieved_at unknown."
     },
     {
       "source_id": "naic_auto_ins_2024",
@@ -217,12 +217,12 @@
       "source_vintage_note": "Exact V2.1 CSV zip URL must be resolved from the downloads page.",
       "parser_version": "0.2.0-draft",
       "retrieved_at": null,
-      "sha256": null,
-      "byte_size": null,
-      "local_cache_filename": null,
-      "validation_status": "SOURCE_GAP",
-      "resolved_url": "https://nhts.ornl.gov/downloads",
-      "retrieval_notes": "2022 NHTS V2.1 CSV exists on the official downloads page, but the previously hardcoded assets/2022/download/csv.zip path was not proven. Resolve the exact V2.1 CSV zip from the landing page before retrieving."
+      "sha256": "210a4e7092a0135f15c95f001836669949cd6a1f515620bce496c84250527bf2",
+      "byte_size": 3916688,
+      "local_cache_filename": "nhts_2022_csv.zip",
+      "validation_status": "RETRIEVED_UNVALIDATED",
+      "resolved_url": "https://nhts.ornl.gov/assets/2022/download/csv.zip",
+      "retrieval_notes": "Cache hit without provenance sidecar; retrieved_at unknown."
     },
     {
       "source_id": "bls_ce_essentials_2024",
@@ -257,12 +257,12 @@
       "source_vintage_note": "Use official BEA API/download. Do not assume year-2.",
       "parser_version": "0.2.0-draft",
       "retrieved_at": null,
-      "sha256": null,
-      "byte_size": null,
-      "local_cache_filename": null,
-      "validation_status": "SOURCE_GAP",
-      "resolved_url": "https://www.bea.gov/data/prices-inflation/regional-price-parities-state-and-metro-area",
-      "retrieval_notes": "Official BEA RPP landing page recorded. Current public release is 2024 data (February 19, 2026). Production retrieve requires the official API/download with the actual data year labeled. Missing RPP is UNAVAILABLE, never 100.0."
+      "sha256": "a1447d67868b76f21417fc8fc6b0157ff5da7f77c3c5e980d1a98b4ab57edace",
+      "byte_size": 252119,
+      "local_cache_filename": "RPP.zip",
+      "validation_status": "RETRIEVED_UNVALIDATED",
+      "resolved_url": "https://apps.bea.gov/regional/zip/RPP.zip",
+      "retrieval_notes": "Cache hit without provenance sidecar; retrieved_at unknown."
     },
     {
       "source_id": "irs_rev_proc_2023_34",

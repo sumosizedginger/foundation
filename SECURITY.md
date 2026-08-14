@@ -18,6 +18,12 @@ Never commit:
 
 Use environment variables or GitHub encrypted secrets when optional credentials are required.
 
+Optional living-cost retrieve secrets (never committed):
+
+- `CENSUS_API_KEY` — Census API national queries. Official ACS B01001 county weights can also be retrieved from the public summary file without a key.
+- `EIA_API_KEY` — EIA Open Data v2 if bulk workbook is insufficient.
+- `HUD_API_TOKEN` — HUD User API if direct XLSX retrieve is blocked.
+
 ## Network
 
 Approved production connectors should use HTTPS.

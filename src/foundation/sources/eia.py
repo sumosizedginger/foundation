@@ -12,27 +12,28 @@ import logging
 from pathlib import Path
 
 from foundation.living_cost.models import ComponentStatus, LivingCostComponentObservation
-from foundation.sources.acquisition import record_unretrieved
 
 logger = logging.getLogger(__name__)
 
 EIA_GAS_URL = "https://www.eia.gov/petroleum/gasdiesel/"
 
 
+EIA_GAS_XLS_URL = "https://www.eia.gov/petroleum/gasdiesel/xls/pswrgvwall.xls"
+
+
 def download_eia_gas_artifact(year: int, cache_dir: Path, force_download: bool = False):
-    """Do not retrieve a guessed EIA filename. Official landing is recorded as SOURCE_GAP."""
-    del cache_dir, force_download
+    """Official EIA weekly retail gasoline workbook (national + PADD + selected states)."""
     if year not in (2024, 2026):
         raise ValueError(f"Unsupported EIA reference year: {year}")
-    return record_unretrieved(
-        f"eia_gas_price_{year}",
-        status="SOURCE_GAP",
-        resolved_url=EIA_GAS_URL,
-        notes=(
-            "EIA gasoline landing page is official. A guessed psw18vwall.csv path is not "
-            "an accepted production retrieve URL. Use EIA Open Data / a documented download "
-            "once the exact series and geography are confirmed. PADD/regional is not state-measured."
-        ),
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    from foundation.sources.acquisition import acquire_source
+
+    return acquire_source(
+        source_id=f"eia_gas_price_{year}",
+        url=EIA_GAS_XLS_URL,
+        cache_dir=cache_dir,
+        expected_filename="pswrgvwall.xls",
+        force_download=force_download,
     )
 
 

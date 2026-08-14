@@ -15,8 +15,6 @@ import csv
 import logging
 from pathlib import Path
 
-from foundation.sources.acquisition import record_unretrieved
-
 logger = logging.getLogger(__name__)
 
 BEA_RPP_LANDING = (
@@ -24,20 +22,22 @@ BEA_RPP_LANDING = (
 )
 
 
+BEA_RPP_ZIP_URL = "https://apps.bea.gov/regional/zip/SARPP.zip"
+
+
 def download_bea_rpp_artifact(year: int, cache_dir: Path, force_download: bool = False):
-    """Do not retrieve a guessed BEA zip or invent data_year = year - 2."""
-    del cache_dir, force_download
+    """Official BEA Regional Price Parities zip. Data year is 2024, not the cost year."""
     if year not in (2024, 2026):
-        raise ValueError(f"Unsupported BEA reference year: {year}")
-    return record_unretrieved(
-        f"bea_rpp_{year}",
-        status="SOURCE_GAP",
-        resolved_url=BEA_RPP_LANDING,
-        notes=(
-            "Official BEA RPP landing page recorded. Current public release is 2024 data "
-            "(February 19, 2026). Production retrieve requires the official API/download "
-            "with the actual data year labeled. Missing RPP is UNAVAILABLE, never 100.0."
-        ),
+        raise ValueError(f"Unsupported BEA project cost year: {year}")
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    from foundation.sources.acquisition import acquire_source
+
+    return acquire_source(
+        source_id=f"bea_rpp_{year}",
+        url=BEA_RPP_ZIP_URL,
+        cache_dir=cache_dir,
+        expected_filename="SARPP.zip",
+        force_download=force_download,
     )
 
 

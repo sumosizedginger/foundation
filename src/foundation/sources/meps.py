@@ -23,11 +23,15 @@ from foundation.sources.acquisition import acquire_source, record_unretrieved
 logger = logging.getLogger(__name__)
 
 MEPS_HC243_LANDING = (
-    "https://meps.ahrq.gov/mepsweb/data_stats/download_data_files_detail.jsp?cboPufNumber=HC-243"
+    "https://meps.ahrq.gov/mepsweb/data_stats/download_data_files_detail.jsp?cboPufNumber=HC-251"
 )
-MEPS_HC243_ASCII_ZIP = "https://meps.ahrq.gov/mepsweb/data_files/pufs/h243/h243dat.zip"
-MEPS_DATA_YEAR = 2022
-MEPS_PUF_ID = "HC-243"
+MEPS_HC243_ASCII_ZIP = "https://meps.ahrq.gov/mepsweb/data_files/pufs/h251/h251dat.zip"
+MEPS_DATA_YEAR = 2023
+MEPS_PUF_ID = "HC-251"
+MEPS_NOTE = (
+    "Newest official Full Year Consolidated PUF at execution is HC-251 (2023). "
+    "2024 Full Year Consolidated is scheduled later; not used."
+)
 
 
 def download_meps_artifact(year: int, cache_dir: Path, force_download: bool = False):
@@ -40,7 +44,7 @@ def download_meps_artifact(year: int, cache_dir: Path, force_download: bool = Fa
         source_id=f"meps_table1_{year}",
         url=MEPS_HC243_ASCII_ZIP,
         cache_dir=cache_dir,
-        expected_filename="h243dat.zip",
+        expected_filename="h251dat.zip",
         force_download=force_download,
     )
     if artifact is None:
@@ -69,7 +73,7 @@ def parse_meps_oop_csv(
     file_sha256: str = "",
 ) -> LivingCostComponentObservation:
     """Parse MEPS expected OOP healthcare expenditure table for privately insured adults 18-64."""
-    file_path = cache_dir if cache_dir.is_file() else cache_dir / "h243dat.zip"
+    file_path = cache_dir if cache_dir.is_file() else cache_dir / "h251dat.zip"
 
     if not file_path.exists():
         logger.warning(f"MEPS CSV not found: {file_path}")

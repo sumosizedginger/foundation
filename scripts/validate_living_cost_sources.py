@@ -13,11 +13,13 @@ import sys
 import zipfile
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 from foundation.living_cost.geo_join import execute_geo_join_audit
 from foundation.living_cost.manifest import RetrievedSourceArtifact, generate_source_manifest
+from foundation.living_cost.owner_packet import write_owner_decision_packet
 from foundation.sources.auto_insurance import download_naic_artifact
 from foundation.sources.bea_rpp import download_bea_rpp_artifact
 from foundation.sources.bls_ce import download_bls_ce_artifact
@@ -264,12 +266,174 @@ def main() -> int:
     logger.info("Source manifest generated at %s", manifest_path)
 
     coverage = write_coverage(all_artifacts)
+    write_owner_decision_packet(METADATA_DIR)
+    write_tax_coverage()
+    write_transport_coverage()
+    write_cms_coverage_stub()
     logger.info(
         "Source coverage generated. Blocking components: %s",
         len(coverage["blocking_components"]),
     )
     logger.info("Validation complete. No living-cost headline was calculated.")
     return 0
+
+
+def write_tax_coverage() -> None:
+    from foundation.living_cost.taxes import FEDERAL_TAX_RULES, NO_INCOME_TAX_STATES
+
+    states = [
+        "AL",
+        "AK",
+        "AZ",
+        "AR",
+        "CA",
+        "CO",
+        "CT",
+        "DE",
+        "DC",
+        "FL",
+        "GA",
+        "HI",
+        "ID",
+        "IL",
+        "IN",
+        "IA",
+        "KS",
+        "KY",
+        "LA",
+        "ME",
+        "MD",
+        "MA",
+        "MI",
+        "MN",
+        "MS",
+        "MO",
+        "MT",
+        "NE",
+        "NV",
+        "NH",
+        "NJ",
+        "NM",
+        "NY",
+        "NC",
+        "ND",
+        "OH",
+        "OK",
+        "OR",
+        "PA",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "UT",
+        "VT",
+        "VA",
+        "WA",
+        "WV",
+        "WI",
+        "WY",
+    ]
+    rows = []
+    for year in (2024, 2026):
+        for st in states:
+            if st in NO_INCOME_TAX_STATES:
+                status = "NO_STATE_EARNED_INCOME_TAX"
+            else:
+                status = "INVENTORY_NOT_VALIDATED"
+            rows.append(
+                {
+                    "year": year,
+                    "state": st,
+                    "status": status,
+                    "federal_source": FEDERAL_TAX_RULES[year]["source"],
+                }
+            )
+    payload = {
+        "report_type": "living_cost_tax_coverage",
+        "generated_at": datetime.now(UTC).replace(microsecond=0).isoformat(),
+        "federal_2024_validated_tables": False,
+        "federal_2026_values_match_rev_proc_2025_32": True,
+        "local_tax_classes": {
+            "A": "no local earned-income tax",
+            "B": "county-level tax directly measurable",
+            "C": "municipal tax requiring additional geography — OWNER DECISION",
+            "D": "unresolved",
+        },
+        "rows": rows,
+        "headline_calculated": False,
+    }
+    (METADATA_DIR / "living_cost_tax_coverage.json").write_text(
+        json.dumps(payload, indent=2), encoding="utf-8"
+    )
+
+
+def write_transport_coverage() -> None:
+    payload = {
+        "report_type": "living_cost_transport_coverage",
+        "generated_at": datetime.now(UTC).replace(microsecond=0).isoformat(),
+        "components": {
+            "mileage": {
+                "status": "MEASURED_TRAVEL_BEHAVIOR",
+                "source": "2022 NHTS V2.1 vehv2pub ANNMILES / hhv2pub WTHHFIN",
+                "note": "Observed, not minimum necessary. Owner decision OD-003.",
+            },
+            "mpg": {"status": "ESTIMATED_OWNER_REVIEW", "note": "28 MPG is not frozen."},
+            "gas": {
+                "status": "RETRIEVED_UNVALIDATED",
+                "source": "EIA pswrgvwall.xls",
+                "note": "PADD/regional is not state-measured.",
+            },
+            "insurance": {"status": "LICENSING_REVIEW"},
+            "maintenance": {"status": "ESTIMATED_OWNER_REVIEW"},
+            "registration": {
+                "status": "SOURCE_GAP",
+                "note": "Hand-entered 51-state table is not accepted as validated.",
+            },
+            "replacement": {"status": "ESTIMATED_OWNER_REVIEW"},
+        },
+        "headline_calculated": False,
+    }
+    (METADATA_DIR / "living_cost_transport_coverage.json").write_text(
+        json.dumps(payload, indent=2), encoding="utf-8"
+    )
+
+
+def write_cms_coverage_stub() -> None:
+    import io
+
+    coverage: dict[str, Any] = {
+        "report_type": "living_cost_cms_coverage",
+        "generated_at": datetime.now(UTC).replace(microsecond=0).isoformat(),
+        "years": {},
+        "headline_calculated": False,
+        "note": "Federal-platform PUF zips retrieved. SBE-only states require SBE QHP PUFs.",
+    }
+    for year in (2024, 2026):
+        sa = CACHE_DIR / f"cms_{year}_service_area_puf.zip"
+        states: list[str] = []
+        if sa.exists():
+            with zipfile.ZipFile(sa) as zf:
+                csvs = [n for n in zf.namelist() if n.lower().endswith(".csv")]
+                if csvs:
+                    with zf.open(csvs[0]) as fh:
+                        reader = __import__("csv").DictReader(
+                            io.TextIOWrapper(fh, encoding="utf-8-sig", errors="replace")
+                        )
+                        found = set()
+                        for row in reader:
+                            st = str(row.get("StateCode") or row.get("State") or "").strip()
+                            if len(st) == 2:
+                                found.add(st.upper())
+                        states = sorted(found)
+        coverage["years"][str(year)] = {
+            "federal_platform_service_area_states": states,
+            "federal_platform_state_count": len(states),
+            "sbe_ingestion": "NOT_IMPLEMENTED_YEAR_SPECIFIC",
+        }
+    (METADATA_DIR / "living_cost_cms_coverage.json").write_text(
+        json.dumps(coverage, indent=2), encoding="utf-8"
+    )
 
 
 if __name__ == "__main__":

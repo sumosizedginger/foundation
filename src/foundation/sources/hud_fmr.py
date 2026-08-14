@@ -91,7 +91,18 @@ def parse_hud_fmr_xlsx(
     observations: list[LivingCostComponentObservation] = []
     seen_fips: set[str] = set()
 
-    wb = openpyxl.load_workbook(filename=file_path, read_only=True, data_only=True)
+    try:
+        wb = openpyxl.load_workbook(filename=file_path, read_only=True, data_only=True)
+    except ValueError:
+        # Some official HUD workbooks have invalid core.xml timestamps.
+        from openpyxl.reader.excel import ExcelReader
+
+        reader = ExcelReader(file_path, read_only=True, data_only=True)
+        reader.read_manifest()
+        reader.read_strings()
+        reader.read_workbook()
+        reader.read_worksheets()
+        wb = reader.wb
     sheet = wb.active
     if not sheet:
         raise ValueError(f"No active sheet found in HUD FMR XLSX: {file_path}")
@@ -114,7 +125,11 @@ def parse_hud_fmr_xlsx(
         if not fips:
             continue
 
-        fips = fips.zfill(5)
+        digits = "".join(ch for ch in fips if ch.isdigit())
+        if len(digits) >= 10:
+            fips = digits[:5]
+        else:
+            fips = digits.zfill(5)
         if len(fips) != 5 or not fips.isdigit():
             continue
 
@@ -122,7 +137,9 @@ def parse_hud_fmr_xlsx(
             continue
         seen_fips.add(fips)
 
-        state_alpha = get_val(row, ["state_alpha", "state"]).upper()
+        state_alpha = get_val(row, ["stusps", "state_alpha", "state"]).upper()
+        if state_alpha.isdigit():
+            state_alpha = get_val(row, ["stusps", "state_alpha"]).upper()
         county_name = get_val(row, ["county_name", "countyname"])
         metro_name = get_val(row, ["metro_name", "areaname", "hud_area_name"])
         geo_name = f"{county_name}, {state_alpha}".strip(", ") or metro_name or fips

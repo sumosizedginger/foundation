@@ -16,6 +16,7 @@ from foundation.sources.census_acs import (
     compute_adult_population_from_b01001_row,
     generate_census_county_universe_report,
     parse_acs_county_population_json,
+    parse_acs_summary_dat,
 )
 from foundation.sources.cms_marketplace import CMS_PUF_URLS
 from foundation.sources.eia import parse_eia_gas_prices_csv
@@ -130,6 +131,21 @@ def test_hud_fmr_parsing_and_multi_county_handling(tmp_path: Path):
     assert sf_obs.status == ComponentStatus.MEASURED
     assert sf_obs.source_id == "hud_fmr_2024"
     assert sf_obs.source_artifact_sha256 != ""
+
+
+def test_acs_summary_dat_county_filter(tmp_path: Path):
+    dat = tmp_path / "acsdt5y2024-b01001.dat"
+    dat.write_text(
+        "GEO_ID|B01001_E001|B01001_E003|B01001_E004|B01001_E005|B01001_E006|"
+        "B01001_E027|B01001_E028|B01001_E029|B01001_E030\n"
+        "0500000US48201|4780000|153750|153750|153750|153750|153750|153750|153750|153750\n"
+        "0100000US|330000000|1|1|1|1|1|1|1|1\n",
+        encoding="utf-8",
+    )
+    pop_map = parse_acs_summary_dat(dat, reference_year=2024)
+    assert "48201" in pop_map
+    assert pop_map["48201"]["adult_population"] == 3550000
+    assert "01000" not in pop_map
 
 
 def test_hud_official_filenames_are_current():
