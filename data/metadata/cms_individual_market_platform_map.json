@@ -1,6 +1,6 @@
 {
   "report_type": "cms_individual_market_platform_map",
-  "generated_at": "2026-08-14T21:45:16+00:00",
+  "generated_at": "2026-08-14T23:49:37+00:00",
   "headline_calculated": false,
   "years": {
     "2024": {
@@ -31,10 +31,9 @@
       "standalone_individual_sbe_count": 19,
       "sbe_fp_states": [
         "AR",
-        "OK",
         "OR"
       ],
-      "sbe_fp_count": 3,
+      "sbe_fp_count": 2,
       "federal_platform_individual_market_states": [
         "AK",
         "AL",
@@ -70,7 +69,7 @@
         "WY"
       ],
       "federal_platform_individual_market_count": 32,
-      "note": "SBE QHP ZIP existence is not platform classification. SBE-FPs use the federal platform and are in the federal Exchange PUFs. Oregon individual-market source is federal for 2024 and 2026.",
+      "note": "SBE QHP ZIP existence is not platform classification. SBE-FPs use the federal platform and are in the federal Exchange PUFs. Oregon individual-market source is federal for 2024 and 2026. Oklahoma is HealthCare.gov/FFM in 2024; SBE-FP effective May 1, 2026. Arkansas and Oregon are SBE-FP in both listed years.",
       "jurisdictions": {
         "AL": {
           "marketplace_platform_classification": "healthcare_gov_ffm",
@@ -325,7 +324,7 @@
           "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
         },
         "OK": {
-          "marketplace_platform_classification": "sbe_fp",
+          "marketplace_platform_classification": "healthcare_gov_ffm",
           "individual_market_source": "federal_exchange_puf",
           "SHOP_source": "not_in_sbe_archive",
           "SBE_archive_exists": false,
@@ -521,7 +520,7 @@
         "WY"
       ],
       "federal_platform_individual_market_count": 30,
-      "note": "SBE QHP ZIP existence is not platform classification. SBE-FPs use the federal platform and are in the federal Exchange PUFs. Oregon individual-market source is federal for 2024 and 2026.",
+      "note": "SBE QHP ZIP existence is not platform classification. SBE-FPs use the federal platform and are in the federal Exchange PUFs. Oregon individual-market source is federal for 2024 and 2026. Oklahoma is HealthCare.gov/FFM in 2024; SBE-FP effective May 1, 2026. Arkansas and Oregon are SBE-FP in both listed years.",
       "jurisdictions": {
         "AL": {
           "marketplace_platform_classification": "healthcare_gov_ffm",

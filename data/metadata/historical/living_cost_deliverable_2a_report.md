@@ -1,3 +1,16 @@
+# SUPERSEDED HISTORICAL DELIVERABLE 2A SNAPSHOT
+
+**NOT CURRENT PROJECT STATUS.**
+
+This file is an archived audit snapshot of Deliverable 2A at SHA
+`b2a30ef4b87a2db38eb5f7d982e0e8b5c9b63b4c`. Do not treat any SHA, CI
+action versions, test counts, CMS SBE status, Connecticut join result,
+or `health_premium` state below as current.
+
+Current closeout: `data/metadata/living_cost_pre_owner_freeze_closeout.md`
+
+---
+
 # Deliverable 2A closeout
 
 **Exact commit SHA:** `b2a30ef4b87a2db38eb5f7d982e0e8b5c9b63b4c`

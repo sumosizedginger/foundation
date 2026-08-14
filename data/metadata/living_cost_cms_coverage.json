@@ -1,6 +1,6 @@
 {
   "report_type": "living_cost_cms_coverage",
-  "generated_at": "2026-08-14T21:50:07+00:00",
+  "generated_at": "2026-08-14T23:48:58+00:00",
   "years": {
     "2024": {
       "federal_platform_service_area_states": [
@@ -62,7 +62,6 @@
       "sbe_standalone_state_count": 19,
       "sbe_fp_states": [
         "AR",
-        "OK",
         "OR"
       ],
       "sbe_ingestion": "PER_STATE_OFFICIAL_ZIPS",

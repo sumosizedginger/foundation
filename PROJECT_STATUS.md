@@ -2,7 +2,10 @@
 
 **Updated:** 2026-08-14  
 **Active Methodology Version:** `0.2.0-draft`  
-**Current Milestone:** Deliverable 1 — empirical source layer + data integrity rebuild (in progress; not complete)
+**Current Milestone:** Pre-owner-freeze evidence cleanup complete; **owner freeze of OD-001–OD-013 is next**
+
+Current living-cost closeout: `data/metadata/living_cost_pre_owner_freeze_closeout.md`  
+Superseded Deliverable 2A snapshot: `data/metadata/historical/living_cost_deliverable_2a_report.md` (NOT current status)
 
 ---
 

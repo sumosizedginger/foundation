@@ -2,7 +2,10 @@
 
 Started from audited HEAD `f2c0636690ac2408d0f537c9fd657225c75e63f3`.
 
-Historical Deliverable 2A milestone `b2a30ef4b87a2db38eb5f7d982e0e8b5c9b63b4c` is preserved as history. It is **not** current HEAD.
+Historical Deliverable 2A milestone `b2a30ef4b87a2db38eb5f7d982e0e8b5c9b63b4c`
+is archived at `data/metadata/historical/living_cost_deliverable_2a_report.md`
+and is **not** current project status. Current closeout:
+`data/metadata/living_cost_pre_owner_freeze_closeout.md`.
 
 Final pushed SHA: `1de6755978455a205bc759229415d71319518d59`.
 

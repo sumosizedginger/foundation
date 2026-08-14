@@ -518,7 +518,7 @@ def write_coverage(artifacts: list[RetrievedSourceArtifact]) -> dict:
             ),
             "gas": _component_status(artifacts, f"eia_gas_price_{year}"),
             "insurance": _component_status(artifacts, f"naic_auto_ins_{year}"),
-            "maintenance": "ESTIMATED_OWNER_REVIEW",
+            "maintenance": "INCOMPLETE_PROVENANCE",
             "registration": "SOURCE_GAP",
             "replacement": "ESTIMATED_OWNER_REVIEW",
             "connectivity": (
@@ -682,6 +682,95 @@ def write_coverage(artifacts: list[RetrievedSourceArtifact]) -> dict:
             }
             for a in artifacts
         ],
+        "status_dimensions": {
+            "note": (
+                "evidence_status is source retrieve/parse honesty. "
+                "methodology_status is whether an owner decision is still required. "
+                "They are not synonyms. An official parse with incomplete retrieval "
+                "is INCOMPLETE_PROVENANCE, not a guessed estimate."
+            ),
+            "by_year": {
+                year: {
+                    "housing": {
+                        "evidence_status": coverage_by_year[year]["housing"],
+                        "methodology_status": "READY",
+                    },
+                    "population_weights": {
+                        "evidence_status": coverage_by_year[year]["population_weights"],
+                        "methodology_status": "OWNER_REVIEW_PENDING",
+                    },
+                    "food": {
+                        "evidence_status": coverage_by_year[year]["food"],
+                        "methodology_status": "OWNER_REVIEW_PENDING",
+                    },
+                    "health_premium": {
+                        "evidence_status": coverage_by_year[year]["health_premium"],
+                        "methodology_status": "OWNER_REVIEW_PENDING",
+                    },
+                    "health_oop": {
+                        "evidence_status": coverage_by_year[year]["health_oop"],
+                        "methodology_status": "OWNER_REVIEW_PENDING",
+                    },
+                    "mileage": {
+                        "evidence_status": coverage_by_year[year]["mileage"],
+                        "methodology_status": "OWNER_REVIEW_PENDING",
+                    },
+                    "mpg": {
+                        "evidence_status": coverage_by_year[year]["mpg"],
+                        "methodology_status": "OWNER_REVIEW_PENDING",
+                    },
+                    "gas": {
+                        "evidence_status": coverage_by_year[year]["gas"],
+                        "methodology_status": "READY",
+                    },
+                    "insurance": {
+                        "evidence_status": coverage_by_year[year]["insurance"],
+                        "methodology_status": "OWNER_REVIEW_PENDING",
+                    },
+                    "maintenance": {
+                        "evidence_status": "INCOMPLETE_PROVENANCE",
+                        "methodology_status": "OWNER_REVIEW_PENDING",
+                    },
+                    "registration": {
+                        "evidence_status": "SOURCE_GAP",
+                        "methodology_status": "OWNER_REVIEW_PENDING",
+                    },
+                    "replacement": {
+                        "evidence_status": "ESTIMATED_OWNER_REVIEW",
+                        "methodology_status": "OWNER_REVIEW_PENDING",
+                    },
+                    "connectivity": {
+                        "evidence_status": coverage_by_year[year]["connectivity"],
+                        "methodology_status": "OWNER_REVIEW_PENDING",
+                    },
+                    "essentials": {
+                        "evidence_status": coverage_by_year[year]["essentials"],
+                        "methodology_status": "OWNER_REVIEW_PENDING",
+                    },
+                    "recreation": {
+                        "evidence_status": coverage_by_year[year]["recreation"],
+                        "methodology_status": "OWNER_REVIEW_PENDING",
+                    },
+                    "rpp": {
+                        "evidence_status": coverage_by_year[year]["rpp"],
+                        "methodology_status": "READY",
+                    },
+                    "federal_tax": {
+                        "evidence_status": "INVENTORY_NOT_VALIDATED",
+                        "methodology_status": "OWNER_REVIEW_PENDING",
+                    },
+                    "state_tax": {
+                        "evidence_status": "SOURCE_GAP",
+                        "methodology_status": "OWNER_REVIEW_PENDING",
+                    },
+                    "local_tax": {
+                        "evidence_status": "SOURCE_GAP",
+                        "methodology_status": "OWNER_REVIEW_PENDING",
+                    },
+                }
+                for year in coverage_by_year
+            },
+        },
         "blocking_components": blocking,
         "headline_calculated": False,
         "gap_calculated": False,
@@ -919,19 +1008,28 @@ def write_transport_coverage() -> None:
                 "note": "Official free NAIC 2022/2023 Auto Insurance Database Report retrieved. redistribution_status=FREE_DOWNLOAD_REDISTRIBUTION_UNCONFIRMED. OD-006 measure not frozen.",
             },
             "maintenance": {
-                "status": "ESTIMATED_OWNER_REVIEW",
+                "evidence_status": "INCOMPLETE_PROVENANCE",
+                "methodology_status": "OWNER_REVIEW_PENDING",
+                "status": "INCOMPLETE_PROVENANCE",
                 "note": (
-                    "VQB/UCC candidates among single-person vehicle-owning CE units. "
-                    "TIRECQ / historical UCC 470211 absence is not measured zero "
-                    "tire spending. UCC 470212 is excluded as fuel residual. "
-                    "OD-007 not frozen."
+                    "Official 2024 Interview VQB/UCC candidates among single-person "
+                    "vehicle-owning CE units. Cached official artifact parses; official "
+                    "re-retrieve remains HTTP 403. Not a guessed estimate. Not VALIDATED. "
+                    "TIRECQ / historical UCC 470211 absence is not measured zero. "
+                    "UCC 470212 is excluded as fuel residual. OD-007 not frozen."
                 ),
             },
             "registration": {
                 "status": "SOURCE_GAP",
+                "evidence_status": "SOURCE_GAP",
+                "methodology_status": "OWNER_REVIEW_PENDING",
                 "note": "Hand-entered 51-state table is not accepted as validated.",
             },
-            "replacement": {"status": "ESTIMATED_OWNER_REVIEW"},
+            "replacement": {
+                "status": "ESTIMATED_OWNER_REVIEW",
+                "evidence_status": "ESTIMATED_OWNER_REVIEW",
+                "methodology_status": "OWNER_REVIEW_PENDING",
+            },
         },
         "headline_calculated": False,
     }

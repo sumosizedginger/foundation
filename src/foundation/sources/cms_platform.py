@@ -64,8 +64,8 @@ ALL_JURISDICTIONS: tuple[str, ...] = (
 
 # Standalone individual-market State-Based Marketplaces / SBEs.
 # Oregon is NOT included: PY2024 HealthCare.gov; PY2026 SBE-FP.
-# Evidence: CMS Open Enrollment reporting (2024 HealthCare.gov for OR);
-# CMS PY2026 21 SBE + 3 SBE-FP (AR, OR, OK).
+# Evidence: CMS 2024 Open Enrollment Final National Snapshot lists Oregon
+# individual-market as HealthCare.gov; CMS PY2026 lists 21 SBEs + 3 SBE-FPs.
 STANDALONE_INDIVIDUAL_SBE: dict[int, frozenset[str]] = {
     2024: frozenset(
         {
@@ -117,9 +117,24 @@ STANDALONE_INDIVIDUAL_SBE: dict[int, frozenset[str]] = {
     ),
 }
 
-# Governance classification. Individual-market data source remains federal PUF.
+# Governance classification only. Individual-market data source remains
+# federal Exchange PUF for every SBE-FP and FFM state.
+#
+# Official CMS State-based Exchanges page (updated 2026-08-13):
+# PY2026 SBE-FPs are Arkansas, Oregon, and Oklahoma (Effective May 1, 2026).
+# https://www.cms.gov/cciio/resources/fact-sheets-and-faqs/state-marketplaces
+#
+# Official CMS Marketplace 2024 OE Final National Snapshot:
+# Arkansas, Oregon, and Oklahoma individual-market enrollment is HealthCare.gov.
+# That does NOT make Oklahoma an SBE-FP in 2024. Oklahoma's SBE-FP effective
+# date is May 1, 2026.
+#
+# Arkansas and Oregon 2024 remain SBE-FP: they have used the federal platform
+# as SBE-FPs continuously (AR since 2017; OR since 2015) and are still listed
+# as PY2026 SBE-FPs. CMS 2024 SBE QHP PUF includes Oregon (SHOP), consistent
+# with SBE-FP SHOP functions. Do not infer SBE-FP merely from HealthCare.gov.
 SBE_FP_STATES: dict[int, frozenset[str]] = {
-    2024: frozenset({"AR", "OK", "OR"}),
+    2024: frozenset({"AR", "OR"}),
     2026: frozenset({"AR", "OK", "OR"}),
 }
 
@@ -193,7 +208,9 @@ def build_platform_map(year: int, sbe_archive_states: set[str] | None = None) ->
         "note": (
             "SBE QHP ZIP existence is not platform classification. "
             "SBE-FPs use the federal platform and are in the federal Exchange PUFs. "
-            "Oregon individual-market source is federal for 2024 and 2026."
+            "Oregon individual-market source is federal for 2024 and 2026. "
+            "Oklahoma is HealthCare.gov/FFM in 2024; SBE-FP effective May 1, 2026. "
+            "Arkansas and Oregon are SBE-FP in both listed years."
         ),
         "jurisdictions": jurisdictions,
     }
@@ -214,6 +231,10 @@ def assert_platform_map_invariants(year: int, payload: dict[str, Any] | None = N
         raise ValueError("Standalone SBE + federal platform do not partition 50 states + DC")
     if "OR" in standalone:
         raise ValueError("Oregon must not be a standalone individual-market SBE")
+    if year == 2024 and "OK" in SBE_FP_STATES[year]:
+        raise ValueError("Oklahoma must not be SBE-FP for plan year 2024")
+    if year == 2026 and "OK" not in SBE_FP_STATES[year]:
+        raise ValueError("Oklahoma must be SBE-FP for plan year 2026")
     if payload["jurisdiction_count"] != 51:
         raise ValueError("Expected 51 jurisdictions")
     if year == 2024 and payload["standalone_individual_sbe_count"] != 19:

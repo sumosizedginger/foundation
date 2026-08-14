@@ -172,6 +172,53 @@ def test_platform_map_partitions_fifty_states_and_dc():
         assert "IL" in SBE_STANDALONE_STATES[2026]
 
 
+def test_closeout_od_labels_match_owner_packet():
+    closeout = (METADATA / "living_cost_pre_owner_freeze_closeout.md").read_text(encoding="utf-8")
+    assert "OD-011 — municipal earned-income tax geography/overlay" in closeout
+    assert "OD-012 — additional resilience reserve" in closeout
+    assert "OD-013 — Connecticut HUD/ACS geography treatment" in closeout
+    assert "RPP geography" not in closeout
+    stale = METADATA / "living_cost_deliverable_2a_report.md"
+    archived = METADATA / "historical" / "living_cost_deliverable_2a_report.md"
+    assert not stale.exists()
+    assert "SUPERSEDED HISTORICAL DELIVERABLE 2A SNAPSHOT" in archived.read_text(encoding="utf-8")
+    assert "NOT CURRENT PROJECT STATUS" in archived.read_text(encoding="utf-8")
+
+
+def test_source_coverage_separates_maintenance_evidence_from_owner_review():
+    coverage = json.loads(
+        (METADATA / "living_cost_source_coverage.json").read_text(encoding="utf-8")
+    )
+    assert coverage["headline_calculated"] is False
+    for year in ("2024", "2026"):
+        assert coverage["coverage_by_year"][year]["maintenance"] == "INCOMPLETE_PROVENANCE"
+        dims = coverage["status_dimensions"]["by_year"][year]["maintenance"]
+        assert dims["evidence_status"] == "INCOMPLETE_PROVENANCE"
+        assert dims["methodology_status"] == "OWNER_REVIEW_PENDING"
+
+
+def test_oklahoma_2024_is_not_sbe_fp():
+    assert "OK" not in SBE_FP_STATES[2024]
+    assert "OK" in SBE_FP_STATES[2026]
+    for year in (2024, 2026):
+        assert individual_market_source(year, "OK") == "federal_exchange_puf"
+        payload = build_platform_map(year)
+        assert_platform_map_invariants(year, payload)
+        assert payload["jurisdictions"]["OK"]["individual_market_source"] == "federal_exchange_puf"
+    assert (
+        build_platform_map(2024)["jurisdictions"]["OK"]["marketplace_platform_classification"]
+        == "healthcare_gov_ffm"
+    )
+    assert (
+        build_platform_map(2026)["jurisdictions"]["OK"]["marketplace_platform_classification"]
+        == "sbe_fp"
+    )
+    # Arkansas and Oregon remain SBE-FP in 2024; HealthCare.gov use is not enough.
+    assert "AR" in SBE_FP_STATES[2024]
+    assert "OR" in SBE_FP_STATES[2024]
+    assert "OK" not in SBE_FP_STATES[2024]
+
+
 def test_sbe_archive_is_not_platform_classification():
     payload = build_platform_map(2026, {"OR"})
     assert payload["jurisdictions"]["OR"]["SBE_archive_exists"] is True
