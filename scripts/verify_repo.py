@@ -70,10 +70,20 @@ def main() -> int:
         )
 
     surv_status = latest["survival_floor"]["status"]
-    if surv_status not in ("pipeline_validation_in_progress", "research_estimate"):
+    if surv_status not in ("pipeline_validation_in_progress", "UNAVAILABLE"):
         raise SystemExit(
-            f"Survival floor must be pipeline_validation_in_progress or research_estimate, got: {surv_status}"
+            "Survival floor must be pipeline_validation_in_progress or UNAVAILABLE, "
+            f"got: {surv_status}"
         )
+
+    health = latest.get("data_health", {})
+    health_status = str(health.get("status", "")).lower()
+    if health_status in {"healthy", "HEALTHY"}:
+        raise SystemExit("Data Health cannot be HEALTHY while Axis 2 is unpublished")
+    if health.get("living_cost_status") == "research_estimate":
+        raise SystemExit("research_estimate is not an acceptable current living-cost status")
+    if health.get("states_modeled") not in (0, None):
+        raise SystemExit("states_modeled must be 0 while Axis 2 is unpublished")
 
     print("Repository structural, schema, living cost, and release-gate verification passed.")
     return 0

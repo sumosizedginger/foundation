@@ -13,46 +13,53 @@ STRICT FAIL-CLOSED RULES:
 from __future__ import annotations
 
 import csv
+import dataclasses
 import logging
 from pathlib import Path
 
 from foundation.living_cost.models import ComponentStatus, LivingCostComponentObservation
-from foundation.sources.acquisition import acquire_source
+from foundation.sources.acquisition import acquire_source, record_unretrieved
 
 logger = logging.getLogger(__name__)
 
-def get_meps_url(year: int) -> str:
-    """Get the official MEPS PUF CSV URL."""
-    # MEPS typically lags by 2 years. Using placeholder structure for automated acquisition.
-    # E.g. h233/h233.csv might be 2021 data
-    data_year = year - 2
-    return f"https://meps.ahrq.gov/data_files/pufs/meps_fy_{data_year}.csv"
+MEPS_HC243_LANDING = (
+    "https://meps.ahrq.gov/mepsweb/data_stats/download_data_files_detail.jsp?cboPufNumber=HC-243"
+)
+MEPS_HC243_ASCII_ZIP = "https://meps.ahrq.gov/mepsweb/data_files/pufs/h243/h243dat.zip"
+MEPS_DATA_YEAR = 2022
+MEPS_PUF_ID = "HC-243"
 
 
-def download_meps_artifact(
-    year: int, cache_dir: Path, force_download: bool = False
-):
-    """Download required MEPS CSV dataset."""
+def download_meps_artifact(year: int, cache_dir: Path, force_download: bool = False):
+    """Retrieve official MEPS HC-243 (2022 Full Year Consolidated), or record a gap."""
     if year not in (2024, 2026):
-        raise ValueError(f"Unsupported MEPS reference year: {year}")
+        raise ValueError(f"Unsupported MEPS project cost year: {year}")
 
     cache_dir.mkdir(parents=True, exist_ok=True)
-    
-    data_year = year - 2
-    expected_filename = f"meps_fy_{data_year}.csv"
-    
     artifact = acquire_source(
-        source_id=f"meps_fyc_{year}",
-        url=get_meps_url(year),
+        source_id=f"meps_table1_{year}",
+        url=MEPS_HC243_ASCII_ZIP,
         cache_dir=cache_dir,
-        expected_filename=expected_filename,
+        expected_filename="h243dat.zip",
         force_download=force_download,
     )
-    
     if artifact is None:
-        raise RuntimeError(f"Required MEPS dataset for {year} is UNAVAILABLE.")
-        
-    return artifact
+        return record_unretrieved(
+            f"meps_table1_{year}",
+            status="UNAVAILABLE",
+            resolved_url=MEPS_HC243_LANDING,
+            notes=(
+                f"Official MEPS {MEPS_PUF_ID} ({MEPS_DATA_YEAR} data year) could not be retrieved. "
+                "No fabricated meps_fy_{year}.csv URL is used."
+            ),
+        )
+    return dataclasses.replace(
+        artifact,
+        notes=(
+            f"MEPS {MEPS_PUF_ID} data year {MEPS_DATA_YEAR} used as OOP source vintage "
+            f"for project cost year {year}. This is not a {year} MEPS file."
+        ),
+    )
 
 
 def parse_meps_oop_csv(
@@ -62,9 +69,8 @@ def parse_meps_oop_csv(
     file_sha256: str = "",
 ) -> LivingCostComponentObservation:
     """Parse MEPS expected OOP healthcare expenditure table for privately insured adults 18-64."""
-    data_year = reference_year - 2
-    file_path = cache_dir / f"meps_fy_{data_year}.csv"
-    
+    file_path = cache_dir if cache_dir.is_file() else cache_dir / "h243dat.zip"
+
     if not file_path.exists():
         logger.warning(f"MEPS CSV not found: {file_path}")
         return LivingCostComponentObservation(
@@ -81,9 +87,9 @@ def parse_meps_oop_csv(
             status=ComponentStatus.UNAVAILABLE,
             source_id=f"meps_fyc_{reference_year}",
             source_variable="TOTSLFX_mean_adult_18_64_priv_ins",
-            source_url=get_meps_url(reference_year),
-            source_release=f"AHRQ MEPS Household Component ({data_year})",
-            source_reference_period=str(data_year),
+            source_url=MEPS_HC243_LANDING,
+            source_release=f"AHRQ MEPS {MEPS_PUF_ID} ({MEPS_DATA_YEAR} data year)",
+            source_reference_period=str(MEPS_DATA_YEAR),
             retrieved_at=retrieved_at,
             source_artifact_sha256=file_sha256,
             methodology_version="0.2.0-draft",
@@ -134,13 +140,15 @@ def parse_meps_oop_csv(
                                 )
                                 represented_pop = int(
                                     float(
-                                        row.get("represented_population") or row.get("n_weighted") or 0
+                                        row.get("represented_population")
+                                        or row.get("n_weighted")
+                                        or 0
                                     )
                                 )
                                 break
                         except ValueError:
                             continue
-    except Exception as e:
+    except (OSError, ValueError, csv.Error, UnicodeError) as e:
         logger.error(f"Failed to parse MEPS CSV: {e}")
 
     if expected_oop_annual is None or expected_oop_annual <= 0:
@@ -159,9 +167,9 @@ def parse_meps_oop_csv(
             status=ComponentStatus.UNAVAILABLE,
             source_id=f"meps_fyc_{reference_year}",
             source_variable="TOTSLFX_mean_adult_18_64_priv_ins",
-            source_url=get_meps_url(reference_year),
-            source_release=f"AHRQ MEPS Household Component ({data_year})",
-            source_reference_period=str(data_year),
+            source_url=MEPS_HC243_LANDING,
+            source_release=f"AHRQ MEPS {MEPS_PUF_ID} ({MEPS_DATA_YEAR} data year)",
+            source_reference_period=str(MEPS_DATA_YEAR),
             retrieved_at=retrieved_at,
             source_artifact_sha256=file_sha256,
             methodology_version="0.2.0-draft",
@@ -180,11 +188,11 @@ def parse_meps_oop_csv(
         value_monthly=round(expected_oop_annual / 12.0, 2),
         unit="USD",
         status=ComponentStatus.MEASURED,
-        source_id=f"meps_fyc_{reference_year}",
+        source_id=f"meps_table1_{reference_year}",
         source_variable="TOTSLFX_mean_adult_18_64_priv_ins",
-        source_url=get_meps_url(reference_year),
-        source_release=f"AHRQ MEPS Household Component ({data_year})",
-        source_reference_period=str(data_year),
+        source_url=MEPS_HC243_LANDING,
+        source_release=f"AHRQ MEPS {MEPS_PUF_ID} ({MEPS_DATA_YEAR} data year)",
+        source_reference_period=str(MEPS_DATA_YEAR),
         retrieved_at=retrieved_at,
         source_artifact_sha256=file_sha256,
         methodology_version="0.2.0-draft",

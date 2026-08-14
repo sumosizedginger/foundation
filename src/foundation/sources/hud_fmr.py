@@ -27,18 +27,22 @@ from foundation.sources.acquisition import acquire_source
 
 logger = logging.getLogger(__name__)
 
+HUD_FMR_LANDING = "https://www.huduser.gov/portal/datasets/fmr.html"
+
 HUD_FMR_SOURCES: dict[int, dict[str, Any]] = {
     2024: {
-        "url": "https://www.huduser.gov/portal/datasets/fmr/fmr2024/FY24_FMRs_revised.xlsx",
+        "url": "https://www.huduser.gov/portal/datasets/fmr/fmr2024/FMR2024_final_revised.xlsx",
+        "landing_page": HUD_FMR_LANDING,
         "release_name": "HUD FY 2024 Fair Market Rents (Revised)",
-        "effective_date": "2023-10-01",
+        "effective_date": "2024-03-11",
         "reference_period": "2024",
-        "expected_filename": "FY24_FMRs_revised.xlsx",
+        "expected_filename": "FMR2024_final_revised.xlsx",
     },
     2026: {
         "url": "https://www.huduser.gov/portal/datasets/fmr/fmr2026/FY26_FMRs_revised.xlsx",
-        "release_name": "HUD FY 2026 Fair Market Rents (Baseline/Revised)",
-        "effective_date": "2025-10-01",
+        "landing_page": HUD_FMR_LANDING,
+        "release_name": "HUD FY 2026 Fair Market Rents (Revised)",
+        "effective_date": "2026-05-21",
         "reference_period": "2026",
         "expected_filename": "FY26_FMRs_revised.xlsx",
     },
@@ -100,13 +104,13 @@ def parse_hud_fmr_xlsx(
                     headers[str(val).strip().lower()] = col_idx
             continue
 
-        def get_val(keys):
+        def get_val(current_row: tuple[object, ...] | list[object], keys: list[str]) -> str:
             for k in keys:
-                if k in headers and row[headers[k]] is not None:
-                    return str(row[headers[k]]).strip()
+                if k in headers and current_row[headers[k]] is not None:
+                    return str(current_row[headers[k]]).strip()
             return ""
 
-        fips = get_val(["fips2010", "fips", "fips_code", "county_fips"])
+        fips = get_val(row, ["fips2010", "fips", "fips_code", "county_fips"])
         if not fips:
             continue
 
@@ -118,12 +122,12 @@ def parse_hud_fmr_xlsx(
             continue
         seen_fips.add(fips)
 
-        state_alpha = get_val(["state_alpha", "state"]).upper()
-        county_name = get_val(["county_name", "countyname"])
-        metro_name = get_val(["metro_name", "areaname", "hud_area_name"])
+        state_alpha = get_val(row, ["state_alpha", "state"]).upper()
+        county_name = get_val(row, ["county_name", "countyname"])
+        metro_name = get_val(row, ["metro_name", "areaname", "hud_area_name"])
         geo_name = f"{county_name}, {state_alpha}".strip(", ") or metro_name or fips
 
-        fmr_1_str = get_val(["fmr_1", "fmr1", "fmr_1br"])
+        fmr_1_str = get_val(row, ["fmr_1", "fmr1", "fmr_1br"])
         if not fmr_1_str:
             continue
 

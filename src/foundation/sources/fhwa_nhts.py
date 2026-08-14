@@ -16,37 +16,30 @@ import csv
 import logging
 import zipfile
 from pathlib import Path
-from typing import Any
 
 from foundation.living_cost.models import ComponentStatus, LivingCostComponentObservation
-from foundation.sources.acquisition import acquire_source
+from foundation.sources.acquisition import record_unretrieved
 
 logger = logging.getLogger(__name__)
 
-# Note: The 2022 NHTS NextGen survey data is used.
-NHTS_2022_URL = "https://nhts.ornl.gov/assets/2022/download/csv.zip"
+NHTS_LANDING = "https://nhts.ornl.gov/downloads"
 
 
-def download_fhwa_nhts_artifact(
-    year: int, cache_dir: Path, force_download: bool = False
-):
-    """Download required FHWA NHTS ZIP."""
+def download_fhwa_nhts_artifact(year: int, cache_dir: Path, force_download: bool = False):
+    """Do not retrieve an unverified NHTS zip path."""
+    del cache_dir, force_download
     if year not in (2024, 2026):
         raise ValueError(f"Unsupported FHWA NHTS reference year: {year}")
-
-    cache_dir.mkdir(parents=True, exist_ok=True)
-    artifact = acquire_source(
-        source_id="fhwa_nhts_2022",
-        url=NHTS_2022_URL,
-        cache_dir=cache_dir,
-        expected_filename="nhts_2022_csv.zip",
-        force_download=force_download,
+    return record_unretrieved(
+        f"fhwa_nhts_{year}",
+        status="SOURCE_GAP",
+        resolved_url=NHTS_LANDING,
+        notes=(
+            "2022 NHTS V2.1 CSV exists on the official downloads page, but the previously "
+            "hardcoded assets/2022/download/csv.zip path was not proven. Resolve the exact "
+            "V2.1 CSV zip from the landing page before retrieving."
+        ),
     )
-    
-    if artifact is None:
-        raise RuntimeError(f"Required FHWA NHTS dataset for 2022 is UNAVAILABLE.")
-        
-    return artifact
 
 
 def parse_fhwa_nhts_mileage(
@@ -72,10 +65,10 @@ def parse_fhwa_nhts_mileage(
             value_monthly=None,
             unit="MILES",
             status=ComponentStatus.UNAVAILABLE,
-            source_id=f"fhwa_nhts_2022",
+            source_id="fhwa_nhts_2022",
             source_variable="ANNMILES",
-            source_url=NHTS_2022_URL,
-            source_release=f"FHWA NHTS 2022",
+            source_url=NHTS_LANDING,
+            source_release="FHWA NHTS 2022",
             source_reference_period="2022",
             retrieved_at=retrieved_at,
             source_artifact_sha256=file_sha256,
@@ -93,41 +86,46 @@ def parse_fhwa_nhts_mileage(
             hh_files = [f for f in z.namelist() if "hhpub" in f.lower() and f.endswith(".csv")]
             if not hh_files:
                 raise FileNotFoundError("Could not find hhpub.csv inside NHTS ZIP.")
-            
+
             with z.open(hh_files[0]) as fh:
                 import io
+
                 text_fh = io.TextIOWrapper(fh, encoding="utf-8-sig", errors="replace")
                 reader = csv.DictReader(text_fh)
-                
+
                 for row in reader:
                     # Filter for 1-worker, 1-adult (HHSIZE) households
                     wrkcount = str(row.get("WRKCOUNT", "")).strip()
                     hhsize = str(row.get("HHSIZE", "")).strip()
-                    
+
                     if wrkcount != "1" or hhsize != "1":
                         continue
-                        
+
                     miles_str = row.get("ANNMILES", "-1")
                     try:
                         miles = float(miles_str)
                     except ValueError:
                         continue
-                        
+
                     # Missing values in NHTS are often negative (e.g., -9)
                     if miles < 0:
                         continue
-                        
-                    weight_str = row.get("WTHHFIN", "1.0")
+
+                    weight_str = str(row.get("WTHHFIN", "")).strip()
+                    if not weight_str:
+                        continue
                     try:
                         weight = float(weight_str)
                     except ValueError:
-                        weight = 1.0
-                        
+                        continue
+                    if weight <= 0:
+                        continue
+
                     weighted_miles_sum += miles * weight
                     total_weights += weight
                     sample_size += 1
 
-    except Exception as e:
+    except (OSError, ValueError, KeyError, csv.Error, zipfile.BadZipFile, UnicodeError) as e:
         logger.error(f"Failed to process NHTS ZIP: {e}")
         return LivingCostComponentObservation(
             component_id="fhwa_annual_miles",
@@ -141,10 +139,10 @@ def parse_fhwa_nhts_mileage(
             value_monthly=None,
             unit="MILES",
             status=ComponentStatus.UNAVAILABLE,
-            source_id=f"fhwa_nhts_2022",
+            source_id="fhwa_nhts_2022",
             source_variable="ANNMILES",
-            source_url=NHTS_2022_URL,
-            source_release=f"FHWA NHTS 2022",
+            source_url=NHTS_LANDING,
+            source_release="FHWA NHTS 2022",
             source_reference_period="2022",
             retrieved_at=retrieved_at,
             source_artifact_sha256=file_sha256,
@@ -165,10 +163,10 @@ def parse_fhwa_nhts_mileage(
             value_monthly=None,
             unit="MILES",
             status=ComponentStatus.UNAVAILABLE,
-            source_id=f"fhwa_nhts_2022",
+            source_id="fhwa_nhts_2022",
             source_variable="ANNMILES",
-            source_url=NHTS_2022_URL,
-            source_release=f"FHWA NHTS 2022",
+            source_url=NHTS_LANDING,
+            source_release="FHWA NHTS 2022",
             source_reference_period="2022",
             retrieved_at=retrieved_at,
             source_artifact_sha256=file_sha256,
@@ -190,10 +188,10 @@ def parse_fhwa_nhts_mileage(
         value_monthly=round(annual_miles / 12.0, 1),
         unit="MILES",
         status=ComponentStatus.MEASURED,
-        source_id=f"fhwa_nhts_2022",
+        source_id="fhwa_nhts_2022",
         source_variable="ANNMILES_WRKCOUNT1_HHSIZE1",
-        source_url=NHTS_2022_URL,
-        source_release=f"FHWA NHTS 2022",
+        source_url=NHTS_LANDING,
+        source_release="FHWA NHTS 2022",
         source_reference_period="2022",
         retrieved_at=retrieved_at,
         source_artifact_sha256=file_sha256,

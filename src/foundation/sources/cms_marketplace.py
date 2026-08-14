@@ -29,19 +29,22 @@ from foundation.sources.acquisition import acquire_source
 
 logger = logging.getLogger(__name__)
 
+CMS_PUF_LANDING = "https://www.cms.gov/marketplace/resources/data/public-use-files"
+CMS_SBE_PUF_LANDING = "https://www.cms.gov/marketplace/resources/data/state-based-public-use-files"
+
+CMS_PUF_SLUGS = {
+    "rate_puf": "rate-puf",
+    "plan_attributes_puf": "plan-attributes-puf",
+    "service_area_puf": "service-area-puf",
+    "benefits_puf": "benefits-and-cost-sharing-puf",
+}
+
 CMS_PUF_URLS: dict[int, dict[str, str]] = {
-    2024: {
-        "rate_puf": "https://www.cms.gov/marketplace/resources/data/public-use-files/2024-rate-puf.csv",
-        "plan_attributes_puf": "https://www.cms.gov/marketplace/resources/data/public-use-files/2024-plan-attributes-puf.csv",
-        "service_area_puf": "https://www.cms.gov/marketplace/resources/data/public-use-files/2024-service-area-puf.csv",
-        "benefits_puf": "https://www.cms.gov/marketplace/resources/data/public-use-files/2024-benefits-and-cost-sharing-puf.csv",
-    },
-    2026: {
-        "rate_puf": "https://www.cms.gov/marketplace/resources/data/public-use-files/2026-rate-puf.csv",
-        "plan_attributes_puf": "https://www.cms.gov/marketplace/resources/data/public-use-files/2026-plan-attributes-puf.csv",
-        "service_area_puf": "https://www.cms.gov/marketplace/resources/data/public-use-files/2026-service-area-puf.csv",
-        "benefits_puf": "https://www.cms.gov/marketplace/resources/data/public-use-files/2026-benefits-and-cost-sharing-puf.csv",
-    },
+    year: {
+        key: f"https://download.cms.gov/marketplace-puf/{year}/{slug}.zip"
+        for key, slug in CMS_PUF_SLUGS.items()
+    }
+    for year in (2024, 2026)
 }
 
 
@@ -61,7 +64,7 @@ def download_cms_marketplace_artifacts(
             source_id=f"cms_{puf_type}_{year}",
             url=url,
             cache_dir=cache_dir,
-            expected_filename=f"cms_{year}_{puf_type}.csv",
+            expected_filename=f"cms_{year}_{puf_type}.zip",
             force_download=force_download,
         )
         if artifact is None:
@@ -139,7 +142,7 @@ def parse_cms_marketplace_multi_puf(
             plan_id = str(row.get("PlanId", "")).strip()
             # The rate PUF PlanId is often 14 chars. StandardComponentId is 14 chars.
             base_plan_id = plan_id[:14] if len(plan_id) >= 14 else plan_id
-            
+
             if base_plan_id not in valid_plans:
                 continue
 
@@ -201,7 +204,7 @@ def parse_cms_marketplace_multi_puf(
             source_release=f"CMS Marketplace PUF ({year})",
             source_reference_period=str(year),
             retrieved_at="",  # Will be populated by pipeline artifact tracker
-            source_artifact_sha256="", # Will be populated by pipeline artifact tracker
+            source_artifact_sha256="",  # Will be populated by pipeline artifact tracker
             methodology_version="0.2.0-draft",
             notes=(
                 f"Lowest-Cost Adequate Silver Plan: {selected['plan_id']} "

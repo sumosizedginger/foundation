@@ -2,8 +2,6 @@ from __future__ import annotations
 
 import argparse
 
-from foundation.pipeline import run_full_pipeline
-
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="foundation")
@@ -28,19 +26,26 @@ def cmd_validate() -> int:
 
 
 def cmd_update() -> int:
+    from foundation.pipeline import run_full_pipeline
+
     print("Running Foundation full pipeline...")
     result = run_full_pipeline()
     pop = result["population_anchor"]
     surv = result["survival_floor"]
+    health = result["data_health"]
     print("\n=== PIPELINE SUCCESSFUL ===")
-    print(f"Population Anchor (2024): ${pop['cutoff']:,.2f}/yr (${pop['monthly_cutoff']:,.2f}/mo)")
     print(
-        f"Survival Floor:           ${surv['single_adult_floor_annual']:,.2f}/yr ({surv['status_label']})"
+        f"Population Anchor (2024): ${pop['cutoff']:,.2f}/yr "
+        f"(${pop.get('monthly_cutoff', pop['cutoff'] / 12):,.2f}/mo)"
     )
     print(
-        f"Survival Gap:             ${surv['survival_gap_annual']:,.2f}/yr (Adequacy: {surv['adequacy_ratio']:.2f})"
+        "Minimum Sustainable Living Cost: "
+        f"{surv.get('status_label', surv.get('status', 'UNAVAILABLE'))}"
     )
-    print(f"Pressure signals:         {len(result['pressures'])} observations")
+    print("Survival Gap:             not published (Axis 2 unpublished)")
+    print("Adequacy:                 not published (Axis 2 unpublished)")
+    print(f"Data Health:              {health.get('status', 'PARTIAL')}")
+    print(f"Pressure signals:         {len(result.get('pressures', []))} observations")
     print(f"Composite score:          {result['composite']['status'].upper()} (Locked)")
     return 0
 

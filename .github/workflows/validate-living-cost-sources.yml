@@ -2,13 +2,18 @@ name: Validate Living Cost Sources
 
 on:
   push:
+    branches: [main]
     paths:
-      - 'src/foundation/sources/**'
-      - 'scripts/validate_living_cost_sources.py'
+      - "src/foundation/sources/**"
+      - "src/foundation/living_cost/**"
+      - "scripts/validate_living_cost_sources.py"
+      - ".github/workflows/validate-living-cost-sources.yml"
   pull_request:
     paths:
-      - 'src/foundation/sources/**'
-      - 'scripts/validate_living_cost_sources.py'
+      - "src/foundation/sources/**"
+      - "src/foundation/living_cost/**"
+      - "scripts/validate_living_cost_sources.py"
+      - ".github/workflows/validate-living-cost-sources.yml"
   workflow_dispatch:
 
 permissions:

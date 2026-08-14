@@ -9,15 +9,9 @@ from foundation.bottom30 import calculate_bottom30_from_zip
 from foundation.config import load_definitions, load_indicators, load_sources
 from foundation.historical import get_historical_vintages_summary
 from foundation.living_cost.engine import run_living_cost_pipeline
-from foundation.living_cost.geo_join import execute_geo_join_audit
 from foundation.living_cost.manifest import generate_source_manifest
 from foundation.sources.bls import fetch_all_pressure_signals
-from foundation.sources.census_acs import (
-    generate_census_county_universe_report,
-    parse_acs_county_population_csv,
-)
 from foundation.sources.census_asec import download_asec_archive
-from foundation.sources.hud_fmr import parse_hud_fmr_csv
 
 
 def atomic_write_json(path: Path, data: Any) -> None:
@@ -59,55 +53,23 @@ def run_full_pipeline(project_root: Path | None = None) -> dict[str, Any]:
     )
     atomic_write_json(current_dir / "population.json", latest_pop.to_dict())
 
-    # 2. Axis 2: Minimum Sustainable Living Cost (DATA PIPELINE VALIDATION IN PROGRESS)
+    # 2. Axis 2 remains unpublished. The engine writes transition-state files only.
+    # Do not flip this flag. Headline living-cost aggregation is not authorized.
     living_cost_release_authorized = False
-    
     if living_cost_release_authorized:
-        living_cost_res = run_living_cost_pipeline(project_root)
-        survival_consolidated = living_cost_res["survival_consolidated"]
-    else:
-        survival_consolidated = {
-            "status": "UNAVAILABLE",
-            "reason": "Pipeline Validation In Progress under D-016"
-        }
+        raise RuntimeError("Living-cost publication is not authorized.")
 
-    # 3. Canonical Manifest & Census County Universe Reports
-    manifest_doc = generate_source_manifest(metadata_dir / "living_cost_source_manifest.json")
+    living_cost_res = run_living_cost_pipeline(project_root)
+    survival_consolidated = living_cost_res["survival_consolidated"]
+
+    # 3. Honest static registry. No retrieved hashes unless acquire actually ran.
+    manifest_doc = generate_source_manifest(
+        [],
+        metadata_dir / "living_cost_source_manifest.json",
+    )
     atomic_write_json(site_data_dir / "living_cost_source_manifest.json", manifest_doc)
 
-    # 4. Ingest Census ACS County Population & Generate County Universe Report
-    fixtures_dir = project_root / "tests" / "fixtures"
-    acs_fixture = fixtures_dir / "sample_acs_county_pop.csv"
-    if acs_fixture.exists():
-        county_pop_map = parse_acs_county_population_csv(acs_fixture, reference_year=2024)
-        universe_report = generate_census_county_universe_report(
-            county_pop_map,
-            metadata_dir / "census_county_universe.json",
-        )
-        atomic_write_json(site_data_dir / "census_county_universe.json", universe_report)
-
-        # 5. Execute HUD ↔ ACS Join Audits
-        hud_fixture_2024 = fixtures_dir / "sample_hud_fmr_2024.csv"
-        if hud_fixture_2024.exists():
-            hud_obs_2024 = parse_hud_fmr_csv(hud_fixture_2024, reference_year=2024)
-            join_report_2024 = execute_geo_join_audit(
-                county_pop_map,
-                hud_obs_2024,
-                reference_year=2024,
-                output_path=metadata_dir / "living_cost_geo_join_2024.json",
-            )
-            atomic_write_json(site_data_dir / "living_cost_geo_join_2024.json", join_report_2024)
-
-            # 2026 join report
-            join_report_2026 = execute_geo_join_audit(
-                county_pop_map,
-                hud_obs_2024,  # baseline join
-                reference_year=2026,
-                output_path=metadata_dir / "living_cost_geo_join_2026.json",
-            )
-            atomic_write_json(site_data_dir / "living_cost_geo_join_2026.json", join_report_2026)
-
-    # 6. National Economic Pressure Signals
+    # 4. National Economic Pressure Signals
     pressure_signals = fetch_all_pressure_signals(cache_dir=cache_dir)
     stale_count = sum(1 for p in pressure_signals if p.is_stale)
     pressures_payload = {
@@ -118,14 +80,17 @@ def run_full_pipeline(project_root: Path | None = None) -> dict[str, Any]:
     }
     atomic_write_json(current_dir / "pressures.json", pressures_payload)
 
-    # 7. Historical Timeline
+    # 5. Historical Timeline
     historical_timeline = get_historical_vintages_summary()
-    
-    # Reconcile history.json CPS SHA-256 with population.json (latest_pop)
+
     import dataclasses
+
+    current_asec_sha = ""
+    if latest_pop.source_artifact is not None:
+        current_asec_sha = latest_pop.source_artifact.sha256
     for i, hist in enumerate(historical_timeline):
-        if hist.survey_year == 2025:
-            historical_timeline[i] = dataclasses.replace(hist, archive_sha256=latest_pop.source_artifact_sha256)
+        if hist.survey_year == 2025 and current_asec_sha:
+            historical_timeline[i] = dataclasses.replace(hist, archive_sha256=current_asec_sha)
 
     hist_payload = {
         "base_currency_year": 2024,
@@ -133,14 +98,20 @@ def run_full_pipeline(project_root: Path | None = None) -> dict[str, Any]:
     }
     atomic_write_json(current_dir / "history.json", hist_payload)
 
-    # 8. Truthful Dynamic Data Health Calculation
+    # 6. Data Health composed from actual component state
     has_stale_pressures = any(p.is_stale for p in pressure_signals)
-    overall_health = "PARTIAL"  # Partial because Population Anchor is verified, but Living Cost is in progress and Composite is locked
+    overall_health = "PARTIAL"
 
     data_health = {
         "status": overall_health,
         "overall_state": "PARTIAL",
-        "description": "Canonical Population Anchor is verified. Minimum Sustainable Living Cost data pipeline validation is in progress under D-016.",
+        "description": (
+            "Canonical Population Anchor is verified. Minimum Sustainable Living Cost "
+            "data pipeline validation is in progress. Composite is prelaunch."
+        ),
+        "living_cost_status": "pipeline_validation_in_progress",
+        "states_modeled": 0,
+        "validation_state": "axis2_unpublished",
         "components": {
             "population_anchor": {
                 "status": "VERIFIED",
@@ -155,13 +126,16 @@ def run_full_pipeline(project_root: Path | None = None) -> dict[str, Any]:
             "living_cost": {
                 "status": "PIPELINE_VALIDATION_IN_PROGRESS",
                 "states_modeled": 0,
-                "note": "Provisional prototype outputs retired under Owner Directive D-016; empirical county join validation in progress.",
+                "note": (
+                    "Prototype outputs retired. Empirical county source validation is "
+                    "in progress. No living-cost headline is published."
+                ),
             },
             "pressure_signals": {
                 "status": "STALE_CACHED" if has_stale_pressures else "CURRENT",
                 "registered_count": len(pressure_signals),
                 "stale_count": stale_count,
-                "note": "9 registered BLS pressure signals; current retrieval status varies.",
+                "note": "Registered BLS pressure signals; current retrieval status varies.",
             },
             "composite_score": {
                 "status": "PRELAUNCH",
@@ -172,7 +146,6 @@ def run_full_pipeline(project_root: Path | None = None) -> dict[str, Any]:
 
     now_iso = datetime.now(UTC).replace(microsecond=0).isoformat()
 
-    # data/current/latest.json
     latest_dashboard = {
         "project": project_defs.get("project", project_defs),
         "as_of": datetime.now(UTC).strftime("%Y-%m-%d"),
@@ -180,7 +153,10 @@ def run_full_pipeline(project_root: Path | None = None) -> dict[str, Any]:
         "composite": {
             "status": "prelaunch",
             "score": None,
-            "message": "The composite Foundation score is locked in PRELAUNCH / RESEARCH. No provisional score is published.",
+            "message": (
+                "The composite Foundation score is locked in PRELAUNCH / RESEARCH. "
+                "No provisional score is published."
+            ),
         },
         "population_anchor": latest_pop.to_dict(),
         "survival_floor": survival_consolidated,
@@ -188,13 +164,20 @@ def run_full_pipeline(project_root: Path | None = None) -> dict[str, Any]:
         "history": [h.to_dict() for h in historical_timeline],
         "data_health": data_health,
         "latest_changes": [
-            f"Reproduced 2025 CPS ASEC (2024 Income) Bottom-30 Population Anchor: ${latest_pop.cutoff:,.2f}/year.",
+            (
+                "Reproduced 2025 CPS ASEC (2024 Income) Bottom-30 Population Anchor: "
+                f"${latest_pop.cutoff:,.2f}/year."
+            ),
             "Cross-checked weighted percentile against independent implementation (diff = 0.0).",
-            "Minimum Sustainable Living Cost: DATA PIPELINE VALIDATION IN PROGRESS under Owner Directive D-016 (prototype outputs retired).",
-            "Ingested 9 registered BLS National Economic Pressure Signals; current retrieval status varies.",
-            "Published 3 historical CPS ASEC vintages in nominal and constant 2024 dollars.",
+            (
+                "Minimum Sustainable Living Cost: DATA PIPELINE VALIDATION IN PROGRESS. "
+                "No headline, Gap, or Adequacy is published."
+            ),
+            "Ingested registered BLS National Economic Pressure Signals; retrieval status varies.",
+            "Published historical CPS ASEC vintages in nominal and constant 2024 dollars.",
         ],
     }
     atomic_write_json(current_dir / "latest.json", latest_dashboard)
+    atomic_write_json(site_data_dir / "latest.json", latest_dashboard)
 
     return latest_dashboard

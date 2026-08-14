@@ -18,44 +18,29 @@ from pathlib import Path
 from typing import Any
 
 from foundation.living_cost.models import ComponentStatus, LivingCostComponentObservation
-from foundation.sources.acquisition import acquire_source
+from foundation.sources.acquisition import record_unretrieved
 
 logger = logging.getLogger(__name__)
 
 USDA_FOOD_PLANS_URL = "https://www.fns.usda.gov/cnpp/usda-food-plans-cost-food-monthly-reports"
 
-# Official USDA Alaska and Hawaii Multipliers relative to U.S. Baseline
-USDA_GEOGRAPHIC_FACTORS = {
-    "AK": 1.25,  # Alaska Urban/Baseline food multiplier
-    "HI": 1.55,  # Hawaii food multiplier based on USDA Honolulu reports
-}
 
-
-def download_usda_food_artifact(
-    year: int, cache_dir: Path, force_download: bool = False
-):
-    """Download required USDA monthly food plan dataset."""
+def download_usda_food_artifact(year: int, cache_dir: Path, force_download: bool = False):
+    """Do not retrieve a fabricated annual USDA CSV. Record the official landing page."""
+    del cache_dir, force_download
     if year not in (2024, 2026):
         raise ValueError(f"Unsupported USDA Food Plan reference year: {year}")
-
-    cache_dir.mkdir(parents=True, exist_ok=True)
-    
-    # URL is a placeholder for the actual CSV constructed from monthly reports
-    # Ideally, this would scrape the page, but for now we expect a merged CSV
-    expected_filename = f"usda_food_plans_{year}.csv"
-    
-    artifact = acquire_source(
-        source_id=f"usda_food_{year}",
-        url=f"{USDA_FOOD_PLANS_URL}/{expected_filename}",
-        cache_dir=cache_dir,
-        expected_filename=expected_filename,
-        force_download=force_download,
+    return record_unretrieved(
+        f"usda_food_low_cost_{year}",
+        status="SOURCE_GAP",
+        resolved_url=USDA_FOOD_PLANS_URL,
+        notes=(
+            "Official CNPP monthly Cost of Food landing page recorded. "
+            "Do not fabricate usda_food_plans_{year}.csv. Resolve each monthly official "
+            "PDF/Excel artifact from the landing page. AK/HI multipliers are not applied "
+            "unless the exact official USDA methodology states those factors."
+        ),
     )
-    
-    if artifact is None:
-        raise RuntimeError(f"Required USDA Food Plan dataset for {year} is UNAVAILABLE.")
-        
-    return artifact
 
 
 def parse_usda_monthly_food_csv(
@@ -72,8 +57,10 @@ def parse_usda_monthly_food_csv(
     - Single Adult = Midpoint * 1.20 (+20% size adjustment)
     - Distinguishes full 12-month Annual Average from YTD Average.
     """
-    file_path = cache_dir / f"usda_food_plans_{reference_year}.csv"
-    
+    file_path = (
+        cache_dir if cache_dir.is_file() else cache_dir / f"usda_food_plans_{reference_year}.csv"
+    )
+
     if not file_path.exists():
         logger.warning(f"USDA Food Plan CSV not found: {file_path}")
         # Return UNAVAILABLE observations
@@ -93,7 +80,7 @@ def parse_usda_monthly_food_csv(
                 source_id=f"usda_food_low_cost_{reference_year}",
                 source_variable="single_adult_low_cost_midpoint_plus20",
                 source_url=USDA_FOOD_PLANS_URL,
-                source_release=f"USDA Food Plans",
+                source_release="USDA Food Plans",
                 source_reference_period=str(reference_year),
                 retrieved_at=retrieved_at,
                 source_artifact_sha256=file_sha256,
@@ -134,7 +121,7 @@ def parse_usda_monthly_food_csv(
                             "female": female_cost,
                         }
                     )
-    except Exception as e:
+    except (OSError, ValueError, csv.Error, UnicodeError) as e:
         logger.error(f"Failed to parse USDA Food Plan CSV: {e}")
 
     observations: list[LivingCostComponentObservation] = []
@@ -142,7 +129,7 @@ def parse_usda_monthly_food_csv(
     for plan_key in ["low_cost", "thrifty"]:
         records = monthly_by_plan[plan_key]
         comp_id = "food_low_cost" if plan_key == "low_cost" else "food_thrifty_sensitivity"
-        
+
         if not records:
             observations.append(
                 LivingCostComponentObservation(
@@ -160,7 +147,7 @@ def parse_usda_monthly_food_csv(
                     source_id=f"usda_food_{plan_key}_{reference_year}",
                     source_variable=f"single_adult_{plan_key}_midpoint_plus20",
                     source_url=USDA_FOOD_PLANS_URL,
-                    source_release=f"USDA Food Plans",
+                    source_release="USDA Food Plans",
                     source_reference_period=str(reference_year),
                     retrieved_at=retrieved_at,
                     source_artifact_sha256=file_sha256,

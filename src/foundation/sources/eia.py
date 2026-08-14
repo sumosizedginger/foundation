@@ -12,39 +12,28 @@ import logging
 from pathlib import Path
 
 from foundation.living_cost.models import ComponentStatus, LivingCostComponentObservation
-from foundation.sources.acquisition import acquire_source
+from foundation.sources.acquisition import record_unretrieved
 
 logger = logging.getLogger(__name__)
 
 EIA_GAS_URL = "https://www.eia.gov/petroleum/gasdiesel/"
 
-# Placeholder for EIA historical price CSV
-EIA_GAS_CSV_URL = "https://www.eia.gov/petroleum/gasdiesel/xls/psw18vwall.csv"
 
-
-def download_eia_gas_artifact(
-    year: int, cache_dir: Path, force_download: bool = False
-):
-    """Download required EIA gasoline price dataset."""
+def download_eia_gas_artifact(year: int, cache_dir: Path, force_download: bool = False):
+    """Do not retrieve a guessed EIA filename. Official landing is recorded as SOURCE_GAP."""
+    del cache_dir, force_download
     if year not in (2024, 2026):
         raise ValueError(f"Unsupported EIA reference year: {year}")
-
-    cache_dir.mkdir(parents=True, exist_ok=True)
-    
-    expected_filename = f"eia_gas_{year}.csv"
-    
-    artifact = acquire_source(
-        source_id=f"eia_gas_{year}",
-        url=EIA_GAS_CSV_URL,
-        cache_dir=cache_dir,
-        expected_filename=expected_filename,
-        force_download=force_download,
+    return record_unretrieved(
+        f"eia_gas_price_{year}",
+        status="SOURCE_GAP",
+        resolved_url=EIA_GAS_URL,
+        notes=(
+            "EIA gasoline landing page is official. A guessed psw18vwall.csv path is not "
+            "an accepted production retrieve URL. Use EIA Open Data / a documented download "
+            "once the exact series and geography are confirmed. PADD/regional is not state-measured."
+        ),
     )
-    
-    if artifact is None:
-        raise RuntimeError(f"Required EIA dataset for {year} is UNAVAILABLE.")
-        
-    return artifact
 
 
 def parse_eia_gas_prices_csv(
@@ -54,8 +43,8 @@ def parse_eia_gas_prices_csv(
     file_sha256: str = "",
 ) -> list[LivingCostComponentObservation]:
     """Parse EIA state retail regular gasoline price dataset."""
-    file_path = cache_dir / f"eia_gas_{reference_year}.csv"
-    
+    file_path = cache_dir if cache_dir.is_file() else cache_dir / f"eia_gas_{reference_year}.csv"
+
     if not file_path.exists():
         logger.warning(f"EIA gas CSV not found: {file_path}")
         return []
@@ -69,12 +58,17 @@ def parse_eia_gas_prices_csv(
                 state_alpha = str(row.get("state") or row.get("State") or "").strip().upper()
                 if not state_alpha:
                     continue
-                    
+
                 gas_price_str = (
-                    row.get("regular_gas_price") or row.get("price_per_gal") or row.get("price") or "0"
+                    row.get("regular_gas_price")
+                    or row.get("price_per_gal")
+                    or row.get("price")
+                    or "0"
                 )
                 try:
-                    price_per_gal = float(str(gas_price_str).replace("$", "").replace(",", "").strip())
+                    price_per_gal = float(
+                        str(gas_price_str).replace("$", "").replace(",", "").strip()
+                    )
                 except ValueError:
                     continue
 
@@ -104,7 +98,7 @@ def parse_eia_gas_prices_csv(
                     notes=f"EIA official measured average price for regular retail gasoline in {state_alpha}: ${price_per_gal:.3f}/gal.",
                 )
                 observations.append(obs)
-    except Exception as e:
+    except (OSError, ValueError, csv.Error, UnicodeError) as e:
         logger.error(f"Failed to parse EIA Gas CSV: {e}")
 
     return observations

@@ -170,6 +170,22 @@ Registered BLS indicators (U-6, Labor Force Participation, Employment-Population
 
 ---
 
+## D-017 — Empirical source layer takeover rules
+
+**Date:** 2026-08-14  
+**Status:** ACCEPTED (Owner Directive via GROK.MD)
+
+1. Deliverable 1 is an evidence/source-integrity rebuild, not authorization to publish Minimum Sustainable Living Cost, Gap, or Adequacy.
+2. Production retrieve paths must be official landing pages or proven publisher artifacts. Guessed government filenames are forbidden.
+3. `VALIDATED` requires byte verification from a retrieval sidecar. Filesystem mtime is not `retrieved_at`.
+4. Fixture tests are not evidence of official file layout. Production code may not read `tests/`.
+5. Data Health cannot be `HEALTHY` while Axis 2 is unpublished.
+6. Shared ACS 2023 5-Year weights may be used for both 2024 and 2026 cost years if labeled as the weight source vintage, not as a 2026 Census file.
+7. MEPS HC-243 (2022 data year) may be used as the OOP source vintage if labeled honestly and not called “2024 MEPS.”
+8. 2025 ASEC SHA values `318845a2…c0deef0b` and `318845a2…ea6497284` remain dual-recorded until the archive is re-retrieved and hashed. Do not silently pick one.
+
+---
+
 ## Pending decisions
 
 ### P-001 — Composite normalization

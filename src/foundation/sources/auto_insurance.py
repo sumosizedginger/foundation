@@ -19,7 +19,7 @@ import logging
 from pathlib import Path
 
 from foundation.living_cost.models import ComponentStatus, LivingCostComponentObservation
-from foundation.sources.acquisition import acquire_source
+from foundation.sources.acquisition import record_unretrieved
 
 logger = logging.getLogger(__name__)
 
@@ -27,33 +27,21 @@ NAIC_BASE_URL = (
     "https://content.naic.org/research-actuarial-services/auto-insurance-database-report"
 )
 
-# Licensed publication: requires manual placement or secured authenticated download
-NAIC_LICENSED_CSV_URL = "https://content.naic.org/licensed-artifacts/naic_auto_insurance.csv"
 
-
-def download_naic_artifact(
-    year: int, cache_dir: Path, force_download: bool = False
-):
-    """Download or verify required NAIC Auto Insurance dataset."""
+def download_naic_artifact(year: int, cache_dir: Path, force_download: bool = False):
+    """NAIC Auto Insurance Database Report is licensed. Do not invent a download URL."""
+    del cache_dir, force_download
     if year not in (2024, 2026):
         raise ValueError(f"Unsupported NAIC reference year: {year}")
-
-    cache_dir.mkdir(parents=True, exist_ok=True)
-    
-    expected_filename = f"naic_auto_insurance_{year}.csv"
-    
-    artifact = acquire_source(
-        source_id=f"naic_auto_ins_{year}",
-        url=NAIC_LICENSED_CSV_URL,
-        cache_dir=cache_dir,
-        expected_filename=expected_filename,
-        force_download=force_download,
+    return record_unretrieved(
+        f"naic_auto_ins_{year}",
+        status="LICENSING_REVIEW",
+        resolved_url=NAIC_BASE_URL,
+        notes=(
+            "NAIC Auto Insurance Database Report is a licensed publication. "
+            "No official public automated CSV exists. Do not fabricate a download URL."
+        ),
     )
-    
-    if artifact is None:
-        raise RuntimeError(f"Required NAIC dataset for {year} is UNAVAILABLE. Verify licensing and artifact placement.")
-        
-    return artifact
 
 
 def parse_naic_auto_insurance_csv(
@@ -63,8 +51,12 @@ def parse_naic_auto_insurance_csv(
     file_sha256: str = "",
 ) -> list[LivingCostComponentObservation]:
     """Parse NAIC state auto insurance average expenditure dataset."""
-    file_path = cache_dir / f"naic_auto_insurance_{reference_year}.csv"
-    
+    file_path = (
+        cache_dir
+        if cache_dir.is_file()
+        else cache_dir / f"naic_auto_insurance_{reference_year}.csv"
+    )
+
     if not file_path.exists():
         logger.warning(f"NAIC auto insurance CSV not found: {file_path}")
         return []
@@ -78,7 +70,7 @@ def parse_naic_auto_insurance_csv(
                 state_alpha = str(row.get("state") or row.get("State") or "").strip().upper()
                 if not state_alpha:
                     continue
-                    
+
                 prem_str = (
                     row.get("average_annual_premium")
                     or row.get("combined_expenditure")
@@ -123,7 +115,7 @@ def parse_naic_auto_insurance_csv(
                     ),
                 )
                 observations.append(obs)
-    except Exception as e:
+    except (OSError, ValueError, csv.Error, UnicodeError) as e:
         logger.error(f"Failed to parse NAIC CSV: {e}")
 
     return observations

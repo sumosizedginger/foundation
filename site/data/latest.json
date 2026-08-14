@@ -8,10 +8,10 @@
   "data_health": {
     "bls_pressure_signals_count": 9,
     "cps_asec_verified_vintages": 3,
-    "living_cost_status": "research_estimate",
-    "states_modeled": 51,
-    "status": "healthy",
-    "validation_state": "all_checks_passed"
+    "living_cost_status": "pipeline_validation_in_progress",
+    "states_modeled": 0,
+    "status": "PARTIAL",
+    "validation_state": "axis2_unpublished"
   },
   "history": [
     {

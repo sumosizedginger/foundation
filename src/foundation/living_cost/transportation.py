@@ -127,10 +127,8 @@ def calculate_transportation(
 
     if not retrieved_at:
         from datetime import UTC, datetime
+
         retrieved_at = datetime.now(UTC).replace(microsecond=0).isoformat()
-        
-    if not source_sha256:
-        source_sha256 = "N/A_ESTIMATED_MODEL"
 
     return LivingCostComponentObservation(
         component_id="transportation_auto",
@@ -147,7 +145,7 @@ def calculate_transportation(
         source_id=f"transport_model_{reference_year}",
         source_variable="single_adult_auto_ownership_model",
         source_url="https://www.fhwa.dot.gov/",
-        source_release=f"FHWA NHTS / EIA / NAIC Synthesized Transport Model ({reference_year})",
+        source_release=f"Transportation model assumptions ({reference_year})",
         source_reference_period=str(reference_year),
         retrieved_at=retrieved_at,
         source_artifact_sha256=source_sha256,

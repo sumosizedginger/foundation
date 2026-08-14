@@ -18,39 +18,50 @@ from __future__ import annotations
 import csv
 import logging
 import zipfile
-from datetime import UTC, datetime
 from pathlib import Path
 
 from foundation.living_cost.models import ComponentStatus, LivingCostComponentObservation
 from foundation.percentiles import weighted_percentile
-from foundation.sources.acquisition import acquire_source
+from foundation.sources.acquisition import acquire_source, record_unretrieved
 
 logger = logging.getLogger(__name__)
 
+BLS_CE_LANDING = "https://www.bls.gov/cex/pumd_data.htm"
+BLS_CE_DICTIONARY = "https://www.bls.gov/cex/pumd/ce-pumd-interview-diary-dictionary.xlsx"
+
+# Explicit Interview-year pin. Do not invent a 2026 Interview file.
+# 2024 cost year uses 2024 Interview. 2026 cost year uses the latest published Interview (2024).
+BLS_CE_INTERVIEW_YEAR: dict[int, int] = {
+    2024: 2024,
+    2026: 2024,
+}
+
+
+def get_bls_ce_interview_year(cost_year: int) -> int:
+    if cost_year not in BLS_CE_INTERVIEW_YEAR:
+        raise ValueError(f"Unsupported BLS CE cost year: {cost_year}")
+    return BLS_CE_INTERVIEW_YEAR[cost_year]
+
+
 def get_bls_ce_url(year: int) -> str:
-    """Get the official BLS CE PUM Intrvw ZIP URL."""
-    # Assuming standard BLS PUM URL format
-    # E.g. for 2022, it's intrvw22.zip
-    # Use reference_year - 2 for typical lag, or reference_year - 1 if available
-    # For now, we'll map 2024 to 2022 data (intrvw22.zip) and 2026 to 2024 data (intrvw24.zip)
-    data_year = year - 2
-    short_yr = str(data_year)[-2:]
-    return f"https://www.bls.gov/cex/pumd/data/comma/intrvw{short_yr}.zip"
+    """Official BLS CE Interview CSV zip for the pinned Interview year."""
+    interview_year = get_bls_ce_interview_year(year)
+    short_yr = str(interview_year)[-2:]
+    # 2022+ Interview files live under /csv/, not the legacy /comma/ path.
+    return f"https://www.bls.gov/cex/pumd/data/csv/intrvw{short_yr}.zip"
 
 
-def download_bls_ce_artifact(
-    year: int, cache_dir: Path, force_download: bool = False
-):
+def download_bls_ce_artifact(year: int, cache_dir: Path, force_download: bool = False):
     """Download required BLS CE microdata ZIP."""
     if year not in (2024, 2026):
         raise ValueError(f"Unsupported BLS CE reference year: {year}")
 
     cache_dir.mkdir(parents=True, exist_ok=True)
-    
-    data_year = year - 2
+
+    data_year = get_bls_ce_interview_year(year)
     short_yr = str(data_year)[-2:]
     expected_filename = f"bls_ce_intrvw{short_yr}.zip"
-    
+
     artifact = acquire_source(
         source_id=f"bls_ce_{year}",
         url=get_bls_ce_url(year),
@@ -58,10 +69,18 @@ def download_bls_ce_artifact(
         expected_filename=expected_filename,
         force_download=force_download,
     )
-    
+
     if artifact is None:
-        raise RuntimeError(f"Required BLS CE dataset for {year} is UNAVAILABLE.")
-        
+        return record_unretrieved(
+            f"bls_ce_{year}",
+            status="UNAVAILABLE",
+            resolved_url=get_bls_ce_url(year),
+            notes=(
+                f"Official BLS CE Interview {data_year} CSV zip was not retrieved "
+                f"({get_bls_ce_url(year)}). BLS often returns 403 to automated clients."
+            ),
+        )
+
     return artifact
 
 
@@ -72,10 +91,10 @@ def parse_bls_ce_microdata(
     file_sha256: str = "",
 ) -> list[LivingCostComponentObservation]:
     """Parse BLS CE single-person consumer unit records and compute weighted P25 expenditures from ZIP."""
-    data_year = reference_year - 2
+    data_year = get_bls_ce_interview_year(reference_year)
     short_yr = str(data_year)[-2:]
-    zip_path = cache_dir / f"bls_ce_intrvw{short_yr}.zip"
-    
+    zip_path = cache_dir / f"bls_ce_intrvw{short_yr}.zip" if cache_dir.is_dir() else cache_dir
+
     if not zip_path.exists():
         logger.warning(f"BLS CE ZIP not found: {zip_path}")
         return [
@@ -122,7 +141,7 @@ def parse_bls_ce_microdata(
                 source_artifact_sha256=file_sha256,
                 methodology_version="0.2.0-draft",
                 notes="UNAVAILABLE: BLS CE ZIP could not be found.",
-            )
+            ),
         ]
 
     essentials_vals: list[float] = []
@@ -134,13 +153,14 @@ def parse_bls_ce_microdata(
     try:
         with zipfile.ZipFile(zip_path) as z:
             fmli_files = [f for f in z.namelist() if "fmli" in f.lower() and f.endswith(".csv")]
-            
+
             for fmli_file in fmli_files:
                 with z.open(fmli_file) as fh:
                     import io
+
                     text_fh = io.TextIOWrapper(fh, encoding="utf-8-sig", errors="replace")
                     reader = csv.DictReader(text_fh)
-                    
+
                     for row in reader:
                         fam_size_str = row.get("FAM_SIZE") or row.get("fam_size") or "0"
                         try:
@@ -162,7 +182,7 @@ def parse_bls_ce_microdata(
                         apparcq = float(row.get("APPARCQ") or row.get("apparcq") or 0.0)
                         perscacq = float(row.get("PERSCACQ") or row.get("perscacq") or 0.0)
                         houseqcq = float(row.get("HOUSEQCQ") or row.get("houseqcq") or 0.0)
-                        
+
                         # Note: Quarterly spending is annualized by multiplying by 4
                         ess_val = (apparcq + perscacq + houseqcq) * 4.0
                         if ess_val > 0:
@@ -172,13 +192,13 @@ def parse_bls_ce_microdata(
                         # Recreation: FEETXCQ (Admissions/Fees) + READCQ (Reading)
                         feetxcq = float(row.get("FEETXCQ") or row.get("feetxcq") or 0.0)
                         readcq = float(row.get("READCQ") or row.get("readcq") or 0.0)
-                        
+
                         rec_val = (feetxcq + readcq) * 4.0
                         if rec_val > 0:
                             rec_vals.append(rec_val)
                             rec_weights.append(weight)
 
-    except Exception as e:
+    except (OSError, ValueError, KeyError, csv.Error, zipfile.BadZipFile, UnicodeError) as e:
         logger.error(f"Failed to process BLS CE ZIP: {e}")
         # Will fall through to unavailability below
 

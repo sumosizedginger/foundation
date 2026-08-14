@@ -12,6 +12,7 @@ __pycache__/
 *.sas7bdat
 raw/
 data/raw/
+data/cache/
 site/data/*.tmp
 node_modules/
 .DS_Store

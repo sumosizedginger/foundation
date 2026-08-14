@@ -1,8 +1,8 @@
 # Project Status
 
-**Updated:** 2026-08-13  
+**Updated:** 2026-08-14  
 **Active Methodology Version:** `0.2.0-draft`  
-**Current Milestone:** Minimum Sustainable Living Cost Methodology Migration (Complete & Verified)
+**Current Milestone:** Deliverable 1 — empirical source layer + data integrity rebuild (in progress; not complete)
 
 ---
 
@@ -36,19 +36,15 @@
 - [x] **Data Sources Registry Updated:** HUD FMR, USDA Food Plans, CMS Marketplace PUFs, MEPS, FHWA, NAIC, BLS CE, Census ACS, IRS/State tax schedules.
 - [x] **Implementation Plan Deliverable:** Full production source specification, fields, geographic resolution, licensing, and methodological risk analysis.
 
-### Phases 2–11: Implementation, Calculation & Public Deployment
+### Phases 2–11: Not complete
 
-- [x] **Phase 2 & 3: Source Adapters & Component Calculators:** Implemented modular housing (HUD 1BR), food (USDA Low-Cost & Thrifty), transportation (EIA gas + NAIC insurance + BLS CE auto reserve), healthcare (CMS Silver + MEPS OOP), connectivity & essentials (FCC & BLS CE), recreation (BLS CE P25 & BEA RPP), and resilience reserve.
-- [x] **Phase 4: Deterministic Tax Engine:** Solves `G - Taxes(G) = NetNeeds` using interval bisection for FICA (Social Security & Medicare), Federal single statutory brackets, 50-State + DC tax schedules, and local income taxes.
-- [x] **Phase 5: Local County Engine:** Evaluated local living costs across 50 states + DC.
-- [x] **Phase 6 & 7: State & National Aggregators:** Computed adult-population-weighted P25, Median (P50), P75, weighted mean, min, and max across all 50 states + DC.
-- [x] **Phase 8 & 9: Time-Comparable & Current Vintages:** Built 2024 Comparable Living Cost (National Weighted Median: **$51,220.16**) and 2026 Current Living Cost (National Weighted Median: **$55,551.89**).
-- [x] **Phase 10: Validation, Sensitivities & Benchmark Comparisons:** Sensitivity analysis (Food Thrifty, Health OOP Low/High, Transit Mileage Low/High) and external benchmark divergence analyses (MIT Living Wage, United For ALICE, Official Poverty Measure).
-- [x] **Phase 11: Public Dashboard & Presentation:** Interactive 50-state + DC sortable table, state detail provenance inspection, dual-axis cards, Time-Comparable Survival Gap (**-$29,420.16**), and Adequacy Ratio (**0.43 / 43%**).
+The $51,220.16 / $55,551.89 prototype headlines, 51-state rankings, -$29,420.16 gap, and 43% adequacy ratio are **retired**. They were produced from synthetic geography and are not current results.
+
+Current work is the empirical source layer: official HUD/CMS/MEPS/BLS artifacts or explicit `SOURCE_GAP` / `LICENSING_REVIEW`. No living-cost headline is authorized.
 
 ---
 
 ## 3. Explicit Release Locks
 
 - [x] Composite Foundation Score remains locked in `PRELAUNCH / RESEARCH`.
-- [x] Minimum Sustainable Living Cost is fully implemented and labeled `RESEARCH ESTIMATE (0.2.0-draft)` until formal promotion gates.
+- [x] Minimum Sustainable Living Cost remains `DATA PIPELINE VALIDATION IN PROGRESS` / unpublished.

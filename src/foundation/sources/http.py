@@ -31,7 +31,13 @@ def download_file(
     digest = hashlib.sha256()
     total = 0
 
-    with requests.get(url, stream=True, timeout=timeout) as response:
+    headers = {
+        "User-Agent": (
+            "The-Foundation/0.2 (+https://github.com/sumosizedginger/foundation; "
+            "public economic measurement research)"
+        )
+    }
+    with requests.get(url, stream=True, timeout=timeout, headers=headers) as response:
         response.raise_for_status()
         content_type = response.headers.get("content-type")
 
@@ -50,6 +56,22 @@ def download_file(
                     raise RuntimeError("Download exceeded configured byte limit")
                 digest.update(chunk)
                 fh.write(chunk)
+
+    if total <= 0:
+        temp.unlink(missing_ok=True)
+        raise RuntimeError(f"Refusing empty download from {url}")
+
+    if (
+        content_type
+        and "html" in content_type.lower()
+        and destination.suffix.lower()
+        not in {
+            ".html",
+            ".htm",
+        }
+    ):
+        temp.unlink(missing_ok=True)
+        raise RuntimeError(f"Refusing HTML response for non-HTML destination from {url}")
 
     temp.replace(destination)
     return DownloadResult(

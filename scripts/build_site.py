@@ -11,9 +11,25 @@ CURRENT = ROOT / "data" / "current"
 METADATA = ROOT / "data" / "metadata"
 
 
+RETIRED_HEADLINE_TOKENS = ("27960", "51220.16", "55551.89")
+
+
 def validate_json(path: Path) -> dict:
     with path.open("r", encoding="utf-8") as fh:
         return json.load(fh)
+
+
+def assert_no_retired_headlines(path: Path, payload: dict) -> None:
+    if path.name.startswith("validation_report_"):
+        return
+    raw = json.dumps(payload)
+    if "retired_prototype" in raw:
+        return
+    for token in RETIRED_HEADLINE_TOKENS:
+        if token in raw:
+            raise SystemExit(
+                f"{path} contains retired prototype headline token {token} outside a retired record"
+            )
 
 
 def main() -> int:
@@ -33,7 +49,8 @@ def main() -> int:
     for fname in json_files:
         src = CURRENT / fname
         if src.exists():
-            validate_json(src)
+            payload = validate_json(src)
+            assert_no_retired_headlines(src, payload)
             shutil.copy2(src, PUBLIC_DATA / fname)
             print(f"Copied {fname} to {PUBLIC_DATA}")
 

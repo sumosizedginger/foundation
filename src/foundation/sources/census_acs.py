@@ -12,14 +12,14 @@ STRICT METHODOLOGICAL RULES:
 
 from __future__ import annotations
 
-import hashlib
 import json
 import logging
+import os
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from foundation.sources.acquisition import acquire_source
+from foundation.sources.acquisition import acquire_source, record_unretrieved
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +39,9 @@ ACS_VARS = [
     "B01001_030E",  # F 15-17
 ]
 
-CENSUS_ACS_5YR_URL = f"https://api.census.gov/data/2023/acs/acs5?get={','.join(ACS_VARS)}&for=county:*"
+CENSUS_ACS_5YR_URL = (
+    f"https://api.census.gov/data/2023/acs/acs5?get={','.join(ACS_VARS)}&for=county:*"
+)
 
 # Valid 2-digit State FIPS for 50 States + DC
 VALID_STATE_FIPS = {
@@ -111,14 +113,24 @@ def download_acs_county_population_artifact(
     force_download: bool = False,
 ):
     """Download or retrieve cached official Census ACS 5-Year dataset (JSON)."""
-    if year != 2024:
-        # Currently the methodology strictly pins to 2023 ACS for the 2024 vintage
-        raise ValueError(f"Unsupported Census ACS reference year: {year}")
+    if year not in (2024, 2026):
+        raise ValueError(f"Unsupported Census ACS project cost year: {year}")
 
     cache_dir.mkdir(parents=True, exist_ok=True)
+    api_key = os.environ.get("CENSUS_API_KEY", "").strip()
+    if not api_key:
+        return record_unretrieved(
+            f"census_acs5_{year}",
+            status="SOURCE_GAP",
+            resolved_url=CENSUS_ACS_5YR_URL,
+            notes=(
+                "Census API now requires CENSUS_API_KEY. Unauthenticated requests return "
+                "an HTML 'Missing Key' page, which is not ACS data."
+            ),
+        )
     return acquire_source(
         source_id=f"census_acs5_{year}",
-        url=CENSUS_ACS_5YR_URL,
+        url=f"{CENSUS_ACS_5YR_URL}&key={api_key}",
         cache_dir=cache_dir,
         expected_filename="acs_5yr_county_pop_2023.json",
         force_download=force_download,
