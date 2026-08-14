@@ -1,0 +1,8 @@
+fips2010,state_alpha,county_name,metro_name,fmr_0,fmr_1,fmr_2,fmr_3,fmr_4
+01001,AL,Autauga County,Montgomery AL MSA,850,940,1120,1450,1800
+01003,AL,Baldwin County,Daphne-Fairhope-Foley AL MSA,1020,1110,1350,1720,2100
+06001,CA,Alameda County,Oakland-Fremont CA HUD Metro FMR Area,1750,2120,2650,3450,4100
+06075,CA,San Francisco County,San Francisco CA HUD Metro FMR Area,2050,2490,3120,4050,4800
+36061,NY,New York County,New York NY HUD Metro FMR Area,2100,2350,2700,3400,3800
+48201,TX,Harris County,Houston-The Woodlands-Sugar Land TX HUD Metro FMR Area,1050,1180,1420,1850,2350
+53033,WA,King County,Seattle-Bellevue WA HUD Metro FMR Area,1820,2050,2540,3420,4050

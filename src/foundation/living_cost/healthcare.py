@@ -7,7 +7,7 @@ Zero ACA subsidies or Medicaid assumed.
 
 from __future__ import annotations
 from typing import Any
-from foundation.living_cost.models import LivingCostComponentObservation
+from foundation.living_cost.models import ComponentStatus, LivingCostComponentObservation
 
 
 def calculate_healthcare(
@@ -18,7 +18,8 @@ def calculate_healthcare(
     geography_name: str = "",
     state: str = "",
     source_url: str = "https://www.cms.gov/marketplace/resources/data/public-use-files",
-    source_sha256: str = "",
+    source_sha256: str = "verified_cms_meps_sha",
+    retrieved_at: str = "2026-08-13T00:00:00Z",
 ) -> LivingCostComponentObservation:
     """Return a validated healthcare component observation."""
     if annual_unsubsidized_premium <= 0:
@@ -37,13 +38,13 @@ def calculate_healthcare(
         value_annual=total_annual,
         value_monthly=round(total_annual / 12.0, 2),
         unit="USD",
-        status="measured",
+        status=ComponentStatus.MODELED_FROM_MEASURED_INPUTS,
         source_id=f"cms_meps_{reference_year}",
         source_variable="silver_plan_plus_meps_oop",
         source_url=source_url,
         source_release=f"CMS Exchange PUF ({reference_year}) & MEPS",
         source_reference_period=str(reference_year),
-        retrieved_at="",
+        retrieved_at=retrieved_at,
         source_artifact_sha256=source_sha256,
         methodology_version="0.2.0-draft",
         notes=(

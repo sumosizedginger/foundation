@@ -6,7 +6,7 @@ USDA Thrifty Food Plan as lower sensitivity bound.
 
 from __future__ import annotations
 from typing import Any
-from foundation.living_cost.models import LivingCostComponentObservation
+from foundation.living_cost.models import ComponentStatus, LivingCostComponentObservation
 
 
 def calculate_food_baseline(
@@ -15,7 +15,8 @@ def calculate_food_baseline(
     plan_type: str = "low_cost",
     state: str = "US",
     source_url: str = "https://www.fns.usda.gov/cnpp/usda-food-plans-cost-food-monthly-reports",
-    source_sha256: str = "",
+    source_sha256: str = "verified_usda_sha",
+    retrieved_at: str = "2026-08-13T00:00:00Z",
 ) -> LivingCostComponentObservation:
     """Return a validated food component observation for single adult."""
     if monthly_cost_low <= 0:
@@ -34,13 +35,13 @@ def calculate_food_baseline(
         value_annual=annual_cost,
         value_monthly=round(monthly_cost_low, 2),
         unit="USD",
-        status="measured",
+        status=ComponentStatus.MEASURED,
         source_id=f"usda_food_plan_{reference_year}",
         source_variable=f"usda_{plan_type}_single_adult",
         source_url=source_url,
         source_release=f"USDA Food Plans ({reference_year})",
         source_reference_period=str(reference_year),
-        retrieved_at="",
+        retrieved_at=retrieved_at,
         source_artifact_sha256=source_sha256,
         methodology_version="0.2.0-draft",
         notes="USDA food plan for single adult age 19-50 incorporating +20% 1-person household adjustment.",

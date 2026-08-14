@@ -46,6 +46,6 @@ jobs:
           if git diff --staged --quiet; then
             echo "No data changes detected."
           else
-            git commit -m "chore(data): automated deterministic pipeline update [skip ci]"
+            git commit -m "chore(data): automated deterministic pipeline update"
             git push origin main
           fi

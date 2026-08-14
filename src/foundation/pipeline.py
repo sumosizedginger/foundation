@@ -126,9 +126,7 @@ def run_full_pipeline(project_root: Path | None = None) -> dict:
         "latest_changes": [
             f"Reproduced 2025 CPS ASEC (2024 Income) Bottom-30 Population Anchor: ${latest_pop.cutoff:,.2f}/year.",
             "Cross-checked weighted percentile against independent implementation (diff = 0.0).",
-            f"Computed 2024 Minimum Sustainable Living Cost (National Weighted Median): ${survival_consolidated['minimum_sustainable_living_cost_2024']['weighted_median_gross']:,.2f}/year across 50 states + DC.",
-            f"Computed Time-Comparable 2024 Survival Gap: ${survival_consolidated['survival_gap_2024']:,.2f} (Adequacy Ratio: {survival_consolidated['adequacy_ratio_2024']:.2f}).",
-            f"Computed 2026 Current Minimum Sustainable Living Cost: ${survival_consolidated['minimum_sustainable_living_cost_2026']['weighted_median_gross']:,.2f}/year.",
+            "Minimum Sustainable Living Cost: DATA PIPELINE VALIDATION IN PROGRESS under Owner Directive D-016 (prototype outputs retired).",
             "Ingested 9 verified BLS National Economic Pressure Signals.",
             "Published 3 historical CPS ASEC vintages in nominal and constant 2024 dollars.",
         ],

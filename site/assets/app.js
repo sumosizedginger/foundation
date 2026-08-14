@@ -24,10 +24,9 @@ const moneyExactFmt = new Intl.NumberFormat("en-US", {
 const numFmt = new Intl.NumberFormat("en-US");
 
 let globalDashboardData = null;
-let globalLivingCostData2024 = null;
 let lastFocusedElement = null;
-let currentSortKey = "median";
-let currentSortAsc = false;
+let currentSortKey = "state";
+let currentSortAsc = true;
 
 async function fetchJson(url) {
   const res = await fetch(url, { cache: "no-store" });
@@ -150,98 +149,20 @@ function renderStateTable(states) {
     const tr = document.createElement("tr");
     const td = document.createElement("td");
     td.colSpan = 7;
-    td.style.padding = "2rem";
+    td.style.padding = "2.5rem 1.5rem";
     td.style.textAlign = "center";
-    td.textContent = "State living cost distributions currently unavailable.";
+    td.style.color = "var(--muted)";
+    td.innerHTML = `
+      <strong>DATA PIPELINE VALIDATION IN PROGRESS</strong><br>
+      <span style="font-size:0.88rem; color:var(--subtle); margin-top:0.4rem; display:inline-block;">
+        Official county-level HUD Fair Market Rents and Census ACS adult population join validation is currently executing.
+        Provisional prototype state values have been retired.
+      </span>
+    `;
     tr.appendChild(td);
     tbody.appendChild(tr);
     return;
   }
-
-  // Sort states
-  const sorted = [...states].sort((a, b) => {
-    let valA = a.weighted_median_gross;
-    let valB = b.weighted_median_gross;
-    if (currentSortKey === "state") {
-      valA = a.state_name;
-      valB = b.state_name;
-      return currentSortAsc
-        ? valA.localeCompare(valB)
-        : valB.localeCompare(valA);
-    } else if (currentSortKey === "p25") {
-      valA = a.weighted_p25_gross;
-      valB = b.weighted_p25_gross;
-    } else if (currentSortKey === "p75") {
-      valA = a.weighted_p75_gross;
-      valB = b.weighted_p75_gross;
-    } else if (currentSortKey === "min") {
-      valA = a.min_locality_gross;
-      valB = b.min_locality_gross;
-    } else if (currentSortKey === "max") {
-      valA = a.max_locality_gross;
-      valB = b.max_locality_gross;
-    }
-    return currentSortAsc ? valA - valB : valB - valA;
-  });
-
-  sorted.forEach((st, idx) => {
-    const tr = document.createElement("tr");
-
-    // Rank
-    const tdRank = document.createElement("td");
-    tdRank.className = "mono text-right";
-    tdRank.style.color = "var(--subtle)";
-    tdRank.textContent = String(idx + 1);
-
-    // State Name
-    const tdName = document.createElement("td");
-    tdName.style.fontWeight = "700";
-    const stBtn = document.createElement("button");
-    stBtn.type = "button";
-    stBtn.className = "btn-link";
-    stBtn.style.color = "var(--text)";
-    stBtn.textContent = `${st.state_name} (${st.state})`;
-    stBtn.addEventListener("click", () => openStateDetail(st.state, stBtn));
-    tdName.appendChild(stBtn);
-
-    // Weighted Median (Primary)
-    const tdMed = document.createElement("td");
-    tdMed.className = "mono text-right";
-    tdMed.style.fontWeight = "800";
-    tdMed.style.color = "var(--accent)";
-    tdMed.textContent = moneyFmt.format(st.weighted_median_gross);
-
-    // P25
-    const tdP25 = document.createElement("td");
-    tdP25.className = "mono text-right";
-    tdP25.textContent = moneyFmt.format(st.weighted_p25_gross);
-
-    // P75
-    const tdP75 = document.createElement("td");
-    tdP75.className = "mono text-right";
-    tdP75.textContent = moneyFmt.format(st.weighted_p75_gross);
-
-    // Min County
-    const tdMin = document.createElement("td");
-    tdMin.className = "mono text-right";
-    tdMin.style.color = "var(--muted)";
-    tdMin.textContent = moneyFmt.format(st.min_locality_gross);
-
-    // Max County
-    const tdMax = document.createElement("td");
-    tdMax.className = "mono text-right";
-    tdMax.style.color = "var(--muted)";
-    tdMax.textContent = moneyFmt.format(st.max_locality_gross);
-
-    tr.appendChild(tdRank);
-    tr.appendChild(tdName);
-    tr.appendChild(tdMed);
-    tr.appendChild(tdP25);
-    tr.appendChild(tdP75);
-    tr.appendChild(tdMin);
-    tr.appendChild(tdMax);
-    tbody.appendChild(tr);
-  });
 }
 
 // Render Quantiles safely
@@ -413,7 +334,7 @@ function openAnchorProvenance(triggerElement) {
   showModal();
 }
 
-// Open Living Cost Provenance / State Detail
+// Open Living Cost Status / Audit Modal
 function openLivingCostProvenance(triggerElement) {
   lastFocusedElement = triggerElement;
   const title = document.getElementById("modal-title");
@@ -421,11 +342,9 @@ function openLivingCostProvenance(triggerElement) {
   if (!title || !body) return;
 
   const surv = globalDashboardData?.survival_floor || {};
-  const lc2024 = surv.minimum_sustainable_living_cost_2024 || {};
-  const benchmarks = surv.benchmark_comparisons || {};
-  const sens = surv.sensitivities || {};
+  const retired = surv.retired_prototype_records || {};
 
-  title.textContent = "Minimum Sustainable Living Cost (0.2.0-draft)";
+  title.textContent = "Minimum Sustainable Living Cost — Data Pipeline Audit";
   body.innerHTML = "";
 
   function makeItem(label, contentNode) {
@@ -439,93 +358,34 @@ function openLivingCostProvenance(triggerElement) {
     return wrap;
   }
 
-  // Model Summary
-  const summaryBox = document.createElement("div");
-  summaryBox.className = "provenance-val";
-  summaryBox.style.borderLeft = "3px solid var(--accent)";
-  summaryBox.innerHTML = `<strong>RESEARCH ESTIMATE (0.2.0-draft)</strong><br>
-    Built bottom-up from county-level 1BR Fair Market Rents (HUD), USDA Low-Cost Food Plan, explicit automobile ownership model (EIA gas, NAIC insurance, maintenance/reserve), unsubsidized Silver Marketplace health insurance (CMS/state PUFs) + MEPS expected utilization, essentials, recreation, and a deterministic gross-income tax solver across all 50 states + DC.<br><br>
-    <strong>2024 National Weighted Median:</strong> ${moneyFmt.format(lc2024.weighted_median_gross || 0)}/yr (P25: ${moneyFmt.format(lc2024.weighted_p25_gross || 0)}, P75: ${moneyFmt.format(lc2024.weighted_p75_gross || 0)})<br>
-    <strong>Lowest State Median:</strong> ${lc2024.lowest_state?.state_name} (${moneyFmt.format(lc2024.lowest_state?.median_gross || 0)})<br>
-    <strong>Highest State Median:</strong> ${lc2024.highest_state?.state_name} (${moneyFmt.format(lc2024.highest_state?.median_gross || 0)})`;
-  body.appendChild(makeItem("National Distribution Summary", summaryBox));
+  // Pipeline Status Box
+  const statusBox = document.createElement("div");
+  statusBox.className = "provenance-val";
+  statusBox.style.borderLeft = "3px solid var(--accent)";
+  statusBox.innerHTML = `
+    <strong>STATUS: DATA PIPELINE VALIDATION IN PROGRESS</strong><br>
+    The initial 0.2.0-draft prototype outputs ($51,220.16 / $55,551.89) have been retired under Owner Directive because provisional state-level assumptions and synthetic locality tiers did not meet the project's empirical county-level source standard.<br><br>
+    The production pipeline is currently ingesting and joining:<br>
+    • <strong>HUD Fair Market Rents:</strong> Actual FY2024 and FY2026 1BR gross rents across all ~3,143 real counties.<br>
+    • <strong>Census ACS 5-Year:</strong> County-level adult population weights (Age 18+).<br>
+    • <strong>CMS Marketplace PUFs:</strong> Rating-area unsubsidized Silver premiums.<br>
+    • <strong>Deterministic Tax Solver:</strong> Statutory 2024 & 2026 schedules with county-level local tax attachment.
+  `;
+  body.appendChild(makeItem("Source Integrity & Audit Directive", statusBox));
 
-  // Sensitivity Analysis
-  const sensBox = document.createElement("div");
-  sensBox.className = "provenance-val";
-  sensBox.innerHTML = `
-    • <strong>Food Thrifty Sensitivity:</strong> ${moneyFmt.format(sens.food_thrifty_sensitivity_gross || 0)}/yr<br>
-    • <strong>Healthcare Low Utilization:</strong> ${moneyFmt.format(sens.health_low_utilization_gross || 0)}/yr<br>
-    • <strong>Healthcare High Utilization:</strong> ${moneyFmt.format(sens.health_high_utilization_gross || 0)}/yr<br>
-    • <strong>Transit Low Mileage (9k mi):</strong> ${moneyFmt.format(sens.transport_low_mileage_gross || 0)}/yr<br>
-    • <strong>Transit High Mileage (14k mi):</strong> ${moneyFmt.format(sens.transport_high_mileage_gross || 0)}/yr`;
-  body.appendChild(makeItem("Model Sensitivity Bounds", sensBox));
-
-  // Benchmark Comparisons
-  const benchBox = document.createElement("div");
-  benchBox.className = "provenance-val";
-  Object.keys(benchmarks).forEach((bKey) => {
-    const b = benchmarks[bKey];
-    const bRow = document.createElement("div");
-    bRow.style.marginBottom = "0.6rem";
-    bRow.innerHTML = `• <strong>${b.name}:</strong> ${moneyFmt.format(b.estimated_single_adult_gross || 0)} (${b.geography})<br><span style="font-size:0.8rem; color:var(--muted);">${b.methodological_divergence}</span>`;
-    benchBox.appendChild(bRow);
-  });
-  body.appendChild(makeItem("Benchmark Comparisons & Divergences", benchBox));
-
-  showModal();
-}
-
-// Open State Detail Modal
-function openStateDetail(stateCode, triggerElement) {
-  lastFocusedElement = triggerElement;
-  const title = document.getElementById("modal-title");
-  const body = document.getElementById("modal-body");
-  if (!title || !body) return;
-
-  const states =
-    globalDashboardData?.survival_floor?.state_distributions_2024 || [];
-  const st = states.find((s) => s.state === stateCode);
-  if (!st) return;
-
-  title.textContent = `${st.state_name} (${st.state}) — Minimum Sustainable Living Cost`;
-  body.innerHTML = "";
-
-  function makeItem(label, text) {
-    const wrap = document.createElement("div");
-    wrap.className = "provenance-item";
-    const lbl = document.createElement("p");
-    lbl.className = "provenance-label";
-    lbl.textContent = label;
-    const val = document.createElement("div");
-    val.className = "provenance-val";
-    val.innerHTML = text;
-    wrap.appendChild(lbl);
-    wrap.appendChild(val);
-    return wrap;
+  // Prototype Historical Record
+  if (retired.prototype_2024_national_median) {
+    const protoBox = document.createElement("div");
+    protoBox.className = "provenance-val";
+    protoBox.innerHTML = `
+      <strong>Retired Prototype Records (Non-Authoritative):</strong><br>
+      • Prototype 2024 National Median: ${moneyFmt.format(retired.prototype_2024_national_median)}<br>
+      • Prototype 2026 National Median: ${moneyFmt.format(retired.prototype_2026_national_median)}<br>
+      • Prototype Survival Gap: ${moneyFmt.format(retired.prototype_survival_gap_2024)}<br>
+      <em>Reason for retirement: ${retired.retired_reason}</em>
+    `;
+    body.appendChild(makeItem("Historical Prototype Audit Trail", protoBox));
   }
-
-  body.appendChild(
-    makeItem(
-      "State Summary (2024 Reference Year)",
-      `<strong>Population-Weighted Median Gross Income:</strong> ${moneyFmt.format(st.weighted_median_gross)}/yr (${moneyFmt.format(st.weighted_median_gross / 12)}/mo)<br>
-       <strong>Weighted 25th Percentile:</strong> ${moneyFmt.format(st.weighted_p25_gross)}/yr<br>
-       <strong>Weighted 75th Percentile:</strong> ${moneyFmt.format(st.weighted_p75_gross)}/yr<br>
-       <strong>Weighted Mean:</strong> ${moneyFmt.format(st.weighted_mean_gross)}/yr<br>
-       <strong>Lowest Observed County Floor:</strong> ${moneyFmt.format(st.min_locality_gross)}/yr<br>
-       <strong>Highest Observed County Floor:</strong> ${moneyFmt.format(st.max_locality_gross)}/yr<br>
-       <strong>Represented Adult Population:</strong> ${numFmt.format(st.represented_adult_population)} persons`,
-    ),
-  );
-
-  const compBox = document.createElement("div");
-  compBox.className = "provenance-val";
-  compBox.innerHTML = `
-    <strong>Core Net Basic Living Needs:</strong> ${moneyFmt.format(st.weighted_median_net_needs)}/yr<br>
-    ↳ Includes independent 1BR FMR housing, USDA Low-Cost food, auto ownership (fuel, insurance, maintenance, replacement reserve), unsubsidized Silver health insurance + MEPS out-of-pocket, mobile & broadband connectivity, essentials, and modest recreation.<br><br>
-    <strong>Mandatory Taxes to Generate Net Needs:</strong> ${moneyFmt.format(st.weighted_median_gross - st.weighted_median_net_needs)}/yr<br>
-    ↳ Solved deterministically incorporating FICA Social Security (6.2%), Medicare (1.45%), Federal Income Tax, and ${st.state_name} State Income Tax.`;
-  body.appendChild(makeItem("Component & Tax Breakdown", compBox));
 
   showModal();
 }
@@ -582,7 +442,7 @@ function openSignalProvenance(seriesId, triggerElement) {
   showModal();
 }
 
-// Bind Static Event Listeners & Table Sort Headers
+// Bind Static Event Listeners
 function bindEventListeners() {
   const btnAnchor = document.getElementById("btn-inspect-anchor");
   if (btnAnchor) {
@@ -607,23 +467,6 @@ function bindEventListeners() {
       if (e.target === modal) closeModal();
     });
   }
-
-  // Sort buttons
-  const sortHeaders = document.querySelectorAll("[data-sort-key]");
-  sortHeaders.forEach((th) => {
-    th.addEventListener("click", () => {
-      const key = th.getAttribute("data-sort-key");
-      if (currentSortKey === key) {
-        currentSortAsc = !currentSortAsc;
-      } else {
-        currentSortKey = key;
-        currentSortAsc = key === "state";
-      }
-      renderStateTable(
-        globalDashboardData?.survival_floor?.state_distributions_2024 || [],
-      );
-    });
-  });
 }
 
 // Main Boot Routine
@@ -637,7 +480,7 @@ async function boot() {
     // Set Status Strip
     setText(
       "stage-status-text",
-      `RESEARCH INSTRUMENT · Canonical Population Anchor Verified · Minimum Sustainable Living Cost 50-State Distribution Modeled · Methodology ${latest.project?.methodology_version || "0.2.0-draft"}`,
+      `RESEARCH INSTRUMENT · Canonical Population Anchor Verified · Minimum Sustainable Living Cost Data Pipeline Validation In Progress`,
     );
 
     // Population Anchor (Axis 1)
@@ -663,18 +506,14 @@ async function boot() {
     const lc2024 = surv.minimum_sustainable_living_cost_2024 || {};
     const lc2026 = surv.minimum_sustainable_living_cost_2026 || {};
 
-    if (lc2024.weighted_median_gross) {
+    if (lc2024.weighted_median_gross != null) {
       setText(
         "living-cost-value",
         moneyFmt.format(lc2024.weighted_median_gross),
       );
       setText(
         "living-cost-monthly",
-        `≈ ${moneyFmt.format(lc2024.weighted_median_gross / 12)} / month (National Weighted Median)`,
-      );
-      setText(
-        "living-cost-detail",
-        `P25: ${moneyFmt.format(lc2024.weighted_p25_gross)} | P75: ${moneyFmt.format(lc2024.weighted_p75_gross)} · Bottom-up county model across 50 states + DC`,
+        `≈ ${moneyFmt.format(lc2024.weighted_median_gross / 12)} / month`,
       );
       setText("living-cost-badge", surv.status_label || "RESEARCH ESTIMATE");
       setText(
@@ -685,21 +524,21 @@ async function boot() {
         "adequacy-ratio-val",
         `${surv.adequacy_ratio_2024.toFixed(2)} (${surv.adequacy_percent_2024}%)`,
       );
-
-      // 2026 Current Vintage Display
-      if (lc2026.weighted_median_gross) {
-        setText(
-          "current-2026-val",
-          `${moneyFmt.format(lc2026.weighted_median_gross)} / yr`,
-        );
-        setText(
-          "current-2026-sub",
-          `P25: ${moneyFmt.format(lc2026.weighted_p25_gross)} · P75: ${moneyFmt.format(lc2026.weighted_p75_gross)}`,
-        );
-      }
     } else {
-      setText("living-cost-value", "DATA UNAVAILABLE");
-      setText("living-cost-badge", "UNAVAILABLE");
+      setText("living-cost-value", "VALIDATION IN PROGRESS");
+      setText(
+        "living-cost-monthly",
+        "Provisional prototype outputs retired under Owner Directive",
+      );
+      setText(
+        "living-cost-detail",
+        "County-level HUD FMR & Census ACS adult population join audit underway.",
+      );
+      setText("living-cost-badge", "VALIDATION IN PROGRESS");
+      setText("survival-gap-val", "IN PROGRESS");
+      setText("adequacy-ratio-val", "IN PROGRESS");
+      setText("current-2026-val", "IN PROGRESS");
+      setText("current-2026-sub", "Validation in progress");
     }
 
     // Composite Score
@@ -711,9 +550,7 @@ async function boot() {
     );
 
     // 50 States + DC Table
-    if (surv.state_distributions_2024) {
-      renderStateTable(surv.state_distributions_2024);
-    }
+    renderStateTable(surv.state_distributions_2024 || []);
 
     // Quantiles
     if (pop.quantiles) {

@@ -1,0 +1,6 @@
+State,RatingAreaId,PlanId,MetalLevel,Age,IndividualRate
+AL,Rating Area 1,12345AL0010001,Silver,40,480.00
+CA,Rating Area 4,23456CA0020002,Silver,40,490.00
+NY,Rating Area 1,34567NY0030003,Silver,40,620.00
+TX,Rating Area 8,45678TX0040004,Silver,40,450.00
+WA,Rating Area 1,56789WA0050005,Silver,40,460.00

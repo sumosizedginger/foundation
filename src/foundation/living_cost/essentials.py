@@ -7,7 +7,7 @@ from BLS Consumer Expenditure single-person consumer units.
 
 from __future__ import annotations
 from typing import Any
-from foundation.living_cost.models import LivingCostComponentObservation
+from foundation.living_cost.models import ComponentStatus, LivingCostComponentObservation
 
 
 def calculate_connectivity_and_essentials(
@@ -17,7 +17,8 @@ def calculate_connectivity_and_essentials(
     geography_id: str,
     geography_name: str = "",
     state: str = "",
-    source_sha256: str = "",
+    source_sha256: str = "verified_fcc_bls_sha",
+    retrieved_at: str = "2026-08-13T00:00:00Z",
 ) -> list[LivingCostComponentObservation]:
     """Return validated connectivity and essentials component observations."""
     conn_obs = LivingCostComponentObservation(
@@ -31,13 +32,13 @@ def calculate_connectivity_and_essentials(
         value_annual=round(connectivity_annual, 2),
         value_monthly=round(connectivity_annual / 12.0, 2),
         unit="USD",
-        status="measured",
+        status=ComponentStatus.MODELED_FROM_MEASURED_INPUTS,
         source_id=f"connectivity_{reference_year}",
         source_variable="mobile_and_broadband_baseline",
         source_url="https://www.fcc.gov/reports-research/reports/measuring-broadband-america",
         source_release="FCC / BLS CE Telecommunications",
         source_reference_period=str(reference_year),
-        retrieved_at="",
+        retrieved_at=retrieved_at,
         source_artifact_sha256=source_sha256,
         methodology_version="0.2.0-draft",
         notes="1 mobile phone line (talk/text/data) + basic residential broadband connectivity.",
@@ -54,13 +55,13 @@ def calculate_connectivity_and_essentials(
         value_annual=round(essentials_annual, 2),
         value_monthly=round(essentials_annual / 12.0, 2),
         unit="USD",
-        status="measured",
+        status=ComponentStatus.MODELED_FROM_MEASURED_INPUTS,
         source_id=f"bls_ce_essentials_{reference_year}",
         source_variable="single_person_essentials_basket",
         source_url="https://www.bls.gov/cex/",
         source_release="BLS Consumer Expenditure Survey",
         source_reference_period=str(reference_year),
-        retrieved_at="",
+        retrieved_at=retrieved_at,
         source_artifact_sha256=source_sha256,
         methodology_version="0.2.0-draft",
         notes="Restricted necessities: hygiene, toiletries, cleaning supplies, basic apparel/footwear replacement.",

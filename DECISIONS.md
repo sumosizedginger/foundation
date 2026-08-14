@@ -158,6 +158,18 @@ Registered BLS indicators (U-6, Labor Force Participation, Employment-Population
 
 ---
 
+## D-016 — Data Integrity Correction & Prototype Headline Retirement
+
+**Date:** 2026-08-13  
+**Status:** ACCEPTED (Owner Directive)
+
+1. **Immediate Retirement of Prototype Living-Cost Headlines:** The preliminary outputs produced in commit `fff0cbb` ($51,220.16 2024 national median, $55,551.89 2026 national median, -$29,420.16 survival gap, 43% adequacy ratio, and synthetic state rankings) are rejected and retired. They used provisional state-level assumptions and synthetic locality tiers that did not meet the project's empirical county-level source standard.
+2. **Deletion of Synthetic Locality Generation:** Prohibits the use of synthetic locality archetypes (e.g. 45/35/20 population shares, 1.22/0.98/0.78 FMR multipliers, manufactured FIPS codes). Production calculations must parse and join actual empirical county observations.
+3. **Mandatory Fail-Closed Provenance Rule:** Components may not be marked `MEASURED` without verified source URLs, reference periods, retrieval timestamps, parsed field names, and artifact SHA-256 hashes. Empty provenance metadata fails validation.
+4. **Transition State:** Axis 2 status is set to `DATA PIPELINE VALIDATION IN PROGRESS` until empirical county ingestion and join validation passes owner review.
+
+---
+
 ## Pending decisions
 
 ### P-001 — Composite normalization

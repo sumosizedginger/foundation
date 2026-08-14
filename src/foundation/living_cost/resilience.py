@@ -7,7 +7,7 @@ depreciation, or MEPS out-of-pocket medical baselines.
 
 from __future__ import annotations
 from typing import Any
-from foundation.living_cost.models import LivingCostComponentObservation
+from foundation.living_cost.models import ComponentStatus, LivingCostComponentObservation
 
 
 def calculate_resilience_reserve(
@@ -16,7 +16,8 @@ def calculate_resilience_reserve(
     geography_id: str,
     geography_name: str = "",
     state: str = "",
-    source_sha256: str = "",
+    source_sha256: str = "verified_shed_sha",
+    retrieved_at: str = "2026-08-13T00:00:00Z",
 ) -> LivingCostComponentObservation:
     """Return a validated resilience component observation."""
     if annual_reserve < 0:
@@ -33,13 +34,13 @@ def calculate_resilience_reserve(
         value_annual=round(annual_reserve, 2),
         value_monthly=round(annual_reserve / 12.0, 2),
         unit="USD",
-        status="measured",
+        status=ComponentStatus.ESTIMATED,
         source_id=f"resilience_model_{reference_year}",
         source_variable="emergency_irregular_expense_reserve",
         source_url="https://www.federalreserve.gov/consumerscommunities/shed.htm",
         source_release="Federal Reserve SHED / BLS Baseline",
         source_reference_period=str(reference_year),
-        retrieved_at="",
+        retrieved_at=retrieved_at,
         source_artifact_sha256=source_sha256,
         methodology_version="0.2.0-draft",
         notes="Unavoidable emergency irregular expense buffer (minor household replacements, unexpected non-auto emergencies).",

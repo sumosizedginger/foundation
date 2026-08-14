@@ -8,7 +8,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Any
 
-from foundation.living_cost.models import LocalLivingCost
+from foundation.living_cost.models import ComponentStatus, LocalLivingCost
 from foundation.living_cost.taxes import solve_gross_required_income
 
 
@@ -26,8 +26,9 @@ def compute_local_living_cost(
     essentials_annual: float,
     social_recreation_annual: float,
     resilience_annual: float,
+    status: ComponentStatus = ComponentStatus.MODELED_FROM_MEASURED_INPUTS,
 ) -> LocalLivingCost:
-    """Compute local county/FMR area net needs and gross required income."""
+    """Compute local county net needs and gross required income."""
     components = {
         "housing": round(housing_annual, 2),
         "food": round(food_annual, 2),
@@ -40,7 +41,12 @@ def compute_local_living_cost(
     }
 
     net_needs = round(sum(components.values()), 2)
-    tax_result = solve_gross_required_income(net_needs, state=state, year=reference_year)
+    tax_result = solve_gross_required_income(
+        net_needs,
+        state=state,
+        fips_code=geography_id,
+        year=reference_year,
+    )
     now_iso = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
 
     return LocalLivingCost(
@@ -56,7 +62,7 @@ def compute_local_living_cost(
         gross_required_income=tax_result.gross_income,
         gross_required_monthly=round(tax_result.gross_income / 12.0, 2),
         taxes=tax_result.to_dict(),
-        status="research_estimate",
+        status=status,
         validation_state="validated",
         methodology_version="0.2.0-draft",
         calculated_at=now_iso,

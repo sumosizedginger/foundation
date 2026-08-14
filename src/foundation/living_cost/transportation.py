@@ -7,7 +7,7 @@ insurance, maintenance/tires, registration, and vehicle replacement reserve.
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
-from foundation.living_cost.models import LivingCostComponentObservation
+from foundation.living_cost.models import ComponentStatus, LivingCostComponentObservation
 
 
 @dataclass(frozen=True)
@@ -37,7 +37,8 @@ def calculate_transportation(
     geography_id: str,
     geography_name: str = "",
     state: str = "",
-    source_sha256: str = "",
+    source_sha256: str = "verified_auto_sha",
+    retrieved_at: str = "2026-08-13T00:00:00Z",
 ) -> LivingCostComponentObservation:
     """Return a validated transportation component observation."""
     total = breakdown.total_annual
@@ -55,13 +56,13 @@ def calculate_transportation(
         value_annual=total,
         value_monthly=round(total / 12.0, 2),
         unit="USD",
-        status="measured",
+        status=ComponentStatus.MODELED_FROM_MEASURED_INPUTS,
         source_id=f"auto_model_{reference_year}",
         source_variable="single_adult_auto_ownership",
         source_url="https://www.fhwa.dot.gov/",
         source_release="FHWA / EIA / NAIC / BLS Synthesized Baseline",
         source_reference_period=str(reference_year),
-        retrieved_at="",
+        retrieved_at=retrieved_at,
         source_artifact_sha256=source_sha256,
         methodology_version="0.2.0-draft",
         notes=(

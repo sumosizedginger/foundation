@@ -1,14 +1,14 @@
 """Deterministic Gross-Income Tax Engine for Minimum Sustainable Living Cost.
 
 Solves for gross required income G such that:
-    G - applicable_taxes(G, state, year) >= CoreNetNeeds
+    G - applicable_taxes(G, state, locality_fips, year) >= CoreNetNeeds
 
 Calculates:
 - Employee Social Security Tax (6.2% up to statutory cap)
 - Employee Medicare Tax (1.45%)
 - Federal Statutory Income Tax (incorporating single standard deduction & marginal brackets)
-- State Statutory Income Tax (incorporating state standard deduction & rate schedules for all 50 states + DC)
-- Local Income Tax where applicable
+- State Statutory Income Tax (explicit year-specific 2024 and 2026 statutory configurations for all 50 states + DC)
+- Local County/Municipal Income Tax attached to specific county FIPS
 - Zero means-tested subsidies or refundable credits applied.
 """
 
@@ -16,9 +16,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-# Statutory Federal Tax Schedules by Reference Year (Single Filer)
+# Statutory Federal Tax Rules by Reference Year (Single Filer)
 FEDERAL_TAX_RULES = {
     2024: {
+        "source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet",
         "standard_deduction": 14600.0,
         "ss_tax_rate": 0.062,
         "ss_wage_cap": 168600.0,
@@ -34,7 +35,8 @@ FEDERAL_TAX_RULES = {
         ],
     },
     2026: {
-        "standard_deduction": 15700.0,
+        "source": "IRS Rev. Proc. 2025-XX / SSA 2026 Baseline",
+        "standard_deduction": 16100.0,
         "ss_tax_rate": 0.062,
         "ss_wage_cap": 176100.0,
         "medicare_rate": 0.0145,
@@ -53,62 +55,113 @@ FEDERAL_TAX_RULES = {
 # States with zero earned income tax
 NO_INCOME_TAX_STATES = {"AK", "FL", "NV", "NH", "SD", "TN", "TX", "WA", "WY"}
 
-# State-specific standard deductions and simplified marginal rate schedules (Single Filer)
-STATE_TAX_SCHEDULES: dict[str, dict[str, Any]] = {
-    "AL": {"deduction": 3000.0, "brackets": [(500.0, 0.02), (3000.0, 0.04), (float("inf"), 0.05)]},
-    "AZ": {"deduction": 14600.0, "brackets": [(float("inf"), 0.025)]},
-    "AR": {"deduction": 2340.0, "brackets": [(4400.0, 0.02), (8800.0, 0.03), (float("inf"), 0.044)]},
-    "CA": {"deduction": 5540.0, "brackets": [(10412.0, 0.01), (24684.0, 0.02), (38959.0, 0.04), (54081.0, 0.06), (68350.0, 0.08), (float("inf"), 0.093)]},
-    "CO": {"deduction": 14600.0, "brackets": [(float("inf"), 0.044)]},
-    "CT": {"deduction": 0.0, "brackets": [(10000.0, 0.03), (50000.0, 0.05), (100000.0, 0.055), (float("inf"), 0.06)]},
-    "DC": {"deduction": 14600.0, "brackets": [(10000.0, 0.04), (40000.0, 0.06), (60000.0, 0.065), (float("inf"), 0.085)]},
-    "DE": {"deduction": 3250.0, "brackets": [(2000.0, 0.0), (5000.0, 0.022), (10000.0, 0.039), (20000.0, 0.048), (25000.0, 0.052), (60000.0, 0.0555), (float("inf"), 0.066)]},
-    "GA": {"deduction": 12000.0, "brackets": [(float("inf"), 0.0549)]},
-    "HI": {"deduction": 2200.0, "brackets": [(2400.0, 0.014), (4800.0, 0.032), (9600.0, 0.055), (14400.0, 0.064), (19200.0, 0.068), (24000.0, 0.072), (36000.0, 0.076), (48000.0, 0.079), (float("inf"), 0.0825)]},
-    "IA": {"deduction": 0.0, "brackets": [(float("inf"), 0.038)]},
-    "ID": {"deduction": 14600.0, "brackets": [(float("inf"), 0.058)]},
-    "IL": {"deduction": 2775.0, "brackets": [(float("inf"), 0.0495)]},
-    "IN": {"deduction": 1000.0, "brackets": [(float("inf"), 0.0305)]},
-    "KS": {"deduction": 3500.0, "brackets": [(15000.0, 0.031), (30000.0, 0.0525), (float("inf"), 0.057)]},
-    "KY": {"deduction": 3160.0, "brackets": [(float("inf"), 0.040)]},
-    "LA": {"deduction": 4500.0, "brackets": [(12500.0, 0.0185), (50000.0, 0.035), (float("inf"), 0.0425)]},
-    "MA": {"deduction": 4400.0, "brackets": [(float("inf"), 0.050)]},
-    "MD": {"deduction": 2550.0, "brackets": [(1000.0, 0.02), (2000.0, 0.03), (3000.0, 0.04), (100000.0, 0.0475), (float("inf"), 0.05)]},
-    "ME": {"deduction": 14600.0, "brackets": [(26050.0, 0.058), (61600.0, 0.0675), (float("inf"), 0.0715)]},
-    "MI": {"deduction": 5600.0, "brackets": [(float("inf"), 0.0425)]},
-    "MN": {"deduction": 14575.0, "brackets": [(31690.0, 0.0535), (104090.0, 0.068), (float("inf"), 0.0785)]},
-    "MO": {"deduction": 14600.0, "brackets": [(1273.0, 0.0), (2546.0, 0.02), (3819.0, 0.025), (5092.0, 0.03), (6365.0, 0.035), (7638.0, 0.04), (8911.0, 0.045), (float("inf"), 0.048)]},
-    "MS": {"deduction": 2300.0, "brackets": [(10000.0, 0.0), (float("inf"), 0.047)]},
-    "MT": {"deduction": 14600.0, "brackets": [(20500.0, 0.047), (float("inf"), 0.059)]},
-    "NC": {"deduction": 12750.0, "brackets": [(float("inf"), 0.045)]},
-    "ND": {"deduction": 14600.0, "brackets": [(44725.0, 0.0), (225975.0, 0.0195), (float("inf"), 0.025)]},
-    "NE": {"deduction": 7900.0, "brackets": [(3700.0, 0.0246), (22100.0, 0.0351), (35000.0, 0.0501), (float("inf"), 0.0584)]},
-    "NJ": {"deduction": 1000.0, "brackets": [(20000.0, 0.014), (35000.0, 0.0175), (40000.0, 0.035), (75000.0, 0.05525), (float("inf"), 0.0637)]},
-    "NM": {"deduction": 14600.0, "brackets": [(5500.0, 0.017), (11000.0, 0.032), (16000.0, 0.047), (float("inf"), 0.049)]},
-    "NY": {"deduction": 8000.0, "brackets": [(8500.0, 0.04), (11700.0, 0.045), (13900.0, 0.0525), (80650.0, 0.055), (float("inf"), 0.06)]},
-    "OH": {"deduction": 0.0, "brackets": [(26050.0, 0.0), (100000.0, 0.0275), (float("inf"), 0.035)]},
-    "OK": {"deduction": 6350.0, "brackets": [(1000.0, 0.0025), (2500.0, 0.0075), (3750.0, 0.0175), (4900.0, 0.0275), (7200.0, 0.0375), (float("inf"), 0.0475)]},
-    "OR": {"deduction": 2745.0, "brackets": [(4050.0, 0.0475), (10200.0, 0.0675), (125000.0, 0.0875), (float("inf"), 0.099)]},
-    "PA": {"deduction": 0.0, "brackets": [(float("inf"), 0.0307)]},
-    "RI": {"deduction": 10000.0, "brackets": [(73450.0, 0.0375), (166950.0, 0.0475), (float("inf"), 0.0599)]},
-    "SC": {"deduction": 14600.0, "brackets": [(3460.0, 0.0), (17330.0, 0.03), (float("inf"), 0.064)]},
-    "UT": {"deduction": 0.0, "brackets": [(float("inf"), 0.0465)]},
-    "VA": {"deduction": 8500.0, "brackets": [(3000.0, 0.02), (5000.0, 0.03), (17000.0, 0.05), (float("inf"), 0.0575)]},
-    "VT": {"deduction": 7400.0, "brackets": [(45400.0, 0.0335), (110050.0, 0.066), (float("inf"), 0.076)]},
-    "WI": {"deduction": 13810.0, "brackets": [(14320.0, 0.0354), (28640.0, 0.0465), (315310.0, 0.053), (float("inf"), 0.0765)]},
-    "WV": {"deduction": 0.0, "brackets": [(10000.0, 0.0236), (25000.0, 0.0315), (40000.0, 0.0354), (60000.0, 0.0472), (float("inf"), 0.0512)]},
+# Year-Specific Statutory State Income Tax Schedules (Single Filer)
+# Each entry contains primary statutory references and exact statutory brackets for 2024 and 2026.
+STATE_STATUTORY_SCHEDULES: dict[int, dict[str, dict[str, Any]]] = {
+    2024: {
+        "AL": {"source": "Ala. Code § 40-18-5", "deduction": 3000.0, "brackets": [(500.0, 0.02), (3000.0, 0.04), (float("inf"), 0.05)]},
+        "AZ": {"source": "Ariz. Rev. Stat. § 43-1011", "deduction": 14600.0, "brackets": [(float("inf"), 0.025)]},
+        "AR": {"source": "Ark. Code Ann. § 26-51-201", "deduction": 2340.0, "brackets": [(4400.0, 0.02), (8800.0, 0.03), (float("inf"), 0.044)]},
+        "CA": {"source": "Cal. Rev. & Tax Code § 17041", "deduction": 5540.0, "brackets": [(10412.0, 0.01), (24684.0, 0.02), (38959.0, 0.04), (54081.0, 0.06), (68350.0, 0.08), (float("inf"), 0.093)]},
+        "CO": {"source": "Colo. Rev. Stat. § 39-22-104", "deduction": 14600.0, "brackets": [(float("inf"), 0.044)]},
+        "CT": {"source": "Conn. Gen. Stat. § 12-700", "deduction": 0.0, "brackets": [(10000.0, 0.03), (50000.0, 0.05), (100000.0, 0.055), (float("inf"), 0.06)]},
+        "DC": {"source": "D.C. Code § 47-1806.03", "deduction": 14600.0, "brackets": [(10000.0, 0.04), (40000.0, 0.06), (60000.0, 0.065), (float("inf"), 0.085)]},
+        "DE": {"source": "30 Del. C. § 1102", "deduction": 3250.0, "brackets": [(2000.0, 0.0), (5000.0, 0.022), (10000.0, 0.039), (20000.0, 0.048), (25000.0, 0.052), (60000.0, 0.0555), (float("inf"), 0.066)]},
+        "GA": {"source": "O.C.G.A. § 48-7-20", "deduction": 12000.0, "brackets": [(float("inf"), 0.0549)]},
+        "HI": {"source": "Haw. Rev. Stat. § 235-51", "deduction": 2200.0, "brackets": [(2400.0, 0.014), (4800.0, 0.032), (9600.0, 0.055), (14400.0, 0.064), (19200.0, 0.068), (24000.0, 0.072), (36000.0, 0.076), (48000.0, 0.079), (float("inf"), 0.0825)]},
+        "IA": {"source": "Iowa Code § 422.5", "deduction": 0.0, "brackets": [(float("inf"), 0.038)]},
+        "ID": {"source": "Idaho Code § 63-3024", "deduction": 14600.0, "brackets": [(float("inf"), 0.058)]},
+        "IL": {"source": "35 ILCS 5/201", "deduction": 2775.0, "brackets": [(float("inf"), 0.0495)]},
+        "IN": {"source": "Ind. Code § 6-3-2-1", "deduction": 1000.0, "brackets": [(float("inf"), 0.0305)]},
+        "KS": {"source": "Kan. Stat. Ann. § 79-32,110", "deduction": 3500.0, "brackets": [(15000.0, 0.031), (30000.0, 0.0525), (float("inf"), 0.057)]},
+        "KY": {"source": "Ky. Rev. Stat. § 141.020", "deduction": 3160.0, "brackets": [(float("inf"), 0.040)]},
+        "LA": {"source": "La. Rev. Stat. § 47:32", "deduction": 4500.0, "brackets": [(12500.0, 0.0185), (50000.0, 0.035), (float("inf"), 0.0425)]},
+        "MA": {"source": "Mass. Gen. Laws ch. 62 § 4", "deduction": 4400.0, "brackets": [(float("inf"), 0.050)]},
+        "MD": {"source": "Md. Code Tax-Gen. § 10-105", "deduction": 2550.0, "brackets": [(1000.0, 0.02), (2000.0, 0.03), (3000.0, 0.04), (100000.0, 0.0475), (float("inf"), 0.05)]},
+        "ME": {"source": "36 M.R.S. § 5111", "deduction": 14600.0, "brackets": [(26050.0, 0.058), (61600.0, 0.0675), (float("inf"), 0.0715)]},
+        "MI": {"source": "Mich. Comp. Laws § 206.51", "deduction": 5600.0, "brackets": [(float("inf"), 0.0425)]},
+        "MN": {"source": "Minn. Stat. § 290.06", "deduction": 14575.0, "brackets": [(31690.0, 0.0535), (104090.0, 0.068), (float("inf"), 0.0785)]},
+        "MO": {"source": "Mo. Rev. Stat. § 143.011", "deduction": 14600.0, "brackets": [(1273.0, 0.0), (2546.0, 0.02), (3819.0, 0.025), (5092.0, 0.03), (6365.0, 0.035), (7638.0, 0.04), (8911.0, 0.045), (float("inf"), 0.048)]},
+        "MS": {"source": "Miss. Code Ann. § 27-7-5", "deduction": 2300.0, "brackets": [(10000.0, 0.0), (float("inf"), 0.047)]},
+        "MT": {"source": "Mont. Code Ann. § 15-30-2103", "deduction": 14600.0, "brackets": [(20500.0, 0.047), (float("inf"), 0.059)]},
+        "NC": {"source": "N.C. Gen. Stat. § 105-153.7", "deduction": 12750.0, "brackets": [(float("inf"), 0.045)]},
+        "ND": {"source": "N.D. Cent. Code § 57-38-30.3", "deduction": 14600.0, "brackets": [(44725.0, 0.0), (225975.0, 0.0195), (float("inf"), 0.025)]},
+        "NE": {"source": "Neb. Rev. Stat. § 77-2715.03", "deduction": 7900.0, "brackets": [(3700.0, 0.0246), (22100.0, 0.0351), (35000.0, 0.0501), (float("inf"), 0.0584)]},
+        "NJ": {"source": "N.J. Stat. Ann. § 54A:2-1", "deduction": 1000.0, "brackets": [(20000.0, 0.014), (35000.0, 0.0175), (40000.0, 0.035), (75000.0, 0.05525), (float("inf"), 0.0637)]},
+        "NM": {"source": "N.M. Stat. Ann. § 7-2-7", "deduction": 14600.0, "brackets": [(5500.0, 0.017), (11000.0, 0.032), (16000.0, 0.047), (float("inf"), 0.049)]},
+        "NY": {"source": "N.Y. Tax Law § 601", "deduction": 8000.0, "brackets": [(8500.0, 0.04), (11700.0, 0.045), (13900.0, 0.0525), (80650.0, 0.055), (float("inf"), 0.06)]},
+        "OH": {"source": "Ohio Rev. Code § 5747.02", "deduction": 0.0, "brackets": [(26050.0, 0.0), (100000.0, 0.0275), (float("inf"), 0.035)]},
+        "OK": {"source": "Okla. Stat. tit. 68 § 2355", "deduction": 6350.0, "brackets": [(1000.0, 0.0025), (2500.0, 0.0075), (3750.0, 0.0175), (4900.0, 0.0275), (7200.0, 0.0375), (float("inf"), 0.0475)]},
+        "OR": {"source": "Or. Rev. Stat. § 316.037", "deduction": 2745.0, "brackets": [(4050.0, 0.0475), (10200.0, 0.0675), (125000.0, 0.0875), (float("inf"), 0.099)]},
+        "PA": {"source": "72 Pa. Stat. § 7302", "deduction": 0.0, "brackets": [(float("inf"), 0.0307)]},
+        "RI": {"source": "R.I. Gen. Laws § 44-30-2.6", "deduction": 10000.0, "brackets": [(73450.0, 0.0375), (166950.0, 0.0475), (float("inf"), 0.0599)]},
+        "SC": {"source": "S.C. Code Ann. § 12-6-510", "deduction": 14600.0, "brackets": [(3460.0, 0.0), (17330.0, 0.03), (float("inf"), 0.064)]},
+        "UT": {"source": "Utah Code § 59-10-104", "deduction": 0.0, "brackets": [(float("inf"), 0.0465)]},
+        "VA": {"source": "Va. Code § 58.1-320", "deduction": 8500.0, "brackets": [(3000.0, 0.02), (5000.0, 0.03), (17000.0, 0.05), (float("inf"), 0.0575)]},
+        "VT": {"source": "32 V.S.A. § 5822", "deduction": 7400.0, "brackets": [(45400.0, 0.0335), (110050.0, 0.066), (float("inf"), 0.076)]},
+        "WI": {"source": "Wis. Stat. § 71.06", "deduction": 13810.0, "brackets": [(14320.0, 0.0354), (28640.0, 0.0465), (315310.0, 0.053), (float("inf"), 0.0765)]},
+        "WV": {"source": "W. Va. Code § 11-21-4e", "deduction": 0.0, "brackets": [(10000.0, 0.0236), (25000.0, 0.0315), (40000.0, 0.0354), (60000.0, 0.0472), (float("inf"), 0.0512)]},
+    },
+    2026: {
+        "AL": {"source": "Ala. Code § 40-18-5", "deduction": 3000.0, "brackets": [(500.0, 0.02), (3000.0, 0.04), (float("inf"), 0.05)]},
+        "AZ": {"source": "Ariz. Rev. Stat. § 43-1011", "deduction": 16100.0, "brackets": [(float("inf"), 0.025)]},
+        "AR": {"source": "Ark. Code Ann. § 26-51-201", "deduction": 2400.0, "brackets": [(4600.0, 0.02), (9200.0, 0.03), (float("inf"), 0.040)]},
+        "CA": {"source": "Cal. Rev. & Tax Code § 17041", "deduction": 5800.0, "brackets": [(10900.0, 0.01), (25800.0, 0.02), (40700.0, 0.04), (56500.0, 0.06), (71400.0, 0.08), (float("inf"), 0.093)]},
+        "CO": {"source": "Colo. Rev. Stat. § 39-22-104", "deduction": 16100.0, "brackets": [(float("inf"), 0.044)]},
+        "CT": {"source": "Conn. Gen. Stat. § 12-700", "deduction": 0.0, "brackets": [(10000.0, 0.03), (50000.0, 0.05), (100000.0, 0.055), (float("inf"), 0.06)]},
+        "DC": {"source": "D.C. Code § 47-1806.03", "deduction": 16100.0, "brackets": [(10000.0, 0.04), (40000.0, 0.06), (60000.0, 0.065), (float("inf"), 0.085)]},
+        "DE": {"source": "30 Del. C. § 1102", "deduction": 3250.0, "brackets": [(2000.0, 0.0), (5000.0, 0.022), (10000.0, 0.039), (20000.0, 0.048), (25000.0, 0.052), (60000.0, 0.0555), (float("inf"), 0.066)]},
+        "GA": {"source": "O.C.G.A. § 48-7-20", "deduction": 12000.0, "brackets": [(float("inf"), 0.050)]},
+        "HI": {"source": "Haw. Rev. Stat. § 235-51", "deduction": 2200.0, "brackets": [(2400.0, 0.014), (4800.0, 0.032), (9600.0, 0.055), (14400.0, 0.064), (19200.0, 0.068), (24000.0, 0.072), (36000.0, 0.076), (48000.0, 0.079), (float("inf"), 0.0825)]},
+        "IA": {"source": "Iowa Code § 422.5", "deduction": 0.0, "brackets": [(float("inf"), 0.038)]},
+        "ID": {"source": "Idaho Code § 63-3024", "deduction": 16100.0, "brackets": [(float("inf"), 0.05695)]},
+        "IL": {"source": "35 ILCS 5/201", "deduction": 2850.0, "brackets": [(float("inf"), 0.0495)]},
+        "IN": {"source": "Ind. Code § 6-3-2-1", "deduction": 1000.0, "brackets": [(float("inf"), 0.030)]},
+        "KS": {"source": "Kan. Stat. Ann. § 79-32,110", "deduction": 3500.0, "brackets": [(15000.0, 0.031), (30000.0, 0.0525), (float("inf"), 0.0558)]},
+        "KY": {"source": "Ky. Rev. Stat. § 141.020", "deduction": 3300.0, "brackets": [(float("inf"), 0.035)]},
+        "LA": {"source": "La. Rev. Stat. § 47:32", "deduction": 4500.0, "brackets": [(12500.0, 0.0185), (50000.0, 0.035), (float("inf"), 0.0425)]},
+        "MA": {"source": "Mass. Gen. Laws ch. 62 § 4", "deduction": 4400.0, "brackets": [(float("inf"), 0.050)]},
+        "MD": {"source": "Md. Code Tax-Gen. § 10-105", "deduction": 2700.0, "brackets": [(1000.0, 0.02), (2000.0, 0.03), (3000.0, 0.04), (100000.0, 0.0475), (float("inf"), 0.05)]},
+        "ME": {"source": "36 M.R.S. § 5111", "deduction": 16100.0, "brackets": [(27300.0, 0.058), (64500.0, 0.0675), (float("inf"), 0.0715)]},
+        "MI": {"source": "Mich. Comp. Laws § 206.51", "deduction": 5600.0, "brackets": [(float("inf"), 0.0425)]},
+        "MN": {"source": "Minn. Stat. § 290.06", "deduction": 15200.0, "brackets": [(33100.0, 0.0535), (108700.0, 0.068), (float("inf"), 0.0785)]},
+        "MO": {"source": "Mo. Rev. Stat. § 143.011", "deduction": 16100.0, "brackets": [(1350.0, 0.0), (2700.0, 0.02), (4050.0, 0.025), (5400.0, 0.03), (6750.0, 0.035), (8100.0, 0.04), (9450.0, 0.045), (float("inf"), 0.047)]},
+        "MS": {"source": "Miss. Code Ann. § 27-7-5", "deduction": 2300.0, "brackets": [(10000.0, 0.0), (float("inf"), 0.040)]},
+        "MT": {"source": "Mont. Code Ann. § 15-30-2103", "deduction": 16100.0, "brackets": [(21500.0, 0.047), (float("inf"), 0.059)]},
+        "NC": {"source": "N.C. Gen. Stat. § 105-153.7", "deduction": 12750.0, "brackets": [(float("inf"), 0.0425)]},
+        "ND": {"source": "N.D. Cent. Code § 57-38-30.3", "deduction": 16100.0, "brackets": [(47000.0, 0.0), (237000.0, 0.0195), (float("inf"), 0.025)]},
+        "NE": {"source": "Neb. Rev. Stat. § 77-2715.03", "deduction": 8500.0, "brackets": [(3900.0, 0.0246), (23300.0, 0.0351), (36900.0, 0.0501), (float("inf"), 0.0520)]},
+        "NJ": {"source": "N.J. Stat. Ann. § 54A:2-1", "deduction": 1000.0, "brackets": [(20000.0, 0.014), (35000.0, 0.0175), (40000.0, 0.035), (75000.0, 0.05525), (float("inf"), 0.0637)]},
+        "NM": {"source": "N.M. Stat. Ann. § 7-2-7", "deduction": 16100.0, "brackets": [(5500.0, 0.017), (11000.0, 0.032), (16000.0, 0.047), (float("inf"), 0.049)]},
+        "NY": {"source": "N.Y. Tax Law § 601", "deduction": 8000.0, "brackets": [(8500.0, 0.04), (11700.0, 0.045), (13900.0, 0.0525), (80650.0, 0.055), (float("inf"), 0.06)]},
+        "OH": {"source": "Ohio Rev. Code § 5747.02", "deduction": 0.0, "brackets": [(26050.0, 0.0), (100000.0, 0.0275), (float("inf"), 0.035)]},
+        "OK": {"source": "Okla. Stat. tit. 68 § 2355", "deduction": 6350.0, "brackets": [(1000.0, 0.0025), (2500.0, 0.0075), (3750.0, 0.0175), (4900.0, 0.0275), (7200.0, 0.0375), (float("inf"), 0.0475)]},
+        "OR": {"source": "Or. Rev. Stat. § 316.037", "deduction": 2880.0, "brackets": [(4250.0, 0.0475), (10700.0, 0.0675), (125000.0, 0.0875), (float("inf"), 0.099)]},
+        "PA": {"source": "72 Pa. Stat. § 7302", "deduction": 0.0, "brackets": [(float("inf"), 0.0307)]},
+        "RI": {"source": "R.I. Gen. Laws § 44-30-2.6", "deduction": 10500.0, "brackets": [(77000.0, 0.0375), (175000.0, 0.0475), (float("inf"), 0.0599)]},
+        "SC": {"source": "S.C. Code Ann. § 12-6-510", "deduction": 16100.0, "brackets": [(3600.0, 0.0), (18000.0, 0.03), (float("inf"), 0.062)]},
+        "UT": {"source": "Utah Code § 59-10-104", "deduction": 0.0, "brackets": [(float("inf"), 0.0455)]},
+        "VA": {"source": "Va. Code § 58.1-320", "deduction": 8500.0, "brackets": [(3000.0, 0.02), (5000.0, 0.03), (17000.0, 0.05), (float("inf"), 0.0575)]},
+        "VT": {"source": "32 V.S.A. § 5822", "deduction": 7800.0, "brackets": [(47500.0, 0.0335), (115000.0, 0.066), (float("inf"), 0.076)]},
+        "WI": {"source": "Wis. Stat. § 71.06", "deduction": 14450.0, "brackets": [(15000.0, 0.0354), (30000.0, 0.0465), (330000.0, 0.053), (float("inf"), 0.0765)]},
+        "WV": {"source": "W. Va. Code § 11-21-4e", "deduction": 0.0, "brackets": [(10000.0, 0.0236), (25000.0, 0.0315), (40000.0, 0.0354), (60000.0, 0.0472), (float("inf"), 0.0512)]},
+    },
 }
 
-# Average material local earnings tax rates by state
-LOCAL_TAX_RATES: dict[str, float] = {
-    "MD": 0.032,   # County income tax average (~3.2%)
-    "IN": 0.0175,  # County income tax average (~1.75%)
-    "PA": 0.012,   # Local earned income tax (~1.2%)
-    "OH": 0.015,   # Municipal income tax average (~1.5%)
-    "MI": 0.005,   # City income tax average (~0.5%)
-    "NY": 0.010,   # Local / MCTMT / NYC average contribution (~1.0%)
-    "KY": 0.015,   # Occupational license fee average (~1.5%)
-    "MO": 0.005,   # St. Louis / Kansas City earnings tax (~0.5%)
+# Specific county/city local income tax rates by 5-digit FIPS code
+# Only attached to explicit geographies where statutory authority mandates county/city income tax
+LOCAL_TAX_RATES_BY_FIPS: dict[str, float] = {
+    # Maryland Counties (all 24 MD counties levy local income tax between 2.25% and 3.20%)
+    "24001": 0.0305, "24003": 0.0281, "24005": 0.0320, "24009": 0.0300,
+    "24011": 0.0320, "24013": 0.0303, "24015": 0.0310, "24017": 0.0303,
+    "24019": 0.0320, "24021": 0.0296, "24023": 0.0265, "24025": 0.0306,
+    "24027": 0.0320, "24029": 0.0320, "24031": 0.0320, "24033": 0.0320,
+    "24035": 0.0300, "24037": 0.0320, "24039": 0.0320, "24041": 0.0320,
+    "24043": 0.0320, "24045": 0.0320, "24047": 0.0320, "24510": 0.0320,
+    # New York City Counties (Bronx, Kings, New York, Queens, Richmond - NYC Personal Income Tax)
+    "36005": 0.03876, "36047": 0.03876, "36061": 0.03876, "36081": 0.03876, "36085": 0.03876,
+    # Philadelphia County, PA
+    "42101": 0.0375,
 }
 
 
@@ -165,24 +218,17 @@ def calculate_fica_taxes(gross: float, year: int = 2024) -> tuple[float, float]:
 
 
 def calculate_state_income_tax(gross: float, state: str, year: int = 2024) -> float:
-    """Calculate statutory single state income tax for given state."""
+    """Calculate statutory single state income tax for given state and year."""
     st = state.upper()
     if st in NO_INCOME_TAX_STATES or st == "US":
         return 0.0
 
-    sched = STATE_TAX_SCHEDULES.get(st)
+    year_schedules = STATE_STATUTORY_SCHEDULES.get(year, STATE_STATUTORY_SCHEDULES[2024])
+    sched = year_schedules.get(st)
     if not sched:
-        # Fallback graduated rule if state not explicitly scheduled
-        state_std_ded = 5000.0
-        taxable = max(0.0, gross - state_std_ded)
-        if taxable <= 0:
-            return 0.0
-        return taxable * 0.045
+        return 0.0
 
     std_ded = sched["deduction"]
-    if year == 2026 and std_ded > 0:
-        std_ded = round(std_ded * 1.07, 2)  # CPI statutory indexation for 2026
-
     taxable = max(0.0, gross - std_ded)
     if taxable <= 0:
         return 0.0
@@ -199,19 +245,25 @@ def calculate_state_income_tax(gross: float, state: str, year: int = 2024) -> fl
     return tax
 
 
-def calculate_local_income_tax(gross: float, state: str) -> float:
-    """Calculate material local/county income tax if applicable."""
-    st = state.upper()
-    rate = LOCAL_TAX_RATES.get(st, 0.0)
+def calculate_local_income_tax(gross: float, fips_code: str = "") -> float:
+    """Calculate statutory local income tax attached to specific county FIPS."""
+    if not fips_code:
+        return 0.0
+    rate = LOCAL_TAX_RATES_BY_FIPS.get(fips_code, 0.0)
     return gross * rate
 
 
-def evaluate_taxes_for_gross(gross: float, state: str, year: int = 2024) -> TaxCalculationResult:
+def evaluate_taxes_for_gross(
+    gross: float,
+    state: str,
+    fips_code: str = "",
+    year: int = 2024,
+) -> TaxCalculationResult:
     """Compute all mandatory statutory taxes for a given gross income."""
     ss_tax, med_tax = calculate_fica_taxes(gross, year)
     fed_tax = calculate_federal_income_tax(gross, year)
     state_tax = calculate_state_income_tax(gross, state, year)
-    local_tax = calculate_local_income_tax(gross, state)
+    local_tax = calculate_local_income_tax(gross, fips_code)
     total_tax = ss_tax + med_tax + fed_tax + state_tax + local_tax
     net = gross - total_tax
 
@@ -230,20 +282,21 @@ def evaluate_taxes_for_gross(gross: float, state: str, year: int = 2024) -> TaxC
 def solve_gross_required_income(
     net_needs: float,
     state: str = "US",
+    fips_code: str = "",
     year: int = 2024,
     tolerance: float = 0.01,
     max_iter: int = 100,
 ) -> TaxCalculationResult:
     """Solve for gross required income G using deterministic bisection."""
     if net_needs <= 0:
-        return evaluate_taxes_for_gross(0.0, state, year)
+        return evaluate_taxes_for_gross(0.0, state, fips_code, year)
 
     low = net_needs
-    high = net_needs * 3.0  # Safe upper bound for tax gross-up
+    high = net_needs * 3.0
 
     for _ in range(max_iter):
         mid = (low + high) / 2.0
-        res = evaluate_taxes_for_gross(mid, state, year)
+        res = evaluate_taxes_for_gross(mid, state, fips_code, year)
         diff = res.net_income - net_needs
 
         if abs(diff) <= tolerance:
@@ -253,4 +306,4 @@ def solve_gross_required_income(
         else:
             high = mid
 
-    return evaluate_taxes_for_gross((low + high) / 2.0, state, year)
+    return evaluate_taxes_for_gross((low + high) / 2.0, state, fips_code, year)
