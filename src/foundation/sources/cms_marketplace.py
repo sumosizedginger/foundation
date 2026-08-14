@@ -77,8 +77,12 @@ def download_cms_marketplace_artifacts(
     return artifacts
 
 
-# Year-specific standalone SBE states. Do not copy 2024 onto 2026 or vice versa.
-# Federal-platform PUF files include FFE + SBE-FP only.
+# Year-specific standalone SBE states from the official CMS SBE QHP PUF landing
+# page (https://www.cms.gov/marketplace/resources/data/state-based-public-use-files).
+# Do not copy 2024 onto 2026 or vice versa. Do not infer platform classification
+# from the mere existence of a state zip.
+# 2024 SBE QHP PUF datasets (data current as of May 14, 2024).
+# 2026 SBE QHP PUF datasets (data current as of June 03, 2026).
 SBE_STANDALONE_STATES: dict[int, frozenset[str]] = {
     2024: frozenset(
         {
@@ -93,11 +97,14 @@ SBE_STANDALONE_STATES: dict[int, frozenset[str]] = {
             "MA",
             "MN",
             "NV",
+            "NJ",
             "NM",
             "NY",
+            "OR",
             "PA",
             "RI",
             "VT",
+            "VA",
             "WA",
         }
     ),
@@ -107,72 +114,185 @@ SBE_STANDALONE_STATES: dict[int, frozenset[str]] = {
             "CO",
             "CT",
             "DC",
+            "GA",
             "ID",
+            "IL",
             "KY",
             "ME",
             "MD",
             "MA",
             "MN",
             "NV",
+            "NJ",
             "NM",
             "NY",
+            "OR",
             "PA",
             "RI",
             "VT",
+            "VA",
             "WA",
         }
     ),
 }
 
-SBE_QHP_ZIP: dict[int, str] = {
-    2024: "https://download.cms.gov/marketplace-puf/2024/sbe-puf-files-2024.zip",
-    2026: "https://download.cms.gov/marketplace-puf/2026/sbe-puf-files-2026.zip",
+# Official per-state zip slugs copied from the CMS landing-page Downloads section.
+# Filenames are year-specific and not assumed to follow one national pattern.
+SBE_STATE_ZIP_SLUGS: dict[int, dict[str, str]] = {
+    2024: {
+        "CA": "californiasbepuf2024.zip",
+        "CO": "coloradosbepuf2024.zip",
+        "CT": "connecticutsbepuf2024.zip",
+        "DC": "districtofcolumbiasbepuf2024.zip",
+        "ID": "idahosbepuf2024.zip",
+        "KY": "kentuckysbepuf2024.zip",
+        "ME": "mainesbepuf2024.zip",
+        "MD": "marylandsbepuf2024.zip",
+        "MA": "massachusettssbepuf2024.zip",
+        "MN": "minnesotasbepuf2024.zip",
+        "NV": "nevadasbepuf2024.zip",
+        "NJ": "newjerseysbepuf2024.zip",
+        "NM": "newmexicosbepuf2024.zip",
+        "NY": "newyorksbepuf2024.zip",
+        "OR": "oregonsbepuf2024.zip",
+        "PA": "pennsylvaniasbepuf2024.zip",
+        "RI": "rhodeislandsbepuf2024.zip",
+        "VT": "vermontsbepuf2024.zip",
+        "VA": "virginiasbepuf2024.zip",
+        "WA": "washingtonsbepuf2024.zip",
+    },
+    2026: {
+        "CA": "californiasbpuf2026.zip",
+        "CO": "coloradosbepuf2026.zip",
+        "CT": "connecticutsbepuf2026.zip",
+        "DC": "districtofcolumbiapuf2026.zip",
+        "GA": "georgiasbepuf2026.zip",
+        "ID": "idahosbepuf2026.zip",
+        "IL": "illinois-sbe-qhp-puf.zip",
+        "KY": "kentuckysbepuf2026.zip",
+        "ME": "mainesbepuf2026.zip",
+        "MD": "marylandsbepuf2026.zip",
+        "MA": "massachusettssbepuf2026.zip",
+        "MN": "minnesotasbepuf2026.zip",
+        "NV": "nevadasbepuf2026.zip",
+        "NJ": "newjerseysbepuf2026.zip",
+        "NM": "newmexicosbepuf2026.zip",
+        "NY": "newyorksbepuf2026.zip",
+        "OR": "oregonsbepuf2026.zip",
+        "PA": "pennsylvaniasbepuf2026.zip",
+        "RI": "rhodeislandsbepuf2026.zip",
+        "VT": "vermontsbepuf2026.zip",
+        "VA": "virginiasbepuf2026.zip",
+        "WA": "washingtonsbepuf2026.zip",
+    },
+}
+
+SBE_DICTIONARY_ZIP: dict[int, str] = {
+    2024: "https://www.cms.gov/files/zip/2024-sbe-qhp-puf-datadictionary.zip",
+    2026: "https://www.cms.gov/files/zip/sbe-puf-files-2026.zip",
 }
 
 
+def sbe_state_zip_url(year: int, state: str) -> str:
+    slug = SBE_STATE_ZIP_SLUGS[year][state]
+    return f"https://www.cms.gov/files/zip/{slug}"
+
+
 def download_cms_sbe_artifact(year: int, cache_dir: Path, force_download: bool = False):
-    """Retrieve official CMS SBE QHP PUF zip if published. Dictionaries-only zips fail closed."""
-    if year not in SBE_QHP_ZIP:
+    """Retrieve official per-state CMS SBE QHP PUF zips. Dictionary-only zips are not plan data."""
+    if year not in SBE_STATE_ZIP_SLUGS:
         raise ValueError(f"Unsupported CMS SBE reference year: {year}")
     cache_dir.mkdir(parents=True, exist_ok=True)
-    artifact = acquire_source(
-        source_id=f"cms_sbe_puf_{year}",
-        url=SBE_QHP_ZIP[year],
-        cache_dir=cache_dir,
-        expected_filename=f"sbe-puf-files-{year}.zip",
-        force_download=force_download,
-    )
-    if artifact is None:
-        return record_unretrieved(
-            f"cms_sbe_puf_{year}",
-            status="SOURCE_GAP",
-            resolved_url=CMS_SBE_PUF_LANDING,
-            notes=(
-                f"Official year-specific SBE QHP PUF zip for {year} was not retrieved. "
-                "Do not infer 2024 SBE coverage from 2026 or vice versa."
-            ),
-        )
-    path = cache_dir / artifact.local_cache_filename
-    csv_members = 0
-    if path.is_file():
-        try:
-            with zipfile.ZipFile(path) as archive:
-                csv_members = sum(1 for name in archive.namelist() if name.lower().endswith(".csv"))
-        except zipfile.BadZipFile:
-            csv_members = 0
-    if csv_members == 0:
-        from dataclasses import replace
+    from dataclasses import replace
 
-        return replace(
-            artifact,
-            validation_status="SOURCE_GAP",
-            notes=(
-                f"SBE archive {path.name} contains documentation only "
-                f"({csv_members} CSV members). Rate/plan/service-area data for "
-                f"standalone SBE states in {year} remain a source gap."
-            ),
+    artifacts = []
+    retrieved_states: list[str] = []
+    parsed_states: list[str] = []
+    missing_states: list[str] = []
+    for state, slug in SBE_STATE_ZIP_SLUGS[year].items():
+        artifact = acquire_source(
+            source_id=f"cms_sbe_{state.lower()}_{year}",
+            url=sbe_state_zip_url(year, state),
+            cache_dir=cache_dir,
+            expected_filename=f"cms_sbe_{year}_{state.lower()}_{slug}",
+            force_download=force_download,
+            refresh_if_unprovenanced=True,
         )
-    return artifact
+        if artifact is None:
+            missing_states.append(state)
+            artifacts.append(
+                record_unretrieved(
+                    f"cms_sbe_{state.lower()}_{year}",
+                    status="SOURCE_GAP",
+                    resolved_url=sbe_state_zip_url(year, state),
+                    notes=(
+                        f"Official {year} SBE QHP PUF zip for {state} was not retrieved "
+                        f"from {CMS_SBE_PUF_LANDING}."
+                    ),
+                )
+            )
+            continue
+        retrieved_states.append(state)
+        path = cache_dir / artifact.local_cache_filename
+        csv_members: list[str] = []
+        if path.is_file():
+            try:
+                with zipfile.ZipFile(path) as archive:
+                    csv_members = [
+                        name for name in archive.namelist() if name.lower().endswith(".csv")
+                    ]
+            except zipfile.BadZipFile:
+                csv_members = []
+        if csv_members:
+            parsed_states.append(state)
+            artifacts.append(
+                replace(
+                    artifact,
+                    validation_status="RETRIEVED_UNVALIDATED",
+                    notes=(
+                        f"{year} SBE QHP PUF {state}: {len(csv_members)} CSV members "
+                        f"({', '.join(csv_members[:6])}). Per-state file; not a national SBE zip. "
+                        "Do not infer federal-platform classification from this file."
+                    ),
+                )
+            )
+        else:
+            artifacts.append(
+                replace(
+                    artifact,
+                    validation_status="SOURCE_GAP",
+                    notes=(
+                        f"{year} SBE QHP PUF {state} archive contains no CSV members "
+                        "(documentation-only or unexpected layout)."
+                    ),
+                )
+            )
+
+    # Year-level coverage artifact used by the auditor / coverage report.
+    from foundation.living_cost.manifest import RetrievedSourceArtifact
+
+    expected = sorted(SBE_STANDALONE_STATES[year])
+    notes = (
+        f"{year} SBE QHP PUF per-state retrieval from {CMS_SBE_PUF_LANDING}. "
+        f"SBE states expected={expected}. retrieved={retrieved_states}. "
+        f"parsed={parsed_states}. missing={missing_states}. "
+        "Do not treat the documentation-only national dictionary zip as plan data. "
+        "Do not infer federal-platform classification rules from a state-specific SBE file."
+    )
+    status = "RETRIEVED_UNVALIDATED" if parsed_states else "SOURCE_GAP"
+    artifacts.append(
+        RetrievedSourceArtifact(
+            source_id=f"cms_sbe_puf_{year}",
+            retrieved_at="",
+            sha256="",
+            byte_size=0,
+            local_cache_filename="",
+            validation_status=status,
+            resolved_url=CMS_SBE_PUF_LANDING,
+            notes=notes,
+        )
+    )
+    return artifacts
 
 
 def _open_puf_table(path: Path) -> Iterator[dict[str, str]]:

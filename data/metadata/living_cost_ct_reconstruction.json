@@ -1,0 +1,56 @@
+{
+  "architecture": "keep_hud_geography_legacy_county",
+  "planning_region_fips": [
+    "09110",
+    "09120",
+    "09130",
+    "09140",
+    "09150",
+    "09160",
+    "09170",
+    "09180",
+    "09190"
+  ],
+  "legacy_county_fips": [
+    "09001",
+    "09003",
+    "09005",
+    "09007",
+    "09009",
+    "09011",
+    "09013",
+    "09015"
+  ],
+  "crosswalk_rows": 183,
+  "mapped_towns": 174,
+  "cousub_adult_rows": 169,
+  "legacy_county_adult_population": {
+    "09001": 757326,
+    "09003": 715728,
+    "09005": 152953,
+    "09007": 138334,
+    "09009": 693694,
+    "09011": 216994,
+    "09013": 123145,
+    "09015": 94748
+  },
+  "unmapped_towns": [],
+  "duplicate_towns": [],
+  "missing_legacy_counties": [],
+  "reproduced": true,
+  "notes": "Reconstructed eight legacy-county adult populations from official Census CT crosswalk + ACS B01001 county-subdivision rows. HUD FMR geography stays on legacy counties.",
+  "report_type": "connecticut_legacy_county_reconstruction",
+  "generated_at": "2026-08-14T20:23:26+00:00",
+  "planning_region_fips_locked": [
+    "09110",
+    "09120",
+    "09130",
+    "09140",
+    "09150",
+    "09160",
+    "09170",
+    "09180",
+    "09190"
+  ],
+  "headline_calculated": false
+}

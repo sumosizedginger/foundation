@@ -1,0 +1,13 @@
+{
+  "report_type": "meps_2024_full_year_refresh",
+  "generated_at": "2026-08-14T20:23:24+00:00",
+  "checked_at_source": "https://meps.ahrq.gov/mepsweb/data_stats/download_data_files.jsp",
+  "schedule_url": "https://meps.ahrq.gov/mepsweb/about_meps/releaseschedule.jsp",
+  "schedule_states_2024_fy": "AUGUST 2026",
+  "released": false,
+  "listed_puf_id": null,
+  "ascii_zip_url": null,
+  "notes": "2024 Full Year Consolidated is NOT in the official MEPS PUF listing. AHRQ schedule still lists it for AUGUST 2026. Continue using HC-251 with true source year = 2023.",
+  "continue_using": "HC-251 true source year = 2023",
+  "headline_calculated": false
+}

@@ -1,0 +1,44 @@
+{
+  "report_type": "living_cost_maintenance_candidates",
+  "generated_at": "2026-08-14T20:23:27+00:00",
+  "status": "MODELED_FROM_MEASURED_INPUTS",
+  "source_data_year": 2024,
+  "project_cost_year": 2024,
+  "translation_method": "NONE",
+  "price_index_series": null,
+  "columns_present": [
+    "MAINRPCQ",
+    "VEHQ",
+    "VEHQL"
+  ],
+  "notes": "OD-007 candidates among single-person vehicle-owning CE units. Zero-spend periods included in mean/median. P25/P50 also computed among positive spenders. Not frozen. $1,200 is not used.",
+  "candidates": {
+    "maintenance_repairs_tires_combined": {
+      "n": 5733,
+      "mean_incl_zero": 257.51,
+      "median_incl_zero": 0.0,
+      "p25_positive": 156.0,
+      "p50_positive": 344.0,
+      "n_positive": 1168
+    },
+    "routine_maintenance_repairs": {
+      "n": 5733,
+      "mean_incl_zero": 257.51,
+      "median_incl_zero": 0.0,
+      "p25_positive": 156.0,
+      "p50_positive": 344.0,
+      "n_positive": 1168
+    },
+    "tires": {
+      "n": 5733,
+      "mean_incl_zero": 0.0,
+      "median_incl_zero": 0.0,
+      "p25_positive": null,
+      "p50_positive": null,
+      "n_positive": 0
+    }
+  },
+  "retrieved_at": "",
+  "source_artifact_sha256": "",
+  "headline_calculated": false
+}

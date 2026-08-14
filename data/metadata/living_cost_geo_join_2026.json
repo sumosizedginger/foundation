@@ -1,7 +1,7 @@
 {
   "report_type": "hud_fmr_census_acs_geo_join",
   "reference_year": 2026,
-  "generated_at": "2026-08-14T17:30:25+00:00",
+  "generated_at": "2026-08-14T20:22:39+00:00",
   "census_artifact_sha256": "1637b18a96881b81e050df1cd3d5ac38a33208b9b69b40e1dbeb3c4e13718f0e",
   "hud_artifact_sha256": "0b130fd046c7bedbee5d206ab55654d390d27da423ff22e307e0698fbb56ad9c",
   "census_county_universe_count": 3144,

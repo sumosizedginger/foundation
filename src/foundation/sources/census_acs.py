@@ -452,8 +452,11 @@ def generate_census_county_universe_report(
         "response_hash": next(iter(county_pop_map.values()), {}).get("sha256", ""),
         "retrieval_timestamp": next(iter(county_pop_map.values()), {}).get("retrieved_at", ""),
         "connecticut_note": (
-            "Connecticut 2024 ACS 5-Year geographies are planning regions "
-            "(FIPS 09110-09170), not legacy counties."
+            "Connecticut 2024 ACS 5-Year geographies are nine planning regions "
+            "(FIPS 09110, 09120, 09130, 09140, 09150, 09160, 09170, 09180, 09190), "
+            "not the eight legacy counties. OD-013 keeps HUD cost geography on "
+            "legacy counties and reconstructs adult weights from the official "
+            "Census county-to-county-subdivision crosswalk."
         ),
     }
 

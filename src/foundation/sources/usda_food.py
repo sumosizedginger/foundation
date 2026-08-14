@@ -77,6 +77,7 @@ def download_usda_food_artifact(year: int, cache_dir: Path, force_download: bool
             cache_dir=cache_dir,
             expected_filename=spec["filename"],
             force_download=force_download,
+            refresh_if_unprovenanced=True,
         )
         if artifact is None:
             artifacts.append(
@@ -215,16 +216,123 @@ def _adult_individual_rows(rows: list[dict[str, Any]], sex: str) -> list[dict[st
     return out
 
 
+_MONTH_ALIASES = {
+    "1": "January",
+    "01": "January",
+    "jan": "January",
+    "january": "January",
+    "2": "February",
+    "02": "February",
+    "feb": "February",
+    "february": "February",
+    "3": "March",
+    "03": "March",
+    "mar": "March",
+    "march": "March",
+    "4": "April",
+    "04": "April",
+    "apr": "April",
+    "april": "April",
+    "5": "May",
+    "05": "May",
+    "may": "May",
+    "6": "June",
+    "06": "June",
+    "jun": "June",
+    "june": "June",
+    "7": "July",
+    "07": "July",
+    "jul": "July",
+    "july": "July",
+    "8": "August",
+    "08": "August",
+    "aug": "August",
+    "august": "August",
+    "9": "September",
+    "09": "September",
+    "sep": "September",
+    "sept": "September",
+    "september": "September",
+    "10": "October",
+    "oct": "October",
+    "october": "October",
+    "11": "November",
+    "nov": "November",
+    "november": "November",
+    "12": "December",
+    "dec": "December",
+    "december": "December",
+}
+_MONTH_ORDER = (
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+)
+
+
+def canonicalize_month_label(raw: object) -> str | None:
+    """Map an official USDA month cell to a calendar month name.
+
+    Does not infer months from row counts. Unknown labels are returned as None.
+    """
+    text = _cell_str(raw)
+    if not text:
+        return None
+    # Handle values like "2026-01" or "January 2026".
+    lowered = text.lower().replace(".", "")
+    for token in (lowered, lowered.split("-")[-1], lowered.split()[0]):
+        if token in _MONTH_ALIASES:
+            return _MONTH_ALIASES[token]
+    digits = "".join(ch for ch in text if ch.isdigit())
+    if len(digits) >= 6:
+        month_num = digits[-2:]
+        if month_num in _MONTH_ALIASES:
+            return _MONTH_ALIASES[month_num]
+    if len(digits) in {1, 2} and digits in _MONTH_ALIASES:
+        return _MONTH_ALIASES[digits]
+    return None
+
+
+def month_coverage(labels: list[str]) -> dict[str, Any]:
+    """Exact covered months derived from source observation labels."""
+    canonical: list[str] = []
+    for label in labels:
+        name = canonicalize_month_label(label)
+        if name and name not in canonical:
+            canonical.append(name)
+    ordered = [m for m in _MONTH_ORDER if m in canonical]
+    return {
+        "months_included": ordered,
+        "month_count": len(ordered),
+        "first_month": ordered[0] if ordered else None,
+        "last_month": ordered[-1] if ordered else None,
+    }
+
+
 def _average_monthly(rows: list[dict[str, Any]]) -> tuple[float | None, int, list[str]]:
     if not rows:
         return None, 0, []
-    months = sorted({row["month"] for row in rows if row["month"]})
-    # One observation per month: if duplicates exist, average them.
+    # One observation per calendar month: if duplicates exist, average them.
     by_month: dict[str, list[float]] = {}
     for row in rows:
-        by_month.setdefault(row["month"] or "unknown", []).append(row["cost"])
-    month_means = [sum(vals) / len(vals) for vals in by_month.values()]
-    return sum(month_means) / len(month_means), len(month_means), months
+        name = canonicalize_month_label(row.get("month"))
+        if name is None:
+            continue
+        by_month.setdefault(name, []).append(row["cost"])
+    if not by_month:
+        return None, 0, []
+    ordered = [m for m in _MONTH_ORDER if m in by_month]
+    month_means = [sum(by_month[m]) / len(by_month[m]) for m in ordered]
+    return sum(month_means) / len(month_means), len(month_means), ordered
 
 
 def build_usda_food_observations(
@@ -287,11 +395,17 @@ def build_usda_food_observations(
         midpoint = (avg_male + avg_female) / 2.0
         single_adult_monthly = round(midpoint * ONE_PERSON_HOUSEHOLD_FACTOR, 2)
         single_adult_annual = round(single_adult_monthly * 12.0, 2)
+        coverage = month_coverage(male_labels + female_labels)
+        months_count = int(coverage["month_count"])
         is_full_year = months_count >= 12
         period_label = (
             f"{reference_year} Annual Average ({months_count} mos)"
             if is_full_year
-            else f"{reference_year} YTD FOOD COST ({months_count} mos)"
+            else (
+                f"{reference_year} YTD FOOD COST months_included="
+                f"{coverage['months_included']} month_count={coverage['month_count']} "
+                f"first_month={coverage['first_month']} last_month={coverage['last_month']}"
+            )
         )
         observations.append(
             LivingCostComponentObservation(

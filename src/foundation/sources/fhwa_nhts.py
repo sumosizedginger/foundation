@@ -1,13 +1,10 @@
 """Federal Highway Administration (FHWA) / National Household Travel Survey (NHTS) Source Adapter.
 
-Ingests and documents the empirical annual vehicle miles traveled (VMT) benchmark for single-adult
-working-age drivers (Age 18-64) covering necessary commuting, medical trips, grocery shopping,
-and essential local travel.
+Observed annual vehicle miles for one-person, one-worker, age-18-64 licensed-driver
+households. This is OBSERVED TRAVEL BEHAVIOR, not MINIMUM NECESSARY MILEAGE.
 
-NHTS METHODOLOGICAL BASELINE:
-- Survey: 2022 NHTS (National Household Travel Survey).
-- Target Population: 1-driver households with 1 adult worker.
-- Weighted Annual VMT: Calculated dynamically from `hhpub.csv` using `ANNMILES` and `WTHHFIN`.
+The person file is joined so that age 18-64 and licensed-driver criteria are actually
+executed. Household-only HHSIZE==1 / WRKCOUNT==1 is not sufficient.
 """
 
 from __future__ import annotations
@@ -27,6 +24,34 @@ NHTS_LANDING = "https://nhts.ornl.gov/downloads"
 NHTS_2022_CSV_ZIP = "https://nhts.ornl.gov/assets/2022/download/csv.zip"
 
 
+def _nhts_age(row: dict[str, str]) -> int | None:
+    for key in ("R_AGE", "R_AGE_IMP", "AGE"):
+        raw = str(row.get(key) or "").strip()
+        if not raw:
+            continue
+        try:
+            age = int(float(raw))
+        except ValueError:
+            continue
+        if age > 0:
+            return age
+    return None
+
+
+def _nhts_is_driver(row: dict[str, str]) -> bool | None:
+    """Return True/False when the official driver field is present; None if unsupported."""
+    for key in ("DRIVER", "DRIVERSTAT"):
+        raw = str(row.get(key) or "").strip().upper()
+        if not raw:
+            continue
+        digits = raw.lstrip("0") or "0"
+        if raw in {"1", "01", "YES", "Y", "DRIVER"} or digits == "1":
+            return True
+        if raw in {"2", "02", "NO", "N", "NONDRIVER", "NON-DRIVER"} or digits == "2":
+            return False
+    return None
+
+
 def download_fhwa_nhts_artifact(year: int, cache_dir: Path, force_download: bool = False):
     """Official 2022 NextGen NHTS V2.1 public-use CSV zip."""
     if year not in (2024, 2026):
@@ -40,6 +65,7 @@ def download_fhwa_nhts_artifact(year: int, cache_dir: Path, force_download: bool
         cache_dir=cache_dir,
         expected_filename="nhts_2022_csv.zip",
         force_download=force_download,
+        refresh_if_unprovenanced=True,
     )
 
 
@@ -91,6 +117,17 @@ def parse_fhwa_nhts_mileage(
             ]
             if not hh_files:
                 raise FileNotFoundError("Could not find household public CSV inside NHTS ZIP.")
+            per_files = [
+                f
+                for f in z.namelist()
+                if f.lower().endswith(".csv")
+                and ("perv2pub" in f.lower() or "perpub" in f.lower())
+            ]
+            if not per_files:
+                raise FileNotFoundError(
+                    "Could not find person public CSV inside NHTS ZIP. "
+                    "Age 18-64 and licensed-driver filters cannot be executed without it."
+                )
 
             import io
 
@@ -99,8 +136,8 @@ def parse_fhwa_nhts_mileage(
                 text_fh = io.TextIOWrapper(fh, encoding="utf-8-sig", errors="replace")
                 reader = csv.DictReader(text_fh)
                 for row in reader:
-                    wrkcount = str(row.get("WRKCOUNT", "")).strip()
-                    hhsize = str(row.get("HHSIZE", "")).strip()
+                    wrkcount = str(row.get("WRKCOUNT", "")).strip().lstrip("0") or "0"
+                    hhsize = str(row.get("HHSIZE", "")).strip().lstrip("0") or "0"
                     if wrkcount != "1" or hhsize != "1":
                         continue
                     hid = str(row.get("HOUSEID") or "").strip()
@@ -114,6 +151,23 @@ def parse_fhwa_nhts_mileage(
                     if weight <= 0:
                         continue
                     eligible[hid] = weight
+
+            person_ok: set[str] = set()
+            with z.open(per_files[0]) as fh:
+                text_fh = io.TextIOWrapper(fh, encoding="utf-8-sig", errors="replace")
+                reader = csv.DictReader(text_fh)
+                for row in reader:
+                    hid = str(row.get("HOUSEID") or "").strip()
+                    if hid not in eligible:
+                        continue
+                    age = _nhts_age(row)
+                    if age is None or age < 18 or age > 64:
+                        continue
+                    driver = _nhts_is_driver(row)
+                    if driver is not True:
+                        continue
+                    person_ok.add(hid)
+            eligible = {hid: w for hid, w in eligible.items() if hid in person_ok}
 
             veh_files = [
                 f
@@ -219,7 +273,7 @@ def parse_fhwa_nhts_mileage(
         unit="MILES",
         status=ComponentStatus.MEASURED,
         source_id=f"fhwa_nhts_{reference_year}",
-        source_variable="ANNMILES_WRKCOUNT1_HHSIZE1",
+        source_variable="ANNMILES_HHSIZE1_WRKCOUNT1_AGE18_64_DRIVER",
         source_url=NHTS_2022_CSV_ZIP,
         source_release="FHWA NHTS 2022 V2.1",
         source_reference_period="2022",
@@ -227,10 +281,12 @@ def parse_fhwa_nhts_mileage(
         source_artifact_sha256=file_sha256,
         methodology_version="0.2.0-draft",
         notes=(
-            "Observed NHTS travel behavior for HOUSEID with HHSIZE=1 and WRKCOUNT=1, "
-            "weight=WTHHFIN, miles=sum(ANNMILES) on vehv2pub. Missing weights are dropped "
-            f"(not defaulted to 1). Weighted mean={annual_miles:,.1f}; median={median:,.1f}; "
+            "OBSERVED TRAVEL BEHAVIOR for one-person, one-worker, age-18-64 licensed-driver "
+            "households with valid annual vehicle mileage. Filters actually executed: "
+            "hhv2pub HHSIZE=1 and WRKCOUNT=1; perv2pub R_AGE in 18-64 and DRIVER=1; "
+            "vehv2pub sum(ANNMILES); weight=WTHHFIN. Missing weights dropped (not defaulted). "
+            f"Weighted mean={annual_miles:,.1f}; median={median:,.1f}; "
             f"P25={p25:,.1f}; P75={p75:,.1f}; unweighted n={sample_size:,}. "
-            "This is OBSERVED ANNUAL MILEAGE, not MINIMUM NECESSARY MILEAGE (OD-003)."
+            "This is not MINIMUM NECESSARY MILEAGE (OD-003)."
         ),
     )

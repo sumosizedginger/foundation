@@ -87,6 +87,37 @@ def record_unretrieved(
     )
 
 
+def provenance_is_complete(artifact: RetrievedSourceArtifact | None) -> bool:
+    """Full VALIDATED requires a real retrieval sidecar, not just a hash of cached bytes."""
+    if artifact is None:
+        return False
+    if not artifact.retrieved_at or not str(artifact.retrieved_at).strip():
+        return False
+    if not artifact.resolved_url or not str(artifact.resolved_url).strip():
+        return False
+    if not artifact.local_cache_filename or not str(artifact.local_cache_filename).strip():
+        return False
+    if not artifact.sha256 or len(artifact.sha256) != 64:
+        return False
+    return bool(artifact.byte_size)
+
+
+def validation_status_after_parse(
+    artifact: RetrievedSourceArtifact,
+    *,
+    parsed_ok: bool,
+    parsed_status: str = "VALIDATED",
+) -> str:
+    """Never promote to VALIDATED without complete retrieval provenance."""
+    if artifact.validation_status in NON_RETRIEVED_STATUSES:
+        return artifact.validation_status
+    if not parsed_ok:
+        return artifact.validation_status or "RETRIEVED_UNVALIDATED"
+    if not provenance_is_complete(artifact):
+        return "INCOMPLETE_PROVENANCE"
+    return parsed_status
+
+
 def acquire_source(
     source_id: str,
     url: str,
@@ -94,6 +125,7 @@ def acquire_source(
     expected_filename: str,
     *,
     force_download: bool = False,
+    refresh_if_unprovenanced: bool = True,
     timeout: tuple[float, float] = (15.0, 180.0),
     max_bytes: int = 500_000_000,
 ) -> RetrievedSourceArtifact | None:
@@ -101,9 +133,20 @@ def acquire_source(
 
     Cache hits never invent retrieved_at from filesystem mtime.
     Missing sidecar => RETRIEVED_UNVALIDATED at best.
+    Prefer re-retrieval over inventing retrieved_at when refresh_if_unprovenanced=True.
     """
     cache_dir.mkdir(parents=True, exist_ok=True)
     destination = cache_dir / expected_filename
+
+    if (
+        refresh_if_unprovenanced
+        and destination.exists()
+        and read_retrieval_sidecar(destination) is None
+    ):
+        logger.info(
+            "Re-retrieving %s because cached bytes have no provenance sidecar", source_id
+        )
+        force_download = True
 
     if force_download or not destination.exists():
         logger.info("Downloading source %s from %s", source_id, url)
@@ -133,7 +176,15 @@ def acquire_source(
             )
         except (OSError, ValueError, RuntimeError, TypeError, requests.RequestException) as exc:
             logger.error("Failed to acquire source %s from %s: %s", source_id, url, exc)
-            return None
+            if destination.exists() and destination.stat().st_size > 0:
+                logger.warning(
+                    "Keeping existing cache for %s after failed refresh; "
+                    "status will not be full VALIDATED without a sidecar.",
+                    source_id,
+                )
+                force_download = False
+            else:
+                return None
 
     logger.info("Using cached source for %s at %s", source_id, destination)
     try:

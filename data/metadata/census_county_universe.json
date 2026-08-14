@@ -1,6 +1,6 @@
 {
   "report_type": "census_county_geography_universe",
-  "generated_at": "2026-08-14T17:30:25+00:00",
+  "generated_at": "2026-08-14T20:22:39+00:00",
   "census_vintage": "2024 ACS 5-Year Estimates",
   "source_url": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b01001.dat",
   "total_county_count": 3144,
@@ -123,9 +123,6 @@
   "weight_vintage_year": 2024,
   "cost_reference_year_note": "This file is the frozen adult-population weight vintage for both 2024 and 2026 cost years.",
   "exact_query": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b01001.dat",
-  "response_hash": "1637b18a96881b81e050df1cd3d5ac38a33208b9b69b40e1dbeb3c4e13718f0e",
-  "retrieval_timestamp": "UNKNOWN_CACHE_HIT_NO_SIDECAR",
-  "connecticut_note": "Connecticut 2024 ACS 5-Year geographies are planning regions (FIPS 09110-09190), not legacy counties.",
   "variables": [
     "NAME",
     "B01001_001E",
@@ -138,5 +135,7 @@
     "B01001_029E",
     "B01001_030E"
   ],
-  "revalidated_at": "2026-08-14T17:51:54+00:00"
+  "response_hash": "1637b18a96881b81e050df1cd3d5ac38a33208b9b69b40e1dbeb3c4e13718f0e",
+  "retrieval_timestamp": "2026-08-14T20:18:18+00:00",
+  "connecticut_note": "Connecticut 2024 ACS 5-Year geographies are nine planning regions (FIPS 09110, 09120, 09130, 09140, 09150, 09160, 09170, 09180, 09190), not the eight legacy counties. OD-013 keeps HUD cost geography on legacy counties and reconstructs adult weights from the official Census county-to-county-subdivision crosswalk."
 }

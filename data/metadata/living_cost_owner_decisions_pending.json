@@ -1,7 +1,10 @@
 {
   "report_type": "living_cost_owner_decisions_pending",
-  "generated_at": "2026-08-14T17:45:59+00:00",
+  "generated_at": "2026-08-14T20:22:45+00:00",
   "headline_calculated": false,
+  "living_cost_release_authorized": false,
+  "states_modeled": 0,
+  "decisions_frozen": false,
   "decisions": [
     {
       "id": "OD-001",
@@ -24,32 +27,32 @@
       "option_c": "Publish mean as primary with median/P75 sensitivity.",
       "recommended": "C",
       "directional_effect": "Mean raises healthcare vs median.",
-      "source_support": "MEPS HC-251 2023 Full Year Consolidated (newest official FY file; 2024 FY due later).",
+      "source_support": "HC-251 (2023 Full Year Consolidated) remains the latest actually listed full-year MEPS file as of 2026-08-14. AHRQ's official 2026 release schedule (https://meps.ahrq.gov/mepsweb/about_meps/releaseschedule.jsp, page last updated July 31, 2026) lists the 2024 Full Year Consolidated Data File for AUGUST 2026. Do not claim the 2024 full-year file exists until it appears in the official MEPS PUF listing. A source-refresh check runs immediately before owner freeze / candidate calculation; if the 2024 FY file is listed it is retrieved, hashed, parsed, and preferred; otherwise HC-251 is used with true source year = 2023.",
       "sensitivity_plan": "Report mean, median, P75 once microdata parse is validated."
     },
     {
       "id": "OD-003",
       "question": "Is observed NHTS mileage the living-cost mileage, or is a lower minimum-necessary mileage required?",
-      "why_it_matters": "Observed 1-person/1-worker households travel far more than a commuting-only floor.",
+      "why_it_matters": "Observed one-person working-age driver households travel far more than a commuting-only floor.",
       "option_a": "Use measured NHTS weighted mean/median as mobility requirement.",
       "option_b": "Define a separate MINIMUM NECESSARY MILEAGE assumption below observed travel.",
       "option_c": "Use NHTS P25 as a conservative observed standard.",
       "recommended": "C pending owner review; do not treat observed mean as 'necessary'.",
-      "directional_effect": "Observed mean (~19,400 mi in current extract) raises transportation vs P25.",
-      "source_support": "2022 NHTS V2.1 hhv2pub+vehv2pub; ANNMILES; WTHHFIN; HHSIZE=1; WRKCOUNT=1.",
+      "directional_effect": "Observed mean raises transportation vs P25.",
+      "source_support": "2022 NHTS V2.1: household file (HHSIZE=1, WRKCOUNT=1) joined to person file (R_AGE 18-64; DRIVER=1 when the field is present) and vehicle file (sum of ANNMILES; weight=WTHHFIN). Sample is labeled OBSERVED TRAVEL BEHAVIOR for one-person, one-worker, age-18-64 licensed-driver households with valid annual vehicle mileage \u2014 not MINIMUM NECESSARY MILEAGE. P25 / median / mean / P75 and unweighted sample count are all emitted.",
       "sensitivity_plan": "Publish P25/median/mean/P75 of observed miles; owner picks headline."
     },
     {
       "id": "OD-004",
-      "question": "What is the reference used vehicle and EPA combined MPG?",
-      "why_it_matters": "MPG scales fuel cost. 28 MPG in code is unsupported.",
-      "option_a": "EPA compact/midsize used-car combined MPG near the fleet median.",
-      "option_b": "Keep 28 MPG as ESTIMATED until EPA table is frozen.",
-      "option_c": "Use a documented specific model-year compact sedan.",
-      "recommended": "A after EPA table extract; until then ESTIMATED_OWNER_REVIEW.",
-      "directional_effect": "Higher MPG lowers fuel cost.",
-      "source_support": "EPA fueleconomy.gov public data; not yet frozen.",
-      "sensitivity_plan": "24 / 28 / 32 MPG."
+      "question": "Which EPA reference-vehicle cohort should set combined real-world MPG?",
+      "why_it_matters": "MPG scales fuel cost. This is a cohort decision, not a source-existence decision.",
+      "option_a": "Used-car window: gasoline (non-BEV, non-PHEV) compact/midsize passenger cars, model years approximately 8\u201312 years before the cost year, weighted/median combined real-world MPG from official EPA vehicle-level data.",
+      "option_b": "New-car window: same class/fuel filter on the latest final EPA model year (MY2024 detailed Automotive Trends / fueleconomy.gov vehicle file).",
+      "option_c": "A documented specific model-year compact/midsize gasoline sedan.",
+      "recommended": "A after owner review of candidate table; do not freeze 24/28/32.",
+      "directional_effect": "Higher MPG lowers fuel cost. Used-car vs new-car window is typically lower MPG than new-car.",
+      "source_support": "Official EPA Automotive Trends detailed data and/or EPA/DOE fueleconomy.gov vehicles file. Candidates include vehicle age/model-year window, class, fuel type, and weighted/median combined real-world MPG with sensitivity alternatives. Not frozen.",
+      "sensitivity_plan": "Compare used-car vs new-car windows; compact vs midsize; median vs sales-weighted mean."
     },
     {
       "id": "OD-005",
@@ -65,27 +68,27 @@
     },
     {
       "id": "OD-006",
-      "question": "What public source replaces licensed NAIC auto-insurance averages?",
-      "why_it_matters": "Insurance is mandatory where auto is the baseline.",
-      "option_a": "Licensed NAIC Auto Insurance Database Report if owner supplies artifact.",
-      "option_b": "State DOI public average-premium tables where they exist.",
-      "option_c": "Leave LICENSING_REVIEW / SOURCE_GAP; no commercial quote sites.",
-      "recommended": "C until a reusable public series is inventoried.",
-      "directional_effect": "Missing insurance blocks VALIDATED transportation.",
-      "source_support": "NAIC is licensed. No fabricated content.naic.org CSV.",
-      "sensitivity_plan": "If owner licenses NAIC, ingest once with honest provenance."
+      "question": "Which NAIC insurance measure should represent required auto insurance?",
+      "why_it_matters": "Insurance is mandatory where auto is the baseline. NAIC now publishes the 2022/2023 Auto Insurance Database Report as a free download; this is no longer a licensed-only source-existence question.",
+      "option_a": "Average expenditure per insured vehicle (what insured households actually spent, mixing coverage take-up).",
+      "option_b": "Combined average premium (liability + comprehensive + collision premiums per insured vehicle / car-year).",
+      "option_c": "Coverage-specific / mandatory-coverage measure (liability-only or state compulsory package) if the report tables permit.",
+      "recommended": "Do not freeze. Prefer the measure that most closely matches a legally required package for a single adult; document that free download is not a redistribution license.",
+      "directional_effect": "Combined premium is typically above liability-only; expenditure mixes optional coverages.",
+      "source_support": "Official free PDF: https://content.naic.org/sites/default/files/publication-aut-pb-auto-insurance-database.pdf (Adopted December 2025; data through 2023; released Feb 13, 2026). Derived statistics with attribution are handled separately from raw-artifact redistribution. redistribution_status = FREE_DOWNLOAD_REDISTRIBUTION_UNCONFIRMED.",
+      "sensitivity_plan": "Publish A/B/C side-by-side for every state once tables are extracted; do not invent a CSV."
     },
     {
       "id": "OD-007",
-      "question": "What is the maintenance + tires + repairs standard?",
-      "why_it_matters": "$1,200 in code is unsupported.",
-      "option_a": "BLS CE vehicle-maintenance/tires P25 among single-person positive spenders.",
-      "option_b": "Keep a labeled ESTIMATED reserve until CE parse is approved.",
-      "option_c": "Split ordinary maintenance, tires, and repairs if CE UCC codes support it.",
-      "recommended": "A+C after CE variables are verified against the official dictionary.",
-      "directional_effect": "P25 is below mean maintenance spend.",
-      "source_support": "BLS CE 2024 Interview PUMD (intrvw24.zip) retrieved and FMLI parsed.",
-      "sensitivity_plan": "P20/P25/P30 on vehicle-maintenance/tires UCC codes after dictionary freeze."
+      "question": "Which long-run annualization of vehicle maintenance/repairs/tires should be the reserve?",
+      "why_it_matters": "Maintenance and repairs are lumpy. Zero spending in a survey period does not necessarily mean zero long-run maintenance need. Do not automatically use P25 among positive spenders.",
+      "option_a": "Weighted mean among single-person vehicle-owning consumer units, including zero-spend periods.",
+      "option_b": "Weighted median among the same units, including zero-spend periods.",
+      "option_c": "P25/P50 among positive spenders, and/or a multi-year annualized result if sufficient CE vintages can be reproduced. Split routine maintenance, tires, and repairs where FMLI/UCC codes support it.",
+      "recommended": "Do not freeze one until owner review. Emit all candidates.",
+      "directional_effect": "Including zeros lowers the reserve vs positive-spender P25/mean; multi-year annualization smooths lumps.",
+      "source_support": "BLS CE 2024 Interview PUMD (intrvw24.zip) FMLI vehicle-owning single-person units. Candidate statistics are computed; no $1,200 constant is used.",
+      "sensitivity_plan": "Compare mean-with-zeros, median-with-zeros, positive-spender P25/P50, and split maintenance/tires/repairs."
     },
     {
       "id": "OD-008",
@@ -101,39 +104,39 @@
     },
     {
       "id": "OD-009",
-      "question": "What is the minimum connectivity standard?",
-      "why_it_matters": "Zero internet is not a sustainable adult life.",
-      "option_a": "One prepaid/postpaid mobile line + one residential broadband plan at a documented low-cost official series.",
-      "option_b": "Mobile-only.",
-      "option_c": "Broadband-only.",
-      "recommended": "A as Foundation minimum-service selection, not a measured typical bill.",
-      "directional_effect": "Adding both line and broadband raises connectivity.",
-      "source_support": "FCC Urban Rate Survey / ACS computer-internet tables are candidates; not frozen.",
-      "sensitivity_plan": "Mobile-only vs mobile+broadband."
+      "question": "What official PRICE sources should set the one-mobile-line + one-broadband connectivity standard?",
+      "why_it_matters": "Zero internet is not a sustainable adult life. ACS internet tables measure subscription/access/type \u2014 they are NOT a price source and are removed as a candidate PRICE series (they may remain supporting evidence for prevalence).",
+      "option_a": "One modest mobile line + one modest residential broadband connection, priced from official FCC Urban Rate Survey broadband results plus a reproducible authoritative mobile-price source.",
+      "option_b": "Mobile-only at the official mobile-price source.",
+      "option_c": "Broadband-only at the FCC Urban Rate Survey benchmark / surveyed urban rate.",
+      "recommended": "A as the Foundation minimum-service selection. Prices must come from real source evidence. ACS is not used for price.",
+      "directional_effect": "Adding both line and broadband raises connectivity vs either alone.",
+      "source_support": "Broadband: official FCC Urban Rate Survey (2024 and 2026 Excel results at fcc.gov/sites/default/files/). Mobile: no single official national prepaid price series is frozen; remaining SOURCE_GAP / ESTIMATED_OWNER_REVIEW until an authoritative reproducible mobile source is accepted. Broadband Consumer Label data are evaluated if published at sufficient geographic scale.",
+      "sensitivity_plan": "Mobile-only vs broadband-only vs both; URS average vs reasonable-comparability benchmark."
     },
     {
       "id": "OD-010",
-      "question": "How should lagging 2026 structural sources be translated?",
-      "why_it_matters": "Relabeling 2024 observations as 2026 is forbidden.",
-      "option_a": "LATEST_AVAILABLE for structural survey files; RULE_YEAR for tax; YTD for monthly prices.",
-      "option_b": "CPI-update every lagged dollar series.",
+      "question": "How should lagging sources be translated into the project cost year?",
+      "why_it_matters": "Relabeling 2024 observations as 2026 is forbidden. A single blanket LATEST_AVAILABLE rule is too coarse.",
+      "option_a": "HYBRID (recommended): QUANTITIES / STRUCTURAL CHARACTERISTICS use LATEST_AVAILABLE when appropriate (NHTS mileage, reference-population structure, RPP if the latest geography measure is older and clearly labeled). TARGET-YEAR LEGAL RULES use RULE_YEAR (federal tax, state tax, registration laws/fees). CURRENT MONTHLY PRICES use YTD or a defined annual average (USDA 2026 food; gasoline where applicable). LAGGED NOMINAL DOLLAR EXPENDITURE SERIES (2024 CE essentials/recreation used for 2026; older insurance dollars; older OOP amounts) evaluate CPI_UPDATED or a component-specific official price index rather than carrying old nominal dollars forward by default. Every component records project_cost_year, source_data_year, translation_method, and price_index_series if applicable.",
+      "option_b": "Unadjusted LATEST_AVAILABLE sensitivity for every lagged series.",
       "option_c": "Refuse 2026 costs until every source has a 2026 observation.",
-      "recommended": "A with explicit project_cost_year / source_data_year / translation_method on every component.",
-      "directional_effect": "CPI-updating raises 2026 vs holding latest available.",
-      "source_support": "GROK.MD \u00a725 translation methods.",
-      "sensitivity_plan": "Show 2026 under LATEST_AVAILABLE vs CPI_UPDATED."
+      "recommended": "A (HYBRID). Keep B as a published sensitivity. Do not silently carry old nominal dollars forward.",
+      "directional_effect": "CPI-updating lagged dollar series typically raises 2026 vs holding latest available nominal dollars.",
+      "source_support": "GROK.MD post-2A \u00a77 component-type translation rules.",
+      "sensitivity_plan": "Show 2026 under HYBRID vs unadjusted LATEST_AVAILABLE for every lagged dollar series."
     },
     {
       "id": "OD-011",
-      "question": "How should municipal earned-income taxes that do not map to county geography be handled?",
-      "why_it_matters": "NYC and Philadelphia are not statewide.",
-      "option_a": "Attach tax only to counties that contain the taxing city; other counties UNAVAILABLE for local tax.",
-      "option_b": "Ignore municipal taxes until a place-level geography is authorized.",
+      "question": "How should municipal earned-income taxes be overlaid onto county geography?",
+      "why_it_matters": "NYC and Philadelphia are not statewide. Do NOT apply a municipal tax to an entire county merely because the taxing city is inside that county.",
+      "option_a": "Direct overlay only when geography is coterminous / the tax applies throughout the modeled county-equivalent, OR the tax is county-level.",
+      "option_b": "When the municipality occupies only part of the county: move the tax calculation to place/subcounty geography, population-weight municipal exposure, or mark local tax unresolved. Do not apply a city tax countywide without geographic justification.",
       "option_c": "Invent a statewide average local tax.",
-      "recommended": "A. Never C.",
-      "directional_effect": "A raises living cost only in affected counties.",
-      "source_support": "GROK.MD local-tax classification A/B/C/D.",
-      "sensitivity_plan": "Compare county results with and without municipal overlay."
+      "recommended": "Classify every local tax as A (coterminous), B (county-level), C (partial municipality), or D (unresolved). Direct overlay only for A/B. Never C-as-statewide.",
+      "directional_effect": "A/B raise living cost only where the tax actually applies; C without justification would overstate countywide cost.",
+      "source_support": "GROK.MD post-2A \u00a78 municipal-tax classification A/B/C/D.",
+      "sensitivity_plan": "Compare county results with coterminous overlay vs place-level vs unresolved."
     },
     {
       "id": "OD-012",
@@ -149,15 +152,15 @@
     },
     {
       "id": "OD-013",
-      "question": "How should Connecticut ACS planning regions be joined to HUD county FMR rows?",
-      "why_it_matters": "2024 ACS 5-Year uses Connecticut planning-region FIPS (09110-09170). HUD FMR still publishes legacy county FIPS. Nine ACS geographies (about 2.9 million adults) currently unmatched.",
-      "option_a": "Build an official CT OPM/Census crosswalk from planning regions to legacy counties and allocate FMR.",
-      "option_b": "Leave CT unmatched until HUD publishes planning-region FMR.",
-      "option_c": "Assign a statewide CT 1BR FMR to unmatched planning regions.",
-      "recommended": "A if an official crosswalk exists; otherwise B. Never invent county rents.",
-      "directional_effect": "B excludes ~1.1% of national adult population from the housing join.",
-      "source_support": "living_cost_geo_join_2024.json unmatched_census_counties 09110-09190.",
-      "sensitivity_plan": "Recompute CT after an official crosswalk is frozen."
+      "question": "How should Connecticut planning-region ACS weights join HUD legacy-county FMR?",
+      "why_it_matters": "There are nine current Connecticut county equivalents: 09110, 09120, 09130, 09140, 09150, 09160, 09170, 09180, 09190. HUD FMR still publishes eight legacy county FIPS. Do not invent planning-region rents. Do not default to allocating legacy HUD county rents into planning regions.",
+      "option_a": "KEEP HUD COST GEOGRAPHY = legacy HUD county. Reconstruct adult population weights for the eight legacy Connecticut counties by (1) retrieving 2024 ACS B01001 age data at county-subdivision / municipality geography, (2) using the official Census Connecticut County to County Subdivision Crosswalk and/or official Connecticut municipality mapping, (3) assigning towns to legacy counties, (4) summing age-18+ population into the eight legacy counties, (5) joining those reconstructed weights to HUD's legacy-county FMR rows. Validate: all CT population represented; no duplicate municipality; no missing town; eight legacy county totals; state adult-pop total reconciles to the Connecticut total.",
+      "option_b": "Leave CT unmatched rather than fabricate allocation if official sources cannot reproduce the reconstruction.",
+      "option_c": "Assign a statewide CT 1BR FMR or invent planning-region rents.",
+      "recommended": "A if the official Census crosswalk plus ACS county-subdivision B01001 can be reproduced; otherwise B. Never C.",
+      "directional_effect": "A keeps CT housing in the join on HUD's published geography. B excludes ~1.1% of national adult population.",
+      "source_support": "Official Census Connecticut County to County Subdivision Crosswalk at https://www2.census.gov/geo/docs/reference/ct_change/ct_cou_to_cousub_crosswalk.xlsx (and .txt). Planning-region FIPS are 09110\u201309190 (nine geographies), not 09110\u201309170.",
+      "sensitivity_plan": "Reconcile reconstructed legacy-county adult pop to ACS Connecticut state total; leave unmatched if reconciliation fails."
     }
   ]
 }

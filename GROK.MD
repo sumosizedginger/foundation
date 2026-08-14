@@ -1,923 +1,640 @@
-THE FOUNDATION — DELIVERABLE 2A
-MINIMUM SUSTAINABLE LIVING COST
-SOURCE CLOSURE + METHODOLOGY FREEZE
+THE FOUNDATION — OWNER DECISION PACKET REFRESH
+POST-DELIVERABLE-2A SOURCE CORRECTION
 
 Repository:
 https://github.com/sumosizedginger/foundation
 
-CURRENT APPROVED BASELINE COMMIT:
+CURRENT AUDITED HEAD:
+f2c0636690ac2408d0f537c9fd657225c75e63f3
 
-98bdb23ead17512db8594e7ff385457d51428155
+PURPOSE:
 
-CURRENT STATE:
+Update the Living Cost owner-decision packet and supporting source coverage using
+current official source information as of 2026-08-14.
 
-- Tests & Code Quality: GREEN
-- Validate Living Cost Sources: GREEN
-- Deploy Pages: GREEN
-- 63 tests passed, 1 skipped
-- Minimum Sustainable Living Cost remains unpublished
-- states_modeled = 0
-- Data Health = PARTIAL
-- current source coverage report contains 38 blocking component/year combinations
-- no Minimum Sustainable Living Cost headline is authorized yet
+DO NOT calculate or publish a Minimum Sustainable Living Cost.
 
-This is no longer a general integrity-repair pass.
+DO NOT calculate Gap, Adequacy, state rankings, national median or Composite.
 
-The purpose of this deliverable is:
-
-1. close as many real empirical source gaps as possible;
-2. validate already-retrieved source artifacts;
-3. identify the genuinely unavoidable remaining modeling assumptions;
-4. freeze those methodology choices explicitly;
-5. produce a complete OWNER DECISION PACKET;
-6. STOP before calculating a national/state Minimum Sustainable Living Cost.
-
-DO NOT CALCULATE OR PUBLISH A LIVING-COST HEADLINE DURING THIS DELIVERABLE.
+This is a SOURCE / METHODOLOGY CORRECTION pass before owner decisions are frozen.
 
 ==================================================
-1. PRESERVE CURRENT SUCCESSFUL ARCHITECTURE
+1. MEPS — UPDATE OD-002 STATUS
 ==================================================
 
-Do not regress:
+HC-251 (2023 Full Year Consolidated) remains the latest actually listed full-year
+MEPS file as of 2026-08-14.
 
-- verified $21,800 Population Anchor;
-- fail-closed source architecture;
-- source manifest;
-- source coverage report;
-- no test fixtures in production;
-- no fabricated provenance;
-- Data Health = PARTIAL while Axis 2 is unavailable;
-- living-cost release lock;
-- working CI;
-- working Pages deployment;
-- working source-validation workflow.
+However, AHRQ's official 2026 release schedule says the:
 
-Do not resurrect retired:
+2024 Full Year Consolidated Data File
 
-$27,960
-$51,220.16
-$55,551.89
--$29,420.16
-43%
+is scheduled for AUGUST 2026.
 
-except in explicitly historical documentation.
+Update OD-002 to say this explicitly.
 
-==================================================
-2. GOAL FOR THIS PASS
-==================================================
+Do not claim the 2024 full-year file exists until it actually appears in the official
+MEPS PUF listing.
 
-Move each required source/component toward one of:
+Add a source-refresh check so that immediately before owner freeze / candidate
+calculation the pipeline checks whether the 2024 Full Year Consolidated file has
+been released.
 
-VALIDATED
-MODELED_FROM_MEASURED_INPUTS
-ESTIMATED — OWNER REVIEW REQUIRED
-UNAVAILABLE
-SOURCE_GAP
-LICENSING_REVIEW
+If released:
+retrieve, hash, parse and prefer it.
 
-Do not use:
-
-"parser ready"
-
-as the final state when a public official source is realistically obtainable.
+If not:
+continue using HC-251 with true source year = 2023.
 
 ==================================================
-3. CENSUS ACS — CLOSE THIS GAP
+2. NHTS — FIX SAMPLE DEFINITION
 ==================================================
 
-Current source report says Census requires an API key.
+Current fhwa_nhts.py documentation claims:
 
-Implement secure support for:
+"single-adult working-age drivers (Age 18-64)"
+and
+"1-driver households"
 
-CENSUS_API_KEY
+but implementation currently filters:
 
-Requirements:
+HHSIZE == 1
+WRKCOUNT == 1
 
-- never commit the key;
-- read from environment;
-- support GitHub Actions secret;
-- document local setup;
-- fail closed when missing.
+and then sums vehicle ANNMILES.
 
-Use the official Census ACS 5-Year API.
+That does NOT establish:
 
-For population weighting, propose and implement this methodology unless evidence shows a better approach:
+age 18-64
+or
+exactly one licensed driver.
 
-Use one frozen ACS adult-population weighting vintage for BOTH the 2024 and 2026 cost distributions so changes in the cost vintages are not confounded by changing aggregation weights.
+Fix one of two ways:
 
-Preferred current candidate:
+A. Preferred:
+join the appropriate NHTS person data and explicitly enforce:
+- one-person household;
+- age 18-64;
+- driver/licensed-driver criterion if supported;
+- one worker if that remains part of methodology.
 
-2024 ACS 5-Year adult population age 18+.
+OR
 
-Clearly distinguish:
+B:
+rename the empirical sample everywhere to exactly what it is:
 
-COST REFERENCE YEAR
-from
-POPULATION WEIGHT VINTAGE.
+"one-person, one-worker households with valid annual vehicle mileage"
 
-Calculate adult population deterministically from the approved B01001 age cells.
+Do not call it working-age drivers unless the age/driver filter is actually executed.
 
-Generate the full 50-state + DC county/county-equivalent universe.
+Preserve:
 
-Generate:
-
-data/metadata/census_county_universe.json
-
-Include:
-
-- ACS vintage;
-- exact query;
-- variables;
-- county count;
-- count by state;
-- represented adult population;
-- excluded territories;
-- response hash;
-- retrieval timestamp.
-
-==================================================
-4. HUD HOUSING — CLOSE THIS GAP
-==================================================
-
-The official HUD county XLSX artifacts exist.
-
-The current CI downloader returned an empty body.
-
-Fix acquisition rather than marking the dataset nonexistent.
-
-For FY2024 use the appropriate official revised FY2024 County Level Data artifact.
-
-For FY2026 use the current official revised County Level Data artifact, presently the revision effective May 21, 2026.
-
-Acquisition may use:
-
-- robust direct download;
-- HUD API;
-- official-link discovery from HUD landing page;
-
-whichever proves most reproducible.
-
-If the HUD API requires a token, support an environment secret rather than hardcoding it.
-
-Validation requires:
-
-- actual nonempty XLSX bytes;
-- valid Excel workbook;
-- correct HUD schema;
-- 1BR FMR field;
-- county/FMR area identifiers;
-- SHA-256;
-- byte size;
-- retrieval timestamp;
-- official effective date.
-
-Then generate REAL:
-
-living_cost_geo_join_2024.json
-living_cost_geo_join_2026.json
-
-using Census county weights.
-
-Report all unmatched counties.
-
-==================================================
-5. HOUSING METHODOLOGY FREEZE
-==================================================
-
-Freeze:
-
-Independent standard-quality 1-bedroom rental.
-
-No roommates.
-
-No room rental.
-
-No homeownership assumption.
-
-Use HUD 1-bedroom FMR.
-
-HUD FMR is gross rent.
-
-Do not separately add utilities already contained in HUD gross rent.
-
-Internet/mobile remain separate.
-
-==================================================
-6. USDA FOOD — CLOSE THIS GAP
-==================================================
-
-Do not fabricate merged CSV files.
-
-Discover and retrieve the actual official USDA Monthly Cost of Food reports / Excel archives.
-
-For 2024:
-
-use all 12 available months and calculate an annual average.
-
-For 2026:
-
-use all months actually available at execution time.
-
-If fewer than 12 months:
-
-label result:
-
-2026 YTD FOOD COST
-
-not annual average.
-
-Primary:
-
-USDA Low-Cost Food Plan.
-
-Sensitivity:
-
-USDA Thrifty Food Plan.
-
-Profile:
-
-male/female adult age-group midpoint
-× official one-person household adjustment.
-
-Document exact age group used.
-
-Raw USDA observations:
-MEASURED.
-
-Foundation midpoint + household adjustment:
-MODELED_FROM_MEASURED_INPUTS.
-
-For Alaska and Hawaii:
-
-use actual official USDA Alaska/Hawaii observations/methodology where applicable.
-
-No hand-entered AK/HI multiplier.
-
-==================================================
-7. CMS HEALTH PREMIUM — VALIDATE RETRIEVED DATA
-==================================================
-
-2024 and 2026 CMS federal-platform PUF artifacts have already been retrieved.
-
-Do not redownload merely for appearance.
-
-Validate:
-
-- hashes;
-- archive integrity;
-- schemas;
-- documented CMS keys.
-
-Implement real joins among:
-
-Rate PUF
-Plan Attributes PUF
-Service Area PUF
-Benefits and Cost Sharing PUF
-
-as required.
-
-Reference profile:
-
-- age 40;
-- single;
-- nonsmoker;
-- no dependents;
-- individual market;
-- ACA-compliant major medical;
-- Silver;
-- unsubsidized.
-
-Selection:
-
-lowest qualifying unsubsidized premium within the real service geography.
-
-Do not default missing fields.
-
-==================================================
-8. CMS STATE-BASED EXCHANGES
-==================================================
-
-Implement separate SBE ingestion using the official CMS SBE QHP PUF datasets.
-
-Marketplace platform/source mapping must be year-specific.
-
-Do not infer 2024 mapping from 2026 or vice versa.
-
-Generate a CMS coverage report showing:
-
-- federal-platform states complete;
-- SBE states complete;
-- missing states;
-- rating areas represented;
-- counties represented.
-
-No state may receive a premium from a plan not actually offered there.
-
-==================================================
-9. HEALTHCARE OOP — UPGRADE MEPS SOURCE
-==================================================
-
-The repository currently has MEPS HC-243 / 2022 data retrieved.
-
-Do not automatically accept 2022 as the best available source.
-
-Discover the newest currently available Full Year Consolidated MEPS file.
-
-At execution time:
-
-- if 2024 Full Year Consolidated is officially available and stable, use it;
-- otherwise use the newest available full-year file and record the true source year.
-
-For the OOP model derive:
-
-adults 18–64
-with private insurance
-annual individual out-of-pocket medical expenditure.
-
-Use the appropriate MEPS final person survey weight.
-
-Report:
-
-- source PUF;
-- source year;
-- variables;
-- age filter;
-- insurance filter;
-- OOP variable;
-- unweighted sample;
-- represented population;
-- weighted mean;
-- weighted median if useful for validation;
-- P75 if useful for sensitivity.
-
-Do not automatically decide whether headline healthcare should use mean, median or another utilization standard.
-
-Put that in OWNER DECISION PACKET.
-
-==================================================
-10. BLS CE — CLOSE ACQUISITION GAP
-==================================================
-
-Official 2024 Consumer Expenditure Public Use Microdata exists in CSV format.
-
-Current CI received HTTP 403 from the guessed/direct path.
-
-Resolve the official download through the BLS publication/download page.
-
-Do not treat 403 as evidence the source is unavailable.
-
-Validate actual archive bytes and schema.
-
-Do not assume:
-
-reference_year - 2
-
-as source-vintage methodology.
-
-Use actual 2024 CE data for the 2024 empirical basket where possible.
-
-For 2026 current costs:
-
-if 2026 CE does not exist, explicitly define a temporal update method instead of pretending 2024 CE is 2026 data.
-
-==================================================
-11. BLS ESSENTIALS BASKET
-==================================================
-
-Construct from actual documented CE/UCC variables.
-
-Create explicit allowlist.
-
-Candidate necessities include:
-
-- apparel replacement;
-- footwear;
-- laundry;
-- personal hygiene;
-- cleaning supplies;
-- ordinary household supplies;
-- basic household replacement items.
-
-Exclude:
-
-- housing;
-- food;
-- healthcare;
-- transportation;
-- recreation;
-- alcohol;
-- tobacco;
-- luxury goods;
-- vacations.
-
-Use one-person consumer units.
-
-Use proper CE survey weights.
-
-Do not default missing weights or household size.
-
-Calculate weighted P25 among appropriate positive-spending units only if methodology and sample quality support it.
-
-Foundation-created P25:
-MODELED_FROM_MEASURED_INPUTS.
-
-==================================================
-12. SOCIAL & RECREATION
-==================================================
-
-Keep this component.
-
-Do NOT set it to zero.
-
-Create documented allowlist for modest:
-
-- entertainment/admissions;
-- reading;
-- hobbies;
-- social participation;
-- limited meals away from home if included.
-
-Prevent double-counting with Food.
-
-Calculate a conservative weighted distribution among single-person consumer units.
-
-Primary candidate:
-
-P25 among positive spenders.
-
-But produce sensitivity:
-
-P20
 P25
-P30
+median
+mean
+P75
+sample count
 
-for OWNER REVIEW.
+and clearly label all as OBSERVED TRAVEL BEHAVIOR, not MINIMUM NECESSARY MILEAGE.
 
-Do not publish one until approved.
-
-==================================================
-13. BEA RPP — CLOSE THIS GAP
-==================================================
-
-Retrieve actual official BEA 2024 Regional Price Parity data.
-
-Current official release contains 2024 RPP values.
-
-Use actual source year = 2024.
-
-Do not call it 2026 RPP.
-
-For 2026 costs, it may serve as the latest available geographic price-parity source if documented as:
-
-SOURCE VINTAGE 2024
-PROJECT COST YEAR 2026.
-
-No missing RPP -> 100 fallback.
-
-Determine whether:
-
-All Items RPP
-
-is appropriate for the specific nationally-derived components being geographically adjusted.
-
-Do NOT apply RPP to HUD housing or other already-local measured values.
+Update OD-003 accordingly.
 
 ==================================================
-14. EIA GASOLINE
+3. EPA MPG — UPDATE OD-004
 ==================================================
 
-Determine the actual geographic resolution available from EIA for regular retail gasoline prices.
+EPA now publishes downloadable final Model Year 2024 Automotive Trends detailed
+fuel-economy data.
 
-Prefer:
+Use official EPA data to construct candidate reference-vehicle MPG standards.
 
-EIA API v2
-or official bulk download.
+Do not simply retain 24 / 28 / 32 as the empirical model.
 
-If using API:
+Research at minimum:
 
-support EIA_API_KEY environment secret.
+- final MY2024 EPA detailed data;
+- passenger-car / compact / midsize distributions;
+- non-BEV/non-PHEV gasoline vehicle fuel economy where appropriate;
+- implications of using a used-car rather than new-car standard.
 
-If equivalent bulk data provide the required series, prefer bulk to avoid a required secret.
+OD-004 should become a decision about the REFERENCE VEHICLE COHORT, not about
+whether an EPA source exists.
 
-Do not label PADD/regional prices as state-measured.
+Produce candidate:
+- vehicle age/model-year window;
+- class;
+- fuel type;
+- weighted/median combined real-world MPG;
+- sensitivity alternatives.
 
-If EIA does not provide all-state retail observations:
-
-produce a methodology decision describing options:
-
-A. use real regional/PADD measured price;
-B. find another authoritative state-level source;
-C. model state adjustment from documented components.
-
-Do not silently choose.
-
-==================================================
-15. NHTS MILEAGE
-==================================================
-
-Resolve the official 2022 NHTS V2.1 public-use archive from the official download/documentation page.
-
-Validate exact variables and weights.
-
-Do not default missing weight to 1.
-
-Produce measured travel-behavior statistics for the reference population.
-
-Candidate reference population:
-
-one-person household
-working-age adult/driver
-one vehicle/driver where variables permit.
-
-But distinguish:
-
-OBSERVED ANNUAL MILEAGE
-
-from:
-
-MINIMUM NECESSARY MILEAGE.
-
-If the latter requires normative judgment, create OWNER DECISION.
-
-Provide:
-
-weighted mean;
-weighted median;
-P25/P75;
-sample size;
-filter definitions.
+Do not freeze without owner review.
 
 ==================================================
-16. VEHICLE MPG
+4. NAIC — REPLACE OD-006
 ==================================================
 
-Do not keep 28 MPG simply because it was already in code.
+The current premise is obsolete.
 
-Research a reproducible reference-vehicle methodology using primary public data where feasible.
+NAIC's official publications site currently offers:
 
-Possible architecture:
+2022/2023 Auto Insurance Database Report
 
-a modest used compact/midsize vehicle standard with EPA combined MPG.
+as a FREE DOWNLOAD.
 
-Do not cherry-pick an unusually efficient vehicle.
+NAIC states the report contains 2023 state-by-state:
 
-Return recommended reference methodology and alternatives for OWNER REVIEW.
+- average expenditures;
+- combined average premiums;
+- other automobile insurance statistics.
 
-Do not freeze without evidence.
+Retrieve the official report.
 
-==================================================
-17. AUTO INSURANCE
-==================================================
+Record actual:
+- source URL;
+- retrieved_at;
+- byte size;
+- SHA-256;
+- publication year;
+- data year;
+- reuse/redistribution terms.
 
-NAIC currently remains LICENSING_REVIEW.
+Do NOT assume raw-report redistribution rights merely because download is free.
 
-Research whether a defensible public alternative can provide state-level personal-auto insurance costs.
+Derived statistics with proper attribution may be handled separately from raw artifact
+redistribution.
 
-Priority:
+Replace OD-006 with:
 
-1. official public NAIC aggregate data if legally reusable;
-2. state insurance regulator public sources;
-3. another federal/state authoritative public source.
+"Which NAIC insurance measure should represent required auto insurance?"
 
-Do not use random commercial quote websites.
+Candidate options should include as actually supported by the report:
 
-If no scalable authoritative source exists:
+A. average expenditure per insured vehicle;
+B. combined average premium;
+C. coverage-specific / mandatory-coverage measure if the data permit.
 
-leave LICENSING_REVIEW / SOURCE_GAP
+Explain what each statistic actually represents.
 
-and present owner options.
+Do not treat insurance as LICENSING_REVIEW merely because the previous agent failed
+to discover the free report.
 
-==================================================
-18. MAINTENANCE + TIRES
-==================================================
-
-Replace the current unsupported $1,200 assumption.
-
-Research reproducible public data.
-
-Consider BLS CE as empirical evidence/validation.
-
-Separate:
-
-ordinary maintenance
-tires
-repairs
-
-if the data support it.
-
-If a normative reserve is required:
-
-label ESTIMATED.
-
-Present alternatives and sensitivity.
+Use a separate redistribution/licensing field if necessary.
 
 ==================================================
-19. VEHICLE REPLACEMENT RESERVE
+5. MAINTENANCE — REVISE OD-007
 ==================================================
 
 Do not automatically use:
 
-$10,000 acquisition
-5 years
-$2,000 salvage
-= $1,600/year.
+P25 among positive spenders
 
-Research a defensible modest-used-vehicle replacement standard.
+for maintenance/repairs/tires.
 
-Model explicitly:
+Maintenance and repairs are lumpy annual expenditures.
 
-reference acquisition cost
-minus expected terminal/salvage value
-divided by usable replacement period.
+Zero spending in a survey period does not necessarily mean zero long-run maintenance
+need.
 
-Every assumption must be visible.
+Calculate candidate statistics among appropriate single-person VEHICLE-OWNING
+consumer units:
 
-This is likely a normative/model component.
+- weighted mean including zero-spend periods;
+- weighted median including zero-spend periods;
+- P25/P50 among positive spenders;
+- multi-year annualized result if sufficient CE vintages can be reproduced.
 
-Return for OWNER REVIEW before freezing.
+Separate where possible:
 
-==================================================
-20. REGISTRATION + MANDATORY VEHICLE FEES
-==================================================
+routine maintenance
+tires
+repairs.
 
-Delete reliance on uncited hand-entered 51-state fee constants.
+OD-007 should explicitly ask which long-run annualization approach best represents a
+sustainable vehicle-maintenance reserve.
 
-For all 50 states + DC:
-
-use primary state DMV/DOR/legislative sources.
-
-Freeze a reference vehicle profile so value/weight/age-based fees can be calculated consistently.
-
-Generate source coverage.
-
-If exact county/local vehicle taxes cannot yet be reproduced:
-
-mark separately.
+Do not freeze one until owner review.
 
 ==================================================
-21. CONNECTIVITY
+6. CONNECTIVITY — REVISE OD-009
 ==================================================
 
-Create a defensible minimum connectivity component:
+ACS internet tables measure:
 
-- one mobile phone line;
-- residential broadband sufficient for ordinary modern participation/work/services.
+subscription/access/type.
 
-Research primary/authoritative sources.
+They are NOT a price source.
 
-Do not assume zero internet.
+Remove ACS as a candidate source for connectivity PRICE.
 
-Do not use premium/high-end plans.
+ACS may remain supporting evidence for prevalence/normality of internet connectivity.
 
-Separate:
+Research real price sources separately for:
 
-measured price observations
-from
-Foundation minimum-service selection.
+A. residential broadband;
+B. one mobile phone/data line.
 
-Return methodology for OWNER REVIEW.
+For broadband, evaluate official FCC price/benchmark sources and any reproducible
+Broadband Consumer Label data available at sufficient geographic scale.
 
-==================================================
-22. FEDERAL TAX
-==================================================
+For mobile, find a reproducible authoritative source.
 
-Validate existing 2024 and 2026 tax tables against official IRS and SSA sources.
+The Foundation selection remains normative:
 
-Current known 2026 values already corrected must remain correct.
+one modest mobile line
++
+one modest residential broadband connection.
 
-Generate source provenance for every federal parameter.
+But the prices must come from real source evidence.
 
-Promote to VALIDATED only after deterministic boundary tests pass.
-
-==================================================
-23. STATE TAX
-==================================================
-
-Create a tax-source coverage matrix for:
-
-50 states + DC
-for 2024 and 2026.
-
-For each:
-
-- primary state source;
-- brackets;
-- rates;
-- deductions;
-- exemptions;
-- ordinary relevant credits;
-- unusual mechanics;
-- implementation status.
-
-Do not approximate a complex state with a fake flat bracket model.
-
-SOURCE_GAP is acceptable.
+Update OD-009.
 
 ==================================================
-24. LOCAL TAX
+7. REVISE OD-010 — SOURCE LAG
 ==================================================
 
-Do NOT require perfect municipal tax modeling merely to make progress.
+Do not use one blanket LATEST_AVAILABLE rule.
 
-Instead classify counties/localities:
+Separate component types.
 
-A. no local earned-income tax;
-B. county-level tax directly measurable;
-C. municipal tax requiring additional geography;
-D. unresolved.
+QUANTITIES / STRUCTURAL CHARACTERISTICS:
+may use LATEST_AVAILABLE when appropriate.
 
-Produce OWNER DECISION on how the county-level living-cost model should handle category C.
+Examples:
+- NHTS mileage behavior;
+- reference-population structure;
+- RPP if latest geography measure is older and clearly labeled.
 
-Do not silently choose.
+TARGET-YEAR LEGAL RULES:
+RULE_YEAR.
 
-==================================================
-25. TIME UPDATE MODEL FOR 2026
-==================================================
+Examples:
+- federal taxes;
+- state taxes;
+- registration laws/fees.
 
-Some annual structural datasets will naturally lag 2026.
+CURRENT MONTHLY PRICES:
+YTD or defined annual average.
 
-Create a formal source-lag framework.
+Examples:
+- USDA 2026 food;
+- gasoline where applicable.
 
-Every component must separately record:
+LAGGED NOMINAL DOLLAR EXPENDITURE SERIES:
+must NOT simply carry old nominal dollars forward by default.
+
+Examples:
+- 2024 CE essentials used for 2026;
+- 2024 CE recreation used for 2026;
+- older insurance dollar observations;
+- older OOP expenditure amounts where applicable.
+
+For these, evaluate a suitable:
+
+CPI_UPDATED
+or component-specific official price index update.
+
+Record:
 
 project_cost_year
 source_data_year
 translation_method
+price_index_series if applicable.
 
-Translation methods may include:
+Update OD-010 to recommend this HYBRID approach.
 
-NONE — direct same-year observation
-LATEST_AVAILABLE — unchanged structural parameter
-CPI_UPDATED — measured older price updated with explicit CPI series
-RULE_YEAR — legal/tax rules for target year
-YTD — current-year partial observations
-
-Never simply relabel an older observation as 2026.
+Keep an unadjusted LATEST_AVAILABLE sensitivity if useful.
 
 ==================================================
-26. OWNER DECISION PACKET
+8. MUNICIPAL TAX — REVISE OD-011
 ==================================================
 
-At the end of this deliverable produce:
+Current Option A is too broad.
 
-data/metadata/living_cost_owner_decisions_pending.json
+Do NOT apply a municipal tax to an entire county merely because the taxing city is
+inside that county.
 
-and a readable Markdown report.
+Classify:
 
-Include ONLY unresolved normative/methodological choices.
+A. geography is coterminous / tax applies throughout modeled county-equivalent;
+B. tax is county-level;
+C. municipality occupies only part of county;
+D. unresolved.
 
-For each decision provide:
+For A/B:
+direct overlay may be appropriate.
 
-QUESTION
-WHY IT MATTERS
-OPTION A
-OPTION B
-OPTION C if applicable
-RECOMMENDED OPTION
-EXPECTED DIRECTIONAL EFFECT
-SOURCE SUPPORT
-SENSITIVITY PLAN
+For C:
+either:
+- move tax calculation to place/subcounty geography;
+- population-weight municipal exposure;
+- or mark local tax unresolved.
 
-At minimum expect decisions around:
+Do not apply a city tax countywide without geographic justification.
 
-- population-weight vintage;
-- healthcare OOP statistic;
-- minimum-mileage definition;
-- reference vehicle;
-- vehicle replacement reserve;
-- insurance fallback;
-- maintenance standard;
-- recreation percentile;
-- connectivity standard;
-- 2026 lag/update rules;
-- local tax handling;
-- resilience reserve.
-
-Do NOT silently make these decisions merely to achieve completeness.
+Update OD-011.
 
 ==================================================
-27. SOURCE COVERAGE TARGET
+9. CONNECTICUT — REPLACE OD-013 METHOD
 ==================================================
 
-Regenerate:
+Correct the planning-region FIPS range.
 
-living_cost_source_manifest.json
-living_cost_source_coverage.json
-census_county_universe.json
-living_cost_geo_join_2024.json
-living_cost_geo_join_2026.json
-CMS coverage report
-tax coverage report
-transportation coverage report
+There are nine current Connecticut county equivalents:
 
-The final source coverage must clearly distinguish:
+09110
+09120
+09130
+09140
+09150
+09160
+09170
+09180
+09190.
+
+The existing OD-013 text incorrectly says 09110-09170.
+
+Census publishes an official:
+
+Connecticut County to County Subdivision Crosswalk
+
+for the transition from eight legacy counties to nine planning regions.
+
+Do NOT default to allocating legacy HUD county rents into planning regions.
+
+Investigate a cleaner approach:
+
+KEEP HUD COST GEOGRAPHY = legacy HUD county.
+
+Reconstruct adult population weights for the eight legacy Connecticut counties by:
+
+1. retrieving 2024 ACS B01001 age data at county-subdivision / municipality geography;
+2. using the official Census Connecticut county-to-county-subdivision crosswalk and/or
+   official Connecticut municipality mapping;
+3. assigning towns to legacy counties;
+4. summing age-18+ population into the eight legacy counties;
+5. joining those reconstructed weights to HUD's legacy-county FMR rows.
+
+This avoids inventing planning-region rents.
+
+Validate:
+- all Connecticut population represented;
+- no duplicate municipality;
+- no missing town;
+- eight legacy county totals;
+- state adult-pop total reconciles to Connecticut total within expected statistical
+  treatment.
+
+If this cannot be reproduced from official sources:
+leave CT unmatched rather than fabricate allocation.
+
+Rewrite OD-013 around this architecture.
+
+==================================================
+10. CMS SBE COVERAGE — CURRENT CLOSEOUT IS WRONG
+==================================================
+
+Delete/update claims that:
+
+"SBE 2024 official zip 404"
+or
+"SBE 2026 zip is documentation-only"
+
+imply that SBE plan data are unavailable.
+
+CMS currently publishes official PER-STATE SBE QHP PUF ZIP files for:
+
+Plan Year 2024
+and
+Plan Year 2026.
+
+The SBE QHP PUF architecture includes separate:
+
+- Rate;
+- Plan Attributes;
+- Benefits and Cost Sharing;
+- Service Area;
+- Business Rules;
+- Network
+
+files as applicable.
+
+Implement retrieval per state and per plan year from the official CMS SBE QHP PUF
+downloads.
+
+Do not assume one national SBE zip.
+
+Join using the appropriate official keys.
+
+Generate coverage report:
+
+2024:
+SBE states expected
+SBE states retrieved
+SBE states parsed
+counties/rating areas covered
+missing states
+
+2026:
+same.
+
+Be careful with platform classification.
+
+Use year-specific official CMS platform information.
+
+Do not infer that the existence of a state-specific SBE file necessarily means the
+same platform classification rules as the federal Exchange PUF.
+
+After successful national coverage, health_premium can move toward validation.
+
+==================================================
+11. PROVENANCE — FIX INVALID FULL VALIDATION STATES
+==================================================
+
+Current source manifest/coverage contains artifacts marked:
 
 VALIDATED
-RETRIEVED_UNVALIDATED
-MODELED_FROM_MEASURED_INPUTS
-ESTIMATED_OWNER_REVIEW
-SOURCE_GAP
-LICENSING_REVIEW
-UNAVAILABLE.
+
+while:
+
+retrieved_at = null
+
+and in some cases:
+
+local_cache_filename = null
+resolved_url = null.
+
+Examples include currently reported HUD, ACS, NHTS, BLS CE, BEA and other cached
+artifacts.
+
+This violates the Foundation provenance contract.
+
+A hash + parse success is not complete retrieval provenance.
+
+For every such artifact:
+
+A. re-retrieve from the authoritative official source and generate a real sidecar;
+OR
+B. if re-retrieval cannot be performed, downgrade from full VALIDATED to an
+appropriate incomplete-provenance status.
+
+Prefer re-retrieval.
+
+Required validated provenance:
+
+- official landing/source;
+- exact resolved URL;
+- actual retrieval timestamp;
+- byte size;
+- SHA-256;
+- immutable cache identity;
+- parser/schema validation;
+- source/reference year.
+
+Do not invent retrieved_at for old cache hits.
 
 ==================================================
-28. CI + WORKFLOW REQUIREMENTS
+12. USDA 2026 — MAKE YTD PERIOD EXPLICIT
 ==================================================
 
-Preserve green:
+The current reports show partial 2026 USDA data.
+
+Do not merely say:
+
+2026 YTD FOOD COST.
+
+Emit exact:
+
+months_included
+month_count
+first_month
+last_month.
+
+The current source data appear to cover five 2026 months for Alaska/Hawaii and a
+corresponding partial national plan period.
+
+Derive the exact covered months from the actual source observations.
+
+Do not infer them from row counts alone.
+
+==================================================
+13. WORKFLOW ACTION VERSIONS
+==================================================
+
+Current repo still uses:
+
+actions/checkout@v5
+actions/setup-python@v6
+actions/setup-node@v5.
+
+Current official documentation now uses:
+
+actions/checkout@v7
+actions/setup-python@v7
+actions/setup-node@v6.
+
+Upgrade consistently across all workflows after verifying the current official
+major releases at implementation time.
+
+Keep Node 24.
+
+Run all workflows afterward.
+
+==================================================
+14. CLOSEOUT METADATA
+==================================================
+
+The pasted Deliverable 2A closeout SHA:
+
+b2a30ef4b87a2db38eb5f7d982e0e8b5c9b63b4c
+
+is historical.
+
+Current audited main at start of this correction is:
+
+f2c0636690ac2408d0f537c9fd657225c75e63f3
+
+Preserve b2a30ef as a historical Deliverable 2A milestone if desired.
+
+Do NOT label it current HEAD.
+
+Generate final closeout from the final pushed SHA.
+
+==================================================
+15. TEST REPORTING
+==================================================
+
+Do not report the old local:
+
+73 passed
+
+as current repository CI status.
+
+Current audited GitHub CI before this correction reports:
+
+68 passed
+5 skipped
+1 warning.
+
+After changes, report the exact GitHub Actions result, not a stale local run.
+
+All three workflows must remain green:
 
 Tests & Code Quality
 Validate Living Cost Sources
 Deploy Pages
 
-Continue running real source validation.
-
-A source gap may appear inside a successful audit workflow.
-
-Programming/import/schema invariant failure must fail CI.
-
-Do not weaken tests to keep green.
-
 ==================================================
-29. SMALL ENGINEERING CLEANUP
+16. OWNER DECISIONS THAT DO NOT REQUIRE MATERIAL CHANGE
 ==================================================
 
-Current GitHub Actions still emit Node-20 deprecation warnings from older action generations.
+Preserve the core direction of:
 
-Update to current official Node-24-compatible GitHub Actions versions after verifying current official releases.
+OD-001 ACS fixed-weight-vintage concept
+OD-005 vehicle replacement formula decision
+OD-008 nonzero Social & Recreation percentile decision
+OD-012 no arbitrary resilience buffer
 
-Also fix the two remaining HTML heading-level warnings.
-
-These are secondary to the empirical work but should leave the repo clean.
+unless new empirical evidence during this correction requires an explicit amendment.
 
 ==================================================
-30. NO ECONOMIC HEADLINE YET
+17. DO NOT FREEZE OWNER DECISIONS YET
 ==================================================
 
-Even if every source becomes VALIDATED:
+Regenerate:
 
-DO NOT calculate/publish:
+living_cost_owner_decisions_pending.md
+living_cost_owner_decisions_pending.json
+
+after the above source corrections.
+
+The owner will review the corrected decision packet afterward.
+
+Do NOT silently mark any OD as ACCEPTED.
+
+==================================================
+18. STOP CONDITION
+==================================================
+
+DO NOT calculate or publish:
 
 Minimum Sustainable Living Cost
-state rankings
+2024 MSLC
+2026 MSLC
+state MSLC rankings
 national median
 Gap
 Adequacy Ratio
-Composite Score
+Composite Score.
 
-This deliverable ends with:
+This pass fixes the evidence and decision packet.
 
-validated sources
-+
-frozen empirical methodology
-+
-owner decision packet.
+When complete:
 
-==================================================
-31. REQUIRED FINAL REPORT
-==================================================
-
-Report:
-
-- exact final commit SHA;
-- actual workflow conclusions;
-- test count;
-- source coverage before vs after;
-- number of remaining blockers;
-- exact validated source list;
-- exact source gaps;
-- exact licensing gaps;
-- actual Census county count;
-- HUD join coverage;
-- CMS geography coverage;
-- USDA month coverage;
-- MEPS source vintage;
-- BLS CE source vintage;
-- NHTS source/sample;
-- BEA RPP source vintage;
-- EIA geographic coverage;
-- tax coverage;
-- transportation gaps;
-- owner decisions required.
+push;
+verify actual GitHub Actions;
+report exact final SHA;
+report all unresolved owner decisions.
 
 Explicitly state:
 
 NO MINIMUM SUSTAINABLE LIVING COST HEADLINE WAS CALCULATED OR PUBLISHED.
-
-==================================================
-FINAL RULE
-==================================================
-
-This pass is successful when we know:
-
-WHAT WE MEASURED,
-WHAT WE CAN MODEL,
-WHAT WE MUST CHOOSE,
-AND WHAT WE STILL DO NOT KNOW.
-
-Do not produce a number simply because the code is capable of arithmetic.
-
-Close the evidence chain first.
-
-Then STOP for owner review.
