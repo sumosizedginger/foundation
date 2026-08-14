@@ -1,79 +1,25 @@
 {
   "report_type": "hud_fmr_census_acs_geo_join",
   "reference_year": 2024,
-  "generated_at": "2026-08-14T20:22:28+00:00",
-  "census_artifact_sha256": "1637b18a96881b81e050df1cd3d5ac38a33208b9b69b40e1dbeb3c4e13718f0e",
-  "hud_artifact_sha256": "0a6634d5745e07f0638efe2aca65161b4b8d6982ebd4d257e8191ed18ecfbf98",
-  "census_county_universe_count": 3144,
+  "generated_at": "2026-08-14T20:37:01+00:00",
+  "census_artifact_sha256": "",
+  "hud_artifact_sha256": "",
+  "census_county_universe_count": 3143,
   "census_total_adult_population": 261404665,
   "hud_source_rows_count": 3228,
   "hud_unique_counties_represented": 3228,
-  "matched_counties_count": 3135,
-  "unmatched_census_counties_count": 9,
-  "unmatched_hud_rows_count": 93,
+  "matched_counties_count": 3143,
+  "unmatched_census_counties_count": 0,
+  "unmatched_hud_rows_count": 85,
   "duplicate_hud_fips_count": 0,
   "duplicate_hud_fips": [],
-  "represented_adult_population": 258511743,
-  "excluded_adult_population": 2892922,
-  "county_coverage_percentage": 99.7137,
-  "population_coverage_percentage": 98.8933,
+  "represented_adult_population": 261404665,
+  "excluded_adult_population": 0,
+  "county_coverage_percentage": 100.0,
+  "population_coverage_percentage": 100.0,
   "multi_county_fmr_areas_count": 218,
-  "unmatched_census_counties": [
-    {
-      "fips": "09110",
-      "name": "0500000US09110",
-      "adult_pop": 780266
-    },
-    {
-      "fips": "09120",
-      "name": "0500000US09120",
-      "adult_pop": 256480
-    },
-    {
-      "fips": "09130",
-      "name": "0500000US09130",
-      "adult_pop": 146455
-    },
-    {
-      "fips": "09140",
-      "name": "0500000US09140",
-      "adult_pop": 362719
-    },
-    {
-      "fips": "09150",
-      "name": "0500000US09150",
-      "adult_pop": 78558
-    },
-    {
-      "fips": "09160",
-      "name": "0500000US09160",
-      "adult_pop": 93041
-    },
-    {
-      "fips": "09170",
-      "name": "0500000US09170",
-      "adult_pop": 458975
-    },
-    {
-      "fips": "09180",
-      "name": "0500000US09180",
-      "adult_pop": 225847
-    },
-    {
-      "fips": "09190",
-      "name": "0500000US09190",
-      "adult_pop": 490581
-    }
-  ],
+  "unmatched_census_counties": [],
   "unmatched_hud_rows": [
-    "09001",
-    "09003",
-    "09005",
-    "09007",
-    "09009",
-    "09011",
-    "09013",
-    "09015",
     "29056",
     "60999",
     "66010",
@@ -159,5 +105,6 @@
     "78010",
     "78020",
     "78030"
-  ]
+  ],
+  "connecticut_method": "legacy_county_reconstructed_from_cousub"
 }

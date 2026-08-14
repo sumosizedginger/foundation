@@ -34,6 +34,7 @@ from foundation.sources.census_acs import (
 )
 from foundation.sources.census_ct import (
     CT_PLANNING_REGION_FIPS,
+    apply_legacy_ct_weights_to_universe,
     download_ct_crosswalk_artifact,
     parse_acs_ct_cousub_adults,
     parse_ct_crosswalk,
@@ -105,6 +106,29 @@ def _safe_acquire(label: str, fn) -> list[RetrievedSourceArtifact]:
     except (OSError, ValueError, RuntimeError, TypeError, KeyError) as exc:
         logger.error("Failed to acquire %s: %s", label, exc)
         return []
+
+
+def _ct_universe_for_2024_join(
+    census_universe: dict,
+) -> dict:
+    """Use reconstructed legacy-county adult weights for FY2024 HUD geography only."""
+    ct_path_xlsx = CACHE_DIR / "ct_cou_to_cousub_crosswalk.xlsx"
+    ct_path_txt = CACHE_DIR / "ct_cou_to_cousub_crosswalk.txt"
+    ct_path = ct_path_xlsx if ct_path_xlsx.exists() else ct_path_txt
+    acs_dat = CACHE_DIR / "acsdt5y2024-b01001.dat"
+    if not acs_dat.exists():
+        for candidate in CACHE_DIR.glob("acsdt5y2024-b01001*"):
+            acs_dat = candidate
+            break
+    if not ct_path.exists() or not acs_dat.exists():
+        return census_universe
+    reconstruction = reconstruct_legacy_county_adult_pop(
+        parse_ct_crosswalk(ct_path),
+        parse_acs_ct_cousub_adults(acs_dat),
+    )
+    if not reconstruction.get("reproduced"):
+        return census_universe
+    return apply_legacy_ct_weights_to_universe(census_universe, reconstruction)
 
 
 def validate_sources_for_year(year: int) -> list[RetrievedSourceArtifact]:
@@ -184,8 +208,11 @@ def validate_sources_for_year(year: int) -> list[RetrievedSourceArtifact]:
 
     if hud_obs and census_universe:
         try:
+            join_universe = census_universe
+            if year == 2024:
+                join_universe = _ct_universe_for_2024_join(census_universe)
             execute_geo_join_audit(
-                census_county_universe=census_universe,
+                census_county_universe=join_universe,
                 hud_observations=hud_obs,
                 reference_year=year,
                 census_artifact_sha256=census_arts[0].sha256 if census_arts else "",

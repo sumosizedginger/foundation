@@ -45,9 +45,10 @@ ACS_LANDING = (
     "https://www2.census.gov/programs-surveys/acs/summary_file/2024/"
     "table-based-SF/data/5YRData/acsdt5y2024-b01001.dat"
 )
-MEPS_HC243_LANDING = (
-    "https://meps.ahrq.gov/mepsweb/data_stats/download_data_files_detail.jsp?cboPufNumber=HC-243"
+MEPS_HC251_LANDING = (
+    "https://meps.ahrq.gov/mepsweb/data_stats/download_data_files_detail.jsp?cboPufNumber=HC-251"
 )
+MEPS_HC243_LANDING = MEPS_HC251_LANDING  # historical alias; HC-243 is 2022, not used
 USDA_FOOD_LANDING = "https://www.fns.usda.gov/cnpp/usda-food-plans-cost-food-monthly-reports"
 EIA_GAS_LANDING = "https://www.eia.gov/petroleum/gasdiesel/"
 NHTS_LANDING = "https://nhts.ornl.gov/downloads"
@@ -144,7 +145,7 @@ STATIC_SOURCES: list[StaticSourceDef] = [
         release="MEPS HC-251 (2023 data year; newest official Full Year Consolidated at execution)",
         url="https://meps.ahrq.gov/mepsweb/data_files/pufs/h251/h251dat.zip",
         licensing_notes="U.S. Government Work (Public Domain)",
-        landing_page=MEPS_HC243_LANDING,
+        landing_page=MEPS_HC251_LANDING,
         parser_identifier="foundation.sources.meps.parse_meps_oop_csv",
         source_vintage_note="2023 MEPS data year used as OOP source vintage for 2024 cost year. Not a 2024 MEPS file.",
     ),

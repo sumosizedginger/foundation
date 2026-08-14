@@ -262,33 +262,37 @@ DECISIONS: list[dict[str, Any]] = [
         "question": "How should Connecticut planning-region ACS weights join HUD legacy-county FMR?",
         "why_it_matters": (
             "There are nine current Connecticut county equivalents: 09110, 09120, 09130, "
-            "09140, 09150, 09160, 09170, 09180, 09190. HUD FMR still publishes eight "
-            "legacy county FIPS. Do not invent planning-region rents. Do not default to "
-            "allocating legacy HUD county rents into planning regions."
+            "09140, 09150, 09160, 09170, 09180, 09190. HUD FY2024 still publishes eight "
+            "legacy county FIPS (09001–09015). HUD FY2026 already publishes the nine "
+            "planning-region FIPS, so 2026 is a direct ACS↔HUD join and is not a "
+            "legacy-county reconstruction problem. Do not invent planning-region rents "
+            "for 2024. Do not allocate 2024 HUD legacy rents into planning regions."
         ),
         "option_a": (
-            "KEEP HUD COST GEOGRAPHY = legacy HUD county. Reconstruct adult population "
-            "weights for the eight legacy Connecticut counties by (1) retrieving 2024 ACS "
-            "B01001 age data at county-subdivision / municipality geography, (2) using the "
-            "official Census Connecticut County to County Subdivision Crosswalk and/or "
-            "official Connecticut municipality mapping, (3) assigning towns to legacy "
-            "counties, (4) summing age-18+ population into the eight legacy counties, "
+            "For HUD vintages that still publish legacy counties (FY2024): KEEP HUD COST "
+            "GEOGRAPHY = legacy HUD county. Reconstruct adult population weights for the "
+            "eight legacy Connecticut counties by (1) retrieving 2024 ACS B01001 age data "
+            "at county-subdivision / municipality geography, (2) using the official Census "
+            "Connecticut County to County Subdivision Crosswalk, (3) assigning towns to "
+            "legacy counties, (4) summing age-18+ population into the eight legacy counties, "
             "(5) joining those reconstructed weights to HUD's legacy-county FMR rows. "
-            "Validate: all CT population represented; no duplicate municipality; no "
-            "missing town; eight legacy county totals; state adult-pop total reconciles "
-            "to the Connecticut total."
+            "For HUD vintages that already publish planning-region FIPS (FY2026): join "
+            "directly; do not reconstruct. Validate: all CT population represented; no "
+            "duplicate municipality; no missing town; eight legacy county totals when "
+            "reconstructing; state adult-pop total reconciles to the Connecticut total."
         ),
-        "option_b": "Leave CT unmatched rather than fabricate allocation if official sources cannot reproduce the reconstruction.",
+        "option_b": "Leave 2024 CT unmatched rather than fabricate allocation if official sources cannot reproduce the reconstruction.",
         "option_c": "Assign a statewide CT 1BR FMR or invent planning-region rents.",
-        "recommended": "A if the official Census crosswalk plus ACS county-subdivision B01001 can be reproduced; otherwise B. Never C.",
-        "directional_effect": "A keeps CT housing in the join on HUD's published geography. B excludes ~1.1% of national adult population.",
+        "recommended": "A: reconstruct 2024 onto HUD legacy counties if official sources reproduce; join 2026 directly on planning-region FIPS. Never C.",
+        "directional_effect": "A keeps 2024 CT housing in the join on HUD's published FY2024 geography. B excludes ~1.1% of national adult population from 2024 only.",
         "source_support": (
             "Official Census Connecticut County to County Subdivision Crosswalk at "
             "https://www2.census.gov/geo/docs/reference/ct_change/"
             "ct_cou_to_cousub_crosswalk.xlsx (and .txt). Planning-region FIPS are "
-            "09110–09190 (nine geographies), not 09110–09170."
+            "09110–09190 (nine geographies), not 09110–09170. FY2026 HUD FMR rows "
+            "already use 09110–09190."
         ),
-        "sensitivity_plan": "Reconcile reconstructed legacy-county adult pop to ACS Connecticut state total; leave unmatched if reconciliation fails.",
+        "sensitivity_plan": "Reconcile reconstructed 2024 legacy-county adult pop to ACS Connecticut state total; leave 2024 unmatched if reconciliation fails.",
     },
 ]
 

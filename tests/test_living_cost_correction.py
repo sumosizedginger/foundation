@@ -8,7 +8,7 @@ import json
 import zipfile
 from pathlib import Path
 
-from foundation.living_cost.manifest import RetrievedSourceArtifact
+from foundation.living_cost.manifest import MEPS_HC251_LANDING, RetrievedSourceArtifact
 from foundation.living_cost.owner_packet import DECISIONS, write_owner_decision_packet
 from foundation.sources.acquisition import (
     provenance_is_complete,
@@ -53,6 +53,8 @@ def test_meps_refresh_prefers_listed_2024_puf_when_present():
 def test_meps_true_source_year_is_2023_until_listed():
     assert MEPS_PUF_ID == "HC-251"
     assert MEPS_DATA_YEAR == 2023
+    assert "HC-251" in MEPS_HC251_LANDING
+    assert "HC-243" not in MEPS_HC251_LANDING
 
 
 def test_nhts_person_join_enforces_age_and_driver(tmp_path: Path):
@@ -120,6 +122,7 @@ def test_owner_packet_od_updates(tmp_path: Path):
     assert "coterminous" in by_id["OD-011"]["option_a"]
     assert "09190" in by_id["OD-013"]["why_it_matters"]
     assert "09110-09170" not in by_id["OD-013"]["why_it_matters"]
+    assert "FY2026" in by_id["OD-013"]["why_it_matters"]
     assert "legacy HUD county" in by_id["OD-013"]["option_a"]
     for item in DECISIONS:
         assert "ACCEPTED" not in item["recommended"]
@@ -242,6 +245,15 @@ def test_ct_reconstruction_uses_official_crosswalk_and_nine_planning_regions():
     assert report["reproduced"] is True
     assert report["unmapped_towns"] == []
     assert report["duplicate_towns"] == []
+    assert report.get("state_total_reconciles") is True
+    from foundation.sources.census_ct import apply_legacy_ct_weights_to_universe
+
+    dummy = {fips: {"adult_population": 1, "county_name": fips, "state": "CT"} for fips in CT_PLANNING_REGION_FIPS}
+    dummy["06075"] = {"adult_population": 10, "county_name": "SF", "state": "CA"}
+    joined = apply_legacy_ct_weights_to_universe(dummy, report)
+    assert "09110" not in joined
+    assert "09001" in joined
+    assert joined["09001"]["adult_population"] == report["legacy_county_adult_population"]["09001"]
     assert set(report["legacy_county_adult_population"]) == {
         "09001",
         "09003",

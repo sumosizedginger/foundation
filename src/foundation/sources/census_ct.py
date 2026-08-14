@@ -263,11 +263,20 @@ def reconstruct_legacy_county_adult_pop(
         and all(pop > 0 for pop in totals.values())
     )
     report["reproduced"] = reproduced
+    reconstructed_sum = sum(totals.values())
+    planning_sum = sum(cousub_adults.values())
+    report["reconstructed_adult_population_sum"] = reconstructed_sum
+    report["acs_cousub_adult_population_sum"] = planning_sum
+    report["state_total_reconciles"] = reconstructed_sum == planning_sum
     if reproduced:
         report["notes"] = (
             "Reconstructed eight legacy-county adult populations from official "
             "Census CT crosswalk + ACS B01001 county-subdivision rows. "
-            "HUD FMR geography stays on legacy counties."
+            "HUD FMR geography stays on legacy counties for vintages that still "
+            "publish 09001–09015. "
+            f"Legacy-county adult sum={reconstructed_sum}; "
+            f"ACS county-subdivision adult sum={planning_sum}; "
+            f"state_total_reconciles={reconstructed_sum == planning_sum}."
         )
     else:
         report["notes"] = (
@@ -275,3 +284,53 @@ def reconstruct_legacy_county_adult_pop(
             "or empty legacy county). Leave CT unmatched rather than fabricate allocation."
         )
     return report
+
+
+CT_LEGACY_COUNTY_NAMES = {
+    "09001": "Fairfield County, Connecticut (legacy)",
+    "09003": "Hartford County, Connecticut (legacy)",
+    "09005": "Litchfield County, Connecticut (legacy)",
+    "09007": "Middlesex County, Connecticut (legacy)",
+    "09009": "New Haven County, Connecticut (legacy)",
+    "09011": "New London County, Connecticut (legacy)",
+    "09013": "Tolland County, Connecticut (legacy)",
+    "09015": "Windham County, Connecticut (legacy)",
+}
+
+
+def apply_legacy_ct_weights_to_universe(
+    census_universe: dict[str, dict[str, Any]],
+    reconstruction: dict[str, Any],
+) -> dict[str, dict[str, Any]]:
+    """Replace 2024 ACS planning-region rows with reconstructed legacy-county weights.
+
+    Only when reconstruction reproduced. Does not invent HUD rents.
+    """
+    if not reconstruction.get("reproduced"):
+        return census_universe
+    totals = reconstruction.get("legacy_county_adult_population") or {}
+    if not totals:
+        return census_universe
+    out = {
+        fips: row
+        for fips, row in census_universe.items()
+        if fips not in CT_PLANNING_REGION_FIPS
+    }
+    template = next(iter(census_universe.values()), {})
+    for fips, adult in totals.items():
+        out[fips] = {
+            "fips": fips,
+            "county_name": CT_LEGACY_COUNTY_NAMES.get(fips, f"Connecticut legacy {fips}"),
+            "state": "CT",
+            "state_fips": "09",
+            "adult_population": int(adult),
+            "total_population": int(adult),
+            "under18_population": 0,
+            "source_id": template.get("source_id", "census_acs5_2024"),
+            "census_vintage": template.get("census_vintage", ""),
+            "source_url": template.get("source_url", CT_CROSSWALK_LANDING),
+            "retrieved_at": template.get("retrieved_at", ""),
+            "sha256": template.get("sha256", ""),
+            "connecticut_weight_method": "legacy_county_reconstructed_from_cousub",
+        }
+    return out

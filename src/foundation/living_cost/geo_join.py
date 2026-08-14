@@ -17,6 +17,36 @@ from typing import Any
 
 from foundation.living_cost.models import LivingCostComponentObservation
 
+_CT_LEGACY_FIPS = {
+    "09001",
+    "09003",
+    "09005",
+    "09007",
+    "09009",
+    "09011",
+    "09013",
+    "09015",
+}
+_CT_PLANNING_FIPS = {
+    "09110",
+    "09120",
+    "09130",
+    "09140",
+    "09150",
+    "09160",
+    "09170",
+    "09180",
+    "09190",
+}
+
+
+def _connecticut_join_method(reference_year: int, matched_fips: set[str]) -> str:
+    if reference_year == 2024 and _CT_LEGACY_FIPS.issubset(matched_fips):
+        return "legacy_county_reconstructed_from_cousub"
+    if reference_year == 2026 and _CT_PLANNING_FIPS.issubset(matched_fips):
+        return "direct_planning_region_join"
+    return "unmatched_or_not_applicable"
+
 
 def execute_geo_join_audit(
     census_county_universe: dict[str, dict[str, Any]],
@@ -106,6 +136,7 @@ def execute_geo_join_audit(
             for f in unmatched_census_fips
         ],
         "unmatched_hud_rows": unmatched_hud_fips,
+        "connecticut_method": _connecticut_join_method(reference_year, matched_fips),
     }
 
     if output_path:
