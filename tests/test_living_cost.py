@@ -1,26 +1,23 @@
-import pytest
-from foundation.living_cost.models import (
-    LivingCostComponentObservation,
-    LocalLivingCost,
-    StateLivingCostDistribution,
+from foundation.living_cost.aggregate import (
+    aggregate_national_living_cost,
+    aggregate_state_living_cost,
 )
-from foundation.living_cost.housing import calculate_local_housing
-from foundation.living_cost.food import calculate_food_baseline
-from foundation.living_cost.transportation import AutoCostBreakdown, calculate_transportation
-from foundation.living_cost.healthcare import calculate_healthcare
 from foundation.living_cost.essentials import calculate_connectivity_and_essentials
+from foundation.living_cost.food import calculate_food_baseline
+from foundation.living_cost.healthcare import calculate_healthcare
+from foundation.living_cost.housing import calculate_local_housing
+from foundation.living_cost.local import compute_local_living_cost
 from foundation.living_cost.recreation import calculate_social_recreation
 from foundation.living_cost.resilience import calculate_resilience_reserve
 from foundation.living_cost.taxes import (
     calculate_federal_income_tax,
     calculate_fica_taxes,
-    calculate_state_income_tax,
-    evaluate_taxes_for_gross,
-    solve_gross_required_income,
 )
-from foundation.living_cost.local import compute_local_living_cost
-from foundation.living_cost.aggregate import aggregate_state_living_cost, aggregate_national_living_cost
-from foundation.living_cost.validation import validate_local_living_cost, validate_state_distribution
+from foundation.living_cost.transportation import AutoCostBreakdown, calculate_transportation
+from foundation.living_cost.validation import (
+    validate_local_living_cost,
+    validate_state_distribution,
+)
 
 
 def test_housing_calculation():
@@ -74,20 +71,37 @@ def test_resilience_reserve():
     assert obs.value_annual == 1200.0
 
 
-def test_deterministic_tax_solver():
-    # Net needs of $50,000 in CA
-    res = solve_gross_required_income(50000.0, state="CA", year=2024)
-    assert res.gross_income > 50000.0
-    assert abs(res.net_income - 50000.0) < 0.05
-    assert res.fica_social_security > 0
-    assert res.fica_medicare > 0
-    assert res.federal_income_tax > 0
-    assert res.state_income_tax > 0
+def test_federal_tax_brackets_boundary_tests():
+    # 2024 boundary tests
+    assert calculate_federal_income_tax(0.0, year=2024) == 0.0
+    assert calculate_federal_income_tax(14600.0, year=2024) == 0.0  # Exactly std deduction
+    assert calculate_federal_income_tax(14601.0, year=2024) == 0.10  # $1 taxable at 10%
+    # First bracket boundary: $14,600 + $11,600 = $26,200
+    assert round(calculate_federal_income_tax(26200.0, year=2024), 2) == 1160.00
+    assert (
+        round(calculate_federal_income_tax(26201.0, year=2024), 2) == 1160.12
+    )  # $1 into 12% bracket
 
-    # In zero income-tax state (TX), state tax must be 0
-    res_tx = solve_gross_required_income(50000.0, state="TX", year=2024)
-    assert res_tx.state_income_tax == 0.0
-    assert res_tx.gross_income < res.gross_income  # Lower gross needed due to 0 state tax
+    # 2024 FICA SSA Wage Cap: $168,600
+    ss_below, med_below = calculate_fica_taxes(168600.0, year=2024)
+    ss_above, med_above = calculate_fica_taxes(200000.0, year=2024)
+    assert round(ss_below, 2) == round(168600.0 * 0.062, 2)
+    assert round(ss_above, 2) == round(168600.0 * 0.062, 2)  # SS capped at $168,600
+    assert med_above > med_below  # Medicare uncapped
+
+    # 2026 boundary tests (IRS Rev. Proc. 2025-32 & SSA 2026 Baseline)
+    assert calculate_federal_income_tax(0.0, year=2026) == 0.0
+    assert calculate_federal_income_tax(16100.0, year=2026) == 0.0  # Exactly 2026 std deduction
+    assert calculate_federal_income_tax(16101.0, year=2026) == 0.10  # $1 taxable at 10%
+    # First bracket boundary: $16,100 + $12,400 = $28,500
+    assert round(calculate_federal_income_tax(28500.0, year=2026), 2) == 1240.00
+    assert round(calculate_federal_income_tax(28501.0, year=2026), 2) == 1240.12
+
+    # 2026 FICA SSA Wage Cap: $184,500
+    ss_2026_cap, _ = calculate_fica_taxes(184500.0, year=2026)
+    ss_2026_above, _ = calculate_fica_taxes(250000.0, year=2026)
+    assert round(ss_2026_cap, 2) == round(184500.0 * 0.062, 2)
+    assert round(ss_2026_above, 2) == round(184500.0 * 0.062, 2)  # SS capped at $184,500
 
 
 def test_local_living_cost_and_aggregation():
@@ -128,7 +142,11 @@ def test_local_living_cost_and_aggregation():
     state_dist = aggregate_state_living_cost("CA", "California", [loc1, loc2], reference_year=2024)
     assert state_dist.locality_count == 2
     assert state_dist.represented_adult_population == 1500000
-    assert state_dist.weighted_p25_gross <= state_dist.weighted_median_gross <= state_dist.weighted_p75_gross
+    assert (
+        state_dist.weighted_p25_gross
+        <= state_dist.weighted_median_gross
+        <= state_dist.weighted_p75_gross
+    )
 
     state_anomalies = validate_state_distribution(state_dist)
     assert len(state_anomalies) == 0

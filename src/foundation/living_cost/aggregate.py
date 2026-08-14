@@ -6,8 +6,9 @@ Never averages county values without population weights.
 """
 
 from __future__ import annotations
-from datetime import datetime, timezone
-from typing import Any
+
+from datetime import UTC, datetime
+
 import numpy as np
 
 from foundation.living_cost.models import (
@@ -30,12 +31,16 @@ def aggregate_state_living_cost(
     if not localities:
         raise ValueError(f"No localities provided for state {state}")
 
-    values = [loc.gross_required_income for loc in localities if loc.gross_required_income is not None]
-    weights = [float(loc.adult_population) for loc in localities if loc.gross_required_income is not None]
+    values = [
+        loc.gross_required_income for loc in localities if loc.gross_required_income is not None
+    ]
+    weights = [
+        float(loc.adult_population) for loc in localities if loc.gross_required_income is not None
+    ]
     total_pop = sum(loc.adult_population for loc in localities)
 
     if not values:
-        now_iso = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+        now_iso = datetime.now(UTC).replace(microsecond=0).isoformat()
         return StateLivingCostDistribution(
             state=state,
             state_name=state_name,
@@ -63,9 +68,11 @@ def aggregate_state_living_cost(
     min_val = min(values)
     max_val = max(values)
 
-    net_needs_vals = [loc.net_needs_annual for loc in localities if loc.net_needs_annual is not None]
+    net_needs_vals = [
+        loc.net_needs_annual for loc in localities if loc.net_needs_annual is not None
+    ]
     median_net = weighted_percentile(net_needs_vals, weights, 0.50)
-    now_iso = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+    now_iso = datetime.now(UTC).replace(microsecond=0).isoformat()
 
     return StateLivingCostDistribution(
         state=state,
@@ -97,12 +104,18 @@ def aggregate_national_living_cost(
     if not all_localities:
         raise ValueError("No localities provided for national aggregation")
 
-    values = [loc.gross_required_income for loc in all_localities if loc.gross_required_income is not None]
-    weights = [float(loc.adult_population) for loc in all_localities if loc.gross_required_income is not None]
+    values = [
+        loc.gross_required_income for loc in all_localities if loc.gross_required_income is not None
+    ]
+    weights = [
+        float(loc.adult_population)
+        for loc in all_localities
+        if loc.gross_required_income is not None
+    ]
     total_pop = sum(loc.adult_population for loc in all_localities)
 
     if not values:
-        now_iso = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+        now_iso = datetime.now(UTC).replace(microsecond=0).isoformat()
         return NationalLivingCostDistribution(
             geography="United States",
             reference_year=reference_year,
@@ -143,7 +156,7 @@ def aggregate_national_living_cost(
         lowest = None
         highest = None
 
-    now_iso = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+    now_iso = datetime.now(UTC).replace(microsecond=0).isoformat()
 
     return NationalLivingCostDistribution(
         geography="United States",

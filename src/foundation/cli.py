@@ -1,8 +1,6 @@
 from __future__ import annotations
 
 import argparse
-import json
-from pathlib import Path
 
 from foundation.pipeline import run_full_pipeline
 
@@ -14,7 +12,7 @@ def build_parser() -> argparse.ArgumentParser:
     update_cmd = sub.add_parser("update", help="Run the full deterministic calculation pipeline")
     update_cmd.add_argument("--all", action="store_true", help="Process all vintages and signals")
 
-    validate = sub.add_parser("validate", help="Run configuration and data validation")
+    sub.add_parser("validate", help="Run configuration and data validation")
     return parser
 
 
@@ -36,8 +34,12 @@ def cmd_update() -> int:
     surv = result["survival_floor"]
     print("\n=== PIPELINE SUCCESSFUL ===")
     print(f"Population Anchor (2024): ${pop['cutoff']:,.2f}/yr (${pop['monthly_cutoff']:,.2f}/mo)")
-    print(f"Survival Floor:           ${surv['single_adult_floor_annual']:,.2f}/yr ({surv['status_label']})")
-    print(f"Survival Gap:             ${surv['survival_gap_annual']:,.2f}/yr (Adequacy: {surv['adequacy_ratio']:.2f})")
+    print(
+        f"Survival Floor:           ${surv['single_adult_floor_annual']:,.2f}/yr ({surv['status_label']})"
+    )
+    print(
+        f"Survival Gap:             ${surv['survival_gap_annual']:,.2f}/yr (Adequacy: {surv['adequacy_ratio']:.2f})"
+    )
     print(f"Pressure signals:         {len(result['pressures'])} observations")
     print(f"Composite score:          {result['composite']['status'].upper()} (Locked)")
     return 0

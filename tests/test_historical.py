@@ -1,6 +1,4 @@
-import pytest
 from foundation.historical import (
-    CPI_U_ANNUAL_AVERAGES,
     adjust_to_constant_dollars,
     get_historical_vintages_summary,
 )

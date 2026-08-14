@@ -6,7 +6,7 @@ positive spenders, adjusted regionally via BEA Regional Price Parities (RPP).
 """
 
 from __future__ import annotations
-from typing import Any
+
 from foundation.living_cost.models import ComponentStatus, LivingCostComponentObservation
 
 

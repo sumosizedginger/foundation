@@ -1,4 +1,4 @@
-name: Tests
+name: Tests & Code Quality
 
 on:
   push:
@@ -18,16 +18,29 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: "pip"
 
-      - name: Install package
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -e ".[dev]"
 
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Run unified code quality checks
+        run: npm run check
+
       - name: Validate configuration
         run: foundation validate
 
-      - name: Run tests
+      - name: Run unit & integration tests
         run: pytest
 
       - name: Build static site data

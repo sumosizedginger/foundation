@@ -1,6 +1,8 @@
 import zipfile
 from pathlib import Path
+
 import pandas as pd
+
 
 def inspect_asec_merge(archive_path: Path):
     with zipfile.ZipFile(archive_path) as zf:
@@ -13,7 +15,9 @@ def inspect_asec_merge(archive_path: Path):
 
         print("\nReading pppub25.csv...")
         with zf.open("pppub25.csv") as f:
-            pp = pd.read_csv(f, usecols=["PH_SEQ", "A_LINENO", "MARSUPWT", "A_AGE"], low_memory=False)
+            pp = pd.read_csv(
+                f, usecols=["PH_SEQ", "A_LINENO", "MARSUPWT", "A_AGE"], low_memory=False
+            )
         print(f"Person records: {len(pp)}")
         print(pp.head())
         print(pp.describe())
@@ -26,6 +30,7 @@ def inspect_asec_merge(archive_path: Path):
         print("\nMARSUPWT summary:")
         print(merged["MARSUPWT"].describe())
         print(f"Sum of MARSUPWT: {merged['MARSUPWT'].sum():,.2f}")
-        
+
+
 if __name__ == "__main__":
     inspect_asec_merge(Path(".cache/census/asecpub25csv.zip"))

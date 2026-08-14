@@ -1,18 +1,27 @@
 """National Association of Insurance Commissioners (NAIC) Auto Insurance Adapter.
 
-Ingests state-level average expenditure for personal automobile insurance (liability, comprehensive, collision).
+Ingests state-level average expenditure for private passenger automobile insurance from official
+NAIC Auto Insurance Database Reports.
+
+METHODOLOGICAL DISTINCTIONS:
+- Metric: Combined Average Expenditure (Liability + Comprehensive + Collision) per insured vehicle.
+- Source Frequency: Biennial/triennial official NAIC releases (e.g. 2021/2022 survey data published in 2024).
+- Temporal Rule: Real source vintage year is stored explicitly. If a 2026 survey is not yet published,
+  the component reports the last validated observation with explicit vintage metadata.
 """
 
 from __future__ import annotations
+
 import csv
 import hashlib
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
 
 from foundation.living_cost.models import ComponentStatus, LivingCostComponentObservation
 
-NAIC_BASE_URL = "https://content.naic.org/research-actuarial-services/auto-insurance-database-report"
+NAIC_BASE_URL = (
+    "https://content.naic.org/research-actuarial-services/auto-insurance-database-report"
+)
 
 
 def parse_naic_auto_insurance_csv(
@@ -33,7 +42,7 @@ def parse_naic_auto_insurance_csv(
         file_sha256 = hasher.hexdigest()
 
     if not retrieved_at:
-        retrieved_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+        retrieved_at = datetime.now(UTC).replace(microsecond=0).isoformat()
 
     observations: list[LivingCostComponentObservation] = []
 
@@ -41,7 +50,12 @@ def parse_naic_auto_insurance_csv(
         reader = csv.DictReader(fh)
         for row in reader:
             state_alpha = str(row.get("state") or row.get("State") or "").strip().upper()
-            prem_str = row.get("average_annual_premium") or row.get("combined_expenditure") or row.get("premium") or "0"
+            prem_str = (
+                row.get("average_annual_premium")
+                or row.get("combined_expenditure")
+                or row.get("premium")
+                or "0"
+            )
             try:
                 annual_prem = float(str(prem_str).replace("$", "").replace(",", "").strip())
             except ValueError:
@@ -49,6 +63,10 @@ def parse_naic_auto_insurance_csv(
 
             if annual_prem <= 0:
                 continue
+
+            source_vintage = str(
+                row.get("source_year") or row.get("vintage") or reference_year
+            ).strip()
 
             obs = LivingCostComponentObservation(
                 component_id="transport_auto_insurance",
@@ -63,14 +81,17 @@ def parse_naic_auto_insurance_csv(
                 unit="USD",
                 status=ComponentStatus.MEASURED,
                 source_id=f"naic_auto_ins_{reference_year}",
-                source_variable="combined_average_expenditure",
+                source_variable="combined_average_expenditure_liability_comp_coll",
                 source_url=NAIC_BASE_URL,
-                source_release=f"NAIC Auto Insurance Database Report ({reference_year})",
-                source_reference_period=str(reference_year),
+                source_release=f"NAIC Auto Insurance Database Report (Source Vintage: {source_vintage})",
+                source_reference_period=source_vintage,
                 retrieved_at=retrieved_at,
                 source_artifact_sha256=file_sha256,
                 methodology_version="0.2.0-draft",
-                notes=f"NAIC average annual private passenger automobile insurance expenditure in {state_alpha}.",
+                notes=(
+                    f"NAIC combined average annual expenditure (Liability + Comprehensive + Collision) "
+                    f"in {state_alpha} (Source Vintage: {source_vintage})."
+                ),
             )
             observations.append(obs)
 

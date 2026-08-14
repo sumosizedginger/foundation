@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 from dataclasses import dataclass
+from datetime import UTC
 from pathlib import Path
 
 import requests
@@ -58,3 +59,18 @@ def download_file(
         bytes=total,
         content_type=content_type,
     )
+
+
+def download_file_with_hash(
+    url: str,
+    destination: Path,
+    *,
+    timeout: tuple[float, float] = (15.0, 180.0),
+    max_bytes: int = 500_000_000,
+) -> tuple[Path, str, str]:
+    """Download file and return (path, sha256_hex, retrieved_at_iso)."""
+    from datetime import datetime
+
+    res = download_file(url, destination, timeout=timeout, max_bytes=max_bytes)
+    now_iso = datetime.now(UTC).replace(microsecond=0).isoformat()
+    return res.path, res.sha256, now_iso

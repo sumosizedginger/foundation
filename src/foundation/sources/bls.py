@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import json
 import math
-from datetime import datetime, timezone
+from datetime import UTC, datetime
+from pathlib import Path
 from typing import Any
 
 import requests
+
 from foundation.models import EconomicPressureObservation
 
 BLS_V2_URL = "https://api.bls.gov/publicAPI/v2/timeseries/data/"
@@ -170,7 +173,7 @@ def fetch_series(
     timeout: float = 15.0,
 ) -> dict[str, Any]:
     """Fetch published BLS time series dynamically deriving years from current time."""
-    current_year = datetime.now(timezone.utc).year
+    current_year = datetime.now(UTC).year
     start_year = start_year or (current_year - 2)
     end_year = end_year or current_year
 
@@ -185,7 +188,9 @@ def fetch_series(
     if registration_key:
         payload["registrationkey"] = registration_key
 
-    headers = {"User-Agent": "TheFoundation/0.1 (Economic Research Instrument; contact@foundation.org)"}
+    headers = {
+        "User-Agent": "TheFoundation/0.1 (Economic Research Instrument; contact@foundation.org)"
+    }
     response = requests.post(BLS_V2_URL, json=payload, headers=headers, timeout=timeout)
     response.raise_for_status()
     data = response.json()
@@ -197,18 +202,21 @@ def fetch_series(
     return data
 
 
-def compute_cpi_rate_changes(obs_list: list[dict[str, Any]]) -> tuple[float | None, float | None, float | None]:
+def compute_cpi_rate_changes(
+    obs_list: list[dict[str, Any]],
+) -> tuple[float | None, float | None, float | None]:
     """Calculate MoM % change, 3-month annualized % change, and YoY % change from sorted monthly observations."""
     if not obs_list:
         return None, None, None
 
     # Filter monthly observations (period starting with 'M' and not 'M13' annual average)
     monthly_obs = [
-        o for o in obs_list
-        if o.get("period", "").startswith("M") and o.get("period") != "M13"
+        o for o in obs_list if o.get("period", "").startswith("M") and o.get("period") != "M13"
     ]
     # Sort descending (latest first)
-    monthly_obs.sort(key=lambda x: (int(x["year"]), int(x["period"].replace("M", ""))), reverse=True)
+    monthly_obs.sort(
+        key=lambda x: (int(x["year"]), int(x["period"].replace("M", ""))), reverse=True
+    )
 
     if not monthly_obs:
         return None, None, None
@@ -247,13 +255,14 @@ def compute_cpi_rate_changes(obs_list: list[dict[str, Any]]) -> tuple[float | No
 def get_economic_pressure_signals(
     series_ids: list[str] | None = None,
     registration_key: str | None = None,
+    cache_dir: Path | None = None,
 ) -> list[EconomicPressureObservation]:
     """Ingest, validate, and compute rate-of-change pressure metrics from BLS.
 
     If network is unavailable, uses archived observations explicitly labeled STALE / CACHED.
     """
     target_ids = series_ids or list(REGISTERED_BLS_SERIES.keys())
-    now_iso = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+    now_iso = datetime.now(UTC).replace(microsecond=0).isoformat()
 
     api_series_map: dict[str, list[dict[str, Any]]] = {}
     is_live_network = False
@@ -264,8 +273,17 @@ def get_economic_pressure_signals(
             sid = s.get("seriesID")
             api_series_map[sid] = s.get("data", [])
         is_live_network = True
-    except Exception as exc:
-        print(f"Notice: BLS API unavailable ({exc}). Using archived observations marked STALE/CACHED.")
+    except (
+        requests.RequestException,
+        json.JSONDecodeError,
+        KeyError,
+        RuntimeError,
+        ValueError,
+        OSError,
+    ) as exc:
+        print(
+            f"Notice: BLS API unavailable ({exc}). Using archived observations marked STALE/CACHED."
+        )
 
     observations: list[EconomicPressureObservation] = []
     for sid in target_ids:
@@ -324,3 +342,6 @@ def get_economic_pressure_signals(
         )
 
     return observations
+
+
+fetch_all_pressure_signals = get_economic_pressure_signals

@@ -1,4 +1,3 @@
-import pytest
 from foundation.sources.bls import REGISTERED_BLS_SERIES, get_economic_pressure_signals
 
 

@@ -6,7 +6,7 @@ Zero ACA subsidies or Medicaid assumed.
 """
 
 from __future__ import annotations
-from typing import Any
+
 from foundation.living_cost.models import ComponentStatus, LivingCostComponentObservation
 
 

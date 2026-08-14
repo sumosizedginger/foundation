@@ -1,6 +1,5 @@
-import zipfile
 import requests
-import io
+
 
 def inspect_zip_members(year):
     yy = str(year)[-2:]
@@ -12,6 +11,7 @@ def inspect_zip_members(year):
     r = requests.get(url, stream=True, headers=headers)
     r.raise_for_status()
     print("Content length:", r.headers.get("content-length"))
+
 
 if __name__ == "__main__":
     inspect_zip_members(2025)

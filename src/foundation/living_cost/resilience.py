@@ -6,7 +6,7 @@ depreciation, or MEPS out-of-pocket medical baselines.
 """
 
 from __future__ import annotations
-from typing import Any
+
 from foundation.living_cost.models import ComponentStatus, LivingCostComponentObservation
 
 

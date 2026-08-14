@@ -1,5 +1,4 @@
-import pytest
-from foundation.survival import calculate_survival_floor, get_benchmark_comparisons
+from foundation.survival import calculate_survival_floor
 
 
 def test_survival_floor_rebuild_in_progress():

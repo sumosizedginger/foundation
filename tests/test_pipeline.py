@@ -1,7 +1,7 @@
 from pathlib import Path
 from unittest.mock import patch
+
 import pandas as pd
-import pytest
 
 from foundation.pipeline import run_full_pipeline
 
@@ -27,12 +27,15 @@ def test_pipeline_with_mocked_archive(tmp_path: Path):
         }
 
     # Create dummy cache files
-    cache_dir = tmp_path / ".cache" / "census"
+    cache_dir = tmp_path / "data" / "cache"
     cache_dir.mkdir(parents=True)
     for yy in ["23", "24", "25"]:
         (cache_dir / f"asecpub{yy}csv.zip").write_text("dummy zip content")
 
-    with patch("foundation.sources.census_asec.extract_and_merge_asec_zip", side_effect=mock_extract_and_merge):
+    with patch(
+        "foundation.sources.census_asec.extract_and_merge_asec_zip",
+        side_effect=mock_extract_and_merge,
+    ):
         result = run_full_pipeline(project_root=tmp_path)
 
         assert result["project"]["name"] == "The Foundation"

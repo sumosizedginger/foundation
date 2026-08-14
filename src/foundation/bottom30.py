@@ -1,14 +1,15 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pandas as pd
+
 from foundation.config import definitions
 from foundation.households import prepare_person_records
 from foundation.independent_check import weighted_percentile_reference
 from foundation.models import Bottom30Result, SourceArtifact, ValidationReport
-from foundation.percentiles import weighted_percentile, weighted_percentiles
+from foundation.percentiles import weighted_percentiles
 from foundation.validation import validate_bottom30_prepared
 
 
@@ -46,9 +47,7 @@ def calculate_bottom30(
         prepared["person_weight"],
         quantile_targets,
     )
-    quants_formatted = {
-        f"P{int(p*100):02d}": round(val, 2) for p, val in quants_raw.items()
-    }
+    quants_formatted = {f"P{int(p * 100):02d}": round(val, 2) for p, val in quants_raw.items()}
 
     cutoff = quants_raw[0.30]
 
@@ -69,7 +68,7 @@ def calculate_bottom30(
     raw_marsupwt = float(prepared["person_weight"].sum())
     represented_population = round(raw_marsupwt / weight_scale, 0)
 
-    now_iso = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+    now_iso = datetime.now(UTC).replace(microsecond=0).isoformat()
 
     validation_rep = None
     if audit_metadata:
@@ -80,7 +79,9 @@ def calculate_bottom30(
             income_year=income_year,
             household_records=int(audit_metadata.get("household_records", report.input_records)),
             person_records=int(audit_metadata.get("person_records", report.input_records)),
-            matched_person_records=int(audit_metadata.get("matched_person_records", report.valid_records)),
+            matched_person_records=int(
+                audit_metadata.get("matched_person_records", report.valid_records)
+            ),
             unmatched_person_records=int(audit_metadata.get("unmatched_person_records", 0)),
             unmatched_household_records=int(audit_metadata.get("unmatched_household_records", 0)),
             duplicate_household_keys=int(audit_metadata.get("duplicate_household_keys", 0)),
@@ -125,7 +126,7 @@ def calculate_bottom30_from_zip(
     artifact = SourceArtifact(
         source_id="census_asec",
         url=f"https://www2.census.gov/programs-surveys/cps/datasets/{survey_year}/march/asecpub{str(survey_year)[-2:]}csv.zip",
-        retrieved_at=datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
+        retrieved_at=datetime.now(UTC).replace(microsecond=0).isoformat(),
         sha256=audit["sha256"],
         bytes=audit["bytes"],
         content_type="application/zip",

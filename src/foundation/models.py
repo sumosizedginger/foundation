@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, asdict
-from datetime import datetime, timezone
+from dataclasses import asdict, dataclass
+from datetime import UTC, datetime
 from typing import Any
 
 
@@ -80,7 +80,7 @@ class Bottom30Result:
         methodology_version: str,
         source_artifact: SourceArtifact | None = None,
         validation_report: ValidationReport | None = None,
-    ) -> "Bottom30Result":
+    ) -> Bottom30Result:
         return cls(
             survey_year=survey_year,
             income_year=income_year,
@@ -94,7 +94,7 @@ class Bottom30Result:
             weight_scale=weight_scale,
             quantiles=quantiles or {},
             methodology_version=methodology_version,
-            calculated_at=datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
+            calculated_at=datetime.now(UTC).replace(microsecond=0).isoformat(),
             source_artifact=source_artifact,
             validation_report=validation_report,
         )
@@ -192,7 +192,9 @@ class SurvivalFloorResult:
             "household_matrix": [h.to_dict() for h in self.household_matrix],
             "methodology_version": self.methodology_version,
             "calculated_at": self.calculated_at,
-            "benchmark_comparisons": {k: v.to_dict() for k, v in self.benchmark_comparisons.items()},
+            "benchmark_comparisons": {
+                k: v.to_dict() for k, v in self.benchmark_comparisons.items()
+            },
         }
 
 

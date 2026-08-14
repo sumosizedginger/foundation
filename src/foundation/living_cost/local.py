@@ -5,8 +5,8 @@ Social & Recreation, and Resilience, then applies the deterministic Tax Solver.
 """
 
 from __future__ import annotations
-from datetime import datetime, timezone
-from typing import Any
+
+from datetime import UTC, datetime
 
 from foundation.living_cost.models import ComponentStatus, LocalLivingCost
 from foundation.living_cost.taxes import solve_gross_required_income
@@ -47,7 +47,7 @@ def compute_local_living_cost(
         fips_code=geography_id,
         year=reference_year,
     )
-    now_iso = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+    now_iso = datetime.now(UTC).replace(microsecond=0).isoformat()
 
     return LocalLivingCost(
         geography_id=geography_id,

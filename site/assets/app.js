@@ -4,7 +4,7 @@
  * CRITICAL ARCHITECTURAL PRINCIPLES:
  * 1. The browser NEVER calculates authoritative economic metrics.
  * 2. All authoritative display numbers, ratios, and percentages come precomputed from validated JSON.
- * 3. Safe DOM construction (textContent) is used to prevent arbitrary HTML injection.
+ * 3. Safe DOM construction (createElement, textContent, appendChild) is strictly used.
  * 4. WCAG 2.2 AA compliant modal focus management and keyboard traps.
  */
 
@@ -25,8 +25,6 @@ const numFmt = new Intl.NumberFormat("en-US");
 
 let globalDashboardData = null;
 let lastFocusedElement = null;
-let currentSortKey = "state";
-let currentSortAsc = true;
 
 async function fetchJson(url) {
   const res = await fetch(url, { cache: "no-store" });
@@ -152,13 +150,22 @@ function renderStateTable(states) {
     td.style.padding = "2.5rem 1.5rem";
     td.style.textAlign = "center";
     td.style.color = "var(--muted)";
-    td.innerHTML = `
-      <strong>DATA PIPELINE VALIDATION IN PROGRESS</strong><br>
-      <span style="font-size:0.88rem; color:var(--subtle); margin-top:0.4rem; display:inline-block;">
-        Official county-level HUD Fair Market Rents and Census ACS adult population join validation is currently executing.
-        Provisional prototype state values have been retired.
-      </span>
-    `;
+
+    const strong = document.createElement("strong");
+    strong.textContent = "DATA PIPELINE VALIDATION IN PROGRESS";
+    td.appendChild(strong);
+
+    td.appendChild(document.createElement("br"));
+
+    const sub = document.createElement("span");
+    sub.style.fontSize = "0.88rem";
+    sub.style.color = "var(--subtle)";
+    sub.style.marginTop = "0.4rem";
+    sub.style.display = "inline-block";
+    sub.textContent =
+      "Official county-level HUD Fair Market Rents and Census ACS adult population join validation is currently executing. Provisional prototype state values have been retired.";
+    td.appendChild(sub);
+
     tr.appendChild(td);
     tbody.appendChild(tr);
     return;
@@ -271,6 +278,34 @@ function handleModalKeydown(e) {
   }
 }
 
+// Helper to create provenance DOM items without innerHTML
+function createProvenanceItem(label, lines) {
+  const wrap = document.createElement("div");
+  wrap.className = "provenance-item";
+
+  const lbl = document.createElement("p");
+  lbl.className = "provenance-label";
+  lbl.textContent = label;
+  wrap.appendChild(lbl);
+
+  const val = document.createElement("div");
+  val.className = "provenance-val";
+
+  lines.forEach((line, idx) => {
+    if (typeof line === "string") {
+      val.appendChild(document.createTextNode(line));
+    } else if (line instanceof HTMLElement) {
+      val.appendChild(line);
+    }
+    if (idx < lines.length - 1) {
+      val.appendChild(document.createElement("br"));
+    }
+  });
+
+  wrap.appendChild(val);
+  return wrap;
+}
+
 // Open Population Anchor Provenance
 function openAnchorProvenance(triggerElement) {
   lastFocusedElement = triggerElement;
@@ -285,50 +320,33 @@ function openAnchorProvenance(triggerElement) {
   title.textContent = "Population Anchor Provenance Chain";
   body.innerHTML = "";
 
-  function makeItem(label, text) {
-    const wrap = document.createElement("div");
-    wrap.className = "provenance-item";
-    const lbl = document.createElement("p");
-    lbl.className = "provenance-label";
-    lbl.textContent = label;
-    const val = document.createElement("div");
-    val.className = "provenance-val";
-    val.innerHTML = text;
-    wrap.appendChild(lbl);
-    wrap.appendChild(val);
-    return wrap;
-  }
-
   body.appendChild(
-    makeItem(
-      "Calculation Chain",
-      `Bottom-30 Cutoff (${moneyExactFmt.format(pop.cutoff || 0)})<br>
-       ↳ Weighted Percentile (p = 0.30)<br>
-       ↳ per_person_income = HTOTVAL / H_NUMPER<br>
-       ↳ Person Weight: MARSUPWT (scale factor 100)<br>
-       ↳ Merged Microdata: pppub${String(pop.survey_year || "25").slice(-2)}.csv ⨝ hhpub${String(pop.survey_year || "25").slice(-2)}.csv on PH_SEQ == H_SEQ`,
-    ),
+    createProvenanceItem("Calculation Chain", [
+      `Bottom-30 Cutoff (${moneyExactFmt.format(pop.cutoff || 0)})`,
+      "↳ Weighted Percentile (p = 0.30)",
+      "↳ per_person_income = HTOTVAL / H_NUMPER",
+      "↳ Person Weight: MARSUPWT (scale factor 100)",
+      `↳ Merged Microdata: pppub${String(pop.survey_year || "25").slice(-2)}.csv ⨝ hhpub${String(pop.survey_year || "25").slice(-2)}.csv on PH_SEQ == H_SEQ`,
+    ]),
   );
 
   body.appendChild(
-    makeItem(
-      "Source Dataset",
-      `<strong>U.S. Census Bureau</strong> · Current Population Survey (CPS ASEC)<br>
-       Survey Year: ${pop.survey_year || "—"} | Income Reference Year: ${pop.income_year || "—"}<br>
-       Archive: ${art.url || "asecpub25csv.zip"}<br>
-       SHA-256: ${art.sha256 || valRep.sha256 || "—"}`,
-    ),
+    createProvenanceItem("Source Dataset", [
+      "U.S. Census Bureau · Current Population Survey (CPS ASEC)",
+      `Survey Year: ${pop.survey_year || "—"} | Income Reference Year: ${pop.income_year || "—"}`,
+      `Archive: ${art.url || "asecpub25csv.zip"}`,
+      `SHA-256: ${art.sha256 || valRep.sha256 || "—"}`,
+    ]),
   );
 
   body.appendChild(
-    makeItem(
-      "Validation & Cross-Check",
-      `Canonical Cutoff: ${moneyExactFmt.format(pop.cutoff || 0)}<br>
-       Independent Reference Cutoff: ${moneyExactFmt.format(valRep.independent_reference_p30 || pop.cutoff || 0)}<br>
-       Implementation Difference: 0.0000 (PASSED)<br>
-       Matched Microdata Person Records: ${numFmt.format(pop.valid_records || 0)}<br>
-       Represented U.S. Population: ${numFmt.format(pop.represented_population || 0)} persons`,
-    ),
+    createProvenanceItem("Validation & Cross-Check", [
+      `Canonical Cutoff: ${moneyExactFmt.format(pop.cutoff || 0)}`,
+      `Independent Reference Cutoff: ${moneyExactFmt.format(valRep.independent_reference_p30 || pop.cutoff || 0)}`,
+      "Implementation Difference: 0.0000 (PASSED)",
+      `Matched Microdata Person Records: ${numFmt.format(pop.valid_records || 0)}`,
+      `Represented U.S. Population: ${numFmt.format(pop.represented_population || 0)} persons`,
+    ]),
   );
 
   showModal();
@@ -347,44 +365,29 @@ function openLivingCostProvenance(triggerElement) {
   title.textContent = "Minimum Sustainable Living Cost — Data Pipeline Audit";
   body.innerHTML = "";
 
-  function makeItem(label, contentNode) {
-    const wrap = document.createElement("div");
-    wrap.className = "provenance-item";
-    const lbl = document.createElement("p");
-    lbl.className = "provenance-label";
-    lbl.textContent = label;
-    wrap.appendChild(lbl);
-    wrap.appendChild(contentNode);
-    return wrap;
-  }
+  body.appendChild(
+    createProvenanceItem("Source Integrity & Audit Directive", [
+      "STATUS: DATA PIPELINE VALIDATION IN PROGRESS",
+      "The initial 0.2.0-draft prototype outputs ($51,220.16 / $55,551.89) have been retired under Owner Directive because provisional state-level assumptions and synthetic locality tiers did not meet the project's empirical county-level source standard.",
+      "",
+      "The production pipeline is currently ingesting and joining:",
+      "• HUD Fair Market Rents: Actual FY2024 and FY2026 1BR gross rents across all ~3,143 real counties.",
+      "• Census ACS 5-Year: County-level adult population weights (Age 18+).",
+      "• CMS Marketplace PUFs: Rating-area unsubsidized Silver premiums.",
+      "• Deterministic Tax Solver: Statutory 2024 & 2026 schedules with county-level local tax attachment.",
+    ]),
+  );
 
-  // Pipeline Status Box
-  const statusBox = document.createElement("div");
-  statusBox.className = "provenance-val";
-  statusBox.style.borderLeft = "3px solid var(--accent)";
-  statusBox.innerHTML = `
-    <strong>STATUS: DATA PIPELINE VALIDATION IN PROGRESS</strong><br>
-    The initial 0.2.0-draft prototype outputs ($51,220.16 / $55,551.89) have been retired under Owner Directive because provisional state-level assumptions and synthetic locality tiers did not meet the project's empirical county-level source standard.<br><br>
-    The production pipeline is currently ingesting and joining:<br>
-    • <strong>HUD Fair Market Rents:</strong> Actual FY2024 and FY2026 1BR gross rents across all ~3,143 real counties.<br>
-    • <strong>Census ACS 5-Year:</strong> County-level adult population weights (Age 18+).<br>
-    • <strong>CMS Marketplace PUFs:</strong> Rating-area unsubsidized Silver premiums.<br>
-    • <strong>Deterministic Tax Solver:</strong> Statutory 2024 & 2026 schedules with county-level local tax attachment.
-  `;
-  body.appendChild(makeItem("Source Integrity & Audit Directive", statusBox));
-
-  // Prototype Historical Record
   if (retired.prototype_2024_national_median) {
-    const protoBox = document.createElement("div");
-    protoBox.className = "provenance-val";
-    protoBox.innerHTML = `
-      <strong>Retired Prototype Records (Non-Authoritative):</strong><br>
-      • Prototype 2024 National Median: ${moneyFmt.format(retired.prototype_2024_national_median)}<br>
-      • Prototype 2026 National Median: ${moneyFmt.format(retired.prototype_2026_national_median)}<br>
-      • Prototype Survival Gap: ${moneyFmt.format(retired.prototype_survival_gap_2024)}<br>
-      <em>Reason for retirement: ${retired.retired_reason}</em>
-    `;
-    body.appendChild(makeItem("Historical Prototype Audit Trail", protoBox));
+    body.appendChild(
+      createProvenanceItem("Historical Prototype Audit Trail", [
+        "Retired Prototype Records (Non-Authoritative):",
+        `• Prototype 2024 National Median: ${moneyFmt.format(retired.prototype_2024_national_median)}`,
+        `• Prototype 2026 National Median: ${moneyFmt.format(retired.prototype_2026_national_median)}`,
+        `• Prototype Survival Gap: ${moneyFmt.format(retired.prototype_survival_gap_2024)}`,
+        `Reason for retirement: ${retired.retired_reason}`,
+      ]),
+    );
   }
 
   showModal();
@@ -405,38 +408,32 @@ function openSignalProvenance(seriesId, triggerElement) {
   title.textContent = `Pressure Signal: ${sig.label}`;
   body.innerHTML = "";
 
-  function makeItem(label, text) {
-    const wrap = document.createElement("div");
-    wrap.className = "provenance-item";
-    const lbl = document.createElement("p");
-    lbl.className = "provenance-label";
-    lbl.textContent = label;
-    const val = document.createElement("div");
-    val.className = "provenance-val";
-    val.innerHTML = text;
-    wrap.appendChild(lbl);
-    wrap.appendChild(val);
-    return wrap;
-  }
+  const linkEl = document.createElement("a");
+  linkEl.href = sig.source_url;
+  linkEl.target = "_blank";
+  linkEl.style.color = "var(--accent)";
+  linkEl.textContent = sig.source_url;
 
   body.appendChild(
-    makeItem("Series Identifier", `${sig.series_id} (${sig.publisher})`),
+    createProvenanceItem("Series Identifier", [
+      `${sig.series_id} (${sig.publisher})`,
+    ]),
   );
+
   body.appendChild(
-    makeItem(
-      "Observation Details",
-      `Observation Period: ${sig.period_name} ${sig.year} (${sig.observation_period})<br>
-       Reported Metric: <strong>${sig.display_value || sig.value}</strong><br>
-       Unit: ${sig.unit} | Seasonal Adjustment: ${sig.seasonal_adjustment}<br>
-       Freshness Status: <span class="badge ${sig.is_stale ? "stale" : "verified"}">${sig.freshness_status.toUpperCase()}</span><br>
-       Official Endpoint: <a href="${sig.source_url}" target="_blank" style="color:var(--accent);">${sig.source_url}</a>`,
-    ),
+    createProvenanceItem("Observation Details", [
+      `Observation Period: ${sig.period_name} ${sig.year} (${sig.observation_period})`,
+      `Reported Metric: ${sig.display_value || sig.value}`,
+      `Unit: ${sig.unit} | Seasonal Adjustment: ${sig.seasonal_adjustment}`,
+      `Freshness Status: ${sig.freshness_status.toUpperCase()}`,
+      linkEl,
+    ]),
   );
+
   body.appendChild(
-    makeItem(
-      "Methodological Role",
-      `<strong>National Economic Pressure Signal:</strong> Measures general macroeconomic conditions. It is NOT a direct measurement of the Bottom-30 population.`,
-    ),
+    createProvenanceItem("Methodological Role", [
+      "National Economic Pressure Signal: Measures general macroeconomic conditions. It is NOT a direct measurement of the Bottom-30 population.",
+    ]),
   );
 
   showModal();
@@ -480,7 +477,7 @@ async function boot() {
     // Set Status Strip
     setText(
       "stage-status-text",
-      `RESEARCH INSTRUMENT · Canonical Population Anchor Verified · Minimum Sustainable Living Cost Data Pipeline Validation In Progress`,
+      "RESEARCH INSTRUMENT · Canonical Population Anchor Verified · Minimum Sustainable Living Cost Data Pipeline Validation In Progress",
     );
 
     // Population Anchor (Axis 1)
@@ -504,7 +501,6 @@ async function boot() {
     // Minimum Sustainable Living Cost (Axis 2)
     const surv = latest.survival_floor || {};
     const lc2024 = surv.minimum_sustainable_living_cost_2024 || {};
-    const lc2026 = surv.minimum_sustainable_living_cost_2026 || {};
 
     if (lc2024.weighted_median_gross != null) {
       setText(

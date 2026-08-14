@@ -1,12 +1,11 @@
 from __future__ import annotations
 
 import hashlib
-import io
 import zipfile
 from pathlib import Path
-from typing import Tuple
 
 import pandas as pd
+
 from foundation.sources.http import DownloadResult, download_file
 
 
@@ -37,7 +36,7 @@ def compute_file_sha256(path: Path) -> str:
 def extract_and_merge_asec_zip(
     archive_path: Path,
     survey_year: int,
-) -> Tuple[pd.DataFrame, dict]:
+) -> tuple[pd.DataFrame, dict]:
     """Extract and merge household and person tables from an official CPS ASEC CSV ZIP archive.
 
     Returns the merged DataFrame and raw extraction audit statistics.
@@ -48,13 +47,21 @@ def extract_and_merge_asec_zip(
     with zipfile.ZipFile(archive_path) as zf:
         # Check files inside zip
         member_names = zf.namelist()
-        hh_candidates = [m for m in member_names if f"hhpub{yy}" in m.lower() and m.lower().endswith(".csv")]
-        pp_candidates = [m for m in member_names if f"pppub{yy}" in m.lower() and m.lower().endswith(".csv")]
+        hh_candidates = [
+            m for m in member_names if f"hhpub{yy}" in m.lower() and m.lower().endswith(".csv")
+        ]
+        pp_candidates = [
+            m for m in member_names if f"pppub{yy}" in m.lower() and m.lower().endswith(".csv")
+        ]
 
         if not hh_candidates or not pp_candidates:
             # Fallback: look for generic names
-            hh_candidates = [m for m in member_names if "hhpub" in m.lower() and m.lower().endswith(".csv")]
-            pp_candidates = [m for m in member_names if "pppub" in m.lower() and m.lower().endswith(".csv")]
+            hh_candidates = [
+                m for m in member_names if "hhpub" in m.lower() and m.lower().endswith(".csv")
+            ]
+            pp_candidates = [
+                m for m in member_names if "pppub" in m.lower() and m.lower().endswith(".csv")
+            ]
 
         if not hh_candidates or not pp_candidates:
             raise RuntimeError(f"Could not locate hhpub and pppub CSV files in {archive_path}")

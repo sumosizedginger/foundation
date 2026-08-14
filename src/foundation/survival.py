@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
-from typing import Any
+from datetime import UTC, datetime
+
 from foundation.config import definitions
 from foundation.models import (
     BenchmarkComparison,
@@ -77,7 +77,7 @@ def calculate_survival_floor(
     """
     defs = definitions()
     methodology_version = defs["project"]["methodology_version"]
-    now_iso = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+    now_iso = datetime.now(UTC).replace(microsecond=0).isoformat()
 
     return SurvivalFloorResult(
         status="in_development",

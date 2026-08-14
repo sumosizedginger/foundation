@@ -65,11 +65,15 @@ def main() -> int:
         raise SystemExit("Composite status must remain locked in prelaunch")
 
     if latest["population_anchor"]["cutoff"] != 21800.00:
-        raise SystemExit(f"Unexpected Population Anchor cutoff: {latest['population_anchor']['cutoff']}")
+        raise SystemExit(
+            f"Unexpected Population Anchor cutoff: {latest['population_anchor']['cutoff']}"
+        )
 
     surv_status = latest["survival_floor"]["status"]
     if surv_status not in ("pipeline_validation_in_progress", "research_estimate"):
-        raise SystemExit(f"Survival floor must be pipeline_validation_in_progress or research_estimate, got: {surv_status}")
+        raise SystemExit(
+            f"Survival floor must be pipeline_validation_in_progress or research_estimate, got: {surv_status}"
+        )
 
     print("Repository structural, schema, living cost, and release-gate verification passed.")
     return 0

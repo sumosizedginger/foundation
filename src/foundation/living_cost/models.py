@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from enum import Enum
 from typing import Any
 
@@ -38,7 +38,9 @@ class LivingCostComponentObservation:
 
     def to_dict(self) -> dict[str, Any]:
         data = asdict(self)
-        data["status"] = self.status.value if isinstance(self.status, ComponentStatus) else str(self.status)
+        data["status"] = (
+            self.status.value if isinstance(self.status, ComponentStatus) else str(self.status)
+        )
         return data
 
 
@@ -63,7 +65,9 @@ class LocalLivingCost:
 
     def to_dict(self) -> dict[str, Any]:
         data = asdict(self)
-        data["status"] = self.status.value if isinstance(self.status, ComponentStatus) else str(self.status)
+        data["status"] = (
+            self.status.value if isinstance(self.status, ComponentStatus) else str(self.status)
+        )
         return data
 
 
@@ -88,7 +92,9 @@ class StateLivingCostDistribution:
 
     def to_dict(self) -> dict[str, Any]:
         data = asdict(self)
-        data["status"] = self.status.value if isinstance(self.status, ComponentStatus) else str(self.status)
+        data["status"] = (
+            self.status.value if isinstance(self.status, ComponentStatus) else str(self.status)
+        )
         return data
 
 
@@ -111,5 +117,7 @@ class NationalLivingCostDistribution:
 
     def to_dict(self) -> dict[str, Any]:
         data = asdict(self)
-        data["status"] = self.status.value if isinstance(self.status, ComponentStatus) else str(self.status)
+        data["status"] = (
+            self.status.value if isinstance(self.status, ComponentStatus) else str(self.status)
+        )
         return data

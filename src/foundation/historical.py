@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from typing import Any
-
 
 # Official BLS CPI-U Annual Averages (Series: CUUR0000SA0 / CUSR0000SA0)
 # Base reference year for constant dollar translations: 2024
@@ -93,7 +92,7 @@ def get_historical_vintages_summary() -> list[HistoricalAnchorVintage]:
             "nominal_cutoff": 21800.00,
             "represented_population": 337689642.0,
             "source_archive": "asecpub25csv.zip",
-            "archive_sha256": "318845a2b5e0034e357900b991196ce28ecdd0c99a0937b27ff77f8ea6497284",
+            "archive_sha256": "318845a2b5e0034eb2973898de1738f4df0025727de38499e7669cb9c0deef0b",
             "quantiles_nominal": {
                 "P10": 10000.00,
                 "P20": 15896.00,
@@ -112,7 +111,7 @@ def get_historical_vintages_summary() -> list[HistoricalAnchorVintage]:
         iy = int(r["income_year"])
         nom_cutoff = float(r["nominal_cutoff"])
         real_cutoff = adjust_to_constant_dollars(nom_cutoff, iy, base_year)
-        
+
         quant_real = {
             k: adjust_to_constant_dollars(float(v), iy, base_year)
             for k, v in r["quantiles_nominal"].items()  # type: ignore

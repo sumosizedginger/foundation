@@ -16,7 +16,7 @@ def load_yaml(name: str) -> dict[str, Any]:
     with path.open("r", encoding="utf-8") as fh:
         data = yaml.safe_load(fh)
     if not isinstance(data, dict):
-        raise ValueError(f"Expected mapping in {path}")
+        raise TypeError(f"Expected mapping in {path}")
     return data
 
 
@@ -34,3 +34,8 @@ def indicators() -> dict[str, Any]:
 
 def weights() -> dict[str, Any]:
     return load_yaml("weights.yml")
+
+
+load_definitions = definitions
+load_sources = sources
+load_indicators = indicators

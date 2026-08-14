@@ -5,7 +5,7 @@ HUD gross rent includes tenant-paid essential utilities; do NOT double-count the
 """
 
 from __future__ import annotations
-from typing import Any
+
 from foundation.living_cost.models import ComponentStatus, LivingCostComponentObservation
 
 

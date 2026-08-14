@@ -13,17 +13,10 @@ This engine orchestrates:
 """
 
 from __future__ import annotations
+
 import json
 from pathlib import Path
 from typing import Any
-
-from foundation.living_cost.models import (
-    ComponentStatus,
-    LivingCostComponentObservation,
-    LocalLivingCost,
-    NationalLivingCostDistribution,
-    StateLivingCostDistribution,
-)
 
 
 def get_living_cost_transition_state() -> dict[str, Any]:
@@ -109,9 +102,17 @@ def run_living_cost_pipeline(project_root: Path) -> dict[str, Any]:
             json.dump(lc_summary, fh, indent=2)
 
         with (data_current / f"state_living_costs_{yr}.json").open("w", encoding="utf-8") as fh:
-            json.dump({"reference_year": yr, "status": "pipeline_validation_in_progress", "states": []}, fh, indent=2)
+            json.dump(
+                {"reference_year": yr, "status": "pipeline_validation_in_progress", "states": []},
+                fh,
+                indent=2,
+            )
         with (site_data / f"state_living_costs_{yr}.json").open("w", encoding="utf-8") as fh:
-            json.dump({"reference_year": yr, "status": "pipeline_validation_in_progress", "states": []}, fh, indent=2)
+            json.dump(
+                {"reference_year": yr, "status": "pipeline_validation_in_progress", "states": []},
+                fh,
+                indent=2,
+            )
 
     return {
         "survival_consolidated": transition_state,

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from itertools import accumulate
-from typing import Iterable
+from collections.abc import Iterable
 
 
 def weighted_percentile_reference(

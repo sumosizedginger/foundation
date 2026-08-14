@@ -1,0 +1,25 @@
+{
+  "name": "the-foundation",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "Deterministic, auditable economic measurement focused on the bottom 30% of Americans.",
+  "scripts": {
+    "check": "npm run format:check && npm run lint:js && npm run lint:css && npm run lint:html && npm run lint:py",
+    "format:check": "prettier --check \"site/**/*.{html,js,css}\" \"*.md\"",
+    "format:write": "prettier --write \"site/**/*.{html,js,css}\" \"*.md\"",
+    "lint:js": "eslint site/assets/app.js",
+    "lint:css": "stylelint \"site/assets/**/*.css\"",
+    "lint:html": "html-validate \"site/**/*.html\"",
+    "lint:py": "ruff check src tests scripts && ruff format --check src tests scripts",
+    "test": "pytest"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.20.0",
+    "eslint": "^9.20.0",
+    "html-validate": "^9.4.1",
+    "prettier": "^3.5.0",
+    "stylelint": "^16.14.1",
+    "stylelint-config-standard": "^37.0.0"
+  }
+}
