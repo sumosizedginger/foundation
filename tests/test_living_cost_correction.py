@@ -131,7 +131,8 @@ def test_owner_packet_od_updates(tmp_path: Path):
 
 def test_sbe_per_state_official_urls_are_year_specific():
     assert "NJ" in SBE_STANDALONE_STATES[2024]
-    assert "OR" in SBE_STANDALONE_STATES[2024]
+    assert "OR" not in SBE_STANDALONE_STATES[2024]
+    assert "OR" in SBE_STATE_ZIP_SLUGS[2024]
     assert "VA" in SBE_STANDALONE_STATES[2024]
     assert "GA" in SBE_STANDALONE_STATES[2026]
     assert "IL" in SBE_STANDALONE_STATES[2026]

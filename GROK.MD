@@ -1,603 +1,573 @@
-THE FOUNDATION — OWNER DECISION PACKET REFRESH
-POST-DELIVERABLE-2A SOURCE CORRECTION
+THE FOUNDATION — PRE-OWNER-FREEZE CORRECTION PASS
+POST e497d45 AUDIT
 
 Repository:
 https://github.com/sumosizedginger/foundation
 
 CURRENT AUDITED HEAD:
-f2c0636690ac2408d0f537c9fd657225c75e63f3
+e497d451088a054d43fda9921aa699531077888a
 
 PURPOSE:
 
-Update the Living Cost owner-decision packet and supporting source coverage using
-current official source information as of 2026-08-14.
+Correct the remaining provenance, CMS platform-classification, CPS source-revision,
+and BLS CE maintenance-detail issues discovered in independent post-closeout review.
 
 DO NOT calculate or publish a Minimum Sustainable Living Cost.
 
-DO NOT calculate Gap, Adequacy, state rankings, national median or Composite.
+DO NOT calculate:
+- 2024 MSLC
+- 2026 MSLC
+- Gap
+- Adequacy Ratio
+- state rankings
+- national median
+- Composite
 
-This is a SOURCE / METHODOLOGY CORRECTION pass before owner decisions are frozen.
+DO NOT mark any owner decision ACCEPTED.
 
-==================================================
-1. MEPS — UPDATE OD-002 STATUS
-==================================================
-
-HC-251 (2023 Full Year Consolidated) remains the latest actually listed full-year
-MEPS file as of 2026-08-14.
-
-However, AHRQ's official 2026 release schedule says the:
-
-2024 Full Year Consolidated Data File
-
-is scheduled for AUGUST 2026.
-
-Update OD-002 to say this explicitly.
-
-Do not claim the 2024 full-year file exists until it actually appears in the official
-MEPS PUF listing.
-
-Add a source-refresh check so that immediately before owner freeze / candidate
-calculation the pipeline checks whether the 2024 Full Year Consolidated file has
-been released.
-
-If released:
-retrieve, hash, parse and prefer it.
-
-If not:
-continue using HC-251 with true source year = 2023.
+Owner freeze occurs AFTER this correction pass.
 
 ==================================================
-2. NHTS — FIX SAMPLE DEFINITION
+1. 2024 HUD ↔ ACS JOIN — FIX PROVENANCE
 ==================================================
 
-Current fhwa_nhts.py documentation claims:
+Current:
 
-"single-adult working-age drivers (Age 18-64)"
-and
-"1-driver households"
+data/metadata/living_cost_geo_join_2024.json
 
-but implementation currently filters:
+has:
 
-HHSIZE == 1
-WRKCOUNT == 1
+"census_artifact_sha256": ""
+"hud_artifact_sha256": ""
 
-and then sums vehicle ANNMILES.
+This is unacceptable.
 
-That does NOT establish:
+The 2026 equivalent correctly carries both hashes.
 
-age 18-64
-or
-exactly one licensed driver.
+Fix the 2024 join-generation path so the report receives and records:
 
-Fix one of two ways:
+- exact ACS source artifact SHA;
+- exact HUD FY2024 source artifact SHA;
+- actual source IDs;
+- source reference periods;
+- retrieval timestamps where appropriate.
 
-A. Preferred:
-join the appropriate NHTS person data and explicitly enforce:
-- one-person household;
-- age 18-64;
-- driver/licensed-driver criterion if supported;
-- one worker if that remains part of methodology.
+Add a release-gate test:
 
-OR
-
-B:
-rename the empirical sample everywhere to exactly what it is:
-
-"one-person, one-worker households with valid annual vehicle mileage"
-
-Do not call it working-age drivers unless the age/driver filter is actually executed.
-
-Preserve:
-
-P25
-median
-mean
-P75
-sample count
-
-and clearly label all as OBSERVED TRAVEL BEHAVIOR, not MINIMUM NECESSARY MILEAGE.
-
-Update OD-003 accordingly.
+A production geo-join report may not claim validated/full coverage if either required
+source hash is blank.
 
 ==================================================
-3. EPA MPG — UPDATE OD-004
+2. DISTINGUISH RAW CENSUS UNIVERSE FROM TRANSFORMED JOIN UNIVERSE
 ==================================================
 
-EPA now publishes downloadable final Model Year 2024 Automotive Trends detailed
-fuel-economy data.
+The official 2024 ACS county/county-equivalent universe contains 3,144 geographies.
 
-Use official EPA data to construct candidate reference-vehicle MPG standards.
+For the FY2024 HUD join, Connecticut is transformed:
 
-Do not simply retain 24 / 28 / 32 as the empirical model.
+9 ACS planning regions
+→
+8 reconstructed legacy counties
 
-Research at minimum:
+which produces a 3,143-geography JOIN universe.
 
-- final MY2024 EPA detailed data;
-- passenger-car / compact / midsize distributions;
-- non-BEV/non-PHEV gasoline vehicle fuel economy where appropriate;
-- implications of using a used-car rather than new-car standard.
+Do not call 3,143:
 
-OD-004 should become a decision about the REFERENCE VEHICLE COHORT, not about
-whether an EPA source exists.
+census_county_universe_count
 
-Produce candidate:
-- vehicle age/model-year window;
-- class;
-- fuel type;
-- weighted/median combined real-world MPG;
-- sensitivity alternatives.
+without qualification.
 
-Do not freeze without owner review.
+Preserve separately, for example:
 
-==================================================
-4. NAIC — REPLACE OD-006
-==================================================
+raw_census_county_equivalent_count = 3144
+join_geography_count = 3143
+connecticut_raw_geographies = 9
+connecticut_reconstructed_geographies = 8
+connecticut_method = legacy_county_reconstructed_from_cousub
 
-The current premise is obsolete.
+The exact schema may differ.
 
-NAIC's official publications site currently offers:
+The principle:
 
-2022/2023 Auto Insurance Database Report
+Do not mutate history by making it appear that Census published only 3,143 county
+equivalents.
 
-as a FREE DOWNLOAD.
-
-NAIC states the report contains 2023 state-by-state:
-
-- average expenditures;
-- combined average premiums;
-- other automobile insurance statistics.
-
-Retrieve the official report.
-
-Record actual:
-- source URL;
-- retrieved_at;
-- byte size;
-- SHA-256;
-- publication year;
-- data year;
-- reuse/redistribution terms.
-
-Do NOT assume raw-report redistribution rights merely because download is free.
-
-Derived statistics with proper attribution may be handled separately from raw artifact
-redistribution.
-
-Replace OD-006 with:
-
-"Which NAIC insurance measure should represent required auto insurance?"
-
-Candidate options should include as actually supported by the report:
-
-A. average expenditure per insured vehicle;
-B. combined average premium;
-C. coverage-specific / mandatory-coverage measure if the data permit.
-
-Explain what each statistic actually represents.
-
-Do not treat insurance as LICENSING_REVIEW merely because the previous agent failed
-to discover the free report.
-
-Use a separate redistribution/licensing field if necessary.
+The transformed geography is a Foundation join representation.
 
 ==================================================
-5. MAINTENANCE — REVISE OD-007
+3. CMS — FIX OREGON PLATFORM CLASSIFICATION
 ==================================================
 
-Do not automatically use:
+Current code incorrectly defines Oregon as a standalone SBE for both 2024 and 2026
+while also including Oregon in the federal-platform data.
 
-P25 among positive spenders
+This creates a platform overlap.
 
-for maintenance/repairs/tires.
+Official CMS evidence:
 
-Maintenance and repairs are lumpy annual expenditures.
+PLAN YEAR 2026:
 
-Zero spending in a survey period does not necessarily mean zero long-run maintenance
-need.
+CMS states there are:
 
-Calculate candidate statistics among appropriate single-person VEHICLE-OWNING
-consumer units:
+21 SBEs
+3 SBE-FPs
 
-- weighted mean including zero-spend periods;
-- weighted median including zero-spend periods;
-- P25/P50 among positive spenders;
-- multi-year annualized result if sufficient CE vintages can be reproduced.
+and explicitly lists:
 
-Separate where possible:
+Arkansas
+Oregon
+Oklahoma
 
-routine maintenance
-tires
-repairs.
+as SBE-FPs.
 
-OD-007 should explicitly ask which long-run annualization approach best represents a
-sustainable vehicle-maintenance reserve.
+Oregon therefore must NOT be counted as one of the 21 standalone individual-market
+SBEs.
 
-Do not freeze one until owner review.
+PLAN YEAR 2024:
 
-==================================================
-6. CONNECTIVITY — REVISE OD-009
-==================================================
+CMS Open Enrollment reporting lists Oregon's individual-market platform as:
 
-ACS internet tables measure:
+HealthCare.gov
 
-subscription/access/type.
+not SBM.
 
-They are NOT a price source.
-
-Remove ACS as a candidate source for connectivity PRICE.
-
-ACS may remain supporting evidence for prevalence/normality of internet connectivity.
-
-Research real price sources separately for:
-
-A. residential broadband;
-B. one mobile phone/data line.
-
-For broadband, evaluate official FCC price/benchmark sources and any reproducible
-Broadband Consumer Label data available at sufficient geographic scale.
-
-For mobile, find a reproducible authoritative source.
-
-The Foundation selection remains normative:
-
-one modest mobile line
-+
-one modest residential broadband connection.
-
-But the prices must come from real source evidence.
-
-Update OD-009.
+Therefore Oregon must not be classified as a standalone individual-market SBE for
+2024 either.
 
 ==================================================
-7. REVISE OD-010 — SOURCE LAG
+4. SBE QHP ZIP EXISTENCE IS NOT PLATFORM CLASSIFICATION
 ==================================================
 
-Do not use one blanket LATEST_AVAILABLE rule.
+CMS's SBE QHP PUF page says SBE-FPs use the federal platform and are included in
+the federal Exchange PUFs.
 
-Separate component types.
+CMS also notes SHOP information can appear for SBE-FPs.
 
-QUANTITIES / STRUCTURAL CHARACTERISTICS:
-may use LATEST_AVAILABLE when appropriate.
+Therefore:
 
-Examples:
-- NHTS mileage behavior;
-- reference-population structure;
-- RPP if latest geography measure is older and clearly labeled.
+DO NOT infer:
 
-TARGET-YEAR LEGAL RULES:
-RULE_YEAR.
+"Oregon has an SBE ZIP"
+→
+"Oregon is standalone SBE individual-market coverage."
 
-Examples:
-- federal taxes;
-- state taxes;
-- registration laws/fees.
+The Oregon SBE QHP archive may contain SHOP/SBE-related records while individual
+QHP eligibility/enrollment remains federal-platform.
 
-CURRENT MONTHLY PRICES:
-YTD or defined annual average.
+Separate concepts:
 
-Examples:
-- USDA 2026 food;
-- gasoline where applicable.
+marketplace_platform_classification
+individual_market_source
+SHOP_source
+SBE_archive_exists
 
-LAGGED NOMINAL DOLLAR EXPENDITURE SERIES:
-must NOT simply carry old nominal dollars forward by default.
+They are not synonyms.
 
-Examples:
-- 2024 CE essentials used for 2026;
-- 2024 CE recreation used for 2026;
-- older insurance dollar observations;
-- older OOP expenditure amounts where applicable.
+==================================================
+5. CORRECT EXPECTED SBE INDIVIDUAL-MARKET COUNTS
+==================================================
 
-For these, evaluate a suitable:
+Rebuild the year-specific individual-market platform map from authoritative CMS
+platform evidence.
 
-CPI_UPDATED
-or component-specific official price index update.
+Expected architecture should reconcile exactly to 50 states + DC without accidental
+double-counting.
+
+For 2024, current evidence implies:
+
+32 HealthCare.gov / federal-platform jurisdictions
+19 standalone SBM jurisdictions
+= 51
+
+NOT:
+
+32 + 20 with Oregon appearing in both.
+
+For 2026, CMS explicitly reports:
+
+30 states using HealthCare.gov
+21 standalone SBEs
+= 51
+
+with Oregon among the federal-platform/SBE-FP states, not among the 21 standalone
+SBEs.
+
+CMS additionally lists three SBE-FPs for PY2026:
+
+Arkansas
+Oregon
+Oklahoma
+
+Note that SBE-FP is a governance classification while federal Exchange PUF coverage
+is the relevant data-source classification.
+
+Create a machine-readable year-specific platform/source map.
+
+Add tests ensuring:
+
+- every state + DC has one individual-market primary data-source path;
+- no jurisdiction is simultaneously treated as standalone-SBE individual market
+  AND federal-platform individual market;
+- SBE-FP states use federal Exchange PUFs for individual-market plan/rate data
+  unless official documentation explicitly requires otherwise.
+
+==================================================
+6. DO NOT DISCARD OREGON SBE ARCHIVE BLINDLY
+==================================================
+
+Inspect the official Oregon SBE archive.
+
+Determine what market/business records it actually contains.
+
+If it contains SHOP-only or otherwise non-individual-market records:
+
+retain the artifact with accurate provenance and market scope.
+
+Do not feed it into the independent single-adult individual-market Silver-plan
+selection.
 
 Record:
 
-project_cost_year
-source_data_year
-translation_method
-price_index_series if applicable.
-
-Update OD-010 to recommend this HYBRID approach.
-
-Keep an unadjusted LATEST_AVAILABLE sensitivity if useful.
+market_scope
+platform_scope
+source_use
 
 ==================================================
-8. MUNICIPAL TAX — REVISE OD-011
+7. CMS SBE — IMPLEMENT THE ACTUAL LOWEST-SILVER JOIN
 ==================================================
 
-Current Option A is too broad.
+Current SBE status:
 
-Do NOT apply a municipal tax to an entire county merely because the taxing city is
-inside that county.
+RETRIEVED_UNVALIDATED
 
-Classify:
+because state ZIP parsing currently proves primarily:
 
-A. geography is coterminous / tax applies throughout modeled county-equivalent;
-B. tax is county-level;
-C. municipality occupies only part of county;
-D. unresolved.
+archive integrity
++
+CSV members exist.
 
-For A/B:
-direct overlay may be appropriate.
+That is not enough.
 
-For C:
-either:
-- move tax calculation to place/subcounty geography;
-- population-weight municipal exposure;
-- or mark local tax unresolved.
+For each TRUE standalone SBE state/year, implement the real equivalent of the federal
+PUF selection using:
 
-Do not apply a city tax countywide without geographic justification.
+- Rate PUF;
+- Plan Attributes PUF;
+- Service Area PUF;
+- Benefits and Cost Sharing PUF;
+- Business Rules if needed for valid rate interpretation.
 
-Update OD-011.
+Reference profile remains:
 
-==================================================
-9. CONNECTICUT — REPLACE OD-013 METHOD
-==================================================
+- individual market;
+- ACA major medical;
+- Silver;
+- age 40;
+- non-tobacco;
+- single;
+- no dependents;
+- unsubsidized.
 
-Correct the planning-region FIPS range.
+Validate actual geography availability.
 
-There are nine current Connecticut county equivalents:
+Do not assume the SBE schemas/keys are identical to federal PUF schemas.
 
-09110
-09120
-09130
-09140
-09150
-09160
-09170
-09180
-09190.
+Use the official year-specific SBE data dictionaries.
 
-The existing OD-013 text incorrectly says 09110-09170.
+For every standalone SBE state report:
 
-Census publishes an official:
+- rows parsed by source file;
+- individual-market rows retained;
+- Silver plans retained;
+- age-40 rates retained;
+- service areas/rating areas represented;
+- counties represented;
+- final qualifying plan count;
+- lowest-Silver output count;
+- unmatched join keys;
+- duplicate keys.
 
-Connecticut County to County Subdivision Crosswalk
+Only after all applicable states pass may:
 
-for the transition from eight legacy counties to nine planning regions.
+health_premium
 
-Do NOT default to allocating legacy HUD county rents into planning regions.
+move from:
 
-Investigate a cleaner approach:
+RETRIEVED_UNVALIDATED
 
-KEEP HUD COST GEOGRAPHY = legacy HUD county.
-
-Reconstruct adult population weights for the eight legacy Connecticut counties by:
-
-1. retrieving 2024 ACS B01001 age data at county-subdivision / municipality geography;
-2. using the official Census Connecticut county-to-county-subdivision crosswalk and/or
-   official Connecticut municipality mapping;
-3. assigning towns to legacy counties;
-4. summing age-18+ population into the eight legacy counties;
-5. joining those reconstructed weights to HUD's legacy-county FMR rows.
-
-This avoids inventing planning-region rents.
-
-Validate:
-- all Connecticut population represented;
-- no duplicate municipality;
-- no missing town;
-- eight legacy county totals;
-- state adult-pop total reconciles to Connecticut total within expected statistical
-  treatment.
-
-If this cannot be reproduced from official sources:
-leave CT unmatched rather than fabricate allocation.
-
-Rewrite OD-013 around this architecture.
+toward VALIDATED / MODELED_FROM_MEASURED_INPUTS as appropriate.
 
 ==================================================
-10. CMS SBE COVERAGE — CURRENT CLOSEOUT IS WRONG
+8. CPS 2025 ASEC SHA — RESOLVE, DON'T MERELY DOCUMENT
 ==================================================
 
-Delete/update claims that:
+Current repo still has two hashes for:
 
-"SBE 2024 official zip 404"
-or
-"SBE 2026 zip is documentation-only"
+asecpub25csv.zip
 
-imply that SBE plan data are unavailable.
+CURRENT/CANONICAL:
+318845a2b5e0034eb2973898de1738f4df0025727de38499e7669cb9c0deef0b
 
-CMS currently publishes official PER-STATE SBE QHP PUF ZIP files for:
+LEGACY HISTORICAL ARTIFACT:
+318845a2b5e0034e357900b991196ce28ecdd0c99a0937b27ff77f8ea6497284
 
-Plan Year 2024
-and
-Plan Year 2026.
+Current state:
 
-The SBE QHP PUF architecture includes separate:
+src/foundation/historical.py
+contains the canonical/current hash.
 
-- Rate;
-- Plan Attributes;
-- Benefits and Cost Sharing;
-- Service Area;
-- Business Rules;
-- Network
+data/current/history.json
+still contains the legacy hash.
 
-files as applicable.
+data/current/latest.json
+therefore contains both hashes for the same source/vintage.
 
-Implement retrieval per state and per plan year from the official CMS SBE QHP PUF
-downloads.
+data/metadata/cps_asec_2025_sha_revisions.json
+labels this:
 
-Do not assume one national SBE zip.
+UNRECONCILED_PENDING_RETRIEVAL.
 
-Join using the appropriate official keys.
+Current release-gate behavior merely permits this contradiction if the revision file
+exists.
 
-Generate coverage report:
+That is not the final desired state.
 
-2024:
-SBE states expected
-SBE states retrieved
-SBE states parsed
-counties/rating areas covered
-missing states
+Re-retrieve the current official Census archive:
 
-2026:
-same.
+https://www2.census.gov/programs-surveys/cps/datasets/2025/march/asecpub25csv.zip
 
-Be careful with platform classification.
+Record:
 
-Use year-specific official CMS platform information.
-
-Do not infer that the existence of a state-specific SBE file necessarily means the
-same platform classification rules as the federal Exchange PUF.
-
-After successful national coverage, health_premium can move toward validation.
-
-==================================================
-11. PROVENANCE — FIX INVALID FULL VALIDATION STATES
-==================================================
-
-Current source manifest/coverage contains artifacts marked:
-
-VALIDATED
-
-while:
-
-retrieved_at = null
-
-and in some cases:
-
-local_cache_filename = null
-resolved_url = null.
-
-Examples include currently reported HUD, ACS, NHTS, BLS CE, BEA and other cached
-artifacts.
-
-This violates the Foundation provenance contract.
-
-A hash + parse success is not complete retrieval provenance.
-
-For every such artifact:
-
-A. re-retrieve from the authoritative official source and generate a real sidecar;
-OR
-B. if re-retrieval cannot be performed, downgrade from full VALIDATED to an
-appropriate incomplete-provenance status.
-
-Prefer re-retrieval.
-
-Required validated provenance:
-
-- official landing/source;
-- exact resolved URL;
-- actual retrieval timestamp;
-- byte size;
+- retrieved_at;
+- exact byte size;
 - SHA-256;
-- immutable cache identity;
-- parser/schema validation;
-- source/reference year.
+- HTTP metadata.
 
-Do not invent retrieved_at for old cache hits.
+Compare against both observed hashes.
 
-==================================================
-12. USDA 2026 — MAKE YTD PERIOD EXPLICIT
-==================================================
+If it matches the canonical/current hash:
 
-The current reports show partial 2026 USDA data.
+- regenerate history.json with that hash;
+- regenerate latest.json;
+- keep the other hash only in the audit revision record as a legacy/unverified
+  observation unless independent retrieval evidence proves it represented genuine
+  Census bytes at an earlier time.
 
-Do not merely say:
+If it matches the legacy hash:
 
-2026 YTD FOOD COST.
+investigate why the current Population Anchor provenance differs.
 
-Emit exact:
+If it matches neither:
 
-months_included
-month_count
-first_month
-last_month.
+STOP and investigate source revision.
 
-The current source data appear to cover five 2026 months for Alaska/Hawaii and a
-corresponding partial national plan period.
-
-Derive the exact covered months from the actual source observations.
-
-Do not infer them from row counts alone.
+Do not silently select a value.
 
 ==================================================
-13. WORKFLOW ACTION VERSIONS
+9. STRENGTHEN CPS RELEASE GATE
 ==================================================
 
-Current repo still uses:
+After reconciliation, replace the permissive test:
 
-actions/checkout@v5
-actions/setup-python@v6
-actions/setup-node@v5.
+"if old and new hashes coexist, revision record may explain them"
 
-Current official documentation now uses:
+with canonical consistency requirements.
 
-actions/checkout@v7
-actions/setup-python@v7
-actions/setup-node@v6.
+For the active/canonical source revision:
 
-Upgrade consistently across all workflows after verifying the current official
-major releases at implementation time.
+historical.py
+history.json
+latest.json history slice
+population.json / latest population anchor
+validation report
 
-Keep Node 24.
+must all identify the SAME canonical artifact hash.
 
-Run all workflows afterward.
-
-==================================================
-14. CLOSEOUT METADATA
-==================================================
-
-The pasted Deliverable 2A closeout SHA:
-
-b2a30ef4b87a2db38eb5f7d982e0e8b5c9b63b4c
-
-is historical.
-
-Current audited main at start of this correction is:
-
-f2c0636690ac2408d0f537c9fd657225c75e63f3
-
-Preserve b2a30ef as a historical Deliverable 2A milestone if desired.
-
-Do NOT label it current HEAD.
-
-Generate final closeout from the final pushed SHA.
+Historical publisher revisions may remain in a separate immutable revision ledger,
+but cannot masquerade as the active source artifact.
 
 ==================================================
-15. TEST REPORTING
+10. BLS CE MAINTENANCE — STOP USING FMLI AS THE SOLE DETAIL SOURCE
 ==================================================
 
-Do not report the old local:
+Current:
 
-73 passed
+parse_bls_ce_maintenance_candidates()
 
-as current repository CI status.
+loops FMLI files and searches summary columns such as:
 
-Current audited GitHub CI before this correction reports:
+MAINRPCQ
+TIRECQ
 
-68 passed
-5 skipped
-1 warning.
+The current result reports all-zero tires because TIRECQ is absent.
 
-After changes, report the exact GitHub Actions result, not a stale local run.
+Do NOT interpret this as measured zero tire spending.
 
-All three workflows must remain green:
+Official BLS PUMD documentation distinguishes:
 
-Tests & Code Quality
-Validate Living Cost Sources
-Deploy Pages
+FMLI:
+CU-level SUMMARY expenditure variables + household characteristics + weights.
+
+MTBI:
+MONTHLY expenditure records keyed by UCC.
+
+BLS also documents detailed vehicle-maintenance/repair files with individual repair
+expense records.
+
+For a detailed maintenance/repair/tire basket, use the appropriate detailed/UCC
+architecture.
+
+Preferred architecture:
+
+FMLI:
+- NEWID;
+- FAM_SIZE;
+- vehicle ownership;
+- FINLWT21;
+- other CU characteristics.
+
+MTBI and/or documented detailed vehicle expenditure files:
+- NEWID;
+- UCC;
+- expenditure amount;
+- appropriate reference period.
+
+Join detailed expenditure records back to eligible FMLI consumer units.
 
 ==================================================
-16. OWNER DECISIONS THAT DO NOT REQUIRE MATERIAL CHANGE
+11. BUILD A DOCUMENTED VEHICLE UCC ALLOWLIST
 ==================================================
 
-Preserve the core direction of:
+Using official BLS:
 
-OD-001 ACS fixed-weight-vintage concept
-OD-005 vehicle replacement formula decision
-OD-008 nonzero Social & Recreation percentile decision
-OD-012 no arbitrary resilience buffer
+- Interview/Diary Dictionary;
+- hierarchical UCC groupings;
+- applicable CE documentation;
 
-unless new empirical evidence during this correction requires an explicit amendment.
+build an explicit vehicle-maintenance expenditure allowlist.
+
+Separate where reproducible:
+
+routine service / maintenance
+repairs
+tires
+
+Potential categories must be derived from official UCC documentation, not guessed
+column names.
+
+Exclude:
+
+fuel
+insurance
+vehicle purchase
+finance charges
+registration
+parking/tolls
+
+because those are separate Foundation components.
+
+Document every included/excluded UCC.
 
 ==================================================
-17. DO NOT FREEZE OWNER DECISIONS YET
+12. MAINTENANCE STATISTICS
+==================================================
+
+For single-person vehicle-owning consumer units calculate candidates:
+
+- weighted annual mean including zero-spend CUs;
+- weighted annual median including zero-spend CUs;
+- positive-spender P25;
+- positive-spender P50;
+- positive-spender mean;
+- sample size;
+- positive-spender sample size;
+- represented weighted population.
+
+Where possible, build multi-year candidates because repair spending is lumpy.
+
+Do not freeze the final owner choice.
+
+OD-007 remains pending.
+
+==================================================
+13. BLS CE PROVENANCE
+==================================================
+
+Current BLS CE re-retrieval returns HTTP 403 and the existing cache is correctly
+labeled:
+
+INCOMPLETE_PROVENANCE.
+
+Do not promote it merely because the parser works.
+
+Investigate the official BLS documented download flow.
+
+If a reproducible official retrieval route succeeds:
+
+re-retrieve
+hash
+sidecar
+validate.
+
+If BLS continues to reject automated retrieval:
+
+keep INCOMPLETE_PROVENANCE
+
+and clearly separate:
+
+content/schema validated from cached official artifact
+
+from:
+
+fully reproducible retrieval provenance.
+
+Do not fabricate retrieval metadata.
+
+==================================================
+14. 2024 HUD UNMATCHED ROW CLASSIFICATION
+==================================================
+
+Current 2024 and 2026 joins report 85 unmatched HUD rows even while modeled U.S.
+coverage is 100%.
+
+Many of these are out-of-scope territories or HUD special/non-county records.
+
+Classify unmatched HUD rows into explicit categories:
+
+- excluded U.S. territories;
+- special/non-county HUD geography;
+- malformed/unrecognized FIPS;
+- actual unmatched 50-state+DC county geography.
+
+Do not let "85 unmatched rows" look like an unexplained county coverage defect when
+the project's 50-state+DC universe has 100% matched population.
+
+Preserve exact IDs.
+
+==================================================
+15. KEEP CURRENT TRUTHFUL GAPS
+==================================================
+
+Do not paper over:
+
+FCC URS 403
+mobile price source gap
+registration source gap
+state/local tax gaps
+MEPS pending newer file
+vehicle replacement owner decision.
+
+These may remain truthful:
+
+SOURCE_GAP
+INCOMPLETE_PROVENANCE
+ESTIMATED_OWNER_REVIEW
+RETRIEVED_UNVALIDATED.
+
+A truthful gap is acceptable.
+
+==================================================
+16. OWNER PACKET
 ==================================================
 
 Regenerate:
@@ -605,35 +575,89 @@ Regenerate:
 living_cost_owner_decisions_pending.md
 living_cost_owner_decisions_pending.json
 
-after the above source corrections.
+after these corrections.
 
-The owner will review the corrected decision packet afterward.
+Keep:
 
-Do NOT silently mark any OD as ACCEPTED.
+OD-001 through OD-013
+
+pending.
+
+Do not mark any as ACCEPTED.
+
+Update OD-006 / CMS-related supporting material as necessary to reflect corrected
+platform classifications.
+
+Update OD-007 to reference the detailed MTBI/UCC maintenance candidates rather than
+an absent FMLI tire summary field.
 
 ==================================================
-18. STOP CONDITION
+17. VALIDATION
 ==================================================
 
-DO NOT calculate or publish:
+Add/strengthen tests for:
+
+- 2024 geo-join hashes nonempty;
+- raw ACS universe vs transformed join universe represented separately;
+- no duplicate individual-market platform classification;
+- Oregon 2024 individual-market source = federal platform / HealthCare.gov PUF;
+- Oregon 2026 individual-market source = federal platform / SBE-FP;
+- 2026 standalone SBE count = 21;
+- all 50 states + DC represented exactly once in individual-market primary source
+  coverage;
+- SBE archive presence does not automatically imply standalone individual-market
+  platform;
+- SBE lowest-Silver join executes on real state files;
+- canonical CPS same-vintage hash consistency;
+- old CPS hash retained only in revision ledger if not current;
+- BLS missing TIRECQ does not produce a false measured zero-tire conclusion;
+- detailed maintenance UCC basket excludes gas/insurance/purchase/registration.
+
+==================================================
+18. CI
+==================================================
+
+Preserve:
+
+actions/checkout@v7
+actions/setup-python@v7
+actions/setup-node@v6
+Node 24.
+
+All three workflows must be green:
+
+Tests & Code Quality
+Validate Living Cost Sources
+Deploy Pages
+
+Report exact GitHub result after push.
+
+==================================================
+19. STOP CONDITION
+==================================================
+
+DO NOT CALCULATE OR PUBLISH:
 
 Minimum Sustainable Living Cost
-2024 MSLC
-2026 MSLC
-state MSLC rankings
-national median
 Gap
 Adequacy Ratio
-Composite Score.
+state living-cost rankings
+national living-cost median
+Composite.
 
-This pass fixes the evidence and decision packet.
+This is the final evidence-cleanup pass before OWNER DECISION FREEZE.
 
-When complete:
+When complete, report:
 
-push;
-verify actual GitHub Actions;
-report exact final SHA;
-report all unresolved owner decisions.
+- final SHA;
+- CI results;
+- corrected CMS platform map;
+- standalone SBE counts;
+- SBE lowest-Silver join coverage;
+- CPS canonical SHA reconciliation;
+- corrected 2024 geo-join provenance;
+- BLS maintenance/UCC candidate results;
+- remaining SOURCE_GAP / INCOMPLETE_PROVENANCE items.
 
 Explicitly state:
 

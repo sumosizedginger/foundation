@@ -1,0 +1,911 @@
+{
+  "report_type": "cms_individual_market_platform_map",
+  "generated_at": "2026-08-14T21:45:16+00:00",
+  "headline_calculated": false,
+  "years": {
+    "2024": {
+      "report_type": "cms_individual_market_platform_map",
+      "year": 2024,
+      "jurisdiction_count": 51,
+      "standalone_individual_sbe_states": [
+        "CA",
+        "CO",
+        "CT",
+        "DC",
+        "ID",
+        "KY",
+        "MA",
+        "MD",
+        "ME",
+        "MN",
+        "NJ",
+        "NM",
+        "NV",
+        "NY",
+        "PA",
+        "RI",
+        "VA",
+        "VT",
+        "WA"
+      ],
+      "standalone_individual_sbe_count": 19,
+      "sbe_fp_states": [
+        "AR",
+        "OK",
+        "OR"
+      ],
+      "sbe_fp_count": 3,
+      "federal_platform_individual_market_states": [
+        "AK",
+        "AL",
+        "AR",
+        "AZ",
+        "DE",
+        "FL",
+        "GA",
+        "HI",
+        "IA",
+        "IL",
+        "IN",
+        "KS",
+        "LA",
+        "MI",
+        "MO",
+        "MS",
+        "MT",
+        "NC",
+        "ND",
+        "NE",
+        "NH",
+        "OH",
+        "OK",
+        "OR",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "UT",
+        "WI",
+        "WV",
+        "WY"
+      ],
+      "federal_platform_individual_market_count": 32,
+      "note": "SBE QHP ZIP existence is not platform classification. SBE-FPs use the federal platform and are in the federal Exchange PUFs. Oregon individual-market source is federal for 2024 and 2026.",
+      "jurisdictions": {
+        "AL": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "AK": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "AZ": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "AR": {
+          "marketplace_platform_classification": "sbe_fp",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "CA": {
+          "marketplace_platform_classification": "standalone_sbm",
+          "individual_market_source": "sbe_qhp_puf",
+          "SHOP_source": "sbe_qhp_puf",
+          "SBE_archive_exists": true,
+          "source_use": "individual_market_lowest_silver_from_sbe_qhp_puf"
+        },
+        "CO": {
+          "marketplace_platform_classification": "standalone_sbm",
+          "individual_market_source": "sbe_qhp_puf",
+          "SHOP_source": "sbe_qhp_puf",
+          "SBE_archive_exists": true,
+          "source_use": "individual_market_lowest_silver_from_sbe_qhp_puf"
+        },
+        "CT": {
+          "marketplace_platform_classification": "standalone_sbm",
+          "individual_market_source": "sbe_qhp_puf",
+          "SHOP_source": "sbe_qhp_puf",
+          "SBE_archive_exists": true,
+          "source_use": "individual_market_lowest_silver_from_sbe_qhp_puf"
+        },
+        "DE": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "DC": {
+          "marketplace_platform_classification": "standalone_sbm",
+          "individual_market_source": "sbe_qhp_puf",
+          "SHOP_source": "sbe_qhp_puf",
+          "SBE_archive_exists": true,
+          "source_use": "individual_market_lowest_silver_from_sbe_qhp_puf"
+        },
+        "FL": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "GA": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "HI": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "ID": {
+          "marketplace_platform_classification": "standalone_sbm",
+          "individual_market_source": "sbe_qhp_puf",
+          "SHOP_source": "sbe_qhp_puf",
+          "SBE_archive_exists": true,
+          "source_use": "individual_market_lowest_silver_from_sbe_qhp_puf"
+        },
+        "IL": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "IN": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "IA": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "KS": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "KY": {
+          "marketplace_platform_classification": "standalone_sbm",
+          "individual_market_source": "sbe_qhp_puf",
+          "SHOP_source": "sbe_qhp_puf",
+          "SBE_archive_exists": true,
+          "source_use": "individual_market_lowest_silver_from_sbe_qhp_puf"
+        },
+        "LA": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "ME": {
+          "marketplace_platform_classification": "standalone_sbm",
+          "individual_market_source": "sbe_qhp_puf",
+          "SHOP_source": "sbe_qhp_puf",
+          "SBE_archive_exists": true,
+          "source_use": "individual_market_lowest_silver_from_sbe_qhp_puf"
+        },
+        "MD": {
+          "marketplace_platform_classification": "standalone_sbm",
+          "individual_market_source": "sbe_qhp_puf",
+          "SHOP_source": "sbe_qhp_puf",
+          "SBE_archive_exists": true,
+          "source_use": "individual_market_lowest_silver_from_sbe_qhp_puf"
+        },
+        "MA": {
+          "marketplace_platform_classification": "standalone_sbm",
+          "individual_market_source": "sbe_qhp_puf",
+          "SHOP_source": "sbe_qhp_puf",
+          "SBE_archive_exists": true,
+          "source_use": "individual_market_lowest_silver_from_sbe_qhp_puf"
+        },
+        "MI": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "MN": {
+          "marketplace_platform_classification": "standalone_sbm",
+          "individual_market_source": "sbe_qhp_puf",
+          "SHOP_source": "sbe_qhp_puf",
+          "SBE_archive_exists": true,
+          "source_use": "individual_market_lowest_silver_from_sbe_qhp_puf"
+        },
+        "MS": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "MO": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "MT": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "NE": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "NV": {
+          "marketplace_platform_classification": "standalone_sbm",
+          "individual_market_source": "sbe_qhp_puf",
+          "SHOP_source": "sbe_qhp_puf",
+          "SBE_archive_exists": true,
+          "source_use": "individual_market_lowest_silver_from_sbe_qhp_puf"
+        },
+        "NH": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "NJ": {
+          "marketplace_platform_classification": "standalone_sbm",
+          "individual_market_source": "sbe_qhp_puf",
+          "SHOP_source": "sbe_qhp_puf",
+          "SBE_archive_exists": true,
+          "source_use": "individual_market_lowest_silver_from_sbe_qhp_puf"
+        },
+        "NM": {
+          "marketplace_platform_classification": "standalone_sbm",
+          "individual_market_source": "sbe_qhp_puf",
+          "SHOP_source": "sbe_qhp_puf",
+          "SBE_archive_exists": true,
+          "source_use": "individual_market_lowest_silver_from_sbe_qhp_puf"
+        },
+        "NY": {
+          "marketplace_platform_classification": "standalone_sbm",
+          "individual_market_source": "sbe_qhp_puf",
+          "SHOP_source": "sbe_qhp_puf",
+          "SBE_archive_exists": true,
+          "source_use": "individual_market_lowest_silver_from_sbe_qhp_puf"
+        },
+        "NC": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "ND": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "OH": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "OK": {
+          "marketplace_platform_classification": "sbe_fp",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "OR": {
+          "marketplace_platform_classification": "sbe_fp",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "sbe_qhp_puf",
+          "SBE_archive_exists": true,
+          "source_use": "individual_market_from_federal_exchange_puf; sbe_archive_retained_for_shop_or_non_individual_scope"
+        },
+        "PA": {
+          "marketplace_platform_classification": "standalone_sbm",
+          "individual_market_source": "sbe_qhp_puf",
+          "SHOP_source": "sbe_qhp_puf",
+          "SBE_archive_exists": true,
+          "source_use": "individual_market_lowest_silver_from_sbe_qhp_puf"
+        },
+        "RI": {
+          "marketplace_platform_classification": "standalone_sbm",
+          "individual_market_source": "sbe_qhp_puf",
+          "SHOP_source": "sbe_qhp_puf",
+          "SBE_archive_exists": true,
+          "source_use": "individual_market_lowest_silver_from_sbe_qhp_puf"
+        },
+        "SC": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "SD": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "TN": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "TX": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "UT": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "VT": {
+          "marketplace_platform_classification": "standalone_sbm",
+          "individual_market_source": "sbe_qhp_puf",
+          "SHOP_source": "sbe_qhp_puf",
+          "SBE_archive_exists": true,
+          "source_use": "individual_market_lowest_silver_from_sbe_qhp_puf"
+        },
+        "VA": {
+          "marketplace_platform_classification": "standalone_sbm",
+          "individual_market_source": "sbe_qhp_puf",
+          "SHOP_source": "sbe_qhp_puf",
+          "SBE_archive_exists": true,
+          "source_use": "individual_market_lowest_silver_from_sbe_qhp_puf"
+        },
+        "WA": {
+          "marketplace_platform_classification": "standalone_sbm",
+          "individual_market_source": "sbe_qhp_puf",
+          "SHOP_source": "sbe_qhp_puf",
+          "SBE_archive_exists": true,
+          "source_use": "individual_market_lowest_silver_from_sbe_qhp_puf"
+        },
+        "WV": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "WI": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "WY": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        }
+      },
+      "sbe_lowest_silver_states_joined": [
+        "CA",
+        "CO",
+        "CT",
+        "DC",
+        "ID",
+        "KY",
+        "MA",
+        "MD",
+        "ME",
+        "MN",
+        "NJ",
+        "NM",
+        "NV",
+        "NY",
+        "PA",
+        "RI",
+        "VA",
+        "VT",
+        "WA"
+      ],
+      "sbe_lowest_silver_output_count": 125,
+      "all_standalone_sbe_joined": true
+    },
+    "2026": {
+      "report_type": "cms_individual_market_platform_map",
+      "year": 2026,
+      "jurisdiction_count": 51,
+      "standalone_individual_sbe_states": [
+        "CA",
+        "CO",
+        "CT",
+        "DC",
+        "GA",
+        "ID",
+        "IL",
+        "KY",
+        "MA",
+        "MD",
+        "ME",
+        "MN",
+        "NJ",
+        "NM",
+        "NV",
+        "NY",
+        "PA",
+        "RI",
+        "VA",
+        "VT",
+        "WA"
+      ],
+      "standalone_individual_sbe_count": 21,
+      "sbe_fp_states": [
+        "AR",
+        "OK",
+        "OR"
+      ],
+      "sbe_fp_count": 3,
+      "federal_platform_individual_market_states": [
+        "AK",
+        "AL",
+        "AR",
+        "AZ",
+        "DE",
+        "FL",
+        "HI",
+        "IA",
+        "IN",
+        "KS",
+        "LA",
+        "MI",
+        "MO",
+        "MS",
+        "MT",
+        "NC",
+        "ND",
+        "NE",
+        "NH",
+        "OH",
+        "OK",
+        "OR",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "UT",
+        "WI",
+        "WV",
+        "WY"
+      ],
+      "federal_platform_individual_market_count": 30,
+      "note": "SBE QHP ZIP existence is not platform classification. SBE-FPs use the federal platform and are in the federal Exchange PUFs. Oregon individual-market source is federal for 2024 and 2026.",
+      "jurisdictions": {
+        "AL": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "AK": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "AZ": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "AR": {
+          "marketplace_platform_classification": "sbe_fp",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "CA": {
+          "marketplace_platform_classification": "standalone_sbm",
+          "individual_market_source": "sbe_qhp_puf",
+          "SHOP_source": "sbe_qhp_puf",
+          "SBE_archive_exists": true,
+          "source_use": "individual_market_lowest_silver_from_sbe_qhp_puf"
+        },
+        "CO": {
+          "marketplace_platform_classification": "standalone_sbm",
+          "individual_market_source": "sbe_qhp_puf",
+          "SHOP_source": "sbe_qhp_puf",
+          "SBE_archive_exists": true,
+          "source_use": "individual_market_lowest_silver_from_sbe_qhp_puf"
+        },
+        "CT": {
+          "marketplace_platform_classification": "standalone_sbm",
+          "individual_market_source": "sbe_qhp_puf",
+          "SHOP_source": "sbe_qhp_puf",
+          "SBE_archive_exists": true,
+          "source_use": "individual_market_lowest_silver_from_sbe_qhp_puf"
+        },
+        "DE": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "DC": {
+          "marketplace_platform_classification": "standalone_sbm",
+          "individual_market_source": "sbe_qhp_puf",
+          "SHOP_source": "sbe_qhp_puf",
+          "SBE_archive_exists": true,
+          "source_use": "individual_market_lowest_silver_from_sbe_qhp_puf"
+        },
+        "FL": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "GA": {
+          "marketplace_platform_classification": "standalone_sbm",
+          "individual_market_source": "sbe_qhp_puf",
+          "SHOP_source": "sbe_qhp_puf",
+          "SBE_archive_exists": true,
+          "source_use": "individual_market_lowest_silver_from_sbe_qhp_puf"
+        },
+        "HI": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "ID": {
+          "marketplace_platform_classification": "standalone_sbm",
+          "individual_market_source": "sbe_qhp_puf",
+          "SHOP_source": "sbe_qhp_puf",
+          "SBE_archive_exists": true,
+          "source_use": "individual_market_lowest_silver_from_sbe_qhp_puf"
+        },
+        "IL": {
+          "marketplace_platform_classification": "standalone_sbm",
+          "individual_market_source": "sbe_qhp_puf",
+          "SHOP_source": "sbe_qhp_puf",
+          "SBE_archive_exists": true,
+          "source_use": "individual_market_lowest_silver_from_sbe_qhp_puf"
+        },
+        "IN": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "IA": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "KS": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "KY": {
+          "marketplace_platform_classification": "standalone_sbm",
+          "individual_market_source": "sbe_qhp_puf",
+          "SHOP_source": "sbe_qhp_puf",
+          "SBE_archive_exists": true,
+          "source_use": "individual_market_lowest_silver_from_sbe_qhp_puf"
+        },
+        "LA": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "ME": {
+          "marketplace_platform_classification": "standalone_sbm",
+          "individual_market_source": "sbe_qhp_puf",
+          "SHOP_source": "sbe_qhp_puf",
+          "SBE_archive_exists": true,
+          "source_use": "individual_market_lowest_silver_from_sbe_qhp_puf"
+        },
+        "MD": {
+          "marketplace_platform_classification": "standalone_sbm",
+          "individual_market_source": "sbe_qhp_puf",
+          "SHOP_source": "sbe_qhp_puf",
+          "SBE_archive_exists": true,
+          "source_use": "individual_market_lowest_silver_from_sbe_qhp_puf"
+        },
+        "MA": {
+          "marketplace_platform_classification": "standalone_sbm",
+          "individual_market_source": "sbe_qhp_puf",
+          "SHOP_source": "sbe_qhp_puf",
+          "SBE_archive_exists": true,
+          "source_use": "individual_market_lowest_silver_from_sbe_qhp_puf"
+        },
+        "MI": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "MN": {
+          "marketplace_platform_classification": "standalone_sbm",
+          "individual_market_source": "sbe_qhp_puf",
+          "SHOP_source": "sbe_qhp_puf",
+          "SBE_archive_exists": true,
+          "source_use": "individual_market_lowest_silver_from_sbe_qhp_puf"
+        },
+        "MS": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "MO": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "MT": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "NE": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "NV": {
+          "marketplace_platform_classification": "standalone_sbm",
+          "individual_market_source": "sbe_qhp_puf",
+          "SHOP_source": "sbe_qhp_puf",
+          "SBE_archive_exists": true,
+          "source_use": "individual_market_lowest_silver_from_sbe_qhp_puf"
+        },
+        "NH": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "NJ": {
+          "marketplace_platform_classification": "standalone_sbm",
+          "individual_market_source": "sbe_qhp_puf",
+          "SHOP_source": "sbe_qhp_puf",
+          "SBE_archive_exists": true,
+          "source_use": "individual_market_lowest_silver_from_sbe_qhp_puf"
+        },
+        "NM": {
+          "marketplace_platform_classification": "standalone_sbm",
+          "individual_market_source": "sbe_qhp_puf",
+          "SHOP_source": "sbe_qhp_puf",
+          "SBE_archive_exists": true,
+          "source_use": "individual_market_lowest_silver_from_sbe_qhp_puf"
+        },
+        "NY": {
+          "marketplace_platform_classification": "standalone_sbm",
+          "individual_market_source": "sbe_qhp_puf",
+          "SHOP_source": "sbe_qhp_puf",
+          "SBE_archive_exists": true,
+          "source_use": "individual_market_lowest_silver_from_sbe_qhp_puf"
+        },
+        "NC": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "ND": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "OH": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "OK": {
+          "marketplace_platform_classification": "sbe_fp",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "OR": {
+          "marketplace_platform_classification": "sbe_fp",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "sbe_qhp_puf",
+          "SBE_archive_exists": true,
+          "source_use": "individual_market_from_federal_exchange_puf; sbe_archive_retained_for_shop_or_non_individual_scope"
+        },
+        "PA": {
+          "marketplace_platform_classification": "standalone_sbm",
+          "individual_market_source": "sbe_qhp_puf",
+          "SHOP_source": "sbe_qhp_puf",
+          "SBE_archive_exists": true,
+          "source_use": "individual_market_lowest_silver_from_sbe_qhp_puf"
+        },
+        "RI": {
+          "marketplace_platform_classification": "standalone_sbm",
+          "individual_market_source": "sbe_qhp_puf",
+          "SHOP_source": "sbe_qhp_puf",
+          "SBE_archive_exists": true,
+          "source_use": "individual_market_lowest_silver_from_sbe_qhp_puf"
+        },
+        "SC": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "SD": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "TN": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "TX": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "UT": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "VT": {
+          "marketplace_platform_classification": "standalone_sbm",
+          "individual_market_source": "sbe_qhp_puf",
+          "SHOP_source": "sbe_qhp_puf",
+          "SBE_archive_exists": true,
+          "source_use": "individual_market_lowest_silver_from_sbe_qhp_puf"
+        },
+        "VA": {
+          "marketplace_platform_classification": "standalone_sbm",
+          "individual_market_source": "sbe_qhp_puf",
+          "SHOP_source": "sbe_qhp_puf",
+          "SBE_archive_exists": true,
+          "source_use": "individual_market_lowest_silver_from_sbe_qhp_puf"
+        },
+        "WA": {
+          "marketplace_platform_classification": "standalone_sbm",
+          "individual_market_source": "sbe_qhp_puf",
+          "SHOP_source": "sbe_qhp_puf",
+          "SBE_archive_exists": true,
+          "source_use": "individual_market_lowest_silver_from_sbe_qhp_puf"
+        },
+        "WV": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "WI": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        },
+        "WY": {
+          "marketplace_platform_classification": "healthcare_gov_ffm",
+          "individual_market_source": "federal_exchange_puf",
+          "SHOP_source": "not_in_sbe_archive",
+          "SBE_archive_exists": false,
+          "source_use": "individual_market_lowest_silver_from_federal_exchange_puf"
+        }
+      },
+      "sbe_lowest_silver_states_joined": [
+        "CA",
+        "CO",
+        "CT",
+        "DC",
+        "GA",
+        "ID",
+        "IL",
+        "KY",
+        "MA",
+        "MD",
+        "ME",
+        "MN",
+        "NJ",
+        "NM",
+        "NV",
+        "NY",
+        "PA",
+        "RI",
+        "VA",
+        "VT",
+        "WA"
+      ],
+      "sbe_lowest_silver_output_count": 155,
+      "all_standalone_sbe_joined": true
+    }
+  }
+}

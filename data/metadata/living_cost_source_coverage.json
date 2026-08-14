@@ -28,7 +28,7 @@
       "housing": "VALIDATED",
       "population_weights": "VALIDATED",
       "food": "MODELED_FROM_MEASURED_INPUTS",
-      "health_premium": "RETRIEVED_UNVALIDATED",
+      "health_premium": "MODELED_FROM_MEASURED_INPUTS",
       "health_oop": "RETRIEVED_UNVALIDATED",
       "mileage": "VALIDATED",
       "mpg": "RETRIEVED_UNVALIDATED",
@@ -49,7 +49,7 @@
       "housing": "VALIDATED",
       "population_weights": "VALIDATED",
       "food": "MODELED_FROM_MEASURED_INPUTS",
-      "health_premium": "RETRIEVED_UNVALIDATED",
+      "health_premium": "MODELED_FROM_MEASURED_INPUTS",
       "health_oop": "RETRIEVED_UNVALIDATED",
       "mileage": "VALIDATED",
       "mpg": "RETRIEVED_UNVALIDATED",
@@ -959,7 +959,7 @@
     }
   ],
   "blocking_components": [
-    "2024:health_premium:RETRIEVED_UNVALIDATED",
+
     "2024:health_oop:RETRIEVED_UNVALIDATED",
     "2024:mpg:RETRIEVED_UNVALIDATED",
     "2024:insurance:RETRIEVED_UNVALIDATED",
@@ -972,7 +972,7 @@
     "2024:federal_tax:INVENTORY_NOT_VALIDATED",
     "2024:state_tax:SOURCE_GAP",
     "2024:local_tax:SOURCE_GAP",
-    "2026:health_premium:RETRIEVED_UNVALIDATED",
+
     "2026:health_oop:RETRIEVED_UNVALIDATED",
     "2026:mpg:RETRIEVED_UNVALIDATED",
     "2026:insurance:RETRIEVED_UNVALIDATED",

@@ -144,13 +144,17 @@ DECISIONS: list[dict[str, Any]] = [
         "option_c": (
             "P25/P50 among positive spenders, and/or a multi-year annualized result if "
             "sufficient CE vintages can be reproduced. Split routine maintenance, tires, "
-            "and repairs where FMLI/UCC codes support it."
+            "and repairs using official MTBI UCC codes (470211/470220/470212), not an "
+            "absent FMLI TIRECQ column."
         ),
         "recommended": "Do not freeze one until owner review. Emit all candidates.",
         "directional_effect": "Including zeros lowers the reserve vs positive-spender P25/mean; multi-year annualization smooths lumps.",
         "source_support": (
-            "BLS CE 2024 Interview PUMD (intrvw24.zip) FMLI vehicle-owning single-person "
-            "units. Candidate statistics are computed; no $1,200 constant is used."
+            "BLS CE 2024 Interview PUMD: FMLI (NEWID, FAM_SIZE, VEHQ, FINLWT21) joined "
+            "to MTBI (NEWID, UCC, COST). Official allowlisted UCCs 470211 tires, "
+            "470220 maintenance/repair, 470212 parts. TIRECQ absence or a missing "
+            "tire UCC is not measured zero tire spending. Fuel/insurance/purchase/"
+            "finance/registration/parking UCCs are excluded. No $1,200 constant."
         ),
         "sensitivity_plan": "Compare mean-with-zeros, median-with-zeros, positive-spender P25/P50, and split maintenance/tires/repairs.",
     },

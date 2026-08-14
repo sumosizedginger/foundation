@@ -1,41 +1,227 @@
 {
   "report_type": "living_cost_maintenance_candidates",
-  "generated_at": "2026-08-14T20:23:27+00:00",
+  "generated_at": "2026-08-14T21:48:41+00:00",
   "status": "MODELED_FROM_MEASURED_INPUTS",
   "source_data_year": 2024,
   "project_cost_year": 2024,
   "translation_method": "NONE",
   "price_index_series": null,
-  "columns_present": [
-    "MAINRPCQ",
-    "VEHQ",
-    "VEHQL"
+  "architecture": "FMLI characteristics + MTBI UCC expenditures",
+  "included_uccs_present": [
+    "470212"
   ],
-  "notes": "OD-007 candidates among single-person vehicle-owning CE units. Zero-spend periods included in mean/median. P25/P50 also computed among positive spenders. Not frozen. $1,200 is not used.",
+  "included_uccs_absent": [
+    "470211",
+    "470220"
+  ],
+  "excluded_uccs": [
+    "450110",
+    "450210",
+    "450220",
+    "460110",
+    "460901",
+    "470111",
+    "470112",
+    "470114",
+    "480110",
+    "510110",
+    "520110",
+    "520516",
+    "520517",
+    "520531",
+    "520541",
+    "520550",
+    "520902"
+  ],
+  "allowlist": {
+    "report_type": "bls_ce_vehicle_ucc_allowlist",
+    "dictionary_url": "https://www.bls.gov/cex/pumd/ce-pumd-interview-diary-dictionary.xlsx",
+    "stubs_url": "https://www.bls.gov/cex/pumd/stubs.zip",
+    "getting_started_url": "https://www.bls.gov/cex/pumd-getting-started-guide.htm",
+    "architecture": "FMLI supplies NEWID, FAM_SIZE, vehicle ownership, FINLWT21. MTBI supplies NEWID, UCC, COST, REF_MO, REF_YR. Do not use FMLI summary columns such as TIRECQ as the sole detail source.",
+    "included": {
+      "470211": {
+        "label": "Tires \u2014 purchased, replaced, installed",
+        "foundation_group": "tires",
+        "include": "yes",
+        "reason": "Official Interview tire UCC."
+      },
+      "470212": {
+        "label": "Vehicle parts, equipment, and accessories",
+        "foundation_group": "repairs",
+        "include": "yes",
+        "reason": "Official Interview parts/equipment UCC."
+      },
+      "470220": {
+        "label": "Vehicle maintenance and servicing / repairs",
+        "foundation_group": "routine_maintenance",
+        "include": "yes",
+        "reason": "Official Interview maintenance/repair services UCC."
+      }
+    },
+    "excluded": {
+      "470111": {
+        "label": "Gasoline",
+        "foundation_group": "fuel",
+        "include": "no",
+        "reason": "Separate Foundation fuel component (EIA)."
+      },
+      "470112": {
+        "label": "Diesel fuel",
+        "foundation_group": "fuel",
+        "include": "no",
+        "reason": "Separate Foundation fuel component (EIA)."
+      },
+      "470114": {
+        "label": "Gasohol / other motor fuel",
+        "foundation_group": "fuel",
+        "include": "no",
+        "reason": "Separate Foundation fuel component (EIA)."
+      },
+      "510110": {
+        "label": "Vehicle insurance",
+        "foundation_group": "insurance",
+        "include": "no",
+        "reason": "Separate Foundation insurance component (NAIC)."
+      },
+      "450110": {
+        "label": "New cars",
+        "foundation_group": "vehicle_purchase",
+        "include": "no",
+        "reason": "Separate Foundation vehicle-replacement component."
+      },
+      "450210": {
+        "label": "Used cars",
+        "foundation_group": "vehicle_purchase",
+        "include": "no",
+        "reason": "Separate Foundation vehicle-replacement component."
+      },
+      "450220": {
+        "label": "New trucks",
+        "foundation_group": "vehicle_purchase",
+        "include": "no",
+        "reason": "Separate Foundation vehicle-replacement component."
+      },
+      "460110": {
+        "label": "New motorcycles",
+        "foundation_group": "vehicle_purchase",
+        "include": "no",
+        "reason": "Separate Foundation vehicle-replacement component."
+      },
+      "460901": {
+        "label": "Vehicle finance charges",
+        "foundation_group": "finance",
+        "include": "no",
+        "reason": "Finance charges are not maintenance."
+      },
+      "480110": {
+        "label": "Vehicle finance charges (Interview finance UCC)",
+        "foundation_group": "finance",
+        "include": "no",
+        "reason": "Finance charges are not maintenance."
+      },
+      "520541": {
+        "label": "Vehicle registration",
+        "foundation_group": "registration",
+        "include": "no",
+        "reason": "Separate Foundation registration component."
+      },
+      "520550": {
+        "label": "Drivers' licenses",
+        "foundation_group": "registration",
+        "include": "no",
+        "reason": "Licensing is not maintenance."
+      },
+      "520902": {
+        "label": "Vehicle inspection",
+        "foundation_group": "registration",
+        "include": "no",
+        "reason": "Inspection/registration-adjacent, not maintenance reserve."
+      },
+      "520516": {
+        "label": "Parking fees",
+        "foundation_group": "parking_tolls",
+        "include": "no",
+        "reason": "Parking/tolls are a separate component."
+      },
+      "520517": {
+        "label": "Tolls",
+        "foundation_group": "parking_tolls",
+        "include": "no",
+        "reason": "Parking/tolls are a separate component."
+      },
+      "520110": {
+        "label": "Vehicle rental / lease",
+        "foundation_group": "rental",
+        "include": "no",
+        "reason": "Rental/lease is not owned-vehicle maintenance."
+      },
+      "520531": {
+        "label": "Automobile service clubs",
+        "foundation_group": "service_clubs",
+        "include": "no",
+        "reason": "Club dues are not a repair/tire/maintenance event."
+      }
+    },
+    "groups": {
+      "tires": [
+        "470211"
+      ],
+      "routine_maintenance": [
+        "470220"
+      ],
+      "repairs": [
+        "470212"
+      ]
+    }
+  },
+  "tirecq_present": false,
+  "tirecq_interpreted_as_measured_zero": false,
+  "sample_size": 5733,
+  "represented_weighted_population": 156403117.03,
+  "notes": "OD-007 MTBI/UCC candidates among single-person vehicle-owning CE units. Zero-spend CUs included in mean/median. Absent tire UCC is not a measured zero. Not frozen. $1,200 is not used.",
   "candidates": {
     "maintenance_repairs_tires_combined": {
       "n": 5733,
-      "mean_incl_zero": 257.51,
+      "mean_incl_zero": 1.0,
       "median_incl_zero": 0.0,
-      "p25_positive": 156.0,
-      "p50_positive": 344.0,
-      "n_positive": 1168
+      "p25_positive": 1.68,
+      "p50_positive": 3.96,
+      "positive_spender_mean": 5.78,
+      "n_positive": 975,
+      "weighted_population": 156403117.03
     },
-    "routine_maintenance_repairs": {
-      "n": 5733,
-      "mean_incl_zero": 257.51,
-      "median_incl_zero": 0.0,
-      "p25_positive": 156.0,
-      "p50_positive": 344.0,
-      "n_positive": 1168
-    },
-    "tires": {
+    "routine_maintenance": {
       "n": 5733,
       "mean_incl_zero": 0.0,
       "median_incl_zero": 0.0,
       "p25_positive": null,
       "p50_positive": null,
-      "n_positive": 0
+      "positive_spender_mean": null,
+      "n_positive": 0,
+      "weighted_population": 156403117.03
+    },
+    "repairs_parts": {
+      "n": 5733,
+      "mean_incl_zero": 1.0,
+      "median_incl_zero": 0.0,
+      "p25_positive": 1.68,
+      "p50_positive": 3.96,
+      "positive_spender_mean": 5.78,
+      "n_positive": 975,
+      "weighted_population": 156403117.03
+    },
+    "tires": {
+      "n": 0,
+      "mean_incl_zero": null,
+      "median_incl_zero": null,
+      "p25_positive": null,
+      "p50_positive": null,
+      "positive_spender_mean": null,
+      "n_positive": 0,
+      "weighted_population": 0.0,
+      "status": "UCC_ABSENT_NOT_MEASURED_ZERO",
+      "note": "Official tire UCC 470211 is absent from this Interview MTBI vintage. This is not measured zero tire spending. TIRECQ on FMLI is also absent."
     }
   },
   "retrieved_at": "",

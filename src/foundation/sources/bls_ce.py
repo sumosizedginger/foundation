@@ -24,6 +24,14 @@ from typing import Any
 from foundation.living_cost.models import ComponentStatus, LivingCostComponentObservation
 from foundation.percentiles import weighted_percentile
 from foundation.sources.acquisition import acquire_source, record_unretrieved
+from foundation.sources.bls_ce_ucc import (
+    EXCLUDED_UCCS,
+    INCLUDED_UCCS,
+    REPAIR_UCCS,
+    ROUTINE_UCCS,
+    TIRE_UCCS,
+    allowlist_document,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -370,6 +378,18 @@ def _weighted_mean(values: list[float], weights: list[float]) -> float | None:
     return sum(v * w for v, w in zip(values, weights, strict=True)) / sum(weights)
 
 
+def _fmli_quarter_key(name: str) -> str:
+    lower = name.lower().replace("\\", "/")
+    stem = lower.rsplit("/", 1)[-1]
+    return stem.replace("fmli", "").replace(".csv", "")
+
+
+def _mtbi_quarter_key(name: str) -> str:
+    lower = name.lower().replace("\\", "/")
+    stem = lower.rsplit("/", 1)[-1]
+    return stem.replace("mtbi", "").replace(".csv", "")
+
+
 def parse_bls_ce_maintenance_candidates(
     cache_dir: Path,
     reference_year: int = 2024,
@@ -378,10 +398,11 @@ def parse_bls_ce_maintenance_candidates(
 ) -> dict[str, Any]:
     """Candidate maintenance/repair/tire statistics for OD-007. Not frozen.
 
-    Population: single-person vehicle-owning consumer units.
-    Includes zero-spend periods in mean/median. Also emits P25/P50 among
-    positive spenders. Splits MAINRPCQ / TIRECQ when those FMLI columns exist.
+    FMLI supplies CU characteristics/weights. MTBI supplies UCC expenditures.
+    TIRECQ absence is not measured zero tire spending.
     """
+    import io
+
     data_year = get_bls_ce_interview_year(reference_year)
     short_yr = str(data_year)[-2:]
     if cache_dir.is_file():
@@ -394,46 +415,84 @@ def parse_bls_ce_maintenance_candidates(
         "source_data_year": data_year,
         "notes": "BLS CE Interview zip not present.",
         "candidates": {},
+        "allowlist": allowlist_document(),
+        "tirecq_present": False,
+        "tirecq_interpreted_as_measured_zero": False,
     }
     if not zip_path.exists():
         return empty
 
     combined_all: list[tuple[float, float]] = []
-    maint_all: list[tuple[float, float]] = []
+    routine_all: list[tuple[float, float]] = []
+    repair_all: list[tuple[float, float]] = []
     tire_all: list[tuple[float, float]] = []
-    columns_seen: set[str] = set()
+    uccs_seen: set[str] = set()
+    tirecq_present = False
+    n_cus = 0
+    weighted_pop = 0.0
     try:
         with zipfile.ZipFile(zip_path) as z:
             fmli_files = [f for f in z.namelist() if "fmli" in f.lower() and f.endswith(".csv")]
+            mtbi_files = [f for f in z.namelist() if "mtbi" in f.lower() and f.endswith(".csv")]
+            mtbi_by_q = {_mtbi_quarter_key(f): f for f in mtbi_files}
             for fmli_file in fmli_files:
+                qkey = _fmli_quarter_key(fmli_file)
+                mtbi_file = mtbi_by_q.get(qkey)
+                spend_by_newid: dict[str, dict[str, float]] = {}
+                if mtbi_file:
+                    with z.open(mtbi_file) as fh:
+                        reader = csv.DictReader(
+                            io.TextIOWrapper(fh, encoding="utf-8-sig", errors="replace")
+                        )
+                        for row in reader:
+                            newid = str(row.get("NEWID") or "").strip()
+                            ucc = str(row.get("UCC") or "").strip()
+                            if not newid or ucc not in INCLUDED_UCCS:
+                                if ucc:
+                                    uccs_seen.add(ucc)
+                                continue
+                            uccs_seen.add(ucc)
+                            try:
+                                cost = float(row.get("COST") or 0.0)
+                            except ValueError:
+                                continue
+                            bucket = spend_by_newid.setdefault(
+                                newid,
+                                {"combined": 0.0, "routine": 0.0, "repairs": 0.0, "tires": 0.0},
+                            )
+                            bucket["combined"] += max(cost, 0.0)
+                            if ucc in ROUTINE_UCCS:
+                                bucket["routine"] += max(cost, 0.0)
+                            if ucc in REPAIR_UCCS:
+                                bucket["repairs"] += max(cost, 0.0)
+                            if ucc in TIRE_UCCS:
+                                bucket["tires"] += max(cost, 0.0)
                 with z.open(fmli_file) as fh:
-                    import io
-
-                    text_fh = io.TextIOWrapper(fh, encoding="utf-8-sig", errors="replace")
-                    reader = csv.DictReader(text_fh)
+                    reader = csv.DictReader(
+                        io.TextIOWrapper(fh, encoding="utf-8-sig", errors="replace")
+                    )
                     fields = {name.upper(): name for name in (reader.fieldnames or [])}
-                    columns_seen.update(fields)
-                    if "FAM_SIZE" not in fields or "FINLWT21" not in fields:
+                    if "TIRECQ" in fields:
+                        tirecq_present = True
+                    if (
+                        "FAM_SIZE" not in fields
+                        or "FINLWT21" not in fields
+                        or "NEWID" not in fields
+                    ):
                         continue
                     veh_col = next(
                         (fields[n] for n in ("VEHQ", "VEHQL", "NUM_AUTO") if n in fields),
                         None,
                     )
-                    maint_col = next(
-                        (fields[n] for n in ("MAINRPCQ", "VRNTLOCQ") if n in fields),
-                        None,
-                    )
-                    tire_col = fields.get("TIRECQ")
-                    if maint_col is None and tire_col is None:
-                        continue
                     for row in reader:
                         try:
                             if int(float(row.get(fields["FAM_SIZE"]) or 0)) != 1:
                                 continue
                             weight = float(row.get(fields["FINLWT21"]) or 0.0)
+                            newid = str(row.get(fields["NEWID"]) or "").strip()
                         except ValueError:
                             continue
-                        if weight <= 0:
+                        if weight <= 0 or not newid:
                             continue
                         if veh_col is not None:
                             try:
@@ -442,23 +501,18 @@ def parse_bls_ce_maintenance_candidates(
                                 continue
                             if veh <= 0:
                                 continue
-                        maint_q = 0.0
-                        tire_q = 0.0
-                        if maint_col:
-                            try:
-                                maint_q = float(row.get(maint_col) or 0.0)
-                            except ValueError:
-                                maint_q = 0.0
-                        if tire_col:
-                            try:
-                                tire_q = float(row.get(tire_col) or 0.0)
-                            except ValueError:
-                                tire_q = 0.0
-                        maint_a = max(maint_q, 0.0) * 4.0
-                        tire_a = max(tire_q, 0.0) * 4.0
-                        combined_all.append((maint_a + tire_a, weight))
-                        maint_all.append((maint_a, weight))
-                        tire_all.append((tire_a, weight))
+                        spend = spend_by_newid.get(
+                            newid, {"combined": 0.0, "routine": 0.0, "repairs": 0.0, "tires": 0.0}
+                        )
+                        # MTBI COST is monthly within the interview reference
+                        # period. Annualize the quarterly total * 4, matching
+                        # the FMLI CQ convention. Zero-spend CUs stay in.
+                        combined_all.append((spend["combined"] * 4.0, weight))
+                        routine_all.append((spend["routine"] * 4.0, weight))
+                        repair_all.append((spend["repairs"] * 4.0, weight))
+                        tire_all.append((spend["tires"] * 4.0, weight))
+                        n_cus += 1
+                        weighted_pop += weight
     except (OSError, ValueError, KeyError, csv.Error, zipfile.BadZipFile, UnicodeError) as exc:
         logger.error("Failed to parse CE maintenance candidates: %s", exc)
         return {
@@ -466,6 +520,9 @@ def parse_bls_ce_maintenance_candidates(
             "source_data_year": data_year,
             "notes": f"Parse failed: {exc}",
             "candidates": {},
+            "allowlist": allowlist_document(),
+            "tirecq_present": False,
+            "tirecq_interpreted_as_measured_zero": False,
         }
 
     def _stats(pairs: list[tuple[float, float]]) -> dict[str, float | int | None]:
@@ -476,7 +533,9 @@ def parse_bls_ce_maintenance_candidates(
                 "median_incl_zero": None,
                 "p25_positive": None,
                 "p50_positive": None,
+                "positive_spender_mean": None,
                 "n_positive": 0,
+                "weighted_population": 0.0,
             }
         vals = [p[0] for p in pairs]
         wts = [p[1] for p in pairs]
@@ -494,13 +553,31 @@ def parse_bls_ce_maintenance_candidates(
             "p50_positive": None
             if not pos_vals
             else round(weighted_percentile(pos_vals, pos_wts, 0.50), 2),
+            "positive_spender_mean": None
+            if not pos_vals
+            else round(_weighted_mean(pos_vals, pos_wts) or 0.0, 2),
             "n_positive": len(pos_vals),
+            "weighted_population": round(sum(wts), 2),
         }
 
+    present_included = sorted(code for code in INCLUDED_UCCS if code in uccs_seen)
+    absent_included = sorted(code for code in INCLUDED_UCCS if code not in uccs_seen)
+    tire_status = (
+        "MEASURED_FROM_MTBI_UCC" if TIRE_UCCS & uccs_seen else "UCC_ABSENT_NOT_MEASURED_ZERO"
+    )
     candidates = {
         "maintenance_repairs_tires_combined": _stats(combined_all),
-        "routine_maintenance_repairs": _stats(maint_all),
-        "tires": _stats(tire_all),
+        "routine_maintenance": _stats(routine_all),
+        "repairs_parts": _stats(repair_all),
+        "tires": {
+            **_stats(tire_all if TIRE_UCCS & uccs_seen else []),
+            "status": tire_status,
+            "note": (
+                "Official tire UCC 470211 is absent from this Interview MTBI vintage. "
+                "This is not measured zero tire spending. TIRECQ on FMLI is also "
+                f"{'present' if tirecq_present else 'absent'}."
+            ),
+        },
     }
     return {
         "status": "MODELED_FROM_MEASURED_INPUTS" if combined_all else "UNAVAILABLE",
@@ -510,13 +587,19 @@ def parse_bls_ce_maintenance_candidates(
         "price_index_series": None
         if reference_year == data_year
         else "CPI-U motor vehicle maintenance and repair (not applied)",
-        "columns_present": sorted(
-            c for c in columns_seen if c in {"MAINRPCQ", "TIRECQ", "VEHQ", "VEHQL"}
-        ),
+        "architecture": "FMLI characteristics + MTBI UCC expenditures",
+        "included_uccs_present": present_included,
+        "included_uccs_absent": absent_included,
+        "excluded_uccs": sorted(EXCLUDED_UCCS),
+        "allowlist": allowlist_document(),
+        "tirecq_present": tirecq_present,
+        "tirecq_interpreted_as_measured_zero": False,
+        "sample_size": n_cus,
+        "represented_weighted_population": round(weighted_pop, 2),
         "notes": (
-            "OD-007 candidates among single-person vehicle-owning CE units. "
-            "Zero-spend periods included in mean/median. P25/P50 also computed among "
-            "positive spenders. Not frozen. $1,200 is not used."
+            "OD-007 MTBI/UCC candidates among single-person vehicle-owning CE units. "
+            "Zero-spend CUs included in mean/median. Absent tire UCC is not a measured "
+            "zero. Not frozen. $1,200 is not used."
         ),
         "candidates": candidates,
         "retrieved_at": retrieved_at,

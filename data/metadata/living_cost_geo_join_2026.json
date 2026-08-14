@@ -1,16 +1,58 @@
 {
   "report_type": "hud_fmr_census_acs_geo_join",
   "reference_year": 2026,
-  "generated_at": "2026-08-14T20:22:39+00:00",
+  "generated_at": "2026-08-14T21:40:54+00:00",
+  "census_source_id": "census_acs5_2026",
+  "hud_source_id": "hud_fmr_2026",
+  "census_reference_period": "2024 ACS 5-Year B01001",
+  "hud_reference_period": "2026",
+  "census_retrieved_at": "2026-08-14T20:18:18+00:00",
+  "hud_retrieved_at": "2026-08-14T20:19:10+00:00",
   "census_artifact_sha256": "1637b18a96881b81e050df1cd3d5ac38a33208b9b69b40e1dbeb3c4e13718f0e",
   "hud_artifact_sha256": "0b130fd046c7bedbee5d206ab55654d390d27da423ff22e307e0698fbb56ad9c",
+  "provenance_complete": true,
+  "coverage_claim_allowed": true,
+  "raw_census_county_equivalent_count": 3144,
+  "join_geography_count": 3144,
   "census_county_universe_count": 3144,
+  "census_county_universe_count_note": "census_county_universe_count is the Foundation JOIN geography count, not the raw Census county-equivalent publication count. raw_census_county_equivalent_count=3144.",
+  "connecticut_method": "direct_planning_region_join",
+  "connecticut_raw_geographies": 9,
+  "connecticut_reconstructed_geographies": 9,
+  "connecticut_raw_fips": [
+    "09110",
+    "09120",
+    "09130",
+    "09140",
+    "09150",
+    "09160",
+    "09170",
+    "09180",
+    "09190"
+  ],
+  "connecticut_join_fips": [
+    "09110",
+    "09120",
+    "09130",
+    "09140",
+    "09150",
+    "09160",
+    "09170",
+    "09180",
+    "09190"
+  ],
   "census_total_adult_population": 261404665,
   "hud_source_rows_count": 3229,
   "hud_unique_counties_represented": 3229,
   "matched_counties_count": 3144,
   "unmatched_census_counties_count": 0,
   "unmatched_hud_rows_count": 85,
+  "unmatched_hud_classification_counts": {
+    "special_non_county_hud_geography": 1,
+    "excluded_us_territory": 84
+  },
+  "unmatched_50_state_dc_county_count": 0,
+  "unmatched_50_state_dc_counties": [],
   "duplicate_hud_fips_count": 0,
   "duplicate_hud_fips": [],
   "represented_adult_population": 261404665,
@@ -105,5 +147,347 @@
     "78010",
     "78020",
     "78030"
+  ],
+  "unmatched_hud_rows_classified": [
+    {
+      "fips": "29056",
+      "classification": "special_non_county_hud_geography"
+    },
+    {
+      "fips": "60999",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "66010",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "69999",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72001",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72003",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72005",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72007",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72009",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72011",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72013",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72015",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72017",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72019",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72021",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72023",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72025",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72027",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72029",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72031",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72033",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72035",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72037",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72039",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72041",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72043",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72045",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72047",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72049",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72051",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72053",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72054",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72055",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72057",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72059",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72061",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72063",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72065",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72067",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72069",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72071",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72073",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72075",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72077",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72079",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72081",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72083",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72085",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72087",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72089",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72091",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72093",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72095",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72097",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72099",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72101",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72103",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72105",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72107",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72109",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72111",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72113",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72115",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72117",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72119",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72121",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72123",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72125",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72127",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72129",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72131",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72133",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72135",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72137",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72139",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72141",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72143",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72145",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72147",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72149",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72151",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "72153",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "78010",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "78020",
+      "classification": "excluded_us_territory"
+    },
+    {
+      "fips": "78030",
+      "classification": "excluded_us_territory"
+    }
   ]
 }

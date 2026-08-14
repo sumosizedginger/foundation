@@ -151,25 +151,77 @@ def test_production_modules_import():
     assert foundation.cli.main
 
 
-def test_cps_same_vintage_hashes_have_revision_record():
+def test_cps_canonical_hash_is_consistent_across_active_artifacts():
     import json
 
-    hist = (ROOT / "src" / "foundation" / "historical.py").read_text(encoding="utf-8")
-    latest = json.loads((ROOT / "data" / "current" / "latest.json").read_text(encoding="utf-8"))
     current = "318845a2b5e0034eb2973898de1738f4df0025727de38499e7669cb9c0deef0b"
     older = "318845a2b5e0034e357900b991196ce28ecdd0c99a0937b27ff77f8ea6497284"
-    assert current in hist
-    history_shas = [row.get("archive_sha256") for row in latest.get("history", [])]
-    if older in history_shas and current in hist:
-        record = json.loads(
-            (ROOT / "data" / "metadata" / "cps_asec_2025_sha_revisions.json").read_text(
-                encoding="utf-8"
-            )
+    hist_py = (ROOT / "src" / "foundation" / "historical.py").read_text(encoding="utf-8")
+    history = json.loads((ROOT / "data" / "current" / "history.json").read_text(encoding="utf-8"))
+    latest = json.loads((ROOT / "data" / "current" / "latest.json").read_text(encoding="utf-8"))
+    population = json.loads(
+        (ROOT / "data" / "current" / "population.json").read_text(encoding="utf-8")
+    )
+    validation = json.loads(
+        (ROOT / "data" / "metadata" / "validation_report_2025.json").read_text(encoding="utf-8")
+    )
+    record = json.loads(
+        (ROOT / "data" / "metadata" / "cps_asec_2025_sha_revisions.json").read_text(
+            encoding="utf-8"
         )
-        hashes = {item["sha256"] for item in record["observed_hashes"]}
-        assert current in hashes
-        assert older in hashes
-        assert record["status"] == "UNRECONCILED_PENDING_RETRIEVAL"
+    )
+    assert current in hist_py
+    vintage_2025 = next(v for v in history["vintages"] if v["survey_year"] == 2025)
+    latest_2025 = next(v for v in latest["history"] if v["survey_year"] == 2025)
+    assert vintage_2025["archive_sha256"] == current
+    assert latest_2025["archive_sha256"] == current
+    pop_sha = population["population_anchor"]["source_artifact"]["sha256"]
+    assert pop_sha == current
+    assert validation["sha256"] == current
+    assert record["canonical_sha256"] == current
+    assert record["status"] == "RECONCILED_OFFICIAL_RETRIEVE"
+    ledger = {item["sha256"] for item in record["observed_hashes"]}
+    assert older in ledger
+    assert current in ledger
+    # Legacy hash may remain only in the revision ledger, not as the active artifact.
+    assert older != vintage_2025["archive_sha256"]
+
+
+def test_geo_join_cannot_claim_full_coverage_with_blank_hashes():
+    from foundation.living_cost.geo_join import execute_geo_join_audit
+    from foundation.living_cost.models import ComponentStatus, LivingCostComponentObservation
+
+    obs = LivingCostComponentObservation(
+        component_id="housing_1br_fmr",
+        category="housing",
+        geography_type="county",
+        geography_id="06075",
+        geography_name="San Francisco",
+        state="CA",
+        reference_year=2024,
+        value_annual=24000.0,
+        value_monthly=2000.0,
+        unit="USD",
+        status=ComponentStatus.MEASURED,
+        source_id="hud_fmr_2024",
+        source_variable="fmr_1br",
+        source_url="https://www.huduser.gov/",
+        source_release="test",
+        source_reference_period="2024",
+        retrieved_at="2026-08-14T00:00:00+00:00",
+        source_artifact_sha256="a" * 64,
+        methodology_version="0.2.0-draft",
+        notes="",
+    )
+    report = execute_geo_join_audit(
+        {"06075": {"adult_population": 100, "county_name": "SF", "state": "CA"}},
+        [obs],
+        2024,
+        census_artifact_sha256="",
+        hud_artifact_sha256="",
+    )
+    assert report["provenance_complete"] is False
+    assert report["coverage_claim_allowed"] is False
 
 
 def test_owner_packet_writes_unresolved_decisions_only(tmp_path: Path):

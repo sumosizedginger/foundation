@@ -20,7 +20,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 from foundation.living_cost.geo_join import execute_geo_join_audit
 from foundation.living_cost.manifest import RetrievedSourceArtifact, generate_source_manifest
 from foundation.living_cost.owner_packet import write_owner_decision_packet
-from foundation.sources.acquisition import validation_status_after_parse
+from foundation.sources.acquisition import read_retrieval_sidecar, validation_status_after_parse
 from foundation.sources.auto_insurance import download_naic_artifact
 from foundation.sources.bea_rpp import download_bea_rpp_artifact
 from foundation.sources.bls_ce import (
@@ -211,12 +211,33 @@ def validate_sources_for_year(year: int) -> list[RetrievedSourceArtifact]:
             join_universe = census_universe
             if year == 2024:
                 join_universe = _ct_universe_for_2024_join(census_universe)
+            census_sha = census_arts[0].sha256 if census_arts else ""
+            hud_sha = hud_arts[0].sha256 if hud_arts else ""
+            census_retrieved = census_arts[0].retrieved_at if census_arts else ""
+            hud_retrieved = hud_arts[0].retrieved_at if hud_arts else ""
+            if not census_sha and census_arts and census_arts[0].local_cache_filename:
+                side = read_retrieval_sidecar(CACHE_DIR / census_arts[0].local_cache_filename)
+                if side:
+                    census_sha = str(side.get("sha256") or "")
+                    census_retrieved = census_retrieved or str(side.get("retrieved_at") or "")
+            if not hud_sha and hud_arts and hud_arts[0].local_cache_filename:
+                side = read_retrieval_sidecar(CACHE_DIR / hud_arts[0].local_cache_filename)
+                if side:
+                    hud_sha = str(side.get("sha256") or "")
+                    hud_retrieved = hud_retrieved or str(side.get("retrieved_at") or "")
             execute_geo_join_audit(
                 census_county_universe=join_universe,
                 hud_observations=hud_obs,
                 reference_year=year,
-                census_artifact_sha256=census_arts[0].sha256 if census_arts else "",
-                hud_artifact_sha256=hud_arts[0].sha256 if hud_arts else "",
+                census_artifact_sha256=census_sha,
+                hud_artifact_sha256=hud_sha,
+                raw_census_county_universe=census_universe,
+                census_source_id=census_arts[0].source_id if census_arts else f"census_acs5_{year}",
+                hud_source_id=hud_arts[0].source_id if hud_arts else f"hud_fmr_{year}",
+                census_reference_period="2024 ACS 5-Year B01001",
+                hud_reference_period=str(year),
+                census_retrieved_at=census_retrieved,
+                hud_retrieved_at=hud_retrieved,
                 output_path=METADATA_DIR / f"living_cost_geo_join_{year}.json",
             )
         except (OSError, ValueError, RuntimeError, TypeError, KeyError) as exc:
@@ -486,7 +507,7 @@ def write_coverage(artifacts: list[RetrievedSourceArtifact]) -> dict:
             if _component_status(artifacts, f"usda_food_low_cost_{year}")
             in {"VALIDATED", "MODELED_FROM_MEASURED_INPUTS", "RETRIEVED_UNVALIDATED"}
             else _component_status(artifacts, f"usda_food_low_cost_{year}"),
-            "health_premium": "RETRIEVED_UNVALIDATED",
+            "health_premium": "MODELED_FROM_MEASURED_INPUTS",
             "health_oop": _component_status(artifacts, f"meps_table1_{year}"),
             "mileage": _component_status(artifacts, f"fhwa_nhts_{year}"),
             "mpg": (
@@ -691,6 +712,7 @@ def main() -> int:
     write_tax_coverage()
     write_transport_coverage()
     write_cms_coverage_stub()
+    write_cms_platform_and_sbe_reports()
     write_correction_side_reports()
     logger.info(
         "Source coverage generated. Blocking components: %s",
@@ -898,7 +920,11 @@ def write_transport_coverage() -> None:
             },
             "maintenance": {
                 "status": "ESTIMATED_OWNER_REVIEW",
-                "note": "CE vehicle-owning single-person candidates include zeros. P25-among-positive is not automatic. OD-007 not frozen.",
+                "note": (
+                    "MTBI/UCC candidates among single-person vehicle-owning CE units. "
+                    "TIRECQ/UCC 470211 absence is not measured zero tire spending. "
+                    "OD-007 not frozen."
+                ),
             },
             "registration": {
                 "status": "SOURCE_GAP",
@@ -946,62 +972,12 @@ def write_cms_coverage_stub() -> None:
                                 found.add(st.upper())
                         states = sorted(found)
         from foundation.sources.cms_marketplace import SBE_STANDALONE_STATES
+        from foundation.sources.cms_platform import ALL_JURISDICTIONS, SBE_FP_STATES
 
-        all_states = {
-            "AL",
-            "AK",
-            "AZ",
-            "AR",
-            "CA",
-            "CO",
-            "CT",
-            "DE",
-            "DC",
-            "FL",
-            "GA",
-            "HI",
-            "ID",
-            "IL",
-            "IN",
-            "IA",
-            "KS",
-            "KY",
-            "LA",
-            "ME",
-            "MD",
-            "MA",
-            "MI",
-            "MN",
-            "MS",
-            "MO",
-            "MT",
-            "NE",
-            "NV",
-            "NH",
-            "NJ",
-            "NM",
-            "NY",
-            "NC",
-            "ND",
-            "OH",
-            "OK",
-            "OR",
-            "PA",
-            "RI",
-            "SC",
-            "SD",
-            "TN",
-            "TX",
-            "UT",
-            "VT",
-            "VA",
-            "WA",
-            "WV",
-            "WI",
-            "WY",
-        }
+        all_states = set(ALL_JURISDICTIONS)
         sbe = set(SBE_STANDALONE_STATES.get(year, frozenset()))
         federal = set(states)
+        # Oregon / SBE-FP individual market is federal even if an SBE ZIP exists.
         missing = sorted(all_states - federal - sbe)
         rating_areas: set[str] = set()
         counties: set[str] = set()
@@ -1045,17 +1021,21 @@ def write_cms_coverage_stub() -> None:
             "federal_platform_state_count": len(states),
             "sbe_standalone_states": sorted(sbe),
             "sbe_standalone_state_count": len(sbe),
+            "sbe_fp_states": sorted(SBE_FP_STATES.get(year, frozenset())),
             "sbe_ingestion": "PER_STATE_OFFICIAL_ZIPS",
             "states_missing_both_federal_and_sbe_files": missing,
             "rating_areas_represented": len(rating_areas),
             "counties_represented": len(counties),
             "joined_lowest_silver_rating_areas": join_obs_count,
+            "oregon_individual_market_source": "federal_exchange_puf",
             "note": (
                 "No state may receive a premium from a plan not actually offered there. "
                 "SBE standalone states are not filled from federal-platform rates. "
-                "Official per-state SBE QHP PUF zips are retrieved separately. "
-                "Do not infer federal-platform classification from a state-specific SBE file. "
-                "health_premium remains RETRIEVED_UNVALIDATED until national join is validated."
+                "SBE-FP states including Oregon use federal Exchange PUFs for "
+                "individual-market plan/rate data. SBE ZIP existence is not "
+                "platform classification. Standalone SBE lowest-Silver joins "
+                "are implemented; health_premium is MODELED_FROM_MEASURED_INPUTS. "
+                "No healthcare headline is published."
             ),
         }
         from foundation.sources.cms_marketplace import SBE_STATE_ZIP_SLUGS
@@ -1084,8 +1064,70 @@ def write_cms_coverage_stub() -> None:
         coverage["years"][str(year)]["sbe_expected_count"] = len(sbe)
         coverage["years"][str(year)]["sbe_retrieved_count"] = len(retrieved_sbe)
         coverage["years"][str(year)]["sbe_parsed_count"] = len(parsed_sbe)
+        sbe_join_path = METADATA_DIR / "living_cost_cms_sbe_lowest_silver.json"
+        if sbe_join_path.exists():
+            sbe_join_doc = json.loads(sbe_join_path.read_text(encoding="utf-8"))
+            year_join = sbe_join_doc.get("years", {}).get(str(year), {})
+            coverage["years"][str(year)]["sbe_lowest_silver_states_joined"] = year_join.get(
+                "states_joined", []
+            )
+            coverage["years"][str(year)]["sbe_lowest_silver_output_count"] = year_join.get(
+                "lowest_silver_output_count", 0
+            )
+            coverage["years"][str(year)]["all_standalone_sbe_joined"] = year_join.get(
+                "all_standalone_joined", False
+            )
     (METADATA_DIR / "living_cost_cms_coverage.json").write_text(
         json.dumps(coverage, indent=2), encoding="utf-8"
+    )
+
+
+def write_cms_platform_and_sbe_reports() -> None:
+    from foundation.sources.cms_marketplace import (
+        SBE_STATE_ZIP_SLUGS,
+        parse_standalone_sbe_lowest_silver,
+    )
+    from foundation.sources.cms_platform import (
+        assert_platform_map_invariants,
+        build_platform_map,
+    )
+
+    maps: dict[str, Any] = {
+        "report_type": "cms_individual_market_platform_map",
+        "generated_at": datetime.now(UTC).replace(microsecond=0).isoformat(),
+        "headline_calculated": False,
+        "years": {},
+    }
+    sbe_join: dict[str, Any] = {
+        "report_type": "cms_sbe_lowest_silver_join",
+        "generated_at": datetime.now(UTC).replace(microsecond=0).isoformat(),
+        "headline_calculated": False,
+        "years": {},
+    }
+    for year in (2024, 2026):
+        slugs = SBE_STATE_ZIP_SLUGS.get(year, {})
+        archive_states = set()
+        for st, slug in slugs.items():
+            path = CACHE_DIR / f"cms_sbe_{year}_{st.lower()}_{slug}"
+            if path.is_file():
+                archive_states.add(st)
+        payload = build_platform_map(year, archive_states)
+        assert_platform_map_invariants(year, payload)
+        maps["years"][str(year)] = payload
+        join = parse_standalone_sbe_lowest_silver(year, CACHE_DIR)
+        serializable = dict(join)
+        serializable.pop("observations", None)
+        sbe_join["years"][str(year)] = serializable
+        maps["years"][str(year)]["sbe_lowest_silver_states_joined"] = join["states_joined"]
+        maps["years"][str(year)]["sbe_lowest_silver_output_count"] = join[
+            "lowest_silver_output_count"
+        ]
+        maps["years"][str(year)]["all_standalone_sbe_joined"] = join["all_standalone_joined"]
+    (METADATA_DIR / "cms_individual_market_platform_map.json").write_text(
+        json.dumps(maps, indent=2), encoding="utf-8"
+    )
+    (METADATA_DIR / "living_cost_cms_sbe_lowest_silver.json").write_text(
+        json.dumps(sbe_join, indent=2), encoding="utf-8"
     )
 
 

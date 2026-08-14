@@ -3,21 +3,30 @@
   "survey_year": 2025,
   "income_year": 2024,
   "source_url": "https://www2.census.gov/programs-surveys/cps/datasets/2025/march/asecpub25csv.zip",
-  "status": "UNRECONCILED_PENDING_RETRIEVAL",
-  "note": "Do not silently choose a hash. Re-retrieve the official archive and record the actual SHA-256 and byte size.",
+  "status": "RECONCILED_OFFICIAL_RETRIEVE",
+  "canonical_sha256": "318845a2b5e0034eb2973898de1738f4df0025727de38499e7669cb9c0deef0b",
+  "canonical_byte_size": 147271429,
+  "retrieved_at": "2026-08-14T21:32:34+00:00",
+  "http_status": 200,
+  "content_type": "application/zip",
+  "note": "Official Census archive was re-retrieved. SHA-256 matches the canonical/current hash in historical.py, population.json, and validation_report_2025.json. The other hash is retained only as a legacy/unverified observation.",
   "observed_hashes": [
     {
+      "role": "canonical_current",
       "sha256": "318845a2b5e0034eb2973898de1738f4df0025727de38499e7669cb9c0deef0b",
+      "byte_size": 147271429,
+      "verified_by": "official_re_retrieve",
       "seen_in": [
         "src/foundation/historical.py current 2025 vintage",
-        "GROK.MD current population artifact"
+        "official retrieve of asecpub25csv.zip"
       ]
     },
     {
+      "role": "legacy_unverified_observation",
       "sha256": "318845a2b5e0034e357900b991196ce28ecdd0c99a0937b27ff77f8ea6497284",
+      "verified_by": "not_reproduced_by_official_retrieve",
       "seen_in": [
-        "data/current/latest.json history slice for survey_year 2025",
-        "GROK.MD older historical artifact"
+        "prior data/current/history.json 2025 vintage (superseded as active artifact)"
       ]
     }
   ]

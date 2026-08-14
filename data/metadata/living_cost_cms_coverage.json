@@ -1,6 +1,6 @@
 {
   "report_type": "living_cost_cms_coverage",
-  "generated_at": "2026-08-14T20:22:45+00:00",
+  "generated_at": "2026-08-14T21:50:07+00:00",
   "years": {
     "2024": {
       "federal_platform_service_area_states": [
@@ -53,20 +53,25 @@
         "NM",
         "NV",
         "NY",
-        "OR",
         "PA",
         "RI",
         "VA",
         "VT",
         "WA"
       ],
-      "sbe_standalone_state_count": 20,
+      "sbe_standalone_state_count": 19,
+      "sbe_fp_states": [
+        "AR",
+        "OK",
+        "OR"
+      ],
       "sbe_ingestion": "PER_STATE_OFFICIAL_ZIPS",
       "states_missing_both_federal_and_sbe_files": [],
       "rating_areas_represented": 378,
       "counties_represented": 2127,
       "joined_lowest_silver_rating_areas": 378,
-      "note": "No state may receive a premium from a plan not actually offered there. SBE standalone states are not filled from federal-platform rates. Official per-state SBE QHP PUF zips are retrieved separately. Do not infer federal-platform classification from a state-specific SBE file. health_premium remains RETRIEVED_UNVALIDATED until national join is validated.",
+      "oregon_individual_market_source": "federal_exchange_puf",
+      "note": "No state may receive a premium from a plan not actually offered there. SBE standalone states are not filled from federal-platform rates. SBE-FP states including Oregon use federal Exchange PUFs for individual-market plan/rate data. SBE ZIP existence is not platform classification. Standalone SBE lowest-Silver joins are implemented; health_premium is MODELED_FROM_MEASURED_INPUTS. No healthcare headline is published.",
       "sbe_states_expected": [
         "CA",
         "CO",
@@ -82,7 +87,6 @@
         "NM",
         "NV",
         "NY",
-        "OR",
         "PA",
         "RI",
         "VA",
@@ -134,9 +138,32 @@
         "WA"
       ],
       "sbe_states_missing": [],
-      "sbe_expected_count": 20,
+      "sbe_expected_count": 19,
       "sbe_retrieved_count": 20,
-      "sbe_parsed_count": 20
+      "sbe_parsed_count": 20,
+      "sbe_lowest_silver_states_joined": [
+        "CA",
+        "CO",
+        "CT",
+        "DC",
+        "ID",
+        "KY",
+        "MA",
+        "MD",
+        "ME",
+        "MN",
+        "NJ",
+        "NM",
+        "NV",
+        "NY",
+        "PA",
+        "RI",
+        "VA",
+        "VT",
+        "WA"
+      ],
+      "sbe_lowest_silver_output_count": 125,
+      "all_standalone_sbe_joined": true
     },
     "2026": {
       "federal_platform_service_area_states": [
@@ -189,20 +216,25 @@
         "NM",
         "NV",
         "NY",
-        "OR",
         "PA",
         "RI",
         "VA",
         "VT",
         "WA"
       ],
-      "sbe_standalone_state_count": 22,
+      "sbe_standalone_state_count": 21,
+      "sbe_fp_states": [
+        "AR",
+        "OK",
+        "OR"
+      ],
       "sbe_ingestion": "PER_STATE_OFFICIAL_ZIPS",
       "states_missing_both_federal_and_sbe_files": [],
       "rating_areas_represented": 349,
       "counties_represented": 1929,
       "joined_lowest_silver_rating_areas": 349,
-      "note": "No state may receive a premium from a plan not actually offered there. SBE standalone states are not filled from federal-platform rates. Official per-state SBE QHP PUF zips are retrieved separately. Do not infer federal-platform classification from a state-specific SBE file. health_premium remains RETRIEVED_UNVALIDATED until national join is validated.",
+      "oregon_individual_market_source": "federal_exchange_puf",
+      "note": "No state may receive a premium from a plan not actually offered there. SBE standalone states are not filled from federal-platform rates. SBE-FP states including Oregon use federal Exchange PUFs for individual-market plan/rate data. SBE ZIP existence is not platform classification. Standalone SBE lowest-Silver joins are implemented; health_premium is MODELED_FROM_MEASURED_INPUTS. No healthcare headline is published.",
       "sbe_states_expected": [
         "CA",
         "CO",
@@ -220,7 +252,6 @@
         "NM",
         "NV",
         "NY",
-        "OR",
         "PA",
         "RI",
         "VA",
@@ -276,9 +307,34 @@
         "WA"
       ],
       "sbe_states_missing": [],
-      "sbe_expected_count": 22,
+      "sbe_expected_count": 21,
       "sbe_retrieved_count": 22,
-      "sbe_parsed_count": 22
+      "sbe_parsed_count": 22,
+      "sbe_lowest_silver_states_joined": [
+        "CA",
+        "CO",
+        "CT",
+        "DC",
+        "GA",
+        "ID",
+        "IL",
+        "KY",
+        "MA",
+        "MD",
+        "ME",
+        "MN",
+        "NJ",
+        "NM",
+        "NV",
+        "NY",
+        "PA",
+        "RI",
+        "VA",
+        "VT",
+        "WA"
+      ],
+      "sbe_lowest_silver_output_count": 155,
+      "all_standalone_sbe_joined": true
     }
   },
   "headline_calculated": false,

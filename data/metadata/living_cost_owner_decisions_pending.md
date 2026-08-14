@@ -88,11 +88,11 @@ Owner decisions are **not frozen**. No OD is marked ACCEPTED.
 
 - Option A: Weighted mean among single-person vehicle-owning consumer units, including zero-spend periods.
 - Option B: Weighted median among the same units, including zero-spend periods.
-- Option C: P25/P50 among positive spenders, and/or a multi-year annualized result if sufficient CE vintages can be reproduced. Split routine maintenance, tires, and repairs where FMLI/UCC codes support it.
+- Option C: P25/P50 among positive spenders, and/or a multi-year annualized result if sufficient CE vintages can be reproduced. Split routine maintenance, tires, and repairs using official MTBI UCC codes (470211/470220/470212), not an absent FMLI TIRECQ column.
 
 **Recommended:** Do not freeze one until owner review. Emit all candidates.
 **Directional effect:** Including zeros lowers the reserve vs positive-spender P25/mean; multi-year annualization smooths lumps.
-**Source support:** BLS CE 2024 Interview PUMD (intrvw24.zip) FMLI vehicle-owning single-person units. Candidate statistics are computed; no $1,200 constant is used.
+**Source support:** BLS CE 2024 Interview PUMD: FMLI (NEWID, FAM_SIZE, VEHQ, FINLWT21) joined to MTBI (NEWID, UCC, COST). Official allowlisted UCCs 470211 tires, 470220 maintenance/repair, 470212 parts. TIRECQ absence or a missing tire UCC is not measured zero tire spending. Fuel/insurance/purchase/finance/registration/parking UCCs are excluded. No $1,200 constant.
 **Sensitivity:** Compare mean-with-zeros, median-with-zeros, positive-spender P25/P50, and split maintenance/tires/repairs.
 
 ## OD-008 — Which recreation percentile is the headline Social & Recreation amount?

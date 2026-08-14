@@ -1,6 +1,6 @@
 {
   "report_type": "living_cost_tax_coverage",
-  "generated_at": "2026-08-14T20:22:45+00:00",
+  "generated_at": "2026-08-14T21:50:49+00:00",
   "federal_2024_validated_tables": false,
   "federal_validation_gate": "Boundary tests exist in tests/test_living_cost.py but IRS source PDFs are not retrieved/parsed, so federal_tax is not VALIDATED.",
   "federal_2026_values_match_rev_proc_2025_32": true,
