@@ -470,8 +470,14 @@ def parse_bls_ce_maintenance_candidates(
 
     def _stats(pairs: list[tuple[float, float]]) -> dict[str, float | int | None]:
         if not pairs:
-            return {"n": 0, "mean_incl_zero": None, "median_incl_zero": None,
-                    "p25_positive": None, "p50_positive": None, "n_positive": 0}
+            return {
+                "n": 0,
+                "mean_incl_zero": None,
+                "median_incl_zero": None,
+                "p25_positive": None,
+                "p50_positive": None,
+                "n_positive": 0,
+            }
         vals = [p[0] for p in pairs]
         wts = [p[1] for p in pairs]
         pos_vals = [p[0] for p in pairs if p[0] > 0]
@@ -479,7 +485,9 @@ def parse_bls_ce_maintenance_candidates(
         return {
             "n": len(pairs),
             "mean_incl_zero": None if not vals else round(_weighted_mean(vals, wts) or 0.0, 2),
-            "median_incl_zero": None if not vals else round(weighted_percentile(vals, wts, 0.50), 2),
+            "median_incl_zero": None
+            if not vals
+            else round(weighted_percentile(vals, wts, 0.50), 2),
             "p25_positive": None
             if not pos_vals
             else round(weighted_percentile(pos_vals, pos_wts, 0.25), 2),
@@ -499,8 +507,12 @@ def parse_bls_ce_maintenance_candidates(
         "source_data_year": data_year,
         "project_cost_year": reference_year,
         "translation_method": "NONE" if reference_year == data_year else "CPI_UPDATED_CANDIDATE",
-        "price_index_series": None if reference_year == data_year else "CPI-U motor vehicle maintenance and repair (not applied)",
-        "columns_present": sorted(c for c in columns_seen if c in {"MAINRPCQ", "TIRECQ", "VEHQ", "VEHQL"}),
+        "price_index_series": None
+        if reference_year == data_year
+        else "CPI-U motor vehicle maintenance and repair (not applied)",
+        "columns_present": sorted(
+            c for c in columns_seen if c in {"MAINRPCQ", "TIRECQ", "VEHQ", "VEHQL"}
+        ),
         "notes": (
             "OD-007 candidates among single-person vehicle-owning CE units. "
             "Zero-spend periods included in mean/median. P25/P50 also computed among "

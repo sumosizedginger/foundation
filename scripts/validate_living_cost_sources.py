@@ -248,8 +248,12 @@ def validate_sources_for_year(year: int) -> list[RetrievedSourceArtifact]:
         _safe_acquire(f"EIA gasoline {year}", lambda: download_eia_gas_artifact(year, CACHE_DIR))
     )
     artifacts.extend(_safe_acquire(f"NAIC {year}", lambda: download_naic_artifact(year, CACHE_DIR)))
-    artifacts.extend(_safe_acquire(f"EPA MPG {year}", lambda: download_epa_mpg_artifact(year, CACHE_DIR)))
-    artifacts.extend(_safe_acquire(f"FCC URS {year}", lambda: download_fcc_urs_artifact(year, CACHE_DIR)))
+    artifacts.extend(
+        _safe_acquire(f"EPA MPG {year}", lambda: download_epa_mpg_artifact(year, CACHE_DIR))
+    )
+    artifacts.extend(
+        _safe_acquire(f"FCC URS {year}", lambda: download_fcc_urs_artifact(year, CACHE_DIR))
+    )
     if year == 2024:
         artifacts.extend(
             _safe_acquire("Census CT crosswalk", lambda: download_ct_crosswalk_artifact(CACHE_DIR))

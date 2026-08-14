@@ -120,8 +120,7 @@ def parse_fhwa_nhts_mileage(
             per_files = [
                 f
                 for f in z.namelist()
-                if f.lower().endswith(".csv")
-                and ("perv2pub" in f.lower() or "perpub" in f.lower())
+                if f.lower().endswith(".csv") and ("perv2pub" in f.lower() or "perpub" in f.lower())
             ]
             if not per_files:
                 raise FileNotFoundError(

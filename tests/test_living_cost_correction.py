@@ -115,9 +115,10 @@ def test_owner_packet_od_updates(tmp_path: Path):
     assert "LICENSING_REVIEW" not in by_id["OD-006"]["question"]
     assert "average expenditure" in by_id["OD-006"]["option_a"].lower()
     assert "including zero" in by_id["OD-007"]["option_a"].lower()
-    assert "NOT a price source" in by_id["OD-009"]["why_it_matters"] or "not a price" in by_id[
-        "OD-009"
-    ]["why_it_matters"].lower()
+    assert (
+        "NOT a price source" in by_id["OD-009"]["why_it_matters"]
+        or "not a price" in by_id["OD-009"]["why_it_matters"].lower()
+    )
     assert "HYBRID" in by_id["OD-010"]["option_a"]
     assert "coterminous" in by_id["OD-011"]["option_a"]
     assert "09190" in by_id["OD-013"]["why_it_matters"]
@@ -248,7 +249,10 @@ def test_ct_reconstruction_uses_official_crosswalk_and_nine_planning_regions():
     assert report.get("state_total_reconciles") is True
     from foundation.sources.census_ct import apply_legacy_ct_weights_to_universe
 
-    dummy = {fips: {"adult_population": 1, "county_name": fips, "state": "CT"} for fips in CT_PLANNING_REGION_FIPS}
+    dummy = {
+        fips: {"adult_population": 1, "county_name": fips, "state": "CT"}
+        for fips in CT_PLANNING_REGION_FIPS
+    }
     dummy["06075"] = {"adult_population": 10, "county_name": "SF", "state": "CA"}
     joined = apply_legacy_ct_weights_to_universe(dummy, report)
     assert "09110" not in joined
@@ -268,7 +272,10 @@ def test_ct_reconstruction_uses_official_crosswalk_and_nine_planning_regions():
 
 def test_no_headline_flags_in_owner_packet_and_coverage():
     coverage_path = (
-        Path(__file__).resolve().parents[1] / "data" / "metadata" / "living_cost_source_coverage.json"
+        Path(__file__).resolve().parents[1]
+        / "data"
+        / "metadata"
+        / "living_cost_source_coverage.json"
     )
     coverage = json.loads(coverage_path.read_text(encoding="utf-8"))
     assert coverage["headline_calculated"] is False

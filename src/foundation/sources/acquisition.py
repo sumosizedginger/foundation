@@ -143,9 +143,7 @@ def acquire_source(
         and destination.exists()
         and read_retrieval_sidecar(destination) is None
     ):
-        logger.info(
-            "Re-retrieving %s because cached bytes have no provenance sidecar", source_id
-        )
+        logger.info("Re-retrieving %s because cached bytes have no provenance sidecar", source_id)
         force_download = True
 
     if force_download or not destination.exists():

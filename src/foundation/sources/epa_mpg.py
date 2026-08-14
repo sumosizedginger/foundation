@@ -232,7 +232,9 @@ def parse_epa_mpg_candidates(
             if not members:
                 raise ValueError("EPA vehicles zip has no CSV member")
             with archive.open(members[0]) as raw:
-                reader = csv.DictReader(io.TextIOWrapper(raw, encoding="utf-8-sig", errors="replace"))
+                reader = csv.DictReader(
+                    io.TextIOWrapper(raw, encoding="utf-8-sig", errors="replace")
+                )
                 rows = list(reader)
     except (OSError, ValueError, zipfile.BadZipFile, csv.Error, UnicodeError) as exc:
         logger.error("Failed to parse EPA vehicles file: %s", exc)

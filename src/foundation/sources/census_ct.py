@@ -312,9 +312,7 @@ def apply_legacy_ct_weights_to_universe(
     if not totals:
         return census_universe
     out = {
-        fips: row
-        for fips, row in census_universe.items()
-        if fips not in CT_PLANNING_REGION_FIPS
+        fips: row for fips, row in census_universe.items() if fips not in CT_PLANNING_REGION_FIPS
     }
     template = next(iter(census_universe.values()), {})
     for fips, adult in totals.items():
