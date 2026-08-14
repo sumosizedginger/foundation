@@ -1,6 +1,8 @@
 # Deliverable 2A closeout
 
-**Commit:** see repository HEAD after this file is committed.
+**Parent commit:** `ea4c58be1387fb7a0de0cd1f0c0502d8c794bb48`
+
+**This closeout is committed with the regenerated reports on the same branch. After push, `git rev-parse HEAD` is the exact SHA.**
 
 **NO MINIMUM SUSTAINABLE LIVING COST HEADLINE WAS CALCULATED OR PUBLISHED.**
 
@@ -12,7 +14,7 @@ GitHub Actions remain on `actions/checkout@v5`, `actions/setup-python@v6`, `acti
 
 ## Tests
 
-Unit suite (excluding integration): 70+ passed at last local run.
+Unit suite (excluding integration): 73 passed at last local run.
 
 ## Source coverage before vs after this pass
 
@@ -51,7 +53,7 @@ After:
 
 ## CMS geography
 
-Federal-platform service-area states are listed in `living_cost_cms_coverage.json` with rating-area and county counts. SBE 2024 official zip 404; SBE 2026 zip is documentation-only.
+Federal-platform Rate/Plan/Service Area/Benefits join produced 378 (2024) and 349 (2026) lowest-Silver rating areas. Service-area county rows: 2127 (2024), 1929 (2026). SBE 2024 official zip 404; SBE 2026 zip is documentation-only. `health_premium` remains RETRIEVED_UNVALIDATED.
 
 ## USDA months
 

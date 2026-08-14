@@ -358,7 +358,10 @@ def write_coverage(artifacts: list[RetrievedSourceArtifact]) -> dict:
         coverage_by_year[str(year)] = {
             "housing": _component_status(artifacts, f"hud_fmr_{year}"),
             "population_weights": _component_status(artifacts, f"census_acs5_{year}"),
-            "food": _component_status(artifacts, f"usda_food_low_cost_{year}"),
+            "food": "MODELED_FROM_MEASURED_INPUTS"
+            if _component_status(artifacts, f"usda_food_low_cost_{year}")
+            in {"VALIDATED", "MODELED_FROM_MEASURED_INPUTS", "RETRIEVED_UNVALIDATED"}
+            else _component_status(artifacts, f"usda_food_low_cost_{year}"),
             "health_premium": "RETRIEVED_UNVALIDATED",
             "health_oop": _component_status(artifacts, f"meps_table1_{year}"),
             "mileage": _component_status(artifacts, f"fhwa_nhts_{year}"),
@@ -451,6 +454,46 @@ def write_coverage(artifacts: list[RetrievedSourceArtifact]) -> dict:
                 "project_cost_year": {"2024": 2024, "2026": 2026},
                 "source_data_year": {"2024": 2024, "2026": 2026},
                 "translation_method": "RULE_YEAR",
+            },
+            "mpg": {
+                "project_cost_year": {"2024": 2024, "2026": 2026},
+                "source_data_year": {"2024": None, "2026": None},
+                "translation_method": "ESTIMATED_OWNER_REVIEW",
+            },
+            "insurance": {
+                "project_cost_year": {"2024": 2024, "2026": 2026},
+                "source_data_year": {"2024": None, "2026": None},
+                "translation_method": "LICENSING_REVIEW",
+            },
+            "maintenance": {
+                "project_cost_year": {"2024": 2024, "2026": 2026},
+                "source_data_year": {"2024": None, "2026": None},
+                "translation_method": "ESTIMATED_OWNER_REVIEW",
+            },
+            "registration": {
+                "project_cost_year": {"2024": 2024, "2026": 2026},
+                "source_data_year": {"2024": None, "2026": None},
+                "translation_method": "SOURCE_GAP",
+            },
+            "replacement": {
+                "project_cost_year": {"2024": 2024, "2026": 2026},
+                "source_data_year": {"2024": None, "2026": None},
+                "translation_method": "ESTIMATED_OWNER_REVIEW",
+            },
+            "connectivity": {
+                "project_cost_year": {"2024": 2024, "2026": 2026},
+                "source_data_year": {"2024": None, "2026": None},
+                "translation_method": "SOURCE_GAP",
+            },
+            "state_tax": {
+                "project_cost_year": {"2024": 2024, "2026": 2026},
+                "source_data_year": {"2024": 2024, "2026": 2026},
+                "translation_method": "RULE_YEAR",
+            },
+            "local_tax": {
+                "project_cost_year": {"2024": 2024, "2026": 2026},
+                "source_data_year": {"2024": None, "2026": None},
+                "translation_method": "SOURCE_GAP",
             },
         },
         "retrieved_artifacts": [

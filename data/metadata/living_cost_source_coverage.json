@@ -27,16 +27,16 @@
     "2024": {
       "housing": "VALIDATED",
       "population_weights": "VALIDATED",
-      "food": "VALIDATED",
+      "food": "MODELED_FROM_MEASURED_INPUTS",
       "health_premium": "RETRIEVED_UNVALIDATED",
       "health_oop": "RETRIEVED_UNVALIDATED",
       "mileage": "VALIDATED",
-      "mpg": "SOURCE_GAP",
+      "mpg": "ESTIMATED_OWNER_REVIEW",
       "gas": "VALIDATED",
       "insurance": "LICENSING_REVIEW",
-      "maintenance": "SOURCE_GAP",
+      "maintenance": "ESTIMATED_OWNER_REVIEW",
       "registration": "SOURCE_GAP",
-      "replacement": "SOURCE_GAP",
+      "replacement": "ESTIMATED_OWNER_REVIEW",
       "connectivity": "SOURCE_GAP",
       "essentials": "MODELED_FROM_MEASURED_INPUTS",
       "recreation": "MODELED_FROM_MEASURED_INPUTS",
@@ -48,16 +48,16 @@
     "2026": {
       "housing": "VALIDATED",
       "population_weights": "VALIDATED",
-      "food": "VALIDATED",
+      "food": "MODELED_FROM_MEASURED_INPUTS",
       "health_premium": "RETRIEVED_UNVALIDATED",
       "health_oop": "RETRIEVED_UNVALIDATED",
       "mileage": "VALIDATED",
-      "mpg": "SOURCE_GAP",
+      "mpg": "ESTIMATED_OWNER_REVIEW",
       "gas": "VALIDATED",
       "insurance": "LICENSING_REVIEW",
-      "maintenance": "SOURCE_GAP",
+      "maintenance": "ESTIMATED_OWNER_REVIEW",
       "registration": "SOURCE_GAP",
-      "replacement": "SOURCE_GAP",
+      "replacement": "ESTIMATED_OWNER_REVIEW",
       "connectivity": "SOURCE_GAP",
       "essentials": "MODELED_FROM_MEASURED_INPUTS",
       "recreation": "MODELED_FROM_MEASURED_INPUTS",
@@ -344,22 +344,22 @@
   "blocking_components": [
     "2024:health_premium:RETRIEVED_UNVALIDATED",
     "2024:health_oop:RETRIEVED_UNVALIDATED",
-    "2024:mpg:SOURCE_GAP",
+    "2024:mpg:ESTIMATED_OWNER_REVIEW",
     "2024:insurance:LICENSING_REVIEW",
-    "2024:maintenance:SOURCE_GAP",
+    "2024:maintenance:ESTIMATED_OWNER_REVIEW",
     "2024:registration:SOURCE_GAP",
-    "2024:replacement:SOURCE_GAP",
+    "2024:replacement:ESTIMATED_OWNER_REVIEW",
     "2024:connectivity:SOURCE_GAP",
     "2024:federal_tax:INVENTORY_NOT_VALIDATED",
     "2024:state_tax:SOURCE_GAP",
     "2024:local_tax:SOURCE_GAP",
     "2026:health_premium:RETRIEVED_UNVALIDATED",
     "2026:health_oop:RETRIEVED_UNVALIDATED",
-    "2026:mpg:SOURCE_GAP",
+    "2026:mpg:ESTIMATED_OWNER_REVIEW",
     "2026:insurance:LICENSING_REVIEW",
-    "2026:maintenance:SOURCE_GAP",
+    "2026:maintenance:ESTIMATED_OWNER_REVIEW",
     "2026:registration:SOURCE_GAP",
-    "2026:replacement:SOURCE_GAP",
+    "2026:replacement:ESTIMATED_OWNER_REVIEW",
     "2026:connectivity:SOURCE_GAP",
     "2026:federal_tax:INVENTORY_NOT_VALIDATED",
     "2026:state_tax:SOURCE_GAP",
@@ -498,6 +498,94 @@
         "2026": 2026
       },
       "translation_method": "RULE_YEAR"
+    },
+    "mpg": {
+      "project_cost_year": {
+        "2024": 2024,
+        "2026": 2026
+      },
+      "source_data_year": {
+        "2024": null,
+        "2026": null
+      },
+      "translation_method": "ESTIMATED_OWNER_REVIEW"
+    },
+    "insurance": {
+      "project_cost_year": {
+        "2024": 2024,
+        "2026": 2026
+      },
+      "source_data_year": {
+        "2024": null,
+        "2026": null
+      },
+      "translation_method": "LICENSING_REVIEW"
+    },
+    "maintenance": {
+      "project_cost_year": {
+        "2024": 2024,
+        "2026": 2026
+      },
+      "source_data_year": {
+        "2024": null,
+        "2026": null
+      },
+      "translation_method": "ESTIMATED_OWNER_REVIEW"
+    },
+    "registration": {
+      "project_cost_year": {
+        "2024": 2024,
+        "2026": 2026
+      },
+      "source_data_year": {
+        "2024": null,
+        "2026": null
+      },
+      "translation_method": "SOURCE_GAP"
+    },
+    "replacement": {
+      "project_cost_year": {
+        "2024": 2024,
+        "2026": 2026
+      },
+      "source_data_year": {
+        "2024": null,
+        "2026": null
+      },
+      "translation_method": "ESTIMATED_OWNER_REVIEW"
+    },
+    "connectivity": {
+      "project_cost_year": {
+        "2024": 2024,
+        "2026": 2026
+      },
+      "source_data_year": {
+        "2024": null,
+        "2026": null
+      },
+      "translation_method": "SOURCE_GAP"
+    },
+    "state_tax": {
+      "project_cost_year": {
+        "2024": 2024,
+        "2026": 2026
+      },
+      "source_data_year": {
+        "2024": 2024,
+        "2026": 2026
+      },
+      "translation_method": "RULE_YEAR"
+    },
+    "local_tax": {
+      "project_cost_year": {
+        "2024": 2024,
+        "2026": 2026
+      },
+      "source_data_year": {
+        "2024": null,
+        "2026": null
+      },
+      "translation_method": "SOURCE_GAP"
     }
   }
 }

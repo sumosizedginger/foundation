@@ -65,7 +65,7 @@
       ],
       "rating_areas_represented": 378,
       "counties_represented": 2127,
-      "joined_lowest_silver_rating_areas": null,
+      "joined_lowest_silver_rating_areas": 378,
       "note": "Counts from official PUF zips. Lowest-silver join is implemented in parse_cms_marketplace_multi_puf; health_premium remains RETRIEVED_UNVALIDATED until SBE files exist."
     },
     "2026": {
@@ -131,7 +131,7 @@
       ],
       "rating_areas_represented": 349,
       "counties_represented": 1929,
-      "joined_lowest_silver_rating_areas": null,
+      "joined_lowest_silver_rating_areas": 349,
       "note": "Counts from official PUF zips. Lowest-silver join is implemented in parse_cms_marketplace_multi_puf; health_premium remains RETRIEVED_UNVALIDATED until SBE files exist."
     }
   },
