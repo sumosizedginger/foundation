@@ -90,8 +90,8 @@ No Minimum Sustainable Living Cost headline was calculated or published.
 
 **Recommended:** A+C after CE variables are verified against the official dictionary.
 **Directional effect:** P25 is below mean maintenance spend.
-**Source support:** BLS CE PUMD; official download currently 403 from this client.
-**Sensitivity:** P20/P25/P30 once CE archive is retrieved.
+**Source support:** BLS CE 2024 Interview PUMD (intrvw24.zip) retrieved and FMLI parsed.
+**Sensitivity:** P20/P25/P30 on vehicle-maintenance/tires UCC codes after dictionary freeze.
 
 ## OD-008 — Which recreation percentile is the headline Social & Recreation amount?
 
@@ -157,3 +157,16 @@ No Minimum Sustainable Living Cost headline was calculated or published.
 **Directional effect:** Any extra reserve raises gross required income.
 **Source support:** GROK.MD resilience section; retired buffers are not authorized.
 **Sensitivity:** None until owner requests one.
+
+## OD-013 — How should Connecticut ACS planning regions be joined to HUD county FMR rows?
+
+**Why it matters:** 2024 ACS 5-Year uses Connecticut planning-region FIPS (09110-09170). HUD FMR still publishes legacy county FIPS. Nine ACS geographies (about 2.9 million adults) currently unmatched.
+
+- Option A: Build an official CT OPM/Census crosswalk from planning regions to legacy counties and allocate FMR.
+- Option B: Leave CT unmatched until HUD publishes planning-region FMR.
+- Option C: Assign a statewide CT 1BR FMR to unmatched planning regions.
+
+**Recommended:** A if an official crosswalk exists; otherwise B. Never invent county rents.
+**Directional effect:** B excludes ~1.1% of national adult population from the housing join.
+**Source support:** living_cost_geo_join_2024.json unmatched_census_counties 09110-09170.
+**Sensitivity:** Recompute CT after an official crosswalk is frozen.

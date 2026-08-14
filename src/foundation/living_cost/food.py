@@ -15,7 +15,7 @@ def calculate_food_baseline(
     plan_type: str = "low_cost",
     state: str = "US",
     source_url: str = "https://www.fns.usda.gov/cnpp/usda-food-plans-cost-food-monthly-reports",
-    source_sha256: str = "verified_usda_sha",
+    source_sha256: str = "",
     retrieved_at: str = "2026-08-13T00:00:00Z",
 ) -> LivingCostComponentObservation:
     """Return a validated food component observation for single adult."""

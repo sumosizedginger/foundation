@@ -1,6 +1,6 @@
 {
   "report_type": "living_cost_owner_decisions_pending",
-  "generated_at": "2026-08-14T17:02:19+00:00",
+  "generated_at": "2026-08-14T17:31:30+00:00",
   "headline_calculated": false,
   "decisions": [
     {
@@ -84,8 +84,8 @@
       "option_c": "Split ordinary maintenance, tires, and repairs if CE UCC codes support it.",
       "recommended": "A+C after CE variables are verified against the official dictionary.",
       "directional_effect": "P25 is below mean maintenance spend.",
-      "source_support": "BLS CE PUMD; official download currently 403 from this client.",
-      "sensitivity_plan": "P20/P25/P30 once CE archive is retrieved."
+      "source_support": "BLS CE 2024 Interview PUMD (intrvw24.zip) retrieved and FMLI parsed.",
+      "sensitivity_plan": "P20/P25/P30 on vehicle-maintenance/tires UCC codes after dictionary freeze."
     },
     {
       "id": "OD-008",
@@ -146,6 +146,18 @@
       "directional_effect": "Any extra reserve raises gross required income.",
       "source_support": "GROK.MD resilience section; retired buffers are not authorized.",
       "sensitivity_plan": "None until owner requests one."
+    },
+    {
+      "id": "OD-013",
+      "question": "How should Connecticut ACS planning regions be joined to HUD county FMR rows?",
+      "why_it_matters": "2024 ACS 5-Year uses Connecticut planning-region FIPS (09110-09170). HUD FMR still publishes legacy county FIPS. Nine ACS geographies (about 2.9 million adults) currently unmatched.",
+      "option_a": "Build an official CT OPM/Census crosswalk from planning regions to legacy counties and allocate FMR.",
+      "option_b": "Leave CT unmatched until HUD publishes planning-region FMR.",
+      "option_c": "Assign a statewide CT 1BR FMR to unmatched planning regions.",
+      "recommended": "A if an official crosswalk exists; otherwise B. Never invent county rents.",
+      "directional_effect": "B excludes ~1.1% of national adult population from the housing join.",
+      "source_support": "living_cost_geo_join_2024.json unmatched_census_counties 09110-09170.",
+      "sensitivity_plan": "Recompute CT after an official crosswalk is frozen."
     }
   ]
 }

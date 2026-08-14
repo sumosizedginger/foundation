@@ -302,3 +302,57 @@ def test_provenance_validator_strict_gates():
     )
     errors_sha = validate_component_provenance(invalid_sha_obs)
     assert any("must be 64 hex characters" in e for e in errors_sha)
+
+
+def test_xlsx_xml_reader_ignores_broken_dimension(tmp_path: Path):
+    from foundation.sources.xlsx_xml import rows_as_dicts
+
+    official = (
+        Path(__file__).resolve().parents[1]
+        / "data"
+        / "cache"
+        / "usda-lowcostplan-sept2007-present.xlsx"
+    )
+    if not official.exists():
+        pytest.skip("official USDA Low-Cost archive is not in data/cache")
+    rows = rows_as_dicts(official)
+    assert len(rows) > 100
+    assert "year" in rows[0]
+    assert "cost" in rows[0]
+
+
+def test_usda_official_adult_filter_and_ytd_label():
+    from foundation.sources.usda_food import build_usda_food_observations
+
+    cache = Path(__file__).resolve().parents[1] / "data" / "cache"
+    official = cache / "usda-lowcostplan-sept2007-present.xlsx"
+    if not official.exists():
+        pytest.skip("official USDA Low-Cost archive is not in data/cache")
+    obs = build_usda_food_observations(cache, 2024)
+    low = next(o for o in obs if o.component_id == "food_low_cost")
+    assert low.value_monthly is not None and low.value_monthly > 0
+    assert low.status.value == "MODELED_FROM_MEASURED_INPUTS"
+    assert "19-50" in low.notes
+    assert "1.20" in low.notes or "1.2" in low.notes
+
+
+def test_bea_sarpp_zip_all_items_2024():
+    zip_path = Path(__file__).resolve().parents[1] / "data" / "cache" / "SARPP.zip"
+    if not zip_path.exists():
+        pytest.skip("official BEA SARPP.zip is not in data/cache")
+    rpp_map = parse_bea_rpp_csv(zip_path, reference_year=2024)
+    assert rpp_map["CA"] > 1.05
+    assert rpp_map["MS"] < 0.95
+    assert "US" not in rpp_map
+    assert len(rpp_map) >= 50
+
+
+def test_bls_ce_uses_cached_official_zip_name():
+    from foundation.sources.bls_ce import _existing_interview_zip
+
+    cache = Path(__file__).resolve().parents[1] / "data" / "cache"
+    found = _existing_interview_zip(cache, "24")
+    if found is None:
+        pytest.skip("official BLS CE Interview zip is not in data/cache")
+    assert found.name in {"intrvw24.zip", "bls_ce_intrvw24.zip"}
+    assert found.stat().st_size > 10_000_000

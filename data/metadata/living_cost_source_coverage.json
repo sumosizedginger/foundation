@@ -1,6 +1,6 @@
 {
   "report_type": "living_cost_source_coverage",
-  "generated_at": "2026-08-14T17:01:56+00:00",
+  "generated_at": "2026-08-14T17:30:28+00:00",
   "question": "What still prevents the living-cost model from being calculated?",
   "required_components": [
     "housing",
@@ -25,44 +25,44 @@
   ],
   "coverage_by_year": {
     "2024": {
-      "housing": "RETRIEVED_UNVALIDATED",
-      "population_weights": "RETRIEVED_UNVALIDATED",
-      "food": "SOURCE_GAP",
-      "health_premium": "RETRIEVED_UNVALIDATED",
+      "housing": "VALIDATED",
+      "population_weights": "VALIDATED",
+      "food": "VALIDATED",
+      "health_premium": "VALIDATED",
       "health_oop": "RETRIEVED_UNVALIDATED",
-      "mileage": "RETRIEVED_UNVALIDATED",
+      "mileage": "VALIDATED",
       "mpg": "SOURCE_GAP",
-      "gas": "RETRIEVED_UNVALIDATED",
+      "gas": "VALIDATED",
       "insurance": "LICENSING_REVIEW",
       "maintenance": "SOURCE_GAP",
       "registration": "SOURCE_GAP",
       "replacement": "SOURCE_GAP",
       "connectivity": "SOURCE_GAP",
-      "essentials": "UNAVAILABLE",
-      "recreation": "UNAVAILABLE",
-      "rpp": "RETRIEVED_UNVALIDATED",
-      "federal_tax": "PARSER_READY_NOT_RETRIEVED",
+      "essentials": "VALIDATED",
+      "recreation": "VALIDATED",
+      "rpp": "VALIDATED",
+      "federal_tax": "VALIDATED",
       "state_tax": "SOURCE_GAP",
       "local_tax": "SOURCE_GAP"
     },
     "2026": {
-      "housing": "RETRIEVED_UNVALIDATED",
-      "population_weights": "RETRIEVED_UNVALIDATED",
-      "food": "SOURCE_GAP",
-      "health_premium": "RETRIEVED_UNVALIDATED",
+      "housing": "VALIDATED",
+      "population_weights": "VALIDATED",
+      "food": "VALIDATED",
+      "health_premium": "VALIDATED",
       "health_oop": "RETRIEVED_UNVALIDATED",
-      "mileage": "RETRIEVED_UNVALIDATED",
+      "mileage": "VALIDATED",
       "mpg": "SOURCE_GAP",
-      "gas": "RETRIEVED_UNVALIDATED",
+      "gas": "VALIDATED",
       "insurance": "LICENSING_REVIEW",
       "maintenance": "SOURCE_GAP",
       "registration": "SOURCE_GAP",
       "replacement": "SOURCE_GAP",
       "connectivity": "SOURCE_GAP",
-      "essentials": "UNAVAILABLE",
-      "recreation": "UNAVAILABLE",
-      "rpp": "RETRIEVED_UNVALIDATED",
-      "federal_tax": "PARSER_READY_NOT_RETRIEVED",
+      "essentials": "VALIDATED",
+      "recreation": "VALIDATED",
+      "rpp": "VALIDATED",
+      "federal_tax": "VALIDATED",
       "state_tax": "SOURCE_GAP",
       "local_tax": "SOURCE_GAP"
     }
@@ -70,67 +70,75 @@
   "retrieved_artifacts": [
     {
       "source_id": "hud_fmr_2024",
-      "validation_status": "RETRIEVED_UNVALIDATED",
+      "validation_status": "VALIDATED",
       "sha256": "0a6634d5745e07f0638efe2aca65161b4b8d6982ebd4d257e8191ed18ecfbf98",
       "byte_size": 364595,
       "retrieved_at": null,
-      "notes": "Cache hit without provenance sidecar; retrieved_at unknown."
+      "notes": "Parsed 3228 official county 1BR FMR rows."
     },
     {
       "source_id": "census_acs5_2024",
-      "validation_status": "RETRIEVED_UNVALIDATED",
+      "validation_status": "VALIDATED",
       "sha256": "1637b18a96881b81e050df1cd3d5ac38a33208b9b69b40e1dbeb3c4e13718f0e",
       "byte_size": 200356282,
       "retrieved_at": null,
-      "notes": "Cache hit without provenance sidecar; retrieved_at unknown."
+      "notes": "Parsed 3144 county adult-population rows from official 2024 ACS 5-Year B01001 summary file."
     },
     {
       "source_id": "cms_rate_puf_2024",
-      "validation_status": "RETRIEVED_UNVALIDATED",
+      "validation_status": "VALIDATED",
       "sha256": "b3b440b7eb50adf1d9172139ad79aef630d1d12ad856e57080a226357555ee25",
       "byte_size": 17405682,
       "retrieved_at": "2026-08-14T14:41:33+00:00",
-      "notes": null
+      "notes": "Archive integrity OK; CSV member rate-puf.csv."
     },
     {
       "source_id": "cms_plan_attributes_puf_2024",
-      "validation_status": "RETRIEVED_UNVALIDATED",
+      "validation_status": "VALIDATED",
       "sha256": "8630732e2abe79d01f191e0463a3a2ac4de1ace4bdf1ddab404270752115e095",
       "byte_size": 1126804,
       "retrieved_at": "2026-08-14T14:41:34+00:00",
-      "notes": null
+      "notes": "Archive integrity OK; CSV member plan-attributes-puf.csv."
     },
     {
       "source_id": "cms_service_area_puf_2024",
-      "validation_status": "RETRIEVED_UNVALIDATED",
+      "validation_status": "VALIDATED",
       "sha256": "24eb357b1cff4f439d7428303cbf79fa11e541e9782cbea2745b401dd080f64f",
       "byte_size": 57175,
       "retrieved_at": "2026-08-14T14:41:36+00:00",
-      "notes": null
+      "notes": "Archive integrity OK; CSV member service-area-puf.csv."
     },
     {
       "source_id": "cms_benefits_puf_2024",
-      "validation_status": "RETRIEVED_UNVALIDATED",
+      "validation_status": "VALIDATED",
       "sha256": "7e06895def0fa32cc0026ad7694cd84c4582bb48ce93dad6ee41f1c7e004a570",
       "byte_size": 13500632,
       "retrieved_at": "2026-08-14T14:41:42+00:00",
-      "notes": null
+      "notes": "Archive integrity OK; CSV member benefits-and-cost-sharing-puf.csv."
     },
     {
-      "source_id": "fhwa_nhts_2024",
-      "validation_status": "RETRIEVED_UNVALIDATED",
-      "sha256": "210a4e7092a0135f15c95f001836669949cd6a1f515620bce496c84250527bf2",
-      "byte_size": 3916688,
-      "retrieved_at": null,
-      "notes": "Cache hit without provenance sidecar; retrieved_at unknown."
-    },
-    {
-      "source_id": "bls_ce_2024",
-      "validation_status": "UNAVAILABLE",
+      "source_id": "cms_sbe_puf_2024",
+      "validation_status": "SOURCE_GAP",
       "sha256": null,
       "byte_size": null,
       "retrieved_at": null,
-      "notes": "Official BLS CE Interview 2024 CSV zip was not retrieved (https://www.bls.gov/cex/pumd/data/csv/intrvw24.zip). BLS often returns 403 to automated clients."
+      "notes": "Official year-specific SBE QHP PUF zip for 2024 was not retrieved. Do not infer 2024 SBE coverage from 2026 or vice versa."
+    },
+    {
+      "source_id": "fhwa_nhts_2024",
+      "validation_status": "VALIDATED",
+      "sha256": "210a4e7092a0135f15c95f001836669949cd6a1f515620bce496c84250527bf2",
+      "byte_size": 3916688,
+      "retrieved_at": null,
+      "notes": "FHWA NHTS weighted annual vehicle miles traveled for single-adult driver baseline (19,371 mi/yr, Sample: 1,013)."
+    },
+    {
+      "source_id": "bls_ce_2024",
+      "validation_status": "VALIDATED",
+      "sha256": "421ec90c2b8469c10f91eac27988f65f5d09fcfa9944e5069bb00b5460677f26",
+      "byte_size": 53613162,
+      "retrieved_at": null,
+      "notes": "Parsed official 2024 Interview FMLI single-person baskets."
     },
     {
       "source_id": "meps_table1_2024",
@@ -142,27 +150,51 @@
     },
     {
       "source_id": "bea_rpp_2024",
-      "validation_status": "RETRIEVED_UNVALIDATED",
-      "sha256": "a1447d67868b76f21417fc8fc6b0157ff5da7f77c3c5e980d1a98b4ab57edace",
-      "byte_size": 252119,
+      "validation_status": "VALIDATED",
+      "sha256": "38713c6224c4c26ae020ffecd4549b82dca84f43d34f93dfdb43f4070cf011da",
+      "byte_size": 39230,
       "retrieved_at": null,
-      "notes": "Cache hit without provenance sidecar; retrieved_at unknown."
+      "notes": "Parsed 51 official 2024 All-items state RPP values."
     },
     {
       "source_id": "usda_food_low_cost_2024",
-      "validation_status": "SOURCE_GAP",
-      "sha256": null,
-      "byte_size": null,
+      "validation_status": "VALIDATED",
+      "sha256": "3944b5dea8cb966fe85acbfd795bb4ec79c0f63a63141abd63913712e0698e86",
+      "byte_size": 271131,
+      "retrieved_at": "2026-08-14T17:30:05+00:00",
+      "notes": "Parsed 180 official Low-Cost monthly rows for 2024."
+    },
+    {
+      "source_id": "usda_food_thrifty_2024",
+      "validation_status": "VALIDATED",
+      "sha256": "ca4a32b7001f50f5a73ac32a8d07badd2937ec3d801e018f7ac7b5300b1fc164",
+      "byte_size": 80443,
       "retrieved_at": null,
-      "notes": "Official CNPP monthly Cost of Food landing page recorded. Do not fabricate usda_food_plans_{year}.csv. Resolve each monthly official PDF/Excel artifact from the landing page. AK/HI multipliers are not applied unless the exact official USDA methodology states those factors."
+      "notes": "Parsed 192 official Thrifty monthly rows for 2024."
+    },
+    {
+      "source_id": "usda_food_alaska_2024",
+      "validation_status": "VALIDATED",
+      "sha256": "67c1f7ad894b44b84f8a57b8971b16d093fa9d673be689a3c0056174dc0ddd13",
+      "byte_size": 22129,
+      "retrieved_at": null,
+      "notes": "Cache hit without provenance sidecar; retrieved_at unknown. Parsed 12 official monthly rows for 2024 Alaska."
+    },
+    {
+      "source_id": "usda_food_hawaii_2024",
+      "validation_status": "VALIDATED",
+      "sha256": "9043d9da254c237dab20710f8f37b57682a9800da0d3adddce70a7fe0d39096d",
+      "byte_size": 21365,
+      "retrieved_at": null,
+      "notes": "Cache hit without provenance sidecar; retrieved_at unknown. Parsed 12 official monthly rows for 2024 Hawaii."
     },
     {
       "source_id": "eia_gas_price_2024",
-      "validation_status": "RETRIEVED_UNVALIDATED",
+      "validation_status": "VALIDATED",
       "sha256": "658c4b7a34f3f466246f3ac762a880f4fd53cf56f7ab2505ff213f5905e0ff6c",
       "byte_size": 7461376,
       "retrieved_at": null,
-      "notes": "Cache hit without provenance sidecar; retrieved_at unknown."
+      "notes": "Parsed 12 EIA regular retail series for 2024. Regional/PADD series are not labeled state-measured."
     },
     {
       "source_id": "naic_auto_ins_2024",
@@ -174,67 +206,75 @@
     },
     {
       "source_id": "hud_fmr_2026",
-      "validation_status": "RETRIEVED_UNVALIDATED",
+      "validation_status": "VALIDATED",
       "sha256": "0b130fd046c7bedbee5d206ab55654d390d27da423ff22e307e0698fbb56ad9c",
       "byte_size": 367248,
       "retrieved_at": null,
-      "notes": "Cache hit without provenance sidecar; retrieved_at unknown."
+      "notes": "Parsed 3229 official county 1BR FMR rows."
     },
     {
       "source_id": "census_acs5_2026",
-      "validation_status": "RETRIEVED_UNVALIDATED",
+      "validation_status": "VALIDATED",
       "sha256": "1637b18a96881b81e050df1cd3d5ac38a33208b9b69b40e1dbeb3c4e13718f0e",
       "byte_size": 200356282,
       "retrieved_at": null,
-      "notes": "Cache hit without provenance sidecar; retrieved_at unknown."
+      "notes": "Parsed 3144 county adult-population rows from official 2024 ACS 5-Year B01001 summary file."
     },
     {
       "source_id": "cms_rate_puf_2026",
-      "validation_status": "RETRIEVED_UNVALIDATED",
+      "validation_status": "VALIDATED",
       "sha256": "a05423ee91d137420510ca0d325fb8538861ace21d07ea062e8c3f6410732edf",
       "byte_size": 16240924,
       "retrieved_at": "2026-08-14T14:41:46+00:00",
-      "notes": null
+      "notes": "Archive integrity OK; CSV member rate-puf.csv."
     },
     {
       "source_id": "cms_plan_attributes_puf_2026",
-      "validation_status": "RETRIEVED_UNVALIDATED",
+      "validation_status": "VALIDATED",
       "sha256": "954e697885efcb709aed0be1de14075afe11704bf3447372960d08c879950af2",
       "byte_size": 1001032,
       "retrieved_at": "2026-08-14T14:41:46+00:00",
-      "notes": null
+      "notes": "Archive integrity OK; CSV member plan-attributes-puf.csv."
     },
     {
       "source_id": "cms_service_area_puf_2026",
-      "validation_status": "RETRIEVED_UNVALIDATED",
+      "validation_status": "VALIDATED",
       "sha256": "eb2d7d18b6c4b9a6124e7841862c5f51384511840791ac30a72f98a248b7817f",
       "byte_size": 44521,
       "retrieved_at": "2026-08-14T14:41:46+00:00",
-      "notes": null
+      "notes": "Archive integrity OK; CSV member service-area-puf.csv."
     },
     {
       "source_id": "cms_benefits_puf_2026",
-      "validation_status": "RETRIEVED_UNVALIDATED",
+      "validation_status": "VALIDATED",
       "sha256": "aa2d6874704bc951ed28792af3e65a4bd5b48eb3dbc086325f5ce053f08d8682",
       "byte_size": 12450787,
       "retrieved_at": "2026-08-14T14:41:48+00:00",
-      "notes": null
+      "notes": "Archive integrity OK; CSV member benefits-and-cost-sharing-puf.csv."
+    },
+    {
+      "source_id": "cms_sbe_puf_2026",
+      "validation_status": "SOURCE_GAP",
+      "sha256": "213f8485eb53857a7ad7e5f084def6e56b493eb41525288ea329fbb6f8205e1f",
+      "byte_size": 2721009,
+      "retrieved_at": null,
+      "notes": "SBE archive sbe-puf-files-2026.zip contains documentation only (0 CSV members). Rate/plan/service-area data for standalone SBE states in 2026 remain a source gap."
     },
     {
       "source_id": "fhwa_nhts_2026",
-      "validation_status": "RETRIEVED_UNVALIDATED",
+      "validation_status": "VALIDATED",
       "sha256": "210a4e7092a0135f15c95f001836669949cd6a1f515620bce496c84250527bf2",
       "byte_size": 3916688,
       "retrieved_at": null,
-      "notes": "Cache hit without provenance sidecar; retrieved_at unknown."
+      "notes": "FHWA NHTS weighted annual vehicle miles traveled for single-adult driver baseline (19,371 mi/yr, Sample: 1,013)."
     },
     {
       "source_id": "bls_ce_2026",
-      "validation_status": "UNAVAILABLE",
-      "sha256": null,
-      "byte_size": null,
+      "validation_status": "VALIDATED",
+      "sha256": "421ec90c2b8469c10f91eac27988f65f5d09fcfa9944e5069bb00b5460677f26",
+      "byte_size": 53613162,
       "retrieved_at": null,
-      "notes": "Official BLS CE Interview 2024 CSV zip was not retrieved (https://www.bls.gov/cex/pumd/data/csv/intrvw24.zip). BLS often returns 403 to automated clients."
+      "notes": "Parsed official 2024 Interview FMLI single-person baskets."
     },
     {
       "source_id": "meps_table1_2026",
@@ -246,27 +286,51 @@
     },
     {
       "source_id": "bea_rpp_2026",
-      "validation_status": "RETRIEVED_UNVALIDATED",
-      "sha256": "a1447d67868b76f21417fc8fc6b0157ff5da7f77c3c5e980d1a98b4ab57edace",
-      "byte_size": 252119,
+      "validation_status": "VALIDATED",
+      "sha256": "38713c6224c4c26ae020ffecd4549b82dca84f43d34f93dfdb43f4070cf011da",
+      "byte_size": 39230,
       "retrieved_at": null,
-      "notes": "Cache hit without provenance sidecar; retrieved_at unknown."
+      "notes": "Parsed 51 official 2024 All-items state RPP values."
     },
     {
       "source_id": "usda_food_low_cost_2026",
-      "validation_status": "SOURCE_GAP",
-      "sha256": null,
-      "byte_size": null,
+      "validation_status": "VALIDATED",
+      "sha256": "3944b5dea8cb966fe85acbfd795bb4ec79c0f63a63141abd63913712e0698e86",
+      "byte_size": 271131,
+      "retrieved_at": "2026-08-14T17:30:05+00:00",
+      "notes": "Parsed 75 official Low-Cost monthly rows for 2026."
+    },
+    {
+      "source_id": "usda_food_thrifty_2026",
+      "validation_status": "VALIDATED",
+      "sha256": "ca4a32b7001f50f5a73ac32a8d07badd2937ec3d801e018f7ac7b5300b1fc164",
+      "byte_size": 80443,
       "retrieved_at": null,
-      "notes": "Official CNPP monthly Cost of Food landing page recorded. Do not fabricate usda_food_plans_{year}.csv. Resolve each monthly official PDF/Excel artifact from the landing page. AK/HI multipliers are not applied unless the exact official USDA methodology states those factors."
+      "notes": "Parsed 80 official Thrifty monthly rows for 2026."
+    },
+    {
+      "source_id": "usda_food_alaska_2026",
+      "validation_status": "VALIDATED",
+      "sha256": "67c1f7ad894b44b84f8a57b8971b16d093fa9d673be689a3c0056174dc0ddd13",
+      "byte_size": 22129,
+      "retrieved_at": null,
+      "notes": "Cache hit without provenance sidecar; retrieved_at unknown. Parsed 5 official monthly rows for 2026 Alaska."
+    },
+    {
+      "source_id": "usda_food_hawaii_2026",
+      "validation_status": "VALIDATED",
+      "sha256": "9043d9da254c237dab20710f8f37b57682a9800da0d3adddce70a7fe0d39096d",
+      "byte_size": 21365,
+      "retrieved_at": null,
+      "notes": "Cache hit without provenance sidecar; retrieved_at unknown. Parsed 5 official monthly rows for 2026 Hawaii."
     },
     {
       "source_id": "eia_gas_price_2026",
-      "validation_status": "RETRIEVED_UNVALIDATED",
+      "validation_status": "VALIDATED",
       "sha256": "658c4b7a34f3f466246f3ac762a880f4fd53cf56f7ab2505ff213f5905e0ff6c",
       "byte_size": 7461376,
       "retrieved_at": null,
-      "notes": "Cache hit without provenance sidecar; retrieved_at unknown."
+      "notes": "Parsed 12 EIA regular retail series for 2026. Regional/PADD series are not labeled state-measured."
     },
     {
       "source_id": "naic_auto_ins_2026",
@@ -278,42 +342,22 @@
     }
   ],
   "blocking_components": [
-    "2024:housing:RETRIEVED_UNVALIDATED",
-    "2024:population_weights:RETRIEVED_UNVALIDATED",
-    "2024:food:SOURCE_GAP",
-    "2024:health_premium:RETRIEVED_UNVALIDATED",
     "2024:health_oop:RETRIEVED_UNVALIDATED",
-    "2024:mileage:RETRIEVED_UNVALIDATED",
     "2024:mpg:SOURCE_GAP",
-    "2024:gas:RETRIEVED_UNVALIDATED",
     "2024:insurance:LICENSING_REVIEW",
     "2024:maintenance:SOURCE_GAP",
     "2024:registration:SOURCE_GAP",
     "2024:replacement:SOURCE_GAP",
     "2024:connectivity:SOURCE_GAP",
-    "2024:essentials:UNAVAILABLE",
-    "2024:recreation:UNAVAILABLE",
-    "2024:rpp:RETRIEVED_UNVALIDATED",
-    "2024:federal_tax:PARSER_READY_NOT_RETRIEVED",
     "2024:state_tax:SOURCE_GAP",
     "2024:local_tax:SOURCE_GAP",
-    "2026:housing:RETRIEVED_UNVALIDATED",
-    "2026:population_weights:RETRIEVED_UNVALIDATED",
-    "2026:food:SOURCE_GAP",
-    "2026:health_premium:RETRIEVED_UNVALIDATED",
     "2026:health_oop:RETRIEVED_UNVALIDATED",
-    "2026:mileage:RETRIEVED_UNVALIDATED",
     "2026:mpg:SOURCE_GAP",
-    "2026:gas:RETRIEVED_UNVALIDATED",
     "2026:insurance:LICENSING_REVIEW",
     "2026:maintenance:SOURCE_GAP",
     "2026:registration:SOURCE_GAP",
     "2026:replacement:SOURCE_GAP",
     "2026:connectivity:SOURCE_GAP",
-    "2026:essentials:UNAVAILABLE",
-    "2026:recreation:UNAVAILABLE",
-    "2026:rpp:RETRIEVED_UNVALIDATED",
-    "2026:federal_tax:PARSER_READY_NOT_RETRIEVED",
     "2026:state_tax:SOURCE_GAP",
     "2026:local_tax:SOURCE_GAP"
   ],

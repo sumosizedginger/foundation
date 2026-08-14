@@ -18,7 +18,7 @@ def calculate_healthcare(
     geography_name: str = "",
     state: str = "",
     source_url: str = "https://www.cms.gov/marketplace/resources/data/public-use-files",
-    source_sha256: str = "verified_cms_meps_sha",
+    source_sha256: str = "",
     retrieved_at: str = "2026-08-13T00:00:00Z",
 ) -> LivingCostComponentObservation:
     """Return a validated healthcare component observation."""

@@ -1,7 +1,7 @@
 {
   "manifest_type": "living_cost_source_manifest",
   "methodology_version": "0.2.0-draft",
-  "generated_at": "2026-08-14T17:01:56+00:00",
+  "generated_at": "2026-08-14T17:30:28+00:00",
   "source_count": 15,
   "sources": [
     {
@@ -20,9 +20,9 @@
       "sha256": "0a6634d5745e07f0638efe2aca65161b4b8d6982ebd4d257e8191ed18ecfbf98",
       "byte_size": 364595,
       "local_cache_filename": "FMR2024_final_revised.xlsx",
-      "validation_status": "RETRIEVED_UNVALIDATED",
+      "validation_status": "VALIDATED",
       "resolved_url": "https://www.huduser.gov/portal/datasets/fmr/fmr2024/FMR2024_final_revised.xlsx",
-      "retrieval_notes": "Cache hit without provenance sidecar; retrieved_at unknown."
+      "retrieval_notes": "Parsed 3228 official county 1BR FMR rows."
     },
     {
       "source_id": "hud_fmr_2026",
@@ -40,9 +40,9 @@
       "sha256": "0b130fd046c7bedbee5d206ab55654d390d27da423ff22e307e0698fbb56ad9c",
       "byte_size": 367248,
       "local_cache_filename": "FY26_FMRs_revised.xlsx",
-      "validation_status": "RETRIEVED_UNVALIDATED",
+      "validation_status": "VALIDATED",
       "resolved_url": "https://www.huduser.gov/portal/datasets/fmr/fmr2026/FY26_FMRs_revised.xlsx",
-      "retrieval_notes": "Cache hit without provenance sidecar; retrieved_at unknown."
+      "retrieval_notes": "Parsed 3229 official county 1BR FMR rows."
     },
     {
       "source_id": "census_acs5_2024",
@@ -60,9 +60,9 @@
       "sha256": "1637b18a96881b81e050df1cd3d5ac38a33208b9b69b40e1dbeb3c4e13718f0e",
       "byte_size": 200356282,
       "local_cache_filename": "acsdt5y2024-b01001.dat",
-      "validation_status": "RETRIEVED_UNVALIDATED",
+      "validation_status": "VALIDATED",
       "resolved_url": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b01001.dat",
-      "retrieval_notes": "Cache hit without provenance sidecar; retrieved_at unknown."
+      "retrieval_notes": "Parsed 3144 county adult-population rows from official 2024 ACS 5-Year B01001 summary file."
     },
     {
       "source_id": "census_acs5_2026",
@@ -80,9 +80,9 @@
       "sha256": "1637b18a96881b81e050df1cd3d5ac38a33208b9b69b40e1dbeb3c4e13718f0e",
       "byte_size": 200356282,
       "local_cache_filename": "acsdt5y2024-b01001.dat",
-      "validation_status": "RETRIEVED_UNVALIDATED",
+      "validation_status": "VALIDATED",
       "resolved_url": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b01001.dat",
-      "retrieval_notes": "Cache hit without provenance sidecar; retrieved_at unknown."
+      "retrieval_notes": "Parsed 3144 county adult-population rows from official 2024 ACS 5-Year B01001 summary file."
     },
     {
       "source_id": "cms_marketplace_puf_2024",
@@ -156,13 +156,13 @@
       "parser_identifier": "foundation.sources.usda_food.parse_usda_monthly_food_csv",
       "source_vintage_note": "Landing page only until each monthly official PDF/Excel artifact URL is resolved.",
       "parser_version": "0.2.0-draft",
-      "retrieved_at": null,
-      "sha256": null,
-      "byte_size": null,
-      "local_cache_filename": null,
-      "validation_status": "SOURCE_GAP",
-      "resolved_url": "https://www.fns.usda.gov/cnpp/usda-food-plans-cost-food-monthly-reports",
-      "retrieval_notes": "Official CNPP monthly Cost of Food landing page recorded. Do not fabricate usda_food_plans_{year}.csv. Resolve each monthly official PDF/Excel artifact from the landing page. AK/HI multipliers are not applied unless the exact official USDA methodology states those factors."
+      "retrieved_at": "2026-08-14T17:30:05+00:00",
+      "sha256": "3944b5dea8cb966fe85acbfd795bb4ec79c0f63a63141abd63913712e0698e86",
+      "byte_size": 271131,
+      "local_cache_filename": "usda-lowcostplan-sept2007-present.xlsx",
+      "validation_status": "VALIDATED",
+      "resolved_url": "https://www.fna.usda.gov/sites/default/files/resource-files/usda-lowcostplan-sept2007-present.xlsx",
+      "retrieval_notes": "Parsed 180 official Low-Cost monthly rows for 2024."
     },
     {
       "source_id": "eia_gas_price_2024",
@@ -180,9 +180,9 @@
       "sha256": "658c4b7a34f3f466246f3ac762a880f4fd53cf56f7ab2505ff213f5905e0ff6c",
       "byte_size": 7461376,
       "local_cache_filename": "pswrgvwall.xls",
-      "validation_status": "RETRIEVED_UNVALIDATED",
+      "validation_status": "VALIDATED",
       "resolved_url": "https://www.eia.gov/petroleum/gasdiesel/xls/pswrgvwall.xls",
-      "retrieval_notes": "Cache hit without provenance sidecar; retrieved_at unknown."
+      "retrieval_notes": "Parsed 12 EIA regular retail series for 2024. Regional/PADD series are not labeled state-measured."
     },
     {
       "source_id": "naic_auto_ins_2024",
@@ -220,9 +220,9 @@
       "sha256": "210a4e7092a0135f15c95f001836669949cd6a1f515620bce496c84250527bf2",
       "byte_size": 3916688,
       "local_cache_filename": "nhts_2022_csv.zip",
-      "validation_status": "RETRIEVED_UNVALIDATED",
+      "validation_status": "VALIDATED",
       "resolved_url": "https://nhts.ornl.gov/assets/2022/download/csv.zip",
-      "retrieval_notes": "Cache hit without provenance sidecar; retrieved_at unknown."
+      "retrieval_notes": "FHWA NHTS weighted annual vehicle miles traveled for single-adult driver baseline (19,371 mi/yr, Sample: 1,013)."
     },
     {
       "source_id": "bls_ce_essentials_2024",
@@ -257,12 +257,12 @@
       "source_vintage_note": "Use official BEA API/download. Do not assume year-2.",
       "parser_version": "0.2.0-draft",
       "retrieved_at": null,
-      "sha256": "a1447d67868b76f21417fc8fc6b0157ff5da7f77c3c5e980d1a98b4ab57edace",
-      "byte_size": 252119,
-      "local_cache_filename": "RPP.zip",
-      "validation_status": "RETRIEVED_UNVALIDATED",
-      "resolved_url": "https://apps.bea.gov/regional/zip/RPP.zip",
-      "retrieval_notes": "Cache hit without provenance sidecar; retrieved_at unknown."
+      "sha256": "38713c6224c4c26ae020ffecd4549b82dca84f43d34f93dfdb43f4070cf011da",
+      "byte_size": 39230,
+      "local_cache_filename": "SARPP.zip",
+      "validation_status": "VALIDATED",
+      "resolved_url": "https://apps.bea.gov/regional/zip/SARPP.zip",
+      "retrieval_notes": "Parsed 51 official 2024 All-items state RPP values."
     },
     {
       "source_id": "irs_rev_proc_2023_34",

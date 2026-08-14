@@ -16,7 +16,7 @@ def calculate_resilience_reserve(
     geography_id: str,
     geography_name: str = "",
     state: str = "",
-    source_sha256: str = "verified_shed_sha",
+    source_sha256: str = "",
     retrieved_at: str = "2026-08-13T00:00:00Z",
 ) -> LivingCostComponentObservation:
     """Return a validated resilience component observation."""

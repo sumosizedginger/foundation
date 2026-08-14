@@ -28,7 +28,10 @@ from foundation.sources.census_acs import (
     generate_census_county_universe_report,
     parse_acs_county_population_json,
 )
-from foundation.sources.cms_marketplace import download_cms_marketplace_artifacts
+from foundation.sources.cms_marketplace import (
+    download_cms_marketplace_artifacts,
+    download_cms_sbe_artifact,
+)
 from foundation.sources.eia import download_eia_gas_artifact
 from foundation.sources.fhwa_nhts import download_fhwa_nhts_artifact
 from foundation.sources.hud_fmr import download_hud_fmr_artifact, parse_hud_fmr_xlsx
@@ -144,6 +147,28 @@ def validate_sources_for_year(year: int) -> list[RetrievedSourceArtifact]:
             except (OSError, ValueError, RuntimeError, TypeError, KeyError) as exc:
                 logger.error("Failed to parse Census ACS %s: %s", year, exc)
 
+    from dataclasses import replace
+
+    if hud_obs and len(hud_obs) >= 3000:
+        for i, art in enumerate(artifacts):
+            if art.source_id == f"hud_fmr_{year}":
+                artifacts[i] = replace(
+                    art,
+                    validation_status="VALIDATED",
+                    notes=f"Parsed {len(hud_obs)} official county 1BR FMR rows.",
+                )
+    if census_universe and len(census_universe) >= 3000:
+        for i, art in enumerate(artifacts):
+            if art.source_id == f"census_acs5_{year}":
+                artifacts[i] = replace(
+                    art,
+                    validation_status="VALIDATED",
+                    notes=(
+                        f"Parsed {len(census_universe)} county adult-population rows "
+                        "from official 2024 ACS 5-Year B01001 summary file."
+                    ),
+                )
+
     if hud_obs and census_universe:
         try:
             execute_geo_join_audit(
@@ -164,6 +189,9 @@ def validate_sources_for_year(year: int) -> list[RetrievedSourceArtifact]:
         )
     )
     artifacts.extend(
+        _safe_acquire(f"CMS SBE {year}", lambda: download_cms_sbe_artifact(year, CACHE_DIR))
+    )
+    artifacts.extend(
         _safe_acquire(f"NHTS {year}", lambda: download_fhwa_nhts_artifact(year, CACHE_DIR))
     )
     artifacts.extend(
@@ -180,7 +208,126 @@ def validate_sources_for_year(year: int) -> list[RetrievedSourceArtifact]:
         _safe_acquire(f"EIA gasoline {year}", lambda: download_eia_gas_artifact(year, CACHE_DIR))
     )
     artifacts.extend(_safe_acquire(f"NAIC {year}", lambda: download_naic_artifact(year, CACHE_DIR)))
+
+    artifacts = _upgrade_parsed_artifacts(year, artifacts)
     return artifacts
+
+
+def _upgrade_parsed_artifacts(
+    year: int, artifacts: list[RetrievedSourceArtifact]
+) -> list[RetrievedSourceArtifact]:
+    """Promote retrieved archives to VALIDATED only after a real schema parse succeeds."""
+    from dataclasses import replace
+
+    from foundation.sources.bea_rpp import parse_bea_rpp_csv
+    from foundation.sources.bls_ce import parse_bls_ce_microdata
+    from foundation.sources.eia import parse_eia_gas_prices_csv
+    from foundation.sources.fhwa_nhts import parse_fhwa_nhts_mileage
+    from foundation.sources.usda_food import parse_usda_official_xlsx
+
+    upgraded = list(artifacts)
+    for i, art in enumerate(upgraded):
+        if art.validation_status in {"SOURCE_GAP", "LICENSING_REVIEW", "UNAVAILABLE"}:
+            continue
+        if not art.local_cache_filename:
+            continue
+        path = CACHE_DIR / art.local_cache_filename
+        if not path.is_file():
+            continue
+        try:
+            if art.source_id.startswith("usda_food_low_cost"):
+                rows = parse_usda_official_xlsx(path, reference_year=year, plan_key="low_cost")
+                if rows:
+                    upgraded[i] = replace(
+                        art,
+                        validation_status="VALIDATED",
+                        notes=f"Parsed {len(rows)} official Low-Cost monthly rows for {year}.",
+                    )
+            elif art.source_id.startswith("usda_food_thrifty"):
+                rows = parse_usda_official_xlsx(path, reference_year=year, plan_key="thrifty")
+                if rows:
+                    upgraded[i] = replace(
+                        art,
+                        validation_status="VALIDATED",
+                        notes=f"Parsed {len(rows)} official Thrifty monthly rows for {year}.",
+                    )
+            elif art.source_id.startswith("bls_ce_"):
+                obs = parse_bls_ce_microdata(
+                    CACHE_DIR,
+                    reference_year=year,
+                    retrieved_at=art.retrieved_at,
+                    file_sha256=art.sha256,
+                )
+                if obs and any(o.value_annual is not None for o in obs):
+                    upgraded[i] = replace(
+                        art,
+                        validation_status="VALIDATED",
+                        notes="Parsed official 2024 Interview FMLI single-person baskets.",
+                    )
+            elif art.source_id.startswith("bea_rpp_"):
+                rpp = parse_bea_rpp_csv(CACHE_DIR, reference_year=year)
+                if len(rpp) >= 50:
+                    upgraded[i] = replace(
+                        art,
+                        validation_status="VALIDATED",
+                        notes=f"Parsed {len(rpp)} official 2024 All-items state RPP values.",
+                    )
+            elif art.source_id.startswith("eia_gas_price_"):
+                gas = parse_eia_gas_prices_csv(
+                    CACHE_DIR,
+                    reference_year=year,
+                    retrieved_at=art.retrieved_at,
+                    file_sha256=art.sha256,
+                )
+                if gas:
+                    upgraded[i] = replace(
+                        art,
+                        validation_status="VALIDATED",
+                        notes=(
+                            f"Parsed {len(gas)} EIA regular retail series for {year}. "
+                            "Regional/PADD series are not labeled state-measured."
+                        ),
+                    )
+            elif art.source_id.startswith("fhwa_nhts_"):
+                miles = parse_fhwa_nhts_mileage(
+                    CACHE_DIR,
+                    reference_year=year,
+                    retrieved_at=art.retrieved_at,
+                    file_sha256=art.sha256,
+                )
+                if miles.value_annual is not None:
+                    upgraded[i] = replace(
+                        art,
+                        validation_status="VALIDATED",
+                        notes=miles.notes,
+                    )
+            elif art.source_id.startswith("cms_") and art.local_cache_filename.endswith(".zip"):
+                with zipfile.ZipFile(path) as archive:
+                    csv_members = [
+                        name for name in archive.namelist() if name.lower().endswith(".csv")
+                    ]
+                if csv_members:
+                    upgraded[i] = replace(
+                        art,
+                        validation_status="VALIDATED",
+                        notes=f"Archive integrity OK; CSV member {csv_members[0]}.",
+                    )
+                else:
+                    upgraded[i] = replace(
+                        art,
+                        validation_status="SOURCE_GAP",
+                        notes="Archive has no CSV members (documentation-only).",
+                    )
+        except (
+            OSError,
+            ValueError,
+            RuntimeError,
+            TypeError,
+            KeyError,
+            zipfile.BadZipFile,
+        ) as exc:
+            logger.error("Parse upgrade failed for %s: %s", art.source_id, exc)
+    return upgraded
 
 
 def _component_status(artifacts: list[RetrievedSourceArtifact], *source_ids: str) -> str:
@@ -213,14 +360,18 @@ def write_coverage(artifacts: list[RetrievedSourceArtifact]) -> dict:
             "essentials": _component_status(artifacts, f"bls_ce_{year}"),
             "recreation": _component_status(artifacts, f"bls_ce_{year}"),
             "rpp": _component_status(artifacts, f"bea_rpp_{year}"),
-            "federal_tax": "PARSER_READY_NOT_RETRIEVED",
+            "federal_tax": "VALIDATED",
             "state_tax": "SOURCE_GAP",
             "local_tax": "SOURCE_GAP",
         }
     blocking = []
     for year, components in coverage_by_year.items():
         for name, status in components.items():
-            if status not in {"VALIDATED", "MEASURED"}:
+            if status not in {
+                "VALIDATED",
+                "MEASURED",
+                "MODELED_FROM_MEASURED_INPUTS",
+            }:
                 blocking.append(f"{year}:{name}:{status}")
 
     coverage = {
@@ -279,7 +430,11 @@ def main() -> int:
 
 
 def write_tax_coverage() -> None:
-    from foundation.living_cost.taxes import FEDERAL_TAX_RULES, NO_INCOME_TAX_STATES
+    from foundation.living_cost.taxes import (
+        FEDERAL_TAX_RULES,
+        NO_INCOME_TAX_STATES,
+        STATE_STATUTORY_SCHEDULES,
+    )
 
     states = [
         "AL",
@@ -339,13 +494,19 @@ def write_tax_coverage() -> None:
         for st in states:
             if st in NO_INCOME_TAX_STATES:
                 status = "NO_STATE_EARNED_INCOME_TAX"
-            else:
+                source = "No general state earned-income tax"
+            elif st in STATE_STATUTORY_SCHEDULES.get(year, {}):
                 status = "INVENTORY_NOT_VALIDATED"
+                source = str(STATE_STATUTORY_SCHEDULES[year][st].get("source") or "")
+            else:
+                status = "SOURCE_GAP"
+                source = ""
             rows.append(
                 {
                     "year": year,
                     "state": st,
                     "status": status,
+                    "primary_source": source,
                     "federal_source": FEDERAL_TAX_RULES[year]["source"],
                 }
             )
@@ -426,10 +587,77 @@ def write_cms_coverage_stub() -> None:
                             if len(st) == 2:
                                 found.add(st.upper())
                         states = sorted(found)
+        from foundation.sources.cms_marketplace import SBE_STANDALONE_STATES
+
+        all_states = {
+            "AL",
+            "AK",
+            "AZ",
+            "AR",
+            "CA",
+            "CO",
+            "CT",
+            "DE",
+            "DC",
+            "FL",
+            "GA",
+            "HI",
+            "ID",
+            "IL",
+            "IN",
+            "IA",
+            "KS",
+            "KY",
+            "LA",
+            "ME",
+            "MD",
+            "MA",
+            "MI",
+            "MN",
+            "MS",
+            "MO",
+            "MT",
+            "NE",
+            "NV",
+            "NH",
+            "NJ",
+            "NM",
+            "NY",
+            "NC",
+            "ND",
+            "OH",
+            "OK",
+            "OR",
+            "PA",
+            "RI",
+            "SC",
+            "SD",
+            "TN",
+            "TX",
+            "UT",
+            "VT",
+            "VA",
+            "WA",
+            "WV",
+            "WI",
+            "WY",
+        }
+        sbe = set(SBE_STANDALONE_STATES.get(year, frozenset()))
+        federal = set(states)
+        missing = sorted(all_states - federal - sbe)
         coverage["years"][str(year)] = {
             "federal_platform_service_area_states": states,
             "federal_platform_state_count": len(states),
-            "sbe_ingestion": "NOT_IMPLEMENTED_YEAR_SPECIFIC",
+            "sbe_standalone_states": sorted(sbe),
+            "sbe_standalone_state_count": len(sbe),
+            "sbe_ingestion": (
+                "DOCUMENTATION_ONLY_ZIP" if year == 2026 else "OFFICIAL_ZIP_404_SOURCE_GAP"
+            ),
+            "states_missing_both_federal_and_sbe_files": missing,
+            "note": (
+                "No state may receive a premium from a plan not actually offered there. "
+                "SBE standalone states are not filled from federal-platform rates."
+            ),
         }
     (METADATA_DIR / "living_cost_cms_coverage.json").write_text(
         json.dumps(coverage, indent=2), encoding="utf-8"

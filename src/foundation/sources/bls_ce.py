@@ -51,8 +51,16 @@ def get_bls_ce_url(year: int) -> str:
     return f"https://www.bls.gov/cex/pumd/data/csv/intrvw{short_yr}.zip"
 
 
+def _existing_interview_zip(cache_dir: Path, short_yr: str) -> Path | None:
+    for name in (f"bls_ce_intrvw{short_yr}.zip", f"intrvw{short_yr}.zip"):
+        path = cache_dir / name
+        if path.is_file() and path.stat().st_size > 1_000_000:
+            return path
+    return None
+
+
 def download_bls_ce_artifact(year: int, cache_dir: Path, force_download: bool = False):
-    """Download required BLS CE microdata ZIP."""
+    """Download official BLS CE Interview CSV zip, or reuse a valid cached copy."""
     if year not in (2024, 2026):
         raise ValueError(f"Unsupported BLS CE reference year: {year}")
 
@@ -61,6 +69,18 @@ def download_bls_ce_artifact(year: int, cache_dir: Path, force_download: bool = 
     data_year = get_bls_ce_interview_year(year)
     short_yr = str(data_year)[-2:]
     expected_filename = f"bls_ce_intrvw{short_yr}.zip"
+
+    cached = None if force_download else _existing_interview_zip(cache_dir, short_yr)
+    if cached is not None:
+        artifact = acquire_source(
+            source_id=f"bls_ce_{year}",
+            url=get_bls_ce_url(year),
+            cache_dir=cache_dir,
+            expected_filename=cached.name,
+            force_download=False,
+        )
+        if artifact is not None:
+            return artifact
 
     artifact = acquire_source(
         source_id=f"bls_ce_{year}",
@@ -77,7 +97,10 @@ def download_bls_ce_artifact(year: int, cache_dir: Path, force_download: bool = 
             resolved_url=get_bls_ce_url(year),
             notes=(
                 f"Official BLS CE Interview {data_year} CSV zip was not retrieved "
-                f"({get_bls_ce_url(year)}). BLS often returns 403 to automated clients."
+                f"from the PUMD landing page ({BLS_CE_LANDING} → {get_bls_ce_url(year)}). "
+                "A 403 from one client is not treated as source nonexistence; "
+                "the official CSV path remains https://www.bls.gov/cex/pumd/data/csv/"
+                f"intrvw{short_yr}.zip."
             ),
         )
 
@@ -93,7 +116,11 @@ def parse_bls_ce_microdata(
     """Parse BLS CE single-person consumer unit records and compute weighted P25 expenditures from ZIP."""
     data_year = get_bls_ce_interview_year(reference_year)
     short_yr = str(data_year)[-2:]
-    zip_path = cache_dir / f"bls_ce_intrvw{short_yr}.zip" if cache_dir.is_dir() else cache_dir
+    if cache_dir.is_file():
+        zip_path = cache_dir
+    else:
+        found = _existing_interview_zip(cache_dir, short_yr)
+        zip_path = found if found is not None else cache_dir / f"bls_ce_intrvw{short_yr}.zip"
 
     if not zip_path.exists():
         logger.warning(f"BLS CE ZIP not found: {zip_path}")
@@ -160,6 +187,13 @@ def parse_bls_ce_microdata(
 
                     text_fh = io.TextIOWrapper(fh, encoding="utf-8-sig", errors="replace")
                     reader = csv.DictReader(text_fh)
+                    fields = {name.upper() for name in (reader.fieldnames or [])}
+                    required = {"FAM_SIZE", "FINLWT21", "APPARCQ", "PERSCACQ", "HOUSEQCQ", "READCQ"}
+                    if not required.issubset(fields):
+                        raise ValueError(
+                            f"BLS CE FMLI file {fmli_file} missing required columns "
+                            f"{sorted(required - fields)}"
+                        )
 
                     for row in reader:
                         fam_size_str = row.get("FAM_SIZE") or row.get("fam_size") or "0"
@@ -189,11 +223,13 @@ def parse_bls_ce_microdata(
                             essentials_vals.append(ess_val)
                             essentials_weights.append(weight)
 
-                        # Recreation: FEETXCQ (Admissions/Fees) + READCQ (Reading)
-                        feetxcq = float(row.get("FEETXCQ") or row.get("feetxcq") or 0.0)
+                        # Recreation allowlist at FMLI summary level:
+                        # READCQ (reading) + ENTERTCQ (entertainment). FEETXCQ is
+                        # not present on 2024 Interview FMLI files.
+                        entertcq = float(row.get("ENTERTCQ") or row.get("entertcq") or 0.0)
                         readcq = float(row.get("READCQ") or row.get("readcq") or 0.0)
 
-                        rec_val = (feetxcq + readcq) * 4.0
+                        rec_val = (entertcq + readcq) * 4.0
                         if rec_val > 0:
                             rec_vals.append(rec_val)
                             rec_weights.append(weight)

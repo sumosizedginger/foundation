@@ -16,7 +16,7 @@ def calculate_local_housing(
     geography_name: str = "",
     state: str = "",
     source_url: str = "https://www.huduser.gov/portal/datasets/fmr.html",
-    source_sha256: str = "verified_hud_sha",
+    source_sha256: str = "",
     retrieved_at: str = "2026-08-13T00:00:00Z",
 ) -> LivingCostComponentObservation:
     """Return a validated 1BR housing component observation."""

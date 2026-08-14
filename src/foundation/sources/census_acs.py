@@ -447,8 +447,14 @@ def generate_census_county_universe_report(
         "cost_reference_year_note": (
             "This file is the frozen adult-population weight vintage for both 2024 and 2026 cost years."
         ),
-        "exact_query": CENSUS_ACS_5YR_URL,
+        "exact_query": ACS_SUMMARY_B01001_URL,
         "variables": list(ACS_VARS),
+        "response_hash": next(iter(county_pop_map.values()), {}).get("sha256", ""),
+        "retrieval_timestamp": next(iter(county_pop_map.values()), {}).get("retrieved_at", ""),
+        "connecticut_note": (
+            "Connecticut 2024 ACS 5-Year geographies are planning regions "
+            "(FIPS 09110-09170), not legacy counties."
+        ),
     }
 
     if output_path:

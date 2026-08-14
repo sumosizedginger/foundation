@@ -1,6 +1,6 @@
 {
   "report_type": "living_cost_cms_coverage",
-  "generated_at": "2026-08-14T17:01:56+00:00",
+  "generated_at": "2026-08-14T17:31:30+00:00",
   "years": {
     "2024": {
       "federal_platform_service_area_states": [
@@ -38,7 +38,32 @@
         "WY"
       ],
       "federal_platform_state_count": 32,
-      "sbe_ingestion": "NOT_IMPLEMENTED_YEAR_SPECIFIC"
+      "sbe_standalone_states": [
+        "CA",
+        "CO",
+        "CT",
+        "DC",
+        "ID",
+        "KY",
+        "MA",
+        "MD",
+        "ME",
+        "MN",
+        "NM",
+        "NV",
+        "NY",
+        "PA",
+        "RI",
+        "VT",
+        "WA"
+      ],
+      "sbe_standalone_state_count": 17,
+      "sbe_ingestion": "OFFICIAL_ZIP_404_SOURCE_GAP",
+      "states_missing_both_federal_and_sbe_files": [
+        "NJ",
+        "VA"
+      ],
+      "note": "No state may receive a premium from a plan not actually offered there. SBE standalone states are not filled from federal-platform rates."
     },
     "2026": {
       "federal_platform_service_area_states": [
@@ -74,7 +99,34 @@
         "WY"
       ],
       "federal_platform_state_count": 30,
-      "sbe_ingestion": "NOT_IMPLEMENTED_YEAR_SPECIFIC"
+      "sbe_standalone_states": [
+        "CA",
+        "CO",
+        "CT",
+        "DC",
+        "ID",
+        "KY",
+        "MA",
+        "MD",
+        "ME",
+        "MN",
+        "NM",
+        "NV",
+        "NY",
+        "PA",
+        "RI",
+        "VT",
+        "WA"
+      ],
+      "sbe_standalone_state_count": 17,
+      "sbe_ingestion": "DOCUMENTATION_ONLY_ZIP",
+      "states_missing_both_federal_and_sbe_files": [
+        "GA",
+        "IL",
+        "NJ",
+        "VA"
+      ],
+      "note": "No state may receive a premium from a plan not actually offered there. SBE standalone states are not filled from federal-platform rates."
     }
   },
   "headline_calculated": false,

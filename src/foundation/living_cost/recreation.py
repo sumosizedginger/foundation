@@ -17,7 +17,7 @@ def calculate_social_recreation(
     geography_id: str,
     geography_name: str = "",
     state: str = "",
-    source_sha256: str = "verified_bls_bea_sha",
+    source_sha256: str = "",
     retrieved_at: str = "2026-08-13T00:00:00Z",
 ) -> LivingCostComponentObservation:
     """Return a validated social & recreation component observation."""

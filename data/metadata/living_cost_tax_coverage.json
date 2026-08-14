@@ -1,6 +1,6 @@
 {
   "report_type": "living_cost_tax_coverage",
-  "generated_at": "2026-08-14T17:01:56+00:00",
+  "generated_at": "2026-08-14T17:31:30+00:00",
   "federal_2024_validated_tables": false,
   "federal_2026_values_match_rev_proc_2025_32": true,
   "local_tax_classes": {
@@ -14,612 +14,714 @@
       "year": 2024,
       "state": "AL",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Ala. Code \u00a7 40-18-5",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "AK",
       "status": "NO_STATE_EARNED_INCOME_TAX",
+      "primary_source": "No general state earned-income tax",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "AZ",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Ariz. Rev. Stat. \u00a7 43-1011",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "AR",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Ark. Code Ann. \u00a7 26-51-201",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "CA",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Cal. Rev. & Tax Code \u00a7 17041",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "CO",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Colo. Rev. Stat. \u00a7 39-22-104",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "CT",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Conn. Gen. Stat. \u00a7 12-700",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "DE",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "30 Del. C. \u00a7 1102",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "DC",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "D.C. Code \u00a7 47-1806.03",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "FL",
       "status": "NO_STATE_EARNED_INCOME_TAX",
+      "primary_source": "No general state earned-income tax",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "GA",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "O.C.G.A. \u00a7 48-7-20",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "HI",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Haw. Rev. Stat. \u00a7 235-51",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "ID",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Idaho Code \u00a7 63-3024",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "IL",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "35 ILCS 5/201",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "IN",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Ind. Code \u00a7 6-3-2-1",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "IA",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Iowa Code \u00a7 422.5",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "KS",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Kan. Stat. Ann. \u00a7 79-32,110",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "KY",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Ky. Rev. Stat. \u00a7 141.020",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "LA",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "La. Rev. Stat. \u00a7 47:32",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "ME",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "36 M.R.S. \u00a7 5111",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "MD",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Md. Code Tax-Gen. \u00a7 10-105",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "MA",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Mass. Gen. Laws ch. 62 \u00a7 4",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "MI",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Mich. Comp. Laws \u00a7 206.51",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "MN",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Minn. Stat. \u00a7 290.06",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "MS",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Miss. Code Ann. \u00a7 27-7-5",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "MO",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Mo. Rev. Stat. \u00a7 143.011",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "MT",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Mont. Code Ann. \u00a7 15-30-2103",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "NE",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Neb. Rev. Stat. \u00a7 77-2715.03",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "NV",
       "status": "NO_STATE_EARNED_INCOME_TAX",
+      "primary_source": "No general state earned-income tax",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "NH",
       "status": "NO_STATE_EARNED_INCOME_TAX",
+      "primary_source": "No general state earned-income tax",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "NJ",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "N.J. Stat. Ann. \u00a7 54A:2-1",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "NM",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "N.M. Stat. Ann. \u00a7 7-2-7",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "NY",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "N.Y. Tax Law \u00a7 601",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "NC",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "N.C. Gen. Stat. \u00a7 105-153.7",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "ND",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "N.D. Cent. Code \u00a7 57-38-30.3",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "OH",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Ohio Rev. Code \u00a7 5747.02",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "OK",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Okla. Stat. tit. 68 \u00a7 2355",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "OR",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Or. Rev. Stat. \u00a7 316.037",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "PA",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "72 Pa. Stat. \u00a7 7302",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "RI",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "R.I. Gen. Laws \u00a7 44-30-2.6",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "SC",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "S.C. Code Ann. \u00a7 12-6-510",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "SD",
       "status": "NO_STATE_EARNED_INCOME_TAX",
+      "primary_source": "No general state earned-income tax",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "TN",
       "status": "NO_STATE_EARNED_INCOME_TAX",
+      "primary_source": "No general state earned-income tax",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "TX",
       "status": "NO_STATE_EARNED_INCOME_TAX",
+      "primary_source": "No general state earned-income tax",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "UT",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Utah Code \u00a7 59-10-104",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "VT",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "32 V.S.A. \u00a7 5822",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "VA",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Va. Code \u00a7 58.1-320",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "WA",
       "status": "NO_STATE_EARNED_INCOME_TAX",
+      "primary_source": "No general state earned-income tax",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "WV",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "W. Va. Code \u00a7 11-21-4e",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "WI",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Wis. Stat. \u00a7 71.06",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "WY",
       "status": "NO_STATE_EARNED_INCOME_TAX",
+      "primary_source": "No general state earned-income tax",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2026,
       "state": "AL",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Ala. Code \u00a7 40-18-5",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "AK",
       "status": "NO_STATE_EARNED_INCOME_TAX",
+      "primary_source": "No general state earned-income tax",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "AZ",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Ariz. Rev. Stat. \u00a7 43-1011",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "AR",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Ark. Code Ann. \u00a7 26-51-201",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "CA",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Cal. Rev. & Tax Code \u00a7 17041",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "CO",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Colo. Rev. Stat. \u00a7 39-22-104",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "CT",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Conn. Gen. Stat. \u00a7 12-700",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "DE",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "30 Del. C. \u00a7 1102",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "DC",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "D.C. Code \u00a7 47-1806.03",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "FL",
       "status": "NO_STATE_EARNED_INCOME_TAX",
+      "primary_source": "No general state earned-income tax",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "GA",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "O.C.G.A. \u00a7 48-7-20",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "HI",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Haw. Rev. Stat. \u00a7 235-51",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "ID",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Idaho Code \u00a7 63-3024",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "IL",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "35 ILCS 5/201",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "IN",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Ind. Code \u00a7 6-3-2-1",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "IA",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Iowa Code \u00a7 422.5",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "KS",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Kan. Stat. Ann. \u00a7 79-32,110",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "KY",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Ky. Rev. Stat. \u00a7 141.020",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "LA",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "La. Rev. Stat. \u00a7 47:32",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "ME",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "36 M.R.S. \u00a7 5111",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "MD",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Md. Code Tax-Gen. \u00a7 10-105",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "MA",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Mass. Gen. Laws ch. 62 \u00a7 4",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "MI",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Mich. Comp. Laws \u00a7 206.51",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "MN",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Minn. Stat. \u00a7 290.06",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "MS",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Miss. Code Ann. \u00a7 27-7-5",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "MO",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Mo. Rev. Stat. \u00a7 143.011",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "MT",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Mont. Code Ann. \u00a7 15-30-2103",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "NE",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Neb. Rev. Stat. \u00a7 77-2715.03",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "NV",
       "status": "NO_STATE_EARNED_INCOME_TAX",
+      "primary_source": "No general state earned-income tax",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "NH",
       "status": "NO_STATE_EARNED_INCOME_TAX",
+      "primary_source": "No general state earned-income tax",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "NJ",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "N.J. Stat. Ann. \u00a7 54A:2-1",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "NM",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "N.M. Stat. Ann. \u00a7 7-2-7",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "NY",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "N.Y. Tax Law \u00a7 601",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "NC",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "N.C. Gen. Stat. \u00a7 105-153.7",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "ND",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "N.D. Cent. Code \u00a7 57-38-30.3",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "OH",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Ohio Rev. Code \u00a7 5747.02",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "OK",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Okla. Stat. tit. 68 \u00a7 2355",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "OR",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Or. Rev. Stat. \u00a7 316.037",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "PA",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "72 Pa. Stat. \u00a7 7302",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "RI",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "R.I. Gen. Laws \u00a7 44-30-2.6",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "SC",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "S.C. Code Ann. \u00a7 12-6-510",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "SD",
       "status": "NO_STATE_EARNED_INCOME_TAX",
+      "primary_source": "No general state earned-income tax",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "TN",
       "status": "NO_STATE_EARNED_INCOME_TAX",
+      "primary_source": "No general state earned-income tax",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "TX",
       "status": "NO_STATE_EARNED_INCOME_TAX",
+      "primary_source": "No general state earned-income tax",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "UT",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Utah Code \u00a7 59-10-104",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "VT",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "32 V.S.A. \u00a7 5822",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "VA",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Va. Code \u00a7 58.1-320",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "WA",
       "status": "NO_STATE_EARNED_INCOME_TAX",
+      "primary_source": "No general state earned-income tax",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "WV",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "W. Va. Code \u00a7 11-21-4e",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "WI",
       "status": "INVENTORY_NOT_VALIDATED",
+      "primary_source": "Wis. Stat. \u00a7 71.06",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "WY",
       "status": "NO_STATE_EARNED_INCOME_TAX",
+      "primary_source": "No general state earned-income tax",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     }
   ],

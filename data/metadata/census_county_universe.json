@@ -1,6 +1,6 @@
 {
   "report_type": "census_county_geography_universe",
-  "generated_at": "2026-08-14T17:02:39+00:00",
+  "generated_at": "2026-08-14T17:30:25+00:00",
   "census_vintage": "2024 ACS 5-Year Estimates",
   "source_url": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b01001.dat",
   "total_county_count": 3144,
