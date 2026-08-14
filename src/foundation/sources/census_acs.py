@@ -12,15 +12,34 @@ STRICT METHODOLOGICAL RULES:
 
 from __future__ import annotations
 
-import csv
 import hashlib
 import json
+import logging
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-CENSUS_ACS_5YR_URL = "https://api.census.gov/data/2023/acs/acs5"
+from foundation.sources.acquisition import acquire_source
+
+logger = logging.getLogger(__name__)
+
 CENSUS_VINTAGE = "2023 ACS 5-Year Estimates"
+
+# Required B01001 variables for Adult Population (18+)
+ACS_VARS = [
+    "NAME",
+    "B01001_001E",  # Total Pop
+    "B01001_003E",  # M Under 5
+    "B01001_004E",  # M 5-9
+    "B01001_005E",  # M 10-14
+    "B01001_006E",  # M 15-17
+    "B01001_027E",  # F Under 5
+    "B01001_028E",  # F 5-9
+    "B01001_029E",  # F 10-14
+    "B01001_030E",  # F 15-17
+]
+
+CENSUS_ACS_5YR_URL = f"https://api.census.gov/data/2023/acs/acs5?get={','.join(ACS_VARS)}&for=county:*"
 
 # Valid 2-digit State FIPS for 50 States + DC
 VALID_STATE_FIPS = {
@@ -86,16 +105,29 @@ EXCLUDED_TERRITORIES_FIPS = {
 }
 
 
-def compute_adult_population_from_b01001_row(row: dict[str, Any]) -> tuple[int, int]:
-    """Calculate (adult_population_18_plus, total_population) from ACS B01001 variables.
+def download_acs_county_population_artifact(
+    year: int,
+    cache_dir: Path,
+    force_download: bool = False,
+):
+    """Download or retrieve cached official Census ACS 5-Year dataset (JSON)."""
+    if year != 2024:
+        # Currently the methodology strictly pins to 2023 ACS for the 2024 vintage
+        raise ValueError(f"Unsupported Census ACS reference year: {year}")
 
-    Formula:
-      Total = B01001_001E
-      Under 18 Male = B01001_003E + B01001_004E + B01001_005E + B01001_006E
-      Under 18 Female = B01001_027E + B01001_028E + B01001_029E + B01001_030E
-      Adult Pop (18+) = Total - (Under 18 Male + Under 18 Female)
-    """
-    total_str = row.get("B01001_001E") or row.get("total_population")
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    return acquire_source(
+        source_id=f"census_acs5_{year}",
+        url=CENSUS_ACS_5YR_URL,
+        cache_dir=cache_dir,
+        expected_filename="acs_5yr_county_pop_2023.json",
+        force_download=force_download,
+    )
+
+
+def compute_adult_population_from_b01001_row(row: dict[str, Any]) -> tuple[int, int]:
+    """Calculate (adult_population_18_plus, total_population) from ACS B01001 variables."""
+    total_str = row.get("B01001_001E")
     if total_str is None:
         raise ValueError("Missing total population variable in ACS row")
 
@@ -103,20 +135,6 @@ def compute_adult_population_from_b01001_row(row: dict[str, Any]) -> tuple[int, 
     if total_pop <= 0:
         raise ValueError(f"Total population must be positive, got {total_pop}")
 
-    # Check if explicit adult population column already exists
-    if "adult_population" in row or "pop_18_plus" in row or "adult_pop" in row:
-        val = row.get("adult_population") or row.get("pop_18_plus") or row.get("adult_pop")
-        if val is not None and str(val).strip() != "":
-            adult_pop = int(float(str(val).replace(",", "").strip()))
-            if adult_pop <= 0:
-                raise ValueError(f"Adult population must be positive, got {adult_pop}")
-            if adult_pop > total_pop:
-                raise ValueError(
-                    f"Adult population ({adult_pop}) cannot exceed total population ({total_pop})"
-                )
-            return adult_pop, total_pop
-
-    # Otherwise compute from B01001 sex-by-age cells
     under18_vars = [
         "B01001_003E",
         "B01001_004E",
@@ -146,13 +164,13 @@ def compute_adult_population_from_b01001_row(row: dict[str, Any]) -> tuple[int, 
     return adult_pop, total_pop
 
 
-def parse_acs_county_population_csv(
+def parse_acs_county_population_json(
     file_path: Path,
     reference_year: int = 2024,
     retrieved_at: str = "",
     file_sha256: str = "",
 ) -> dict[str, dict[str, Any]]:
-    """Parse real Census ACS county population dataset.
+    """Parse real Census ACS county population dataset (JSON API Response).
 
     Fail-Closed:
     - Never substitutes total population for adult population.
@@ -162,62 +180,55 @@ def parse_acs_county_population_csv(
     if not file_path.exists():
         raise FileNotFoundError(f"Census ACS file not found: {file_path}")
 
-    if not file_sha256:
-        hasher = hashlib.sha256()
-        with file_path.open("rb") as fh:
-            while chunk := fh.read(65536):
-                hasher.update(chunk)
-        file_sha256 = hasher.hexdigest()
+    with file_path.open("r", encoding="utf-8") as fh:
+        data = json.load(fh)
 
-    if not retrieved_at:
-        retrieved_at = datetime.now(UTC).replace(microsecond=0).isoformat()
+    if not isinstance(data, list) or len(data) < 2:
+        raise ValueError(f"Invalid ACS JSON format in {file_path}")
 
+    headers = data[0]
     results: dict[str, dict[str, Any]] = {}
 
-    with file_path.open("r", encoding="utf-8-sig", errors="replace") as fh:
-        reader = csv.DictReader(fh)
-        for row_idx, row in enumerate(reader, start=2):
-            fips = row.get("fips") or row.get("GEOID") or row.get("geoid") or ""
-            if not fips:
-                st_code = row.get("state") or row.get("STATE") or ""
-                co_code = row.get("county") or row.get("COUNTY") or ""
-                if st_code and co_code:
-                    fips = f"{st_code.strip().zfill(2)}{co_code.strip().zfill(3)}"
+    for row_idx, row_values in enumerate(data[1:], start=2):
+        row = dict(zip(headers, row_values))
 
-            fips = fips.strip().zfill(5)
-            if len(fips) != 5 or not fips.isdigit():
-                continue
+        st_code = row.get("state", "")
+        co_code = row.get("county", "")
+        if not st_code or not co_code:
+            continue
 
-            state_fips = fips[:2]
-            if state_fips in EXCLUDED_TERRITORIES_FIPS:
-                continue
-            if state_fips not in VALID_STATE_FIPS:
-                continue
+        fips = f"{st_code.strip().zfill(2)}{co_code.strip().zfill(3)}"
+        if len(fips) != 5 or not fips.isdigit():
+            continue
 
-            state_alpha = (
-                row.get("state_alpha") or row.get("state_abbr") or VALID_STATE_FIPS[state_fips]
-            )
-            county_name = row.get("NAME") or row.get("county_name") or row.get("name") or fips
+        state_fips = fips[:2]
+        if state_fips in EXCLUDED_TERRITORIES_FIPS:
+            continue
+        if state_fips not in VALID_STATE_FIPS:
+            continue
 
-            try:
-                adult_pop, total_pop = compute_adult_population_from_b01001_row(row)
-            except ValueError as err:
-                raise ValueError(f"ACS parse error at row {row_idx} (FIPS {fips}): {err}") from err
+        state_alpha = VALID_STATE_FIPS[state_fips]
+        county_name = row.get("NAME") or fips
 
-            results[fips] = {
-                "fips": fips,
-                "county_name": county_name,
-                "state": state_alpha,
-                "state_fips": state_fips,
-                "adult_population": adult_pop,
-                "total_population": total_pop,
-                "under18_population": total_pop - adult_pop,
-                "source_id": f"census_acs5_{reference_year}",
-                "census_vintage": CENSUS_VINTAGE,
-                "source_url": CENSUS_ACS_5YR_URL,
-                "retrieved_at": retrieved_at,
-                "sha256": file_sha256,
-            }
+        try:
+            adult_pop, total_pop = compute_adult_population_from_b01001_row(row)
+        except ValueError as err:
+            raise ValueError(f"ACS parse error at row {row_idx} (FIPS {fips}): {err}") from err
+
+        results[fips] = {
+            "fips": fips,
+            "county_name": county_name,
+            "state": state_alpha,
+            "state_fips": state_fips,
+            "adult_population": adult_pop,
+            "total_population": total_pop,
+            "under18_population": total_pop - adult_pop,
+            "source_id": f"census_acs5_{reference_year}",
+            "census_vintage": CENSUS_VINTAGE,
+            "source_url": CENSUS_ACS_5YR_URL,
+            "retrieved_at": retrieved_at,
+            "sha256": file_sha256,
+        }
 
     return results
 

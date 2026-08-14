@@ -60,8 +60,16 @@ def run_full_pipeline(project_root: Path | None = None) -> dict[str, Any]:
     atomic_write_json(current_dir / "population.json", latest_pop.to_dict())
 
     # 2. Axis 2: Minimum Sustainable Living Cost (DATA PIPELINE VALIDATION IN PROGRESS)
-    living_cost_res = run_living_cost_pipeline(project_root)
-    survival_consolidated = living_cost_res["survival_consolidated"]
+    living_cost_release_authorized = False
+    
+    if living_cost_release_authorized:
+        living_cost_res = run_living_cost_pipeline(project_root)
+        survival_consolidated = living_cost_res["survival_consolidated"]
+    else:
+        survival_consolidated = {
+            "status": "UNAVAILABLE",
+            "reason": "Pipeline Validation In Progress under D-016"
+        }
 
     # 3. Canonical Manifest & Census County Universe Reports
     manifest_doc = generate_source_manifest(metadata_dir / "living_cost_source_manifest.json")
@@ -112,6 +120,13 @@ def run_full_pipeline(project_root: Path | None = None) -> dict[str, Any]:
 
     # 7. Historical Timeline
     historical_timeline = get_historical_vintages_summary()
+    
+    # Reconcile history.json CPS SHA-256 with population.json (latest_pop)
+    import dataclasses
+    for i, hist in enumerate(historical_timeline):
+        if hist.survey_year == 2025:
+            historical_timeline[i] = dataclasses.replace(hist, archive_sha256=latest_pop.source_artifact_sha256)
+
     hist_payload = {
         "base_currency_year": 2024,
         "vintages": [h.to_dict() for h in historical_timeline],

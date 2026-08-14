@@ -5,66 +5,61 @@ working-age drivers (Age 18-64) covering necessary commuting, medical trips, gro
 and essential local travel.
 
 NHTS METHODOLOGICAL BASELINE:
-- Survey: 2022 NHTS (National Household Travel Survey) Table VMT_WORKER_SOLO.
+- Survey: 2022 NHTS (National Household Travel Survey).
 - Target Population: 1-driver households with 1 adult worker.
-- Weighted Annual VMT: 10,800–11,400 miles/year (Frozen baseline: 11,000 miles/year).
+- Weighted Annual VMT: Calculated dynamically from `hhpub.csv` using `ANNMILES` and `WTHHFIN`.
 """
 
 from __future__ import annotations
 
 import csv
-import hashlib
-from datetime import UTC, datetime
+import logging
+import zipfile
 from pathlib import Path
+from typing import Any
 
 from foundation.living_cost.models import ComponentStatus, LivingCostComponentObservation
+from foundation.sources.acquisition import acquire_source
 
-FHWA_NHTS_URL = "https://nhts.ornl.gov/"
+logger = logging.getLogger(__name__)
+
+# Note: The 2022 NHTS NextGen survey data is used.
+NHTS_2022_URL = "https://nhts.ornl.gov/assets/2022/download/csv.zip"
 
 
-def parse_fhwa_nhts_mileage_csv(
-    file_path: Path,
+def download_fhwa_nhts_artifact(
+    year: int, cache_dir: Path, force_download: bool = False
+):
+    """Download required FHWA NHTS ZIP."""
+    if year not in (2024, 2026):
+        raise ValueError(f"Unsupported FHWA NHTS reference year: {year}")
+
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    artifact = acquire_source(
+        source_id="fhwa_nhts_2022",
+        url=NHTS_2022_URL,
+        cache_dir=cache_dir,
+        expected_filename="nhts_2022_csv.zip",
+        force_download=force_download,
+    )
+    
+    if artifact is None:
+        raise RuntimeError(f"Required FHWA NHTS dataset for 2022 is UNAVAILABLE.")
+        
+    return artifact
+
+
+def parse_fhwa_nhts_mileage(
+    cache_dir: Path,
     reference_year: int = 2024,
     retrieved_at: str = "",
     file_sha256: str = "",
 ) -> LivingCostComponentObservation:
-    """Parse NHTS annual mileage benchmark dataset for single-adult drivers."""
-    if not file_path.exists():
-        raise FileNotFoundError(f"FHWA NHTS data file not found: {file_path}")
-
-    if not file_sha256:
-        hasher = hashlib.sha256()
-        with file_path.open("rb") as fh:
-            while chunk := fh.read(65536):
-                hasher.update(chunk)
-        file_sha256 = hasher.hexdigest()
-
-    if not retrieved_at:
-        retrieved_at = datetime.now(UTC).replace(microsecond=0).isoformat()
-
-    annual_miles: float | None = None
-    sample_size = 0
-
-    with file_path.open("r", encoding="utf-8-sig", errors="replace") as fh:
-        reader = csv.DictReader(fh)
-        for row in reader:
-            driver_type = str(row.get("driver_type") or row.get("population") or "").strip().lower()
-            if (
-                "single" in driver_type
-                or "solo" in driver_type
-                or "one_driver" in driver_type
-                or "baseline" in driver_type
-            ):
-                miles_str = row.get("annual_vmt") or row.get("annual_miles") or row.get("miles")
-                if miles_str is not None:
-                    try:
-                        annual_miles = float(str(miles_str).replace(",", "").strip())
-                        sample_size = int(float(row.get("sample_count") or 5000))
-                        break
-                    except ValueError:
-                        continue
-
-    if annual_miles is None or annual_miles <= 0:
+    """Parse NHTS annual mileage benchmark dataset for single-adult drivers from ZIP."""
+    zip_path = cache_dir / "nhts_2022_csv.zip"
+    if not zip_path.exists():
+        logger.warning(f"NHTS ZIP not found: {zip_path}")
+        # Fail closed
         return LivingCostComponentObservation(
             component_id="fhwa_annual_miles",
             category="transportation_input",
@@ -77,16 +72,111 @@ def parse_fhwa_nhts_mileage_csv(
             value_monthly=None,
             unit="MILES",
             status=ComponentStatus.UNAVAILABLE,
-            source_id=f"fhwa_nhts_{reference_year}",
-            source_variable="ANNUAL_VMT_SOLO_DRIVER",
-            source_url=FHWA_NHTS_URL,
-            source_release=f"FHWA NHTS ({reference_year})",
-            source_reference_period=str(reference_year),
+            source_id=f"fhwa_nhts_2022",
+            source_variable="ANNMILES",
+            source_url=NHTS_2022_URL,
+            source_release=f"FHWA NHTS 2022",
+            source_reference_period="2022",
             retrieved_at=retrieved_at,
             source_artifact_sha256=file_sha256,
             methodology_version="0.2.0-draft",
-            notes="UNAVAILABLE: FHWA NHTS annual mileage could not be parsed from source dataset.",
+            notes="UNAVAILABLE: FHWA NHTS annual mileage ZIP could not be found.",
         )
+
+    weighted_miles_sum = 0.0
+    total_weights = 0.0
+    sample_size = 0
+
+    try:
+        with zipfile.ZipFile(zip_path) as z:
+            # Look for the household public file. Names can vary, e.g., hhpub.csv or hhpub22.csv
+            hh_files = [f for f in z.namelist() if "hhpub" in f.lower() and f.endswith(".csv")]
+            if not hh_files:
+                raise FileNotFoundError("Could not find hhpub.csv inside NHTS ZIP.")
+            
+            with z.open(hh_files[0]) as fh:
+                import io
+                text_fh = io.TextIOWrapper(fh, encoding="utf-8-sig", errors="replace")
+                reader = csv.DictReader(text_fh)
+                
+                for row in reader:
+                    # Filter for 1-worker, 1-adult (HHSIZE) households
+                    wrkcount = str(row.get("WRKCOUNT", "")).strip()
+                    hhsize = str(row.get("HHSIZE", "")).strip()
+                    
+                    if wrkcount != "1" or hhsize != "1":
+                        continue
+                        
+                    miles_str = row.get("ANNMILES", "-1")
+                    try:
+                        miles = float(miles_str)
+                    except ValueError:
+                        continue
+                        
+                    # Missing values in NHTS are often negative (e.g., -9)
+                    if miles < 0:
+                        continue
+                        
+                    weight_str = row.get("WTHHFIN", "1.0")
+                    try:
+                        weight = float(weight_str)
+                    except ValueError:
+                        weight = 1.0
+                        
+                    weighted_miles_sum += miles * weight
+                    total_weights += weight
+                    sample_size += 1
+
+    except Exception as e:
+        logger.error(f"Failed to process NHTS ZIP: {e}")
+        return LivingCostComponentObservation(
+            component_id="fhwa_annual_miles",
+            category="transportation_input",
+            geography_type="national",
+            geography_id="US",
+            geography_name="United States Baseline",
+            state="US",
+            reference_year=reference_year,
+            value_annual=None,
+            value_monthly=None,
+            unit="MILES",
+            status=ComponentStatus.UNAVAILABLE,
+            source_id=f"fhwa_nhts_2022",
+            source_variable="ANNMILES",
+            source_url=NHTS_2022_URL,
+            source_release=f"FHWA NHTS 2022",
+            source_reference_period="2022",
+            retrieved_at=retrieved_at,
+            source_artifact_sha256=file_sha256,
+            methodology_version="0.2.0-draft",
+            notes=f"UNAVAILABLE: Failed to process NHTS dataset - {e}",
+        )
+
+    if sample_size == 0 or total_weights == 0:
+        return LivingCostComponentObservation(
+            component_id="fhwa_annual_miles",
+            category="transportation_input",
+            geography_type="national",
+            geography_id="US",
+            geography_name="United States Baseline",
+            state="US",
+            reference_year=reference_year,
+            value_annual=None,
+            value_monthly=None,
+            unit="MILES",
+            status=ComponentStatus.UNAVAILABLE,
+            source_id=f"fhwa_nhts_2022",
+            source_variable="ANNMILES",
+            source_url=NHTS_2022_URL,
+            source_release=f"FHWA NHTS 2022",
+            source_reference_period="2022",
+            retrieved_at=retrieved_at,
+            source_artifact_sha256=file_sha256,
+            methodology_version="0.2.0-draft",
+            notes="UNAVAILABLE: NHTS filtering yielded 0 valid samples.",
+        )
+
+    annual_miles = weighted_miles_sum / total_weights
 
     return LivingCostComponentObservation(
         component_id="fhwa_annual_miles",
@@ -100,11 +190,11 @@ def parse_fhwa_nhts_mileage_csv(
         value_monthly=round(annual_miles / 12.0, 1),
         unit="MILES",
         status=ComponentStatus.MEASURED,
-        source_id=f"fhwa_nhts_{reference_year}",
-        source_variable="ANNUAL_VMT_SOLO_DRIVER",
-        source_url=FHWA_NHTS_URL,
-        source_release=f"FHWA NHTS Table VMT_WORKER_SOLO ({reference_year})",
-        source_reference_period=str(reference_year),
+        source_id=f"fhwa_nhts_2022",
+        source_variable="ANNMILES_WRKCOUNT1_HHSIZE1",
+        source_url=NHTS_2022_URL,
+        source_release=f"FHWA NHTS 2022",
+        source_reference_period="2022",
         retrieved_at=retrieved_at,
         source_artifact_sha256=file_sha256,
         methodology_version="0.2.0-draft",

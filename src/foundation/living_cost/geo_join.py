@@ -22,6 +22,8 @@ def execute_geo_join_audit(
     census_county_universe: dict[str, dict[str, Any]],
     hud_observations: list[LivingCostComponentObservation],
     reference_year: int,
+    census_artifact_sha256: str = "",
+    hud_artifact_sha256: str = "",
     output_path: Path | None = None,
 ) -> dict[str, Any]:
     """Execute join between Census county universe and HUD FMR observations."""
@@ -79,6 +81,8 @@ def execute_geo_join_audit(
         "report_type": "hud_fmr_census_acs_geo_join",
         "reference_year": reference_year,
         "generated_at": now_iso,
+        "census_artifact_sha256": census_artifact_sha256,
+        "hud_artifact_sha256": hud_artifact_sha256,
         "census_county_universe_count": total_census_counties,
         "census_total_adult_population": total_census_adult_pop,
         "hud_source_rows_count": hud_rows_count,

@@ -755,7 +755,7 @@ def calculate_state_income_tax(gross: float, state: str, year: int = 2024) -> fl
     year_schedules = STATE_STATUTORY_SCHEDULES.get(year, STATE_STATUTORY_SCHEDULES[2024])
     sched = year_schedules.get(st)
     if not sched:
-        return 0.0
+        raise ValueError(f"State income tax schedule UNAVAILABLE for state {st} in {year}")
 
     std_ded = sched["deduction"]
     taxable = max(0.0, gross - std_ded)

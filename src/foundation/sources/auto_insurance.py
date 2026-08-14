@@ -8,91 +8,122 @@ METHODOLOGICAL DISTINCTIONS:
 - Source Frequency: Biennial/triennial official NAIC releases (e.g. 2021/2022 survey data published in 2024).
 - Temporal Rule: Real source vintage year is stored explicitly. If a 2026 survey is not yet published,
   the component reports the last validated observation with explicit vintage metadata.
+- Licensing: The NAIC Auto Insurance Database Report is a licensed publication. The acquisition layer
+  expects the purchased artifact to be available or securely downloaded.
 """
 
 from __future__ import annotations
 
 import csv
-import hashlib
-from datetime import UTC, datetime
+import logging
 from pathlib import Path
 
 from foundation.living_cost.models import ComponentStatus, LivingCostComponentObservation
+from foundation.sources.acquisition import acquire_source
+
+logger = logging.getLogger(__name__)
 
 NAIC_BASE_URL = (
     "https://content.naic.org/research-actuarial-services/auto-insurance-database-report"
 )
 
+# Licensed publication: requires manual placement or secured authenticated download
+NAIC_LICENSED_CSV_URL = "https://content.naic.org/licensed-artifacts/naic_auto_insurance.csv"
+
+
+def download_naic_artifact(
+    year: int, cache_dir: Path, force_download: bool = False
+):
+    """Download or verify required NAIC Auto Insurance dataset."""
+    if year not in (2024, 2026):
+        raise ValueError(f"Unsupported NAIC reference year: {year}")
+
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    
+    expected_filename = f"naic_auto_insurance_{year}.csv"
+    
+    artifact = acquire_source(
+        source_id=f"naic_auto_ins_{year}",
+        url=NAIC_LICENSED_CSV_URL,
+        cache_dir=cache_dir,
+        expected_filename=expected_filename,
+        force_download=force_download,
+    )
+    
+    if artifact is None:
+        raise RuntimeError(f"Required NAIC dataset for {year} is UNAVAILABLE. Verify licensing and artifact placement.")
+        
+    return artifact
+
 
 def parse_naic_auto_insurance_csv(
-    file_path: Path,
+    cache_dir: Path,
     reference_year: int,
     retrieved_at: str = "",
     file_sha256: str = "",
 ) -> list[LivingCostComponentObservation]:
     """Parse NAIC state auto insurance average expenditure dataset."""
+    file_path = cache_dir / f"naic_auto_insurance_{reference_year}.csv"
+    
     if not file_path.exists():
-        raise FileNotFoundError(f"NAIC auto insurance file not found: {file_path}")
-
-    if not file_sha256:
-        hasher = hashlib.sha256()
-        with file_path.open("rb") as fh:
-            while chunk := fh.read(65536):
-                hasher.update(chunk)
-        file_sha256 = hasher.hexdigest()
-
-    if not retrieved_at:
-        retrieved_at = datetime.now(UTC).replace(microsecond=0).isoformat()
+        logger.warning(f"NAIC auto insurance CSV not found: {file_path}")
+        return []
 
     observations: list[LivingCostComponentObservation] = []
 
-    with file_path.open("r", encoding="utf-8-sig", errors="replace") as fh:
-        reader = csv.DictReader(fh)
-        for row in reader:
-            state_alpha = str(row.get("state") or row.get("State") or "").strip().upper()
-            prem_str = (
-                row.get("average_annual_premium")
-                or row.get("combined_expenditure")
-                or row.get("premium")
-                or "0"
-            )
-            try:
-                annual_prem = float(str(prem_str).replace("$", "").replace(",", "").strip())
-            except ValueError:
-                continue
+    try:
+        with file_path.open("r", encoding="utf-8-sig", errors="replace") as fh:
+            reader = csv.DictReader(fh)
+            for row in reader:
+                state_alpha = str(row.get("state") or row.get("State") or "").strip().upper()
+                if not state_alpha:
+                    continue
+                    
+                prem_str = (
+                    row.get("average_annual_premium")
+                    or row.get("combined_expenditure")
+                    or row.get("premium")
+                    or "0"
+                )
+                try:
+                    annual_prem = float(str(prem_str).replace("$", "").replace(",", "").strip())
+                except ValueError:
+                    continue
 
-            if annual_prem <= 0:
-                continue
+                if annual_prem <= 0:
+                    continue
 
-            source_vintage = str(
-                row.get("source_year") or row.get("vintage") or reference_year
-            ).strip()
+                source_vintage = str(
+                    row.get("source_year") or row.get("vintage") or reference_year
+                ).strip()
 
-            obs = LivingCostComponentObservation(
-                component_id="transport_auto_insurance",
-                category="transportation",
-                geography_type="state",
-                geography_id=state_alpha,
-                geography_name=f"{state_alpha} Auto Insurance",
-                state=state_alpha,
-                reference_year=reference_year,
-                value_annual=round(annual_prem, 2),
-                value_monthly=round(annual_prem / 12.0, 2),
-                unit="USD",
-                status=ComponentStatus.MEASURED,
-                source_id=f"naic_auto_ins_{reference_year}",
-                source_variable="combined_average_expenditure_liability_comp_coll",
-                source_url=NAIC_BASE_URL,
-                source_release=f"NAIC Auto Insurance Database Report (Source Vintage: {source_vintage})",
-                source_reference_period=source_vintage,
-                retrieved_at=retrieved_at,
-                source_artifact_sha256=file_sha256,
-                methodology_version="0.2.0-draft",
-                notes=(
-                    f"NAIC combined average annual expenditure (Liability + Comprehensive + Collision) "
-                    f"in {state_alpha} (Source Vintage: {source_vintage})."
-                ),
-            )
-            observations.append(obs)
+                obs = LivingCostComponentObservation(
+                    component_id="transport_auto_insurance",
+                    category="transportation",
+                    geography_type="state",
+                    geography_id=state_alpha,
+                    geography_name=f"{state_alpha} Auto Insurance",
+                    state=state_alpha,
+                    reference_year=reference_year,
+                    value_annual=round(annual_prem, 2),
+                    value_monthly=round(annual_prem / 12.0, 2),
+                    unit="USD",
+                    status=ComponentStatus.MEASURED,
+                    source_id=f"naic_auto_ins_{reference_year}",
+                    source_variable="combined_average_expenditure_liability_comp_coll",
+                    source_url=NAIC_BASE_URL,
+                    source_release=f"NAIC Auto Insurance Database Report (Source Vintage: {source_vintage})",
+                    source_reference_period=source_vintage,
+                    retrieved_at=retrieved_at,
+                    source_artifact_sha256=file_sha256,
+                    methodology_version="0.2.0-draft",
+                    notes=(
+                        f"NAIC combined average annual expenditure (Liability + Comprehensive + Collision) "
+                        f"in {state_alpha} (Source Vintage: {source_vintage})."
+                    ),
+                )
+                observations.append(obs)
+    except Exception as e:
+        logger.error(f"Failed to parse NAIC CSV: {e}")
 
     return observations

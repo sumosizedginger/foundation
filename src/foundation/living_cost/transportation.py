@@ -99,19 +99,38 @@ class AutoCostBreakdown:
         )
 
 
+def get_state_registration_fee(state: str) -> float:
+    """Get the statutory state vehicle registration fee. Raises ValueError if unavailable."""
+    st = state.upper()
+    fee = STATE_REGISTRATION_FEES.get(st)
+    if fee is None:
+        raise ValueError(f"State vehicle registration fee UNAVAILABLE for state {st}")
+    return fee
+
+
 def calculate_transportation(
     breakdown: AutoCostBreakdown,
     reference_year: int,
     geography_id: str,
     geography_name: str = "",
     state: str = "",
-    source_sha256: str = "verified_transport_sha",
-    retrieved_at: str = "2026-08-13T00:00:00Z",
+    source_sha256: str = "",
+    retrieved_at: str = "",
 ) -> LivingCostComponentObservation:
-    """Return a validated transportation component observation (MODELED_FROM_MEASURED_INPUTS)."""
+    """Return a validated transportation component observation (ESTIMATED)."""
     total = breakdown.total_annual
     if total <= 0:
         raise ValueError(f"Transportation total must be positive, got {total}")
+
+    # Ensure registration fee is verified
+    _ = get_state_registration_fee(state)
+
+    if not retrieved_at:
+        from datetime import UTC, datetime
+        retrieved_at = datetime.now(UTC).replace(microsecond=0).isoformat()
+        
+    if not source_sha256:
+        source_sha256 = "N/A_ESTIMATED_MODEL"
 
     return LivingCostComponentObservation(
         component_id="transportation_auto",
@@ -124,7 +143,7 @@ def calculate_transportation(
         value_annual=total,
         value_monthly=round(total / 12.0, 2),
         unit="USD",
-        status=ComponentStatus.MODELED_FROM_MEASURED_INPUTS,
+        status=ComponentStatus.ESTIMATED,
         source_id=f"transport_model_{reference_year}",
         source_variable="single_adult_auto_ownership_model",
         source_url="https://www.fhwa.dot.gov/",
@@ -134,9 +153,9 @@ def calculate_transportation(
         source_artifact_sha256=source_sha256,
         methodology_version="0.2.0-draft",
         notes=(
-            f"Auto model: {breakdown.annual_miles:,.0f} mi/yr @ {REFERENCE_VEHICLE_MPG:.1f} MPG; "
+            f"Auto model (ESTIMATED): {breakdown.annual_miles:,.0f} mi/yr @ {REFERENCE_VEHICLE_MPG:.1f} MPG; "
             f"Fuel: ${breakdown.fuel_cost_annual:,.2f}, Ins: ${breakdown.insurance_cost_annual:,.2f}, "
             f"Maint: ${breakdown.maintenance_tires_annual:,.2f}, Reg: ${breakdown.registration_fees_annual:,.2f}, "
-            f"Replacement Reserve: ${breakdown.replacement_reserve_annual:,.2f}."
+            f"Replacement Reserve (ESTIMATED): ${breakdown.replacement_reserve_annual:,.2f}."
         ),
     )
