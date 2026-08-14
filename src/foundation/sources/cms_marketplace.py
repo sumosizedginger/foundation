@@ -213,8 +213,9 @@ def parse_cms_marketplace_multi_puf(
     rate_file = _puf_path(cache_dir, year, "rate_puf")
     plan_file = _puf_path(cache_dir, year, "plan_attributes_puf")
     service_file = _puf_path(cache_dir, year, "service_area_puf")
+    benefits_file = _puf_path(cache_dir, year, "benefits_puf")
 
-    if rate_file is None or plan_file is None:
+    if rate_file is None or plan_file is None or benefits_file is None:
         logger.warning(f"CMS PUF files missing for {year}, returning empty list.")
         return []
 
@@ -260,6 +261,22 @@ def parse_cms_marketplace_multi_puf(
             "state": str(row.get("StateCode") or "").strip().upper(),
         }
 
+    benefit_plan_ids: set[str] = set()
+    for row in _open_puf_table(benefits_file):
+        dental = str(row.get("DentalOnlyPlan") or "").strip().lower()
+        if dental in {"yes", "y", "true", "1"}:
+            continue
+        bid = str(row.get("StandardComponentId") or row.get("PlanId") or "").strip()[:14]
+        if bid:
+            benefit_plan_ids.add(bid)
+    if not benefit_plan_ids:
+        logger.warning("CMS Benefits PUF produced no join keys for %s", year)
+        return []
+    valid_plans = {pid: meta for pid, meta in valid_plans.items() if pid in benefit_plan_ids}
+    if not valid_plans:
+        logger.warning("CMS Benefits join removed every Silver plan for %s", year)
+        return []
+
     service_keys: set[tuple[str, str, str]] = set()
     if service_file is not None:
         for row in _open_puf_table(service_file):
@@ -270,6 +287,10 @@ def parse_cms_marketplace_multi_puf(
             service_area_id = str(row.get("ServiceAreaId") or "").strip()
             state_alpha = str(row.get("StateCode") or "").strip().upper()
             if not issuer_id or not service_area_id or not state_alpha:
+                continue
+            cover_state = str(row.get("CoverEntireState") or "").strip().lower()
+            county = str(row.get("County") or "").strip()
+            if cover_state not in {"yes", "y", "true", "1"} and not county:
                 continue
             service_keys.add((state_alpha, issuer_id, service_area_id))
 

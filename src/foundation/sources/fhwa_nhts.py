@@ -197,7 +197,14 @@ def parse_fhwa_nhts_mileage(
             notes="UNAVAILABLE: NHTS filtering yielded 0 valid samples.",
         )
 
+    from foundation.percentiles import weighted_percentile
+
+    miles = [miles_by_hh[hid] for hid in eligible if hid in miles_by_hh]
+    weights = [eligible[hid] for hid in eligible if hid in miles_by_hh]
     annual_miles = weighted_miles_sum / total_weights
+    p25 = weighted_percentile(miles, weights, 0.25)
+    median = weighted_percentile(miles, weights, 0.50)
+    p75 = weighted_percentile(miles, weights, 0.75)
 
     return LivingCostComponentObservation(
         component_id="fhwa_annual_miles",
@@ -211,13 +218,19 @@ def parse_fhwa_nhts_mileage(
         value_monthly=round(annual_miles / 12.0, 1),
         unit="MILES",
         status=ComponentStatus.MEASURED,
-        source_id="fhwa_nhts_2022",
+        source_id=f"fhwa_nhts_{reference_year}",
         source_variable="ANNMILES_WRKCOUNT1_HHSIZE1",
         source_url=NHTS_2022_CSV_ZIP,
-        source_release="FHWA NHTS 2022",
+        source_release="FHWA NHTS 2022 V2.1",
         source_reference_period="2022",
         retrieved_at=retrieved_at,
         source_artifact_sha256=file_sha256,
         methodology_version="0.2.0-draft",
-        notes=f"FHWA NHTS weighted annual vehicle miles traveled for single-adult driver baseline ({annual_miles:,.0f} mi/yr, Sample: {sample_size:,}).",
+        notes=(
+            "Observed NHTS travel behavior for HOUSEID with HHSIZE=1 and WRKCOUNT=1, "
+            "weight=WTHHFIN, miles=sum(ANNMILES) on vehv2pub. Missing weights are dropped "
+            f"(not defaulted to 1). Weighted mean={annual_miles:,.1f}; median={median:,.1f}; "
+            f"P25={p25:,.1f}; P75={p75:,.1f}; unweighted n={sample_size:,}. "
+            "This is OBSERVED ANNUAL MILEAGE, not MINIMUM NECESSARY MILEAGE (OD-003)."
+        ),
     )

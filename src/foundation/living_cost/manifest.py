@@ -41,7 +41,10 @@ class RetrievedSourceArtifact:
 
 HUD_FMR_LANDING = "https://www.huduser.gov/portal/datasets/fmr.html"
 CMS_PUF_LANDING = "https://www.cms.gov/marketplace/resources/data/public-use-files"
-ACS_LANDING = "https://api.census.gov/data/2023/acs/acs5"
+ACS_LANDING = (
+    "https://www2.census.gov/programs-surveys/acs/summary_file/2024/"
+    "table-based-SF/data/5YRData/acsdt5y2024-b01001.dat"
+)
 MEPS_HC243_LANDING = (
     "https://meps.ahrq.gov/mepsweb/data_stats/download_data_files_detail.jsp?cboPufNumber=HC-243"
 )
@@ -85,13 +88,13 @@ STATIC_SOURCES: list[StaticSourceDef] = [
         publisher="U.S. Census Bureau",
         dataset="American Community Survey 5-Year Estimates Table B01001 (Adult Population Age 18+)",
         reference_year=2024,
-        release="2023 ACS 5-Year Data Release",
+        release="2024 ACS 5-Year Data Release (B01001 summary file)",
         url=ACS_LANDING,
         licensing_notes="U.S. Government Work (Public Domain)",
         landing_page="https://www.census.gov/programs-surveys/acs",
-        parser_identifier="foundation.sources.census_acs.parse_acs_county_population_json",
+        parser_identifier="foundation.sources.census_acs.parse_acs_summary_dat",
         source_vintage_note=(
-            "Weight source vintage is 2023 ACS 5-Year. This is not a 2024 Census file."
+            "Frozen weight vintage is 2024 ACS 5-Year B01001. Used for both 2024 and 2026 cost years."
         ),
     ),
     StaticSourceDef(
@@ -99,18 +102,18 @@ STATIC_SOURCES: list[StaticSourceDef] = [
         publisher="U.S. Census Bureau",
         dataset="American Community Survey 5-Year Estimates Table B01001 (Adult Population Age 18+)",
         reference_year=2026,
-        release="2023 ACS 5-Year Data Release (shared weight vintage)",
+        release="2024 ACS 5-Year Data Release (shared weight vintage)",
         url=ACS_LANDING,
         licensing_notes="U.S. Government Work (Public Domain)",
         landing_page="https://www.census.gov/programs-surveys/acs",
-        parser_identifier="foundation.sources.census_acs.parse_acs_county_population_json",
+        parser_identifier="foundation.sources.census_acs.parse_acs_summary_dat",
         source_vintage_note=(
-            "2026 cost year uses the same 2023 ACS 5-Year weight vintage as 2024. "
+            "2026 cost year uses the same 2024 ACS 5-Year weight vintage as 2024. "
             "Not a 2026 Census file."
         ),
     ),
     StaticSourceDef(
-        source_id="cms_marketplace_puf_2024",
+        source_id="cms_rate_puf_2024",
         publisher="Centers for Medicare & Medicaid Services (CMS)",
         dataset="Marketplace Exchange PUFs (Rate, Plan Attributes, Service Area, Benefits)",
         reference_year=2024,
@@ -122,7 +125,7 @@ STATIC_SOURCES: list[StaticSourceDef] = [
         source_vintage_note="FFE + SBE-FP only. Standalone SBE states require SBE QHP PUFs.",
     ),
     StaticSourceDef(
-        source_id="cms_marketplace_puf_2026",
+        source_id="cms_rate_puf_2026",
         publisher="Centers for Medicare & Medicaid Services (CMS)",
         dataset="Marketplace Exchange PUFs (Rate, Plan Attributes, Service Area, Benefits)",
         reference_year=2026,
@@ -136,14 +139,14 @@ STATIC_SOURCES: list[StaticSourceDef] = [
     StaticSourceDef(
         source_id="meps_table1_2024",
         publisher="Agency for Healthcare Research and Quality (AHRQ)",
-        dataset="MEPS Household Component HC-243 2022 Full Year Consolidated Data File",
+        dataset="MEPS Household Component HC-251 2023 Full Year Consolidated Data File",
         reference_year=2024,
-        release="MEPS HC-243 (released August 2024; data year 2022)",
-        url="https://meps.ahrq.gov/mepsweb/data_files/pufs/h243/h243dat.zip",
+        release="MEPS HC-251 (2023 data year; newest official Full Year Consolidated at execution)",
+        url="https://meps.ahrq.gov/mepsweb/data_files/pufs/h251/h251dat.zip",
         licensing_notes="U.S. Government Work (Public Domain)",
         landing_page=MEPS_HC243_LANDING,
         parser_identifier="foundation.sources.meps.parse_meps_oop_csv",
-        source_vintage_note="2022 MEPS data year used as OOP source vintage for 2024 cost year.",
+        source_vintage_note="2023 MEPS data year used as OOP source vintage for 2024 cost year. Not a 2024 MEPS file.",
     ),
     StaticSourceDef(
         source_id="usda_food_low_cost_2024",
@@ -151,13 +154,11 @@ STATIC_SOURCES: list[StaticSourceDef] = [
         dataset="USDA Food Plans: Monthly Cost of Food Reports (Low-Cost Plan)",
         reference_year=2024,
         release="USDA/CNPP monthly Cost of Food reports",
-        url=USDA_FOOD_LANDING,
+        url="https://www.fna.usda.gov/sites/default/files/resource-files/usda-lowcostplan-sept2007-present.xlsx",
         licensing_notes="U.S. Government Work (Public Domain)",
-        landing_page=USDA_FOOD_LANDING,
-        parser_identifier="foundation.sources.usda_food.parse_usda_monthly_food_csv",
-        source_vintage_note=(
-            "Landing page only until each monthly official PDF/Excel artifact URL is resolved."
-        ),
+        landing_page="https://www.fna.usda.gov/research/cnpp/usda-food-plans/cost-food-monthly-reports",
+        parser_identifier="foundation.sources.usda_food.parse_usda_official_xlsx",
+        source_vintage_note="Official CNPP Low-Cost archive usda-lowcostplan-sept2007-present.xlsx.",
     ),
     StaticSourceDef(
         source_id="eia_gas_price_2024",
@@ -195,7 +196,7 @@ STATIC_SOURCES: list[StaticSourceDef] = [
         source_vintage_note="Exact V2.1 CSV zip URL must be resolved from the downloads page.",
     ),
     StaticSourceDef(
-        source_id="bls_ce_essentials_2024",
+        source_id="bls_ce_2024",
         publisher="U.S. Bureau of Labor Statistics (BLS)",
         dataset="Consumer Expenditure Survey Interview PUMD (CSV)",
         reference_year=2024,
@@ -286,6 +287,23 @@ def generate_source_manifest(
             base_dict["retrieval_notes"] = None
 
         sources_out.append(base_dict)
+
+    known_ids = {item["source_id"] for item in sources_out}
+    for artifact in retrieved_artifacts:
+        if artifact.source_id in known_ids:
+            continue
+        sources_out.append(
+            {
+                "source_id": artifact.source_id,
+                "retrieved_at": artifact.retrieved_at or None,
+                "sha256": artifact.sha256 or None,
+                "byte_size": artifact.byte_size or None,
+                "local_cache_filename": artifact.local_cache_filename or None,
+                "validation_status": artifact.validation_status,
+                "resolved_url": artifact.resolved_url or None,
+                "retrieval_notes": artifact.notes or None,
+            }
+        )
 
     manifest_doc = {
         "manifest_type": "living_cost_source_manifest",

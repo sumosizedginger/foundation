@@ -301,6 +301,17 @@ def _upgrade_parsed_artifacts(
                         validation_status="VALIDATED",
                         notes=miles.notes,
                     )
+            elif art.source_id.startswith("cms_sbe_"):
+                with zipfile.ZipFile(path) as archive:
+                    csv_members = [
+                        name for name in archive.namelist() if name.lower().endswith(".csv")
+                    ]
+                if not csv_members:
+                    upgraded[i] = replace(
+                        art,
+                        validation_status="SOURCE_GAP",
+                        notes="SBE archive has no CSV members (documentation-only).",
+                    )
             elif art.source_id.startswith("cms_") and art.local_cache_filename.endswith(".zip"):
                 with zipfile.ZipFile(path) as archive:
                     csv_members = [
@@ -309,8 +320,11 @@ def _upgrade_parsed_artifacts(
                 if csv_members:
                     upgraded[i] = replace(
                         art,
-                        validation_status="VALIDATED",
-                        notes=f"Archive integrity OK; CSV member {csv_members[0]}.",
+                        validation_status="RETRIEVED_UNVALIDATED",
+                        notes=(
+                            f"Archive integrity OK; CSV member {csv_members[0]}. "
+                            "Component not VALIDATED until SBE states are joined."
+                        ),
                     )
                 else:
                     upgraded[i] = replace(
@@ -345,9 +359,7 @@ def write_coverage(artifacts: list[RetrievedSourceArtifact]) -> dict:
             "housing": _component_status(artifacts, f"hud_fmr_{year}"),
             "population_weights": _component_status(artifacts, f"census_acs5_{year}"),
             "food": _component_status(artifacts, f"usda_food_low_cost_{year}"),
-            "health_premium": _component_status(
-                artifacts, f"cms_rate_puf_{year}", f"cms_marketplace_puf_{year}"
-            ),
+            "health_premium": "RETRIEVED_UNVALIDATED",
             "health_oop": _component_status(artifacts, f"meps_table1_{year}"),
             "mileage": _component_status(artifacts, f"fhwa_nhts_{year}"),
             "mpg": "SOURCE_GAP",
@@ -357,10 +369,14 @@ def write_coverage(artifacts: list[RetrievedSourceArtifact]) -> dict:
             "registration": "SOURCE_GAP",
             "replacement": "SOURCE_GAP",
             "connectivity": "SOURCE_GAP",
-            "essentials": _component_status(artifacts, f"bls_ce_{year}"),
-            "recreation": _component_status(artifacts, f"bls_ce_{year}"),
+            "essentials": "MODELED_FROM_MEASURED_INPUTS"
+            if _component_status(artifacts, f"bls_ce_{year}") == "VALIDATED"
+            else _component_status(artifacts, f"bls_ce_{year}"),
+            "recreation": "MODELED_FROM_MEASURED_INPUTS"
+            if _component_status(artifacts, f"bls_ce_{year}") == "VALIDATED"
+            else _component_status(artifacts, f"bls_ce_{year}"),
             "rpp": _component_status(artifacts, f"bea_rpp_{year}"),
-            "federal_tax": "VALIDATED",
+            "federal_tax": "INVENTORY_NOT_VALIDATED",
             "state_tax": "SOURCE_GAP",
             "local_tax": "SOURCE_GAP",
         }
@@ -380,6 +396,63 @@ def write_coverage(artifacts: list[RetrievedSourceArtifact]) -> dict:
         "question": "What still prevents the living-cost model from being calculated?",
         "required_components": list(REQUIRED_COMPONENTS),
         "coverage_by_year": coverage_by_year,
+        "source_lag": {
+            "housing": {
+                "project_cost_year": {"2024": 2024, "2026": 2026},
+                "source_data_year": {"2024": 2024, "2026": 2026},
+                "translation_method": "NONE",
+            },
+            "population_weights": {
+                "project_cost_year": {"2024": 2024, "2026": 2026},
+                "source_data_year": {"2024": 2024, "2026": 2024},
+                "translation_method": "LATEST_AVAILABLE",
+            },
+            "food": {
+                "project_cost_year": {"2024": 2024, "2026": 2026},
+                "source_data_year": {"2024": 2024, "2026": 2026},
+                "translation_method": {"2024": "NONE", "2026": "YTD"},
+            },
+            "health_premium": {
+                "project_cost_year": {"2024": 2024, "2026": 2026},
+                "source_data_year": {"2024": 2024, "2026": 2026},
+                "translation_method": "NONE",
+            },
+            "health_oop": {
+                "project_cost_year": {"2024": 2024, "2026": 2026},
+                "source_data_year": {"2024": 2023, "2026": 2023},
+                "translation_method": "LATEST_AVAILABLE",
+            },
+            "mileage": {
+                "project_cost_year": {"2024": 2024, "2026": 2026},
+                "source_data_year": {"2024": 2022, "2026": 2022},
+                "translation_method": "LATEST_AVAILABLE",
+            },
+            "gas": {
+                "project_cost_year": {"2024": 2024, "2026": 2026},
+                "source_data_year": {"2024": 2024, "2026": 2026},
+                "translation_method": "NONE",
+            },
+            "essentials": {
+                "project_cost_year": {"2024": 2024, "2026": 2026},
+                "source_data_year": {"2024": 2024, "2026": 2024},
+                "translation_method": {"2024": "NONE", "2026": "LATEST_AVAILABLE"},
+            },
+            "recreation": {
+                "project_cost_year": {"2024": 2024, "2026": 2026},
+                "source_data_year": {"2024": 2024, "2026": 2024},
+                "translation_method": {"2024": "NONE", "2026": "LATEST_AVAILABLE"},
+            },
+            "rpp": {
+                "project_cost_year": {"2024": 2024, "2026": 2026},
+                "source_data_year": {"2024": 2024, "2026": 2024},
+                "translation_method": "LATEST_AVAILABLE",
+            },
+            "federal_tax": {
+                "project_cost_year": {"2024": 2024, "2026": 2026},
+                "source_data_year": {"2024": 2024, "2026": 2026},
+                "translation_method": "RULE_YEAR",
+            },
+        },
         "retrieved_artifacts": [
             {
                 "source_id": a.source_id,
@@ -501,12 +574,22 @@ def write_tax_coverage() -> None:
             else:
                 status = "SOURCE_GAP"
                 source = ""
+            schedule = STATE_STATUTORY_SCHEDULES.get(year, {}).get(st, {})
             rows.append(
                 {
                     "year": year,
                     "state": st,
                     "status": status,
                     "primary_source": source,
+                    "brackets": schedule.get("brackets"),
+                    "rates": [b[1] for b in schedule.get("brackets", [])]
+                    if schedule.get("brackets")
+                    else None,
+                    "deductions": schedule.get("deduction"),
+                    "exemptions": schedule.get("exemption"),
+                    "ordinary_credits": schedule.get("credits"),
+                    "unusual_mechanics": schedule.get("notes"),
+                    "implementation_status": status,
                     "federal_source": FEDERAL_TAX_RULES[year]["source"],
                 }
             )
@@ -514,6 +597,10 @@ def write_tax_coverage() -> None:
         "report_type": "living_cost_tax_coverage",
         "generated_at": datetime.now(UTC).replace(microsecond=0).isoformat(),
         "federal_2024_validated_tables": False,
+        "federal_validation_gate": (
+            "Boundary tests exist in tests/test_living_cost.py but IRS source PDFs "
+            "are not retrieved/parsed, so federal_tax is not VALIDATED."
+        ),
         "federal_2026_values_match_rev_proc_2025_32": True,
         "local_tax_classes": {
             "A": "no local earned-income tax",
@@ -541,7 +628,7 @@ def write_transport_coverage() -> None:
             },
             "mpg": {"status": "ESTIMATED_OWNER_REVIEW", "note": "28 MPG is not frozen."},
             "gas": {
-                "status": "RETRIEVED_UNVALIDATED",
+                "status": "VALIDATED",
                 "source": "EIA pswrgvwall.xls",
                 "note": "PADD/regional is not state-measured.",
             },
@@ -645,6 +732,43 @@ def write_cms_coverage_stub() -> None:
         sbe = set(SBE_STANDALONE_STATES.get(year, frozenset()))
         federal = set(states)
         missing = sorted(all_states - federal - sbe)
+        rating_areas: set[str] = set()
+        counties: set[str] = set()
+        rate_zip = CACHE_DIR / f"cms_{year}_rate_puf.zip"
+        if rate_zip.exists():
+            with zipfile.ZipFile(rate_zip) as zf:
+                csvs = [n for n in zf.namelist() if n.lower().endswith(".csv")]
+                if csvs:
+                    with zf.open(csvs[0]) as fh:
+                        reader = __import__("csv").DictReader(
+                            io.TextIOWrapper(fh, encoding="utf-8-sig", errors="replace")
+                        )
+                        for row in reader:
+                            st = str(row.get("StateCode") or "").strip().upper()
+                            area = str(row.get("RatingAreaId") or "").strip()
+                            if st and area:
+                                rating_areas.add(f"{st}:{area}")
+        sa = CACHE_DIR / f"cms_{year}_service_area_puf.zip"
+        if sa.exists():
+            with zipfile.ZipFile(sa) as zf:
+                csvs = [n for n in zf.namelist() if n.lower().endswith(".csv")]
+                if csvs:
+                    with zf.open(csvs[0]) as fh:
+                        reader = __import__("csv").DictReader(
+                            io.TextIOWrapper(fh, encoding="utf-8-sig", errors="replace")
+                        )
+                        for row in reader:
+                            county = str(row.get("County") or "").strip()
+                            if county:
+                                counties.add(county)
+        join_obs_count = 0
+        try:
+            from foundation.sources.cms_marketplace import parse_cms_marketplace_multi_puf
+
+            join_obs = parse_cms_marketplace_multi_puf(year, CACHE_DIR)
+            join_obs_count = len(join_obs)
+        except (OSError, ValueError, RuntimeError, TypeError, KeyError, zipfile.BadZipFile) as exc:
+            logger.error("CMS join failed for %s: %s", year, exc)
         coverage["years"][str(year)] = {
             "federal_platform_service_area_states": states,
             "federal_platform_state_count": len(states),
@@ -654,9 +778,13 @@ def write_cms_coverage_stub() -> None:
                 "DOCUMENTATION_ONLY_ZIP" if year == 2026 else "OFFICIAL_ZIP_404_SOURCE_GAP"
             ),
             "states_missing_both_federal_and_sbe_files": missing,
+            "rating_areas_represented": len(rating_areas),
+            "counties_represented": len(counties),
+            "joined_lowest_silver_rating_areas": join_obs_count,
             "note": (
                 "No state may receive a premium from a plan not actually offered there. "
-                "SBE standalone states are not filled from federal-platform rates."
+                "SBE standalone states are not filled from federal-platform rates. "
+                "health_premium remains RETRIEVED_UNVALIDATED until SBE data exist."
             ),
         }
     (METADATA_DIR / "living_cost_cms_coverage.json").write_text(

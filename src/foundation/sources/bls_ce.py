@@ -242,7 +242,9 @@ def parse_bls_ce_microdata(
 
     # Calculate weighted P25 for Essentials
     if essentials_vals:
+        p20_essentials = weighted_percentile(essentials_vals, essentials_weights, 0.20)
         p25_essentials = weighted_percentile(essentials_vals, essentials_weights, 0.25)
+        p30_essentials = weighted_percentile(essentials_vals, essentials_weights, 0.30)
         obs_ess = LivingCostComponentObservation(
             component_id="essentials_basket",
             category="essentials",
@@ -254,9 +256,9 @@ def parse_bls_ce_microdata(
             value_annual=round(p25_essentials, 2),
             value_monthly=round(p25_essentials / 12.0, 2),
             unit="USD",
-            status=ComponentStatus.MEASURED,
+            status=ComponentStatus.MODELED_FROM_MEASURED_INPUTS,
             source_id=f"bls_ce_essentials_{reference_year}",
-            source_variable="single_person_weighted_p25_essentials",
+            source_variable="FMLI_APPARCQ_PERSCACQ_HOUSEQCQ_p20_p25_p30",
             source_url=get_bls_ce_url(reference_year),
             source_release=f"BLS Consumer Expenditure Survey Microdata ({data_year})",
             source_reference_period=str(data_year),
@@ -264,8 +266,11 @@ def parse_bls_ce_microdata(
             source_artifact_sha256=file_sha256,
             methodology_version="0.2.0-draft",
             notes=(
-                f"BLS CE weighted P25 expenditure for restricted necessities among single-person positive spenders "
-                f"(${p25_essentials:,.2f}/yr, Sample: {len(essentials_vals):,})."
+                "MODELED_FROM_MEASURED_INPUTS from FMLI summary allowlist "
+                "APPARCQ+PERSCACQ+HOUSEQCQ (not a frozen UCC list). "
+                f"P20=${p20_essentials:,.2f}; P25=${p25_essentials:,.2f}; "
+                f"P30=${p30_essentials:,.2f}/yr among single-person positive spenders "
+                f"(n={len(essentials_vals):,}). P25 stored as the candidate only; not frozen."
             ),
         )
         observations.append(obs_ess)
@@ -297,7 +302,9 @@ def parse_bls_ce_microdata(
 
     # Calculate weighted P25 for Social Recreation
     if rec_vals:
+        p20_rec = weighted_percentile(rec_vals, rec_weights, 0.20)
         p25_rec = weighted_percentile(rec_vals, rec_weights, 0.25)
+        p30_rec = weighted_percentile(rec_vals, rec_weights, 0.30)
         obs_rec = LivingCostComponentObservation(
             component_id="social_recreation",
             category="social_recreation",
@@ -309,9 +316,9 @@ def parse_bls_ce_microdata(
             value_annual=round(p25_rec, 2),
             value_monthly=round(p25_rec / 12.0, 2),
             unit="USD",
-            status=ComponentStatus.MEASURED,
+            status=ComponentStatus.MODELED_FROM_MEASURED_INPUTS,
             source_id=f"bls_ce_recreation_{reference_year}",
-            source_variable="single_person_weighted_p25_recreation",
+            source_variable="FMLI_ENTERTCQ_READCQ_p20_p25_p30",
             source_url=get_bls_ce_url(reference_year),
             source_release=f"BLS Consumer Expenditure Survey Microdata ({data_year})",
             source_reference_period=str(data_year),
@@ -319,8 +326,11 @@ def parse_bls_ce_microdata(
             source_artifact_sha256=file_sha256,
             methodology_version="0.2.0-draft",
             notes=(
-                f"BLS CE weighted P25 expenditure for modest social/recreation goods among single-person positive spenders "
-                f"(${p25_rec:,.2f}/yr, Sample: {len(rec_vals):,})."
+                "MODELED_FROM_MEASURED_INPUTS from FMLI READCQ+ENTERTCQ "
+                "(no UCC allowlist freeze; FEETXCQ absent on 2024 FMLI). "
+                f"P20=${p20_rec:,.2f}; P25=${p25_rec:,.2f}; P30=${p30_rec:,.2f}/yr "
+                f"among single-person positive spenders (n={len(rec_vals):,}). "
+                "No recreation percentile is frozen as the headline."
             ),
         )
         observations.append(obs_rec)

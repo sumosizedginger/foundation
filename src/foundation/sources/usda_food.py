@@ -466,7 +466,7 @@ def parse_usda_monthly_food_csv(
                 value_annual=single_adult_annual,
                 value_monthly=single_adult_monthly,
                 unit="USD",
-                status=ComponentStatus.MEASURED,
+                status=ComponentStatus.MODELED_FROM_MEASURED_INPUTS,
                 source_id=f"usda_food_{plan_key}_{reference_year}",
                 source_variable=f"single_adult_{plan_key}_midpoint_plus20",
                 source_url=USDA_FOOD_PLANS_URL,

@@ -161,7 +161,7 @@ DECISIONS: list[dict[str, Any]] = [
         "option_c": "Assign a statewide CT 1BR FMR to unmatched planning regions.",
         "recommended": "A if an official crosswalk exists; otherwise B. Never invent county rents.",
         "directional_effect": "B excludes ~1.1% of national adult population from the housing join.",
-        "source_support": "living_cost_geo_join_2024.json unmatched_census_counties 09110-09170.",
+        "source_support": "living_cost_geo_join_2024.json unmatched_census_counties 09110-09190.",
         "sensitivity_plan": "Recompute CT after an official crosswalk is frozen.",
     },
 ]

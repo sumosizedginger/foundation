@@ -28,7 +28,7 @@
       "housing": "VALIDATED",
       "population_weights": "VALIDATED",
       "food": "VALIDATED",
-      "health_premium": "VALIDATED",
+      "health_premium": "RETRIEVED_UNVALIDATED",
       "health_oop": "RETRIEVED_UNVALIDATED",
       "mileage": "VALIDATED",
       "mpg": "SOURCE_GAP",
@@ -38,10 +38,10 @@
       "registration": "SOURCE_GAP",
       "replacement": "SOURCE_GAP",
       "connectivity": "SOURCE_GAP",
-      "essentials": "VALIDATED",
-      "recreation": "VALIDATED",
+      "essentials": "MODELED_FROM_MEASURED_INPUTS",
+      "recreation": "MODELED_FROM_MEASURED_INPUTS",
       "rpp": "VALIDATED",
-      "federal_tax": "VALIDATED",
+      "federal_tax": "INVENTORY_NOT_VALIDATED",
       "state_tax": "SOURCE_GAP",
       "local_tax": "SOURCE_GAP"
     },
@@ -49,7 +49,7 @@
       "housing": "VALIDATED",
       "population_weights": "VALIDATED",
       "food": "VALIDATED",
-      "health_premium": "VALIDATED",
+      "health_premium": "RETRIEVED_UNVALIDATED",
       "health_oop": "RETRIEVED_UNVALIDATED",
       "mileage": "VALIDATED",
       "mpg": "SOURCE_GAP",
@@ -59,10 +59,10 @@
       "registration": "SOURCE_GAP",
       "replacement": "SOURCE_GAP",
       "connectivity": "SOURCE_GAP",
-      "essentials": "VALIDATED",
-      "recreation": "VALIDATED",
+      "essentials": "MODELED_FROM_MEASURED_INPUTS",
+      "recreation": "MODELED_FROM_MEASURED_INPUTS",
       "rpp": "VALIDATED",
-      "federal_tax": "VALIDATED",
+      "federal_tax": "INVENTORY_NOT_VALIDATED",
       "state_tax": "SOURCE_GAP",
       "local_tax": "SOURCE_GAP"
     }
@@ -342,6 +342,7 @@
     }
   ],
   "blocking_components": [
+    "2024:health_premium:RETRIEVED_UNVALIDATED",
     "2024:health_oop:RETRIEVED_UNVALIDATED",
     "2024:mpg:SOURCE_GAP",
     "2024:insurance:LICENSING_REVIEW",
@@ -349,8 +350,10 @@
     "2024:registration:SOURCE_GAP",
     "2024:replacement:SOURCE_GAP",
     "2024:connectivity:SOURCE_GAP",
+    "2024:federal_tax:INVENTORY_NOT_VALIDATED",
     "2024:state_tax:SOURCE_GAP",
     "2024:local_tax:SOURCE_GAP",
+    "2026:health_premium:RETRIEVED_UNVALIDATED",
     "2026:health_oop:RETRIEVED_UNVALIDATED",
     "2026:mpg:SOURCE_GAP",
     "2026:insurance:LICENSING_REVIEW",
@@ -358,10 +361,143 @@
     "2026:registration:SOURCE_GAP",
     "2026:replacement:SOURCE_GAP",
     "2026:connectivity:SOURCE_GAP",
+    "2026:federal_tax:INVENTORY_NOT_VALIDATED",
     "2026:state_tax:SOURCE_GAP",
     "2026:local_tax:SOURCE_GAP"
   ],
   "headline_calculated": false,
   "gap_calculated": false,
-  "adequacy_calculated": false
+  "adequacy_calculated": false,
+  "source_lag": {
+    "housing": {
+      "project_cost_year": {
+        "2024": 2024,
+        "2026": 2026
+      },
+      "source_data_year": {
+        "2024": 2024,
+        "2026": 2026
+      },
+      "translation_method": "NONE"
+    },
+    "population_weights": {
+      "project_cost_year": {
+        "2024": 2024,
+        "2026": 2026
+      },
+      "source_data_year": {
+        "2024": 2024,
+        "2026": 2024
+      },
+      "translation_method": "LATEST_AVAILABLE"
+    },
+    "food": {
+      "project_cost_year": {
+        "2024": 2024,
+        "2026": 2026
+      },
+      "source_data_year": {
+        "2024": 2024,
+        "2026": 2026
+      },
+      "translation_method": {
+        "2024": "NONE",
+        "2026": "YTD"
+      }
+    },
+    "health_premium": {
+      "project_cost_year": {
+        "2024": 2024,
+        "2026": 2026
+      },
+      "source_data_year": {
+        "2024": 2024,
+        "2026": 2026
+      },
+      "translation_method": "NONE"
+    },
+    "health_oop": {
+      "project_cost_year": {
+        "2024": 2024,
+        "2026": 2026
+      },
+      "source_data_year": {
+        "2024": 2023,
+        "2026": 2023
+      },
+      "translation_method": "LATEST_AVAILABLE"
+    },
+    "mileage": {
+      "project_cost_year": {
+        "2024": 2024,
+        "2026": 2026
+      },
+      "source_data_year": {
+        "2024": 2022,
+        "2026": 2022
+      },
+      "translation_method": "LATEST_AVAILABLE"
+    },
+    "gas": {
+      "project_cost_year": {
+        "2024": 2024,
+        "2026": 2026
+      },
+      "source_data_year": {
+        "2024": 2024,
+        "2026": 2026
+      },
+      "translation_method": "NONE"
+    },
+    "essentials": {
+      "project_cost_year": {
+        "2024": 2024,
+        "2026": 2026
+      },
+      "source_data_year": {
+        "2024": 2024,
+        "2026": 2024
+      },
+      "translation_method": {
+        "2024": "NONE",
+        "2026": "LATEST_AVAILABLE"
+      }
+    },
+    "recreation": {
+      "project_cost_year": {
+        "2024": 2024,
+        "2026": 2026
+      },
+      "source_data_year": {
+        "2024": 2024,
+        "2026": 2024
+      },
+      "translation_method": {
+        "2024": "NONE",
+        "2026": "LATEST_AVAILABLE"
+      }
+    },
+    "rpp": {
+      "project_cost_year": {
+        "2024": 2024,
+        "2026": 2026
+      },
+      "source_data_year": {
+        "2024": 2024,
+        "2026": 2024
+      },
+      "translation_method": "LATEST_AVAILABLE"
+    },
+    "federal_tax": {
+      "project_cost_year": {
+        "2024": 2024,
+        "2026": 2026
+      },
+      "source_data_year": {
+        "2024": 2024,
+        "2026": 2026
+      },
+      "translation_method": "RULE_YEAR"
+    }
+  }
 }

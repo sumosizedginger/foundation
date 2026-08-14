@@ -1,6 +1,6 @@
 {
   "report_type": "living_cost_cms_coverage",
-  "generated_at": "2026-08-14T17:31:30+00:00",
+  "generated_at": "2026-08-14T17:46:52+00:00",
   "years": {
     "2024": {
       "federal_platform_service_area_states": [
@@ -63,7 +63,10 @@
         "NJ",
         "VA"
       ],
-      "note": "No state may receive a premium from a plan not actually offered there. SBE standalone states are not filled from federal-platform rates."
+      "rating_areas_represented": 378,
+      "counties_represented": 2127,
+      "joined_lowest_silver_rating_areas": null,
+      "note": "Counts from official PUF zips. Lowest-silver join is implemented in parse_cms_marketplace_multi_puf; health_premium remains RETRIEVED_UNVALIDATED until SBE files exist."
     },
     "2026": {
       "federal_platform_service_area_states": [
@@ -126,9 +129,11 @@
         "NJ",
         "VA"
       ],
-      "note": "No state may receive a premium from a plan not actually offered there. SBE standalone states are not filled from federal-platform rates."
+      "rating_areas_represented": 349,
+      "counties_represented": 1929,
+      "joined_lowest_silver_rating_areas": null,
+      "note": "Counts from official PUF zips. Lowest-silver join is implemented in parse_cms_marketplace_multi_puf; health_premium remains RETRIEVED_UNVALIDATED until SBE files exist."
     }
   },
-  "headline_calculated": false,
-  "note": "Federal-platform PUF zips retrieved. SBE-only states require SBE QHP PUFs."
+  "headline_calculated": false
 }

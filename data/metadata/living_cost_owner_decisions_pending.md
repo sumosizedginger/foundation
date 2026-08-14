@@ -168,5 +168,5 @@ No Minimum Sustainable Living Cost headline was calculated or published.
 
 **Recommended:** A if an official crosswalk exists; otherwise B. Never invent county rents.
 **Directional effect:** B excludes ~1.1% of national adult population from the housing join.
-**Source support:** living_cost_geo_join_2024.json unmatched_census_counties 09110-09170.
+**Source support:** living_cost_geo_join_2024.json unmatched_census_counties 09110-09190.
 **Sensitivity:** Recompute CT after an official crosswalk is frozen.

@@ -122,7 +122,10 @@
   },
   "weight_vintage_year": 2024,
   "cost_reference_year_note": "This file is the frozen adult-population weight vintage for both 2024 and 2026 cost years.",
-  "exact_query": "https://api.census.gov/data/2024/acs/acs5?get=NAME,B01001_001E,B01001_003E,B01001_004E,B01001_005E,B01001_006E,B01001_027E,B01001_028E,B01001_029E,B01001_030E&for=county:*",
+  "exact_query": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b01001.dat",
+  "response_hash": "1637b18a96881b81e050df1cd3d5ac38a33208b9b69b40e1dbeb3c4e13718f0e",
+  "retrieval_timestamp": "",
+  "connecticut_note": "Connecticut 2024 ACS 5-Year geographies are planning regions (FIPS 09110-09190), not legacy counties.",
   "variables": [
     "NAME",
     "B01001_001E",

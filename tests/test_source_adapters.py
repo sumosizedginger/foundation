@@ -207,7 +207,7 @@ def test_usda_food_plans_monthly_aggregation():
     assert len(obs_list) >= 1
     low_cost = next(o for o in obs_list if o.component_id == "food_low_cost")
     assert low_cost.value_monthly == 385.98
-    assert low_cost.status == ComponentStatus.MEASURED
+    assert low_cost.status == ComponentStatus.MODELED_FROM_MEASURED_INPUTS
 
 
 def test_fhwa_nhts_missing_file_unavailable(tmp_path: Path):
@@ -356,3 +356,51 @@ def test_bls_ce_uses_cached_official_zip_name():
         pytest.skip("official BLS CE Interview zip is not in data/cache")
     assert found.name in {"intrvw24.zip", "bls_ce_intrvw24.zip"}
     assert found.stat().st_size > 10_000_000
+
+
+def test_transportation_has_no_hand_entered_state_fee_table():
+    import foundation.living_cost.transportation as transport
+
+    assert not hasattr(transport, "STATE_REGISTRATION_FEES")
+    assert not hasattr(transport, "REFERENCE_VEHICLE_MPG")
+    assert not hasattr(transport, "ANNUAL_MAINTENANCE_TIRES")
+    assert not hasattr(transport, "ANNUAL_VEHICLE_REPLACEMENT_RESERVE")
+    with pytest.raises(ValueError, match="SOURCE_GAP"):
+        transport.get_state_registration_fee("CA")
+
+
+def test_coverage_report_has_lag_triad_and_no_headline():
+    coverage = json.loads(
+        (
+            Path(__file__).resolve().parents[1]
+            / "data"
+            / "metadata"
+            / "living_cost_source_coverage.json"
+        ).read_text(encoding="utf-8")
+    )
+    assert coverage["headline_calculated"] is False
+    assert coverage["gap_calculated"] is False
+    assert coverage["adequacy_calculated"] is False
+    lag = coverage.get("source_lag") or {}
+    assert "housing" in lag
+    assert "source_data_year" in lag["housing"]
+    assert "translation_method" in lag["mileage"]
+    tax = json.loads(
+        (
+            Path(__file__).resolve().parents[1]
+            / "data"
+            / "metadata"
+            / "living_cost_tax_coverage.json"
+        ).read_text(encoding="utf-8")
+    )
+    if not tax.get("federal_2024_validated_tables"):
+        assert coverage["coverage_by_year"]["2024"]["federal_tax"] != "VALIDATED"
+
+
+def test_census_universe_required_fields_when_present():
+    path = Path(__file__).resolve().parents[1] / "data" / "metadata" / "census_county_universe.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    assert payload["report_type"] == "census_county_geography_universe"
+    assert "response_hash" in payload
+    assert "retrieval_timestamp" in payload
+    assert "acsdt5y2024-b01001.dat" in str(payload.get("exact_query") or payload.get("source_url"))
