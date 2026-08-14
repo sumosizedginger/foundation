@@ -1,45 +1,6 @@
 {
-  "status": "research_estimate",
-  "status_label": "RESEARCH ESTIMATE",
   "reference_year": 2024,
-  "methodology_version": "0.2.0-draft",
-  "minimum_sustainable_living_cost_2024": {
-    "weighted_median_gross": 51220.16158284187,
-    "weighted_p25_gross": 46294.17074556351,
-    "weighted_p75_gross": 56847.40731808663,
-    "weighted_mean_gross": 52347.02,
-    "lowest_state": {
-      "state": "AR",
-      "state_name": "Arkansas",
-      "median_gross": 40013.36952713013
-    },
-    "highest_state": {
-      "state": "HI",
-      "state_name": "Hawaii",
-      "median_gross": 69951.99591825486
-    }
-  },
-  "minimum_sustainable_living_cost_2026": {
-    "weighted_median_gross": 55551.887335939406,
-    "weighted_p25_gross": 50349.302361011505,
-    "weighted_p75_gross": 61649.41647146226,
-    "lowest_state": {
-      "state": "AR",
-      "state_name": "Arkansas",
-      "median_gross": 43355.17347720146
-    },
-    "highest_state": {
-      "state": "HI",
-      "state_name": "Hawaii",
-      "median_gross": 75896.98824726103
-    }
-  },
-  "population_anchor_2024": 21800.0,
-  "survival_gap_2024": -29420.16,
-  "adequacy_ratio_2024": 0.4256,
-  "adequacy_percent_2024": 43,
-  "time_comparability_verified": true,
-  "state_distributions_2024": [
+  "states": [
     {
       "state": "AK",
       "state_name": "Alaska",
@@ -907,38 +868,5 @@
       "methodology_version": "0.2.0-draft",
       "calculated_at": "2026-08-14T01:42:28+00:00"
     }
-  ],
-  "sensitivities": {
-    "food_thrifty_sensitivity_gross": 50570.16,
-    "health_low_utilization_gross": 50240.16,
-    "health_high_utilization_gross": 52870.16,
-    "transport_low_mileage_gross": 50500.16,
-    "transport_high_mileage_gross": 52320.16
-  },
-  "benchmark_comparisons": {
-    "mit_living_wage": {
-      "name": "MIT Living Wage Calculator",
-      "author": "Dr. Amy Glasmeier / MIT",
-      "geography": "United States (National weighted)",
-      "reference_year": 2024,
-      "estimated_single_adult_gross": 42500.0,
-      "methodological_divergence": "MIT includes unsubsidized commercial healthcare, civic engagement, and local county cost aggregation. The Foundation models independent standard housing, USDA Low-Cost food, explicit auto ownership, unsubsidized Silver Marketplace healthcare, and full statutory federal/state taxes."
-    },
-    "united_way_alice": {
-      "name": "United For ALICE Survival Budget",
-      "author": "United Way",
-      "geography": "United States (National average)",
-      "reference_year": 2024,
-      "estimated_single_adult_gross": 31200.0,
-      "methodological_divergence": "ALICE includes a 10% contingency buffer but assumes smaller healthcare and transport baselines. The Foundation models full automobile ownership and unsubsidized Silver health insurance."
-    },
-    "official_poverty_measure": {
-      "name": "Official Poverty Measure (OPM)",
-      "author": "U.S. Census Bureau / HHS",
-      "geography": "United States (National)",
-      "reference_year": 2024,
-      "estimated_single_adult_gross": 15650.0,
-      "methodological_divergence": "OPM is based on a 1963 3x food multiplier and severely underestimates modern shelter, transit, healthcare, and utility costs."
-    }
-  }
+  ]
 }

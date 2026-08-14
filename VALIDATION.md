@@ -17,9 +17,11 @@ Publishing plausible garbage is fatal.
 Required:
 
 ### Equal household assignment
+
 Every person in the same household receives the same per-person household income.
 
 ### Household-size arithmetic
+
 Examples:
 
 ```text
@@ -30,15 +32,19 @@ $100,000 / 5 = $20,000
 ```
 
 ### Ranking
+
 Lower per-person household income must rank below higher values regardless of raw household income.
 
 ### Person weighting
+
 The weighted percentile must respond correctly when person survey weights differ.
 
 ### Boundary convention
+
 The exact `>= 30% cumulative weight` rule must have a regression test.
 
 ### Invalid records
+
 Reject/handle explicitly:
 
 - person count <= 0;
@@ -49,6 +55,7 @@ Reject/handle explicitly:
 - infinite values.
 
 ### Negative income
+
 Must remain supported unless official source documentation requires special decoding.
 
 ## 3. CPS ASEC source validation

@@ -4,7 +4,6 @@ import pandas as pd
 import pytest
 
 from foundation.pipeline import run_full_pipeline
-from foundation.models import Bottom30Result, SourceArtifact
 
 
 def test_pipeline_with_mocked_archive(tmp_path: Path):
@@ -43,3 +42,7 @@ def test_pipeline_with_mocked_archive(tmp_path: Path):
         assert (tmp_path / "data" / "current" / "survival.json").exists()
         assert (tmp_path / "data" / "current" / "pressures.json").exists()
         assert (tmp_path / "data" / "current" / "history.json").exists()
+        assert (tmp_path / "data" / "current" / "living_cost_2024.json").exists()
+        assert (tmp_path / "data" / "current" / "living_cost_2026.json").exists()
+        assert (tmp_path / "data" / "current" / "state_living_costs_2024.json").exists()
+        assert (tmp_path / "data" / "current" / "state_living_costs_2026.json").exists()

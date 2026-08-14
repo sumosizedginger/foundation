@@ -19,7 +19,17 @@ def validate_json(path: Path) -> dict:
 def main() -> int:
     PUBLIC_DATA.mkdir(parents=True, exist_ok=True)
 
-    json_files = ["latest.json", "population.json", "survival.json", "pressures.json", "history.json"]
+    json_files = [
+        "latest.json",
+        "population.json",
+        "survival.json",
+        "pressures.json",
+        "history.json",
+        "living_cost_2024.json",
+        "living_cost_2026.json",
+        "state_living_costs_2024.json",
+        "state_living_costs_2026.json",
+    ]
     for fname in json_files:
         src = CURRENT / fname
         if src.exists():

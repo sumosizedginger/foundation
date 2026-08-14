@@ -24,7 +24,10 @@ const moneyExactFmt = new Intl.NumberFormat("en-US", {
 const numFmt = new Intl.NumberFormat("en-US");
 
 let globalDashboardData = null;
+let globalLivingCostData2024 = null;
 let lastFocusedElement = null;
+let currentSortKey = "median";
+let currentSortAsc = false;
 
 async function fetchJson(url) {
   const res = await fetch(url, { cache: "no-store" });
@@ -46,7 +49,8 @@ function renderPressureSignals(signals) {
   if (!signals || !signals.length) {
     const emptyMsg = document.createElement("p");
     emptyMsg.className = "metric-sub";
-    emptyMsg.textContent = "Economic pressure observations currently unavailable.";
+    emptyMsg.textContent =
+      "Economic pressure observations currently unavailable.";
     container.appendChild(emptyMsg);
     return;
   }
@@ -86,8 +90,14 @@ function renderPressureSignals(signals) {
     if (sig.metric_type === "price_inflation") {
       ratesEl = document.createElement("div");
       ratesEl.className = "signal-rates";
-      const momText = sig.mom_change_pct != null ? `1M: ${sig.mom_change_pct > 0 ? "+" : ""}${sig.mom_change_pct}%` : "";
-      const ann3mText = sig.ann_3m_change_pct != null ? `3M Ann: ${sig.ann_3m_change_pct > 0 ? "+" : ""}${sig.ann_3m_change_pct}%` : "";
+      const momText =
+        sig.mom_change_pct != null
+          ? `1M: ${sig.mom_change_pct > 0 ? "+" : ""}${sig.mom_change_pct}%`
+          : "";
+      const ann3mText =
+        sig.ann_3m_change_pct != null
+          ? `3M Ann: ${sig.ann_3m_change_pct > 0 ? "+" : ""}${sig.ann_3m_change_pct}%`
+          : "";
       ratesEl.textContent = [momText, ann3mText].filter(Boolean).join(" · ");
     }
 
@@ -110,7 +120,9 @@ function renderPressureSignals(signals) {
     provBtn.className = "btn-link";
     provBtn.textContent = "Provenance →";
     provBtn.setAttribute("data-series-id", sig.series_id);
-    provBtn.addEventListener("click", () => openSignalProvenance(sig.series_id, provBtn));
+    provBtn.addEventListener("click", () =>
+      openSignalProvenance(sig.series_id, provBtn),
+    );
 
     meta.appendChild(periodSpan);
     meta.appendChild(provBtn);
@@ -128,63 +140,106 @@ function renderPressureSignals(signals) {
   });
 }
 
-// Render Household Matrix safely
-function renderHouseholdMatrix(matrix) {
-  const tbody = document.getElementById("household-matrix-body");
+// Render 50 States + DC Living Cost Table safely
+function renderStateTable(states) {
+  const tbody = document.getElementById("states-table-body");
   if (!tbody) return;
 
   tbody.innerHTML = "";
-  if (!matrix || !matrix.length) {
+  if (!states || !states.length) {
     const tr = document.createElement("tr");
     const td = document.createElement("td");
-    td.colSpan = 6;
+    td.colSpan = 7;
     td.style.padding = "2rem";
     td.style.textAlign = "center";
-    td.style.color = "var(--muted)";
-    td.textContent = "Methodology rebuild in progress. Household matrices will be computed bottom-up from county living costs upon validation.";
+    td.textContent = "State living cost distributions currently unavailable.";
     tr.appendChild(td);
     tbody.appendChild(tr);
     return;
   }
 
-  matrix.forEach((row) => {
+  // Sort states
+  const sorted = [...states].sort((a, b) => {
+    let valA = a.weighted_median_gross;
+    let valB = b.weighted_median_gross;
+    if (currentSortKey === "state") {
+      valA = a.state_name;
+      valB = b.state_name;
+      return currentSortAsc
+        ? valA.localeCompare(valB)
+        : valB.localeCompare(valA);
+    } else if (currentSortKey === "p25") {
+      valA = a.weighted_p25_gross;
+      valB = b.weighted_p25_gross;
+    } else if (currentSortKey === "p75") {
+      valA = a.weighted_p75_gross;
+      valB = b.weighted_p75_gross;
+    } else if (currentSortKey === "min") {
+      valA = a.min_locality_gross;
+      valB = b.min_locality_gross;
+    } else if (currentSortKey === "max") {
+      valA = a.max_locality_gross;
+      valB = b.max_locality_gross;
+    }
+    return currentSortAsc ? valA - valB : valB - valA;
+  });
+
+  sorted.forEach((st, idx) => {
     const tr = document.createElement("tr");
 
-    const tdSize = document.createElement("td");
-    tdSize.className = "mono";
-    tdSize.style.fontWeight = "700";
-    tdSize.textContent = String(row.household_size);
+    // Rank
+    const tdRank = document.createElement("td");
+    tdRank.className = "mono text-right";
+    tdRank.style.color = "var(--subtle)";
+    tdRank.textContent = String(idx + 1);
 
-    const tdLabel = document.createElement("td");
-    tdLabel.textContent = row.composition_label;
+    // State Name
+    const tdName = document.createElement("td");
+    tdName.style.fontWeight = "700";
+    const stBtn = document.createElement("button");
+    stBtn.type = "button";
+    stBtn.className = "btn-link";
+    stBtn.style.color = "var(--text)";
+    stBtn.textContent = `${st.state_name} (${st.state})`;
+    stBtn.addEventListener("click", () => openStateDetail(st.state, stBtn));
+    tdName.appendChild(stBtn);
 
-    const tdAnchor = document.createElement("td");
-    tdAnchor.className = "mono text-right";
-    tdAnchor.textContent = moneyFmt.format(row.population_anchor_annual);
+    // Weighted Median (Primary)
+    const tdMed = document.createElement("td");
+    tdMed.className = "mono text-right";
+    tdMed.style.fontWeight = "800";
+    tdMed.style.color = "var(--accent)";
+    tdMed.textContent = moneyFmt.format(st.weighted_median_gross);
 
-    const tdFloor = document.createElement("td");
-    tdFloor.className = "mono text-right";
-    tdFloor.textContent = moneyFmt.format(row.survival_floor_annual);
+    // P25
+    const tdP25 = document.createElement("td");
+    tdP25.className = "mono text-right";
+    tdP25.textContent = moneyFmt.format(st.weighted_p25_gross);
 
-    const tdGap = document.createElement("td");
-    tdGap.className = "mono text-right";
-    tdGap.style.fontWeight = "700";
-    tdGap.style.color = row.is_adequate ? "var(--good)" : "var(--danger)";
-    const sign = row.survival_gap_annual >= 0 ? "+" : "";
-    tdGap.textContent = `${sign}${moneyFmt.format(row.survival_gap_annual)}`;
+    // P75
+    const tdP75 = document.createElement("td");
+    tdP75.className = "mono text-right";
+    tdP75.textContent = moneyFmt.format(st.weighted_p75_gross);
 
-    const tdAdequacy = document.createElement("td");
-    tdAdequacy.className = "mono text-right";
-    tdAdequacy.style.fontWeight = "700";
-    tdAdequacy.style.color = row.is_adequate ? "var(--good)" : "var(--danger)";
-    tdAdequacy.textContent = `${row.adequacy_ratio.toFixed(2)} (${row.adequacy_percent}%)`;
+    // Min County
+    const tdMin = document.createElement("td");
+    tdMin.className = "mono text-right";
+    tdMin.style.color = "var(--muted)";
+    tdMin.textContent = moneyFmt.format(st.min_locality_gross);
 
-    tr.appendChild(tdSize);
-    tr.appendChild(tdLabel);
-    tr.appendChild(tdAnchor);
-    tr.appendChild(tdFloor);
-    tr.appendChild(tdGap);
-    tr.appendChild(tdAdequacy);
+    // Max County
+    const tdMax = document.createElement("td");
+    tdMax.className = "mono text-right";
+    tdMax.style.color = "var(--muted)";
+    tdMax.textContent = moneyFmt.format(st.max_locality_gross);
+
+    tr.appendChild(tdRank);
+    tr.appendChild(tdName);
+    tr.appendChild(tdMed);
+    tr.appendChild(tdP25);
+    tr.appendChild(tdP75);
+    tr.appendChild(tdMin);
+    tr.appendChild(tdMax);
     tbody.appendChild(tr);
   });
 }
@@ -277,7 +332,9 @@ function handleModalKeydown(e) {
     const modal = document.getElementById("provenance-modal");
     if (!modal) return;
 
-    const focusables = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+    const focusables = modal.querySelectorAll(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+    );
     if (!focusables.length) return;
 
     const first = focusables[0];
@@ -328,8 +385,8 @@ function openAnchorProvenance(triggerElement) {
        ↳ Weighted Percentile (p = 0.30)<br>
        ↳ per_person_income = HTOTVAL / H_NUMPER<br>
        ↳ Person Weight: MARSUPWT (scale factor 100)<br>
-       ↳ Merged Microdata: pppub${String(pop.survey_year || "25").slice(-2)}.csv ⨝ hhpub${String(pop.survey_year || "25").slice(-2)}.csv on PH_SEQ == H_SEQ`
-    )
+       ↳ Merged Microdata: pppub${String(pop.survey_year || "25").slice(-2)}.csv ⨝ hhpub${String(pop.survey_year || "25").slice(-2)}.csv on PH_SEQ == H_SEQ`,
+    ),
   );
 
   body.appendChild(
@@ -338,8 +395,8 @@ function openAnchorProvenance(triggerElement) {
       `<strong>U.S. Census Bureau</strong> · Current Population Survey (CPS ASEC)<br>
        Survey Year: ${pop.survey_year || "—"} | Income Reference Year: ${pop.income_year || "—"}<br>
        Archive: ${art.url || "asecpub25csv.zip"}<br>
-       SHA-256: ${art.sha256 || valRep.sha256 || "—"}`
-    )
+       SHA-256: ${art.sha256 || valRep.sha256 || "—"}`,
+    ),
   );
 
   body.appendChild(
@@ -349,24 +406,26 @@ function openAnchorProvenance(triggerElement) {
        Independent Reference Cutoff: ${moneyExactFmt.format(valRep.independent_reference_p30 || pop.cutoff || 0)}<br>
        Implementation Difference: 0.0000 (PASSED)<br>
        Matched Microdata Person Records: ${numFmt.format(pop.valid_records || 0)}<br>
-       Represented U.S. Population: ${numFmt.format(pop.represented_population || 0)} persons`
-    )
+       Represented U.S. Population: ${numFmt.format(pop.represented_population || 0)} persons`,
+    ),
   );
 
   showModal();
 }
 
-// Open Survival Floor Provenance
-function openSurvivalProvenance(triggerElement) {
+// Open Living Cost Provenance / State Detail
+function openLivingCostProvenance(triggerElement) {
   lastFocusedElement = triggerElement;
   const title = document.getElementById("modal-title");
   const body = document.getElementById("modal-body");
   if (!title || !body) return;
 
   const surv = globalDashboardData?.survival_floor || {};
+  const lc2024 = surv.minimum_sustainable_living_cost_2024 || {};
   const benchmarks = surv.benchmark_comparisons || {};
+  const sens = surv.sensitivities || {};
 
-  title.textContent = "Minimum Sustainable Living Cost — Methodology Migration";
+  title.textContent = "Minimum Sustainable Living Cost (0.2.0-draft)";
   body.innerHTML = "";
 
   function makeItem(label, contentNode) {
@@ -380,26 +439,93 @@ function openSurvivalProvenance(triggerElement) {
     return wrap;
   }
 
-  // Status block
-  const statusBox = document.createElement("div");
-  statusBox.className = "provenance-val";
-  statusBox.style.borderLeft = "3px solid var(--accent)";
-  statusBox.innerHTML = `<strong>METHODOLOGY REBUILD IN PROGRESS (0.2.0-draft)</strong><br>
-    The initial $27,960 single-adult estimate was retired under Decision D-015 because its housing, healthcare, transportation, benefit-treatment, and single-national-constant assumptions were insufficiently defensible.<br><br>
-    A replacement model is being constructed bottom-up from county-level HUD Fair Market Rents, USDA Food Plans, unsubsidized CMS Silver Marketplace health premiums, MEPS expected utilization, explicit auto ownership costs, and a deterministic gross-income tax solver across all 50 states + DC.`;
-  body.appendChild(makeItem("Methodology Status", statusBox));
+  // Model Summary
+  const summaryBox = document.createElement("div");
+  summaryBox.className = "provenance-val";
+  summaryBox.style.borderLeft = "3px solid var(--accent)";
+  summaryBox.innerHTML = `<strong>RESEARCH ESTIMATE (0.2.0-draft)</strong><br>
+    Built bottom-up from county-level 1BR Fair Market Rents (HUD), USDA Low-Cost Food Plan, explicit automobile ownership model (EIA gas, NAIC insurance, maintenance/reserve), unsubsidized Silver Marketplace health insurance (CMS/state PUFs) + MEPS expected utilization, essentials, recreation, and a deterministic gross-income tax solver across all 50 states + DC.<br><br>
+    <strong>2024 National Weighted Median:</strong> ${moneyFmt.format(lc2024.weighted_median_gross || 0)}/yr (P25: ${moneyFmt.format(lc2024.weighted_p25_gross || 0)}, P75: ${moneyFmt.format(lc2024.weighted_p75_gross || 0)})<br>
+    <strong>Lowest State Median:</strong> ${lc2024.lowest_state?.state_name} (${moneyFmt.format(lc2024.lowest_state?.median_gross || 0)})<br>
+    <strong>Highest State Median:</strong> ${lc2024.highest_state?.state_name} (${moneyFmt.format(lc2024.highest_state?.median_gross || 0)})`;
+  body.appendChild(makeItem("National Distribution Summary", summaryBox));
 
-  // Sourced Benchmark Comparisons
+  // Sensitivity Analysis
+  const sensBox = document.createElement("div");
+  sensBox.className = "provenance-val";
+  sensBox.innerHTML = `
+    • <strong>Food Thrifty Sensitivity:</strong> ${moneyFmt.format(sens.food_thrifty_sensitivity_gross || 0)}/yr<br>
+    • <strong>Healthcare Low Utilization:</strong> ${moneyFmt.format(sens.health_low_utilization_gross || 0)}/yr<br>
+    • <strong>Healthcare High Utilization:</strong> ${moneyFmt.format(sens.health_high_utilization_gross || 0)}/yr<br>
+    • <strong>Transit Low Mileage (9k mi):</strong> ${moneyFmt.format(sens.transport_low_mileage_gross || 0)}/yr<br>
+    • <strong>Transit High Mileage (14k mi):</strong> ${moneyFmt.format(sens.transport_high_mileage_gross || 0)}/yr`;
+  body.appendChild(makeItem("Model Sensitivity Bounds", sensBox));
+
+  // Benchmark Comparisons
   const benchBox = document.createElement("div");
   benchBox.className = "provenance-val";
   Object.keys(benchmarks).forEach((bKey) => {
     const b = benchmarks[bKey];
     const bRow = document.createElement("div");
     bRow.style.marginBottom = "0.6rem";
-    bRow.innerHTML = `• <strong>${b.name}:</strong> ${moneyFmt.format(b.estimated_single_adult_annual || 0)} (${b.geography}, Ref: ${b.reference_year})<br><span style="font-size:0.8rem; color:var(--muted);">${b.methodological_divergence}</span>`;
+    bRow.innerHTML = `• <strong>${b.name}:</strong> ${moneyFmt.format(b.estimated_single_adult_gross || 0)} (${b.geography})<br><span style="font-size:0.8rem; color:var(--muted);">${b.methodological_divergence}</span>`;
     benchBox.appendChild(bRow);
   });
-  body.appendChild(makeItem("Validation Benchmark Targets", benchBox));
+  body.appendChild(makeItem("Benchmark Comparisons & Divergences", benchBox));
+
+  showModal();
+}
+
+// Open State Detail Modal
+function openStateDetail(stateCode, triggerElement) {
+  lastFocusedElement = triggerElement;
+  const title = document.getElementById("modal-title");
+  const body = document.getElementById("modal-body");
+  if (!title || !body) return;
+
+  const states =
+    globalDashboardData?.survival_floor?.state_distributions_2024 || [];
+  const st = states.find((s) => s.state === stateCode);
+  if (!st) return;
+
+  title.textContent = `${st.state_name} (${st.state}) — Minimum Sustainable Living Cost`;
+  body.innerHTML = "";
+
+  function makeItem(label, text) {
+    const wrap = document.createElement("div");
+    wrap.className = "provenance-item";
+    const lbl = document.createElement("p");
+    lbl.className = "provenance-label";
+    lbl.textContent = label;
+    const val = document.createElement("div");
+    val.className = "provenance-val";
+    val.innerHTML = text;
+    wrap.appendChild(lbl);
+    wrap.appendChild(val);
+    return wrap;
+  }
+
+  body.appendChild(
+    makeItem(
+      "State Summary (2024 Reference Year)",
+      `<strong>Population-Weighted Median Gross Income:</strong> ${moneyFmt.format(st.weighted_median_gross)}/yr (${moneyFmt.format(st.weighted_median_gross / 12)}/mo)<br>
+       <strong>Weighted 25th Percentile:</strong> ${moneyFmt.format(st.weighted_p25_gross)}/yr<br>
+       <strong>Weighted 75th Percentile:</strong> ${moneyFmt.format(st.weighted_p75_gross)}/yr<br>
+       <strong>Weighted Mean:</strong> ${moneyFmt.format(st.weighted_mean_gross)}/yr<br>
+       <strong>Lowest Observed County Floor:</strong> ${moneyFmt.format(st.min_locality_gross)}/yr<br>
+       <strong>Highest Observed County Floor:</strong> ${moneyFmt.format(st.max_locality_gross)}/yr<br>
+       <strong>Represented Adult Population:</strong> ${numFmt.format(st.represented_adult_population)} persons`,
+    ),
+  );
+
+  const compBox = document.createElement("div");
+  compBox.className = "provenance-val";
+  compBox.innerHTML = `
+    <strong>Core Net Basic Living Needs:</strong> ${moneyFmt.format(st.weighted_median_net_needs)}/yr<br>
+    ↳ Includes independent 1BR FMR housing, USDA Low-Cost food, auto ownership (fuel, insurance, maintenance, replacement reserve), unsubsidized Silver health insurance + MEPS out-of-pocket, mobile & broadband connectivity, essentials, and modest recreation.<br><br>
+    <strong>Mandatory Taxes to Generate Net Needs:</strong> ${moneyFmt.format(st.weighted_median_gross - st.weighted_median_net_needs)}/yr<br>
+    ↳ Solved deterministically incorporating FICA Social Security (6.2%), Medicare (1.45%), Federal Income Tax, and ${st.state_name} State Income Tax.`;
+  body.appendChild(makeItem("Component & Tax Breakdown", compBox));
 
   showModal();
 }
@@ -411,7 +537,9 @@ function openSignalProvenance(seriesId, triggerElement) {
   const body = document.getElementById("modal-body");
   if (!title || !body) return;
 
-  const sig = (globalDashboardData?.pressures || []).find((s) => s.series_id === seriesId);
+  const sig = (globalDashboardData?.pressures || []).find(
+    (s) => s.series_id === seriesId,
+  );
   if (!sig) return;
 
   title.textContent = `Pressure Signal: ${sig.label}`;
@@ -431,7 +559,9 @@ function openSignalProvenance(seriesId, triggerElement) {
     return wrap;
   }
 
-  body.appendChild(makeItem("Series Identifier", `${sig.series_id} (${sig.publisher})`));
+  body.appendChild(
+    makeItem("Series Identifier", `${sig.series_id} (${sig.publisher})`),
+  );
   body.appendChild(
     makeItem(
       "Observation Details",
@@ -439,29 +569,31 @@ function openSignalProvenance(seriesId, triggerElement) {
        Reported Metric: <strong>${sig.display_value || sig.value}</strong><br>
        Unit: ${sig.unit} | Seasonal Adjustment: ${sig.seasonal_adjustment}<br>
        Freshness Status: <span class="badge ${sig.is_stale ? "stale" : "verified"}">${sig.freshness_status.toUpperCase()}</span><br>
-       Official Endpoint: <a href="${sig.source_url}" target="_blank" style="color:var(--accent);">${sig.source_url}</a>`
-    )
+       Official Endpoint: <a href="${sig.source_url}" target="_blank" style="color:var(--accent);">${sig.source_url}</a>`,
+    ),
   );
   body.appendChild(
     makeItem(
       "Methodological Role",
-      `<strong>National Economic Pressure Signal:</strong> Measures general macroeconomic conditions. It is NOT a direct measurement of the Bottom-30 population.`
-    )
+      `<strong>National Economic Pressure Signal:</strong> Measures general macroeconomic conditions. It is NOT a direct measurement of the Bottom-30 population.`,
+    ),
   );
 
   showModal();
 }
 
-// Bind Static Event Listeners
+// Bind Static Event Listeners & Table Sort Headers
 function bindEventListeners() {
   const btnAnchor = document.getElementById("btn-inspect-anchor");
   if (btnAnchor) {
     btnAnchor.addEventListener("click", () => openAnchorProvenance(btnAnchor));
   }
 
-  const btnSurvival = document.getElementById("btn-inspect-survival");
-  if (btnSurvival) {
-    btnSurvival.addEventListener("click", () => openSurvivalProvenance(btnSurvival));
+  const btnLivingCost = document.getElementById("btn-inspect-living-cost");
+  if (btnLivingCost) {
+    btnLivingCost.addEventListener("click", () =>
+      openLivingCostProvenance(btnLivingCost),
+    );
   }
 
   const modalClose = document.getElementById("modal-close-btn");
@@ -475,6 +607,23 @@ function bindEventListeners() {
       if (e.target === modal) closeModal();
     });
   }
+
+  // Sort buttons
+  const sortHeaders = document.querySelectorAll("[data-sort-key]");
+  sortHeaders.forEach((th) => {
+    th.addEventListener("click", () => {
+      const key = th.getAttribute("data-sort-key");
+      if (currentSortKey === key) {
+        currentSortAsc = !currentSortAsc;
+      } else {
+        currentSortKey = key;
+        currentSortAsc = key === "state";
+      }
+      renderStateTable(
+        globalDashboardData?.survival_floor?.state_distributions_2024 || [],
+      );
+    });
+  });
 }
 
 // Main Boot Routine
@@ -488,17 +637,20 @@ async function boot() {
     // Set Status Strip
     setText(
       "stage-status-text",
-      `PRELAUNCH RESEARCH INSTRUMENT · Canonical Population Anchor Verified · Living Cost Migration in Progress · Methodology ${latest.project?.methodology_version || "0.2.0-draft"}`
+      `RESEARCH INSTRUMENT · Canonical Population Anchor Verified · Minimum Sustainable Living Cost 50-State Distribution Modeled · Methodology ${latest.project?.methodology_version || "0.2.0-draft"}`,
     );
 
-    // Population Anchor
+    // Population Anchor (Axis 1)
     const pop = latest.population_anchor || {};
     if (pop.cutoff) {
       setText("cutoff-value", moneyFmt.format(pop.cutoff));
-      setText("cutoff-monthly", `≈ ${moneyFmt.format(pop.monthly_cutoff)} per person / month`);
+      setText(
+        "cutoff-monthly",
+        `≈ ${moneyFmt.format(pop.monthly_cutoff)} per person / month`,
+      );
       setText(
         "cutoff-detail",
-        `Derived from ${pop.survey_year} CPS ASEC microdata (${pop.income_year} income reference year) ranking ${numFmt.format(pop.represented_population || 0)} represented persons.`
+        `Derived from ${pop.survey_year} CPS ASEC microdata (${pop.income_year} income reference year) ranking ${numFmt.format(pop.represented_population || 0)} represented persons.`,
       );
       setText("anchor-badge", "VERIFIED");
     } else {
@@ -506,34 +658,62 @@ async function boot() {
       setText("anchor-badge", "UNAVAILABLE");
     }
 
-    // Survival Floor / Living Cost
+    // Minimum Sustainable Living Cost (Axis 2)
     const surv = latest.survival_floor || {};
-    if (surv.status === "in_development") {
-      setText("survival-value", "UNDER REBUILD");
-      setText("survival-monthly", "0.2.0-draft Architecture In Progress");
+    const lc2024 = surv.minimum_sustainable_living_cost_2024 || {};
+    const lc2026 = surv.minimum_sustainable_living_cost_2026 || {};
+
+    if (lc2024.weighted_median_gross) {
       setText(
-        "survival-detail",
-        "The initial $27,960 model did not meet The Foundation's validation standard. A replacement model is being built bottom-up from local county housing, food, transportation, healthcare, and tax data across all 50 states + DC."
+        "living-cost-value",
+        moneyFmt.format(lc2024.weighted_median_gross),
       );
-      setText("survival-gap-val", "IN REBUILD");
-      setText("adequacy-ratio-val", "IN REBUILD");
-      setText("survival-badge", "REBUILD IN PROGRESS");
-    } else if (surv.single_adult_floor_annual) {
-      setText("survival-value", moneyFmt.format(surv.single_adult_floor_annual));
-      setText("survival-monthly", `≈ ${moneyFmt.format(surv.single_adult_floor_monthly)} per month`);
-      setText("survival-gap-val", `${moneyFmt.format(surv.survival_gap_annual)} / yr`);
-      setText("adequacy-ratio-val", `${surv.adequacy_ratio.toFixed(2)} (${surv.adequacy_percent}%)`);
-      setText("survival-badge", surv.status_label || "RESEARCH ESTIMATE");
+      setText(
+        "living-cost-monthly",
+        `≈ ${moneyFmt.format(lc2024.weighted_median_gross / 12)} / month (National Weighted Median)`,
+      );
+      setText(
+        "living-cost-detail",
+        `P25: ${moneyFmt.format(lc2024.weighted_p25_gross)} | P75: ${moneyFmt.format(lc2024.weighted_p75_gross)} · Bottom-up county model across 50 states + DC`,
+      );
+      setText("living-cost-badge", surv.status_label || "RESEARCH ESTIMATE");
+      setText(
+        "survival-gap-val",
+        `${moneyFmt.format(surv.survival_gap_2024)} / yr`,
+      );
+      setText(
+        "adequacy-ratio-val",
+        `${surv.adequacy_ratio_2024.toFixed(2)} (${surv.adequacy_percent_2024}%)`,
+      );
+
+      // 2026 Current Vintage Display
+      if (lc2026.weighted_median_gross) {
+        setText(
+          "current-2026-val",
+          `${moneyFmt.format(lc2026.weighted_median_gross)} / yr`,
+        );
+        setText(
+          "current-2026-sub",
+          `P25: ${moneyFmt.format(lc2026.weighted_p25_gross)} · P75: ${moneyFmt.format(lc2026.weighted_p75_gross)}`,
+        );
+      }
     } else {
-      setText("survival-value", "DATA UNAVAILABLE");
-      setText("survival-badge", "UNAVAILABLE");
+      setText("living-cost-value", "DATA UNAVAILABLE");
+      setText("living-cost-badge", "UNAVAILABLE");
     }
 
     // Composite Score
-    setText("composite-score-val", latest.composite?.status ? String(latest.composite.status).toUpperCase() : "LOCKED");
+    setText(
+      "composite-score-val",
+      latest.composite?.status
+        ? String(latest.composite.status).toUpperCase()
+        : "LOCKED",
+    );
 
-    // Household Matrix
-    renderHouseholdMatrix(surv.household_matrix || []);
+    // 50 States + DC Table
+    if (surv.state_distributions_2024) {
+      renderStateTable(surv.state_distributions_2024);
+    }
 
     // Quantiles
     if (pop.quantiles) {
@@ -564,9 +744,12 @@ async function boot() {
     }
   } catch (err) {
     console.error("Dashboard initialization error:", err);
-    setText("stage-status-text", "DATA LOAD ERROR · The site refused to invent replacement values.");
+    setText(
+      "stage-status-text",
+      "DATA LOAD ERROR · The site refused to invent replacement values.",
+    );
     setText("cutoff-value", "DATA UNAVAILABLE");
-    setText("survival-value", "DATA UNAVAILABLE");
+    setText("living-cost-value", "DATA UNAVAILABLE");
   }
 }
 

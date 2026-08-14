@@ -1,5 +1,5 @@
 {
-  "calculated_at": "2026-08-13T23:53:12+00:00",
+  "calculated_at": "2026-08-14T01:42:24+00:00",
   "cutoff": 20688.0,
   "definition": "household money income / people in household; person-weighted 30th percentile",
   "excluded_records": 0,
@@ -21,7 +21,7 @@
   "source_artifact": {
     "bytes": 148664101,
     "content_type": "application/zip",
-    "retrieved_at": "2026-08-13T23:53:11+00:00",
+    "retrieved_at": "2026-08-14T01:42:24+00:00",
     "sha256": "cdb39cdac34bef99dd0940ab28e306f692404c2eea44d85dfd634214872a0a09",
     "source_id": "census_asec",
     "url": "https://www2.census.gov/programs-surveys/cps/datasets/2024/march/asecpub24csv.zip"
@@ -32,7 +32,7 @@
   "valid_records": 144265,
   "validation_report": {
     "archive_filename": "asecpub24csv.zip",
-    "calculated_at": "2026-08-13T23:53:12+00:00",
+    "calculated_at": "2026-08-14T01:42:24+00:00",
     "canonical_p30": 20688.0,
     "duplicate_household_keys": 0,
     "household_records": 89473,

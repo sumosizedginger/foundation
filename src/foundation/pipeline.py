@@ -8,15 +8,16 @@ from foundation.bottom30 import calculate_bottom30_from_zip
 from foundation.config import definitions
 from foundation.export import atomic_write_json
 from foundation.historical import get_historical_vintages_summary
+from foundation.living_cost.engine import run_living_cost_pipeline
 from foundation.sources.bls import get_economic_pressure_signals
-from foundation.survival import calculate_survival_floor
 
 
 def run_full_pipeline(project_root: Path | None = None) -> dict:
-    """Run the complete, deterministic Foundation V0.1 pipeline.
+    """Run the complete, deterministic Foundation V0.2 pipeline.
 
     Processes official CPS ASEC microdata archives for 2025, 2024, and 2023,
-    models the research Survival Floor, fetches National Economic Pressure Signals from BLS,
+    executes the bottom-up 50-state + DC Minimum Sustainable Living Cost engine for 2024 and 2026,
+    fetches National Economic Pressure Signals from BLS,
     and publishes atomic, validated JSON artifacts.
     """
     project_root = project_root or Path(__file__).resolve().parents[2]
@@ -62,11 +63,9 @@ def run_full_pipeline(project_root: Path | None = None) -> dict:
     # Latest primary anchor is Survey 2025 / Income 2024
     latest_pop = population_results[2025]
 
-    # 2. Model Research Survival Floor
-    survival_result = calculate_survival_floor(
-        population_anchor_annual=latest_pop.cutoff,
-        reference_year=latest_pop.income_year,
-    )
+    # 2. Execute Full Minimum Sustainable Living Cost Engine (50 States + DC, 2024 & 2026)
+    living_cost_outputs = run_living_cost_pipeline(project_root)
+    survival_consolidated = living_cost_outputs["survival_consolidated"]
 
     # 3. Ingest BLS National Economic Pressure Signals
     pressure_signals = get_economic_pressure_signals()
@@ -84,13 +83,6 @@ def run_full_pipeline(project_root: Path | None = None) -> dict:
         "population_anchor": latest_pop.to_dict(),
     }
     atomic_write_json(current_dir / "population.json", pop_payload)
-
-    # data/current/survival.json
-    surv_payload = {
-        "project": project_defs,
-        "survival_floor": survival_result.to_dict(),
-    }
-    atomic_write_json(current_dir / "survival.json", surv_payload)
 
     # data/current/pressures.json
     press_payload = {
@@ -120,21 +112,23 @@ def run_full_pipeline(project_root: Path | None = None) -> dict:
             "message": "The composite Foundation score is locked in PRELAUNCH / RESEARCH. No provisional score is published.",
         },
         "population_anchor": latest_pop.to_dict(),
-        "survival_floor": survival_result.to_dict(),
+        "survival_floor": survival_consolidated,
         "pressures": [p.to_dict() for p in pressure_signals],
         "history": [h.to_dict() for h in historical_timeline],
         "data_health": {
             "status": "healthy",
             "cps_asec_verified_vintages": 3,
             "bls_pressure_signals_count": len(pressure_signals),
-            "survival_floor_status": "research_estimate",
+            "living_cost_status": "research_estimate",
+            "states_modeled": 51,
             "validation_state": "all_checks_passed",
         },
         "latest_changes": [
             f"Reproduced 2025 CPS ASEC (2024 Income) Bottom-30 Population Anchor: ${latest_pop.cutoff:,.2f}/year.",
             "Cross-checked weighted percentile against independent implementation (diff = 0.0).",
-            f"Calculated Single-Adult Basic Living Survival Floor: ${survival_result.single_adult_floor_annual:,.2f}/year (RESEARCH ESTIMATE).",
-            f"Computed Single-Adult Survival Gap: ${survival_result.survival_gap_annual:,.2f} (Adequacy Ratio: {survival_result.adequacy_ratio:.2f}).",
+            f"Computed 2024 Minimum Sustainable Living Cost (National Weighted Median): ${survival_consolidated['minimum_sustainable_living_cost_2024']['weighted_median_gross']:,.2f}/year across 50 states + DC.",
+            f"Computed Time-Comparable 2024 Survival Gap: ${survival_consolidated['survival_gap_2024']:,.2f} (Adequacy Ratio: {survival_consolidated['adequacy_ratio_2024']:.2f}).",
+            f"Computed 2026 Current Minimum Sustainable Living Cost: ${survival_consolidated['minimum_sustainable_living_cost_2026']['weighted_median_gross']:,.2f}/year.",
             "Ingested 9 verified BLS National Economic Pressure Signals.",
             "Published 3 historical CPS ASEC vintages in nominal and constant 2024 dollars.",
         ],

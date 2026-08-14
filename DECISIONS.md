@@ -3,6 +3,7 @@
 Entries marked ACCEPTED are binding until explicitly superseded.
 
 ## D-001 — Bottom-30 denominator
+
 **Date:** 2026-08-13  
 **Status:** ACCEPTED
 
@@ -13,6 +14,7 @@ No equivalence-scale fractional weighting of children/adults.
 ---
 
 ## D-002 — Ranking unit
+
 **Date:** 2026-08-13  
 **Status:** ACCEPTED
 
@@ -23,6 +25,7 @@ Use official person survey weights.
 ---
 
 ## D-003 — Reference population
+
 **Date:** 2026-08-13  
 **Status:** ACCEPTED
 
@@ -31,6 +34,7 @@ The bottom 30% is primarily a reference point for evaluating the economy, not a 
 ---
 
 ## D-004 — Site before show
+
 **Date:** 2026-08-13  
 **Status:** ACCEPTED
 
@@ -40,6 +44,7 @@ Daily-show format, production and distribution are deferred.
 ---
 
 ## D-005 — Zero-dollar core
+
 **Date:** 2026-08-13  
 **Status:** ACCEPTED
 
@@ -49,6 +54,7 @@ No paid dependency may become necessary for reproducibility without explicit app
 ---
 
 ## D-006 — Agent-operated maintenance
+
 **Date:** 2026-08-13  
 **Status:** ACCEPTED
 
@@ -58,6 +64,7 @@ The owner should not be required to manually write code.
 ---
 
 ## D-007 — Methodology authority
+
 **Date:** 2026-08-13  
 **Status:** ACCEPTED
 
@@ -67,6 +74,7 @@ Agents may not silently change methodology.
 ---
 
 ## D-008 — Fail closed
+
 **Date:** 2026-08-13  
 **Status:** ACCEPTED
 
@@ -75,6 +83,7 @@ Broken/uncertain data produce stale/unavailable states, not guessed replacements
 ---
 
 ## D-009 — Composite score
+
 **Date:** 2026-08-13  
 **Status:** ACCEPTED
 
@@ -84,6 +93,7 @@ It requires validation, sensitivity analysis and explicit release authorization.
 ---
 
 ## D-010 — Primary source preference
+
 **Date:** 2026-08-13  
 **Status:** ACCEPTED
 
@@ -93,15 +103,17 @@ Aggregators are discovery/cross-check tools.
 ---
 
 ## D-011 — Second Economic Axis: Survival Floor (SUPERSEDED IN PART)
+
 **Date:** 2026-08-13  
 **Status:** SUPERSEDED IN PART BY D-015
 
 Added conceptual Second Economic Axis alongside Population Anchor.
-*Note: The numeric $27,960 national baseline, component values, and preliminary modeling assumptions of D-011 are explicitly superseded and retired by D-015. The conceptual dual-axis architecture (Population Anchor vs. Minimum Sustainable Living Cost) is preserved.*
+_Note: The numeric $27,960 national baseline, component values, and preliminary modeling assumptions of D-011 are explicitly superseded and retired by D-015. The conceptual dual-axis architecture (Population Anchor vs. Minimum Sustainable Living Cost) is preserved._
 
 ---
 
 ## D-012 — Open-Source Licensing Structure
+
 **Date:** 2026-08-13  
 **Status:** ACCEPTED
 
@@ -113,6 +125,7 @@ The Foundation brand name, logo, and identity are explicitly reserved and exclud
 ---
 
 ## D-013 — Historical Constant-Dollar Translation
+
 **Date:** 2026-08-13  
 **Status:** ACCEPTED
 
@@ -122,6 +135,7 @@ Historical displays default to real constant dollars to prevent nominal inflatio
 ---
 
 ## D-014 — National Economic Pressure Signals
+
 **Date:** 2026-08-13  
 **Status:** ACCEPTED
 
@@ -130,6 +144,7 @@ Registered BLS indicators (U-6, Labor Force Participation, Employment-Population
 ---
 
 ## D-015 — Minimum Sustainable Living Cost Methodology Migration
+
 **Date:** 2026-08-13  
 **Status:** ACCEPTED (Owner Authorized)
 
@@ -146,7 +161,9 @@ Registered BLS indicators (U-6, Labor Force Participation, Employment-Population
 ## Pending decisions
 
 ### P-001 — Composite normalization
+
 Historical percentile, adequacy scoring, hybrid, or other.
 
 ### P-002 — Composite weights
+
 No final weights approved.

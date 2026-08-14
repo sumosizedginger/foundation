@@ -6,6 +6,7 @@
 ---
 
 ## 1. Living Cost Component Observation
+
 Every individual cost element (e.g., housing, food, auto insurance, health premium) stores complete provenance and geographic context:
 
 ```json
@@ -17,8 +18,8 @@ Every individual cost element (e.g., housing, food, auto insurance, health premi
   "geography_name": "San Francisco County, CA",
   "state": "CA",
   "reference_year": 2024,
-  "value_annual": 28680.00,
-  "value_monthly": 2390.00,
+  "value_annual": 28680.0,
+  "value_monthly": 2390.0,
   "unit": "USD",
   "status": "measured",
   "source_id": "hud_fmr_2024",
@@ -36,6 +37,7 @@ Every individual cost element (e.g., housing, food, auto insurance, health premi
 ---
 
 ## 2. Local Living Cost (County / FMR Area)
+
 Represents the complete bottom-up calculation for a specific locality:
 
 ```json
@@ -47,27 +49,27 @@ Represents the complete bottom-up calculation for a specific locality:
   "profile_id": "single_adult_independent",
   "adult_population": 732000,
   "components": {
-    "housing": 28680.00,
-    "food": 4820.00,
-    "transportation": 9400.00,
-    "healthcare_insurance": 5640.00,
-    "healthcare_out_of_pocket": 1680.00,
-    "connectivity": 1440.00,
-    "essentials": 2400.00,
-    "social_recreation": 2800.00,
-    "resilience": 1200.00
+    "housing": 28680.0,
+    "food": 4820.0,
+    "transportation": 9400.0,
+    "healthcare_insurance": 5640.0,
+    "healthcare_out_of_pocket": 1680.0,
+    "connectivity": 1440.0,
+    "essentials": 2400.0,
+    "social_recreation": 2800.0,
+    "resilience": 1200.0
   },
-  "net_needs_annual": 58060.00,
+  "net_needs_annual": 58060.0,
   "net_needs_monthly": 4838.33,
-  "gross_required_income": 74850.00,
-  "gross_required_monthly": 6237.50,
+  "gross_required_income": 74850.0,
+  "gross_required_monthly": 6237.5,
   "taxes": {
-    "fica_social_security": 4640.70,
+    "fica_social_security": 4640.7,
     "fica_medicare": 1085.33,
-    "federal_income_tax": 7120.00,
+    "federal_income_tax": 7120.0,
     "state_income_tax": 3943.97,
-    "local_income_tax": 0.00,
-    "total_taxes": 16790.00
+    "local_income_tax": 0.0,
+    "total_taxes": 16790.0
   },
   "status": "research_estimate",
   "methodology_version": "0.2.0-draft",
@@ -78,6 +80,7 @@ Represents the complete bottom-up calculation for a specific locality:
 ---
 
 ## 3. State Living Cost Distribution
+
 Represents the population-weighted aggregation across all counties in a state:
 
 ```json
@@ -88,13 +91,13 @@ Represents the population-weighted aggregation across all counties in a state:
   "profile_id": "single_adult_independent",
   "represented_adult_population": 30500000,
   "locality_count": 58,
-  "weighted_p25_gross": 58200.00,
-  "weighted_median_gross": 66800.00,
-  "weighted_p75_gross": 78400.00,
-  "weighted_mean_gross": 68450.00,
-  "min_locality_gross": 46200.00,
-  "max_locality_gross": 89400.00,
-  "weighted_median_net_needs": 52100.00,
+  "weighted_p25_gross": 58200.0,
+  "weighted_median_gross": 66800.0,
+  "weighted_p75_gross": 78400.0,
+  "weighted_mean_gross": 68450.0,
+  "min_locality_gross": 46200.0,
+  "max_locality_gross": 89400.0,
+  "weighted_median_net_needs": 52100.0,
   "methodology_version": "0.2.0-draft",
   "calculated_at": "2026-08-13T16:00:00Z"
 }
@@ -103,6 +106,7 @@ Represents the population-weighted aggregation across all counties in a state:
 ---
 
 ## 4. National Living Cost Distribution
+
 Represents the population-weighted aggregation across all localities in the 50 states + DC:
 
 ```json
@@ -112,17 +116,17 @@ Represents the population-weighted aggregation across all localities in the 50 s
   "profile_id": "single_adult_independent",
   "represented_adult_population": 262000000,
   "locality_count": 3143,
-  "weighted_p25_gross": 48500.00,
-  "weighted_median_gross": 56400.00,
-  "weighted_p75_gross": 67800.00,
-  "weighted_mean_gross": 58100.00,
+  "weighted_p25_gross": 48500.0,
+  "weighted_median_gross": 56400.0,
+  "weighted_p75_gross": 67800.0,
+  "weighted_mean_gross": 58100.0,
   "lowest_state_median": {
     "state": "MS",
-    "median_gross": 43200.00
+    "median_gross": 43200.0
   },
   "highest_state_median": {
     "state": "HI",
-    "median_gross": 79600.00
+    "median_gross": 79600.0
   },
   "status": "research_estimate",
   "methodology_version": "0.2.0-draft",
@@ -137,11 +141,11 @@ Represents the population-weighted aggregation across all localities in the 50 s
 ```json
 {
   "reference_year": 2024,
-  "population_anchor_annual": 21800.00,
+  "population_anchor_annual": 21800.0,
   "population_anchor_status": "measured",
-  "living_cost_national_median_gross": 56400.00,
+  "living_cost_national_median_gross": 56400.0,
   "living_cost_status": "research_estimate",
-  "survival_gap_annual": -34600.00,
+  "survival_gap_annual": -34600.0,
   "adequacy_ratio": 0.386,
   "adequacy_percent": 39,
   "time_comparability_verified": true,
@@ -152,6 +156,7 @@ Represents the population-weighted aggregation across all localities in the 50 s
 ---
 
 ## 6. Status Enum
+
 - `measured` — Derived directly from official microdata using deterministic formulas.
 - `research_estimate` — Transparent multi-component model undergoing active validation.
 - `in_development` — Methodology rebuild in progress.

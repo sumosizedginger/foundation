@@ -75,15 +75,19 @@ Persistent access to methodology, sources and history.
 ## Pages
 
 ### `/`
+
 Current state.
 
 ### `/methodology.html`
+
 Human-readable methodology.
 
 ### `/sources.html`
+
 Source registry and freshness.
 
 ### `/history.html`
+
 Published/research vintages and revisions.
 
 ## Provenance interaction

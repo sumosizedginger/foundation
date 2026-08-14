@@ -1,208 +1,377 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Methodology of The Foundation: Open, deterministic, and auditable economic measurement.">
-  <meta name="theme-color" content="#f59e0b">
-  
-  <link rel="canonical" href="https://sumosizedginger.github.io/foundation/methodology.html">
-  <meta property="og:title" content="Methodology — The Foundation">
-  <meta property="og:description" content="Dual-axis framework, Population Anchor ranking, Survival Floor component model, and benchmark comparisons.">
-  <meta property="og:url" content="https://sumosizedginger.github.io/foundation/methodology.html">
-  <meta property="og:image" content="https://sumosizedginger.github.io/foundation/assets/og-preview.svg">
-  
-  <title>Methodology — The Foundation</title>
-  
-  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-  <link rel="manifest" href="site.webmanifest">
-  <link rel="stylesheet" href="assets/app.css">
-</head>
-<body>
-  <header class="site-header">
-    <a class="brand" href="index.html">
-      THE FOUNDATION
-      <span class="brand-badge">METHODOLOGY V0.1</span>
-    </a>
-    <nav aria-label="Primary Navigation">
-      <a href="index.html">Dashboard</a>
-      <a aria-current="page" href="methodology.html">Methodology</a>
-      <a href="sources.html">Sources & Audit</a>
-      <a href="history.html">History</a>
-    </nav>
-  </header>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Methodology of The Foundation: Open, deterministic, and auditable economic measurement."
+    />
+    <meta name="theme-color" content="#f59e0b" />
 
-  <main style="max-width: 960px;">
-    <section class="section" style="padding-top: 3.5rem;">
-      <p class="eyebrow">DETERMINISTIC SPECIFICATION</p>
-      <h1>Show the work.</h1>
-      <p class="lede">
-        The methodology of The Foundation is intentionally more conservative than our presentation. If a calculation cannot be independently reproduced from public data, it does not belong on this site.
-      </p>
-    </section>
+    <link
+      rel="canonical"
+      href="https://sumosizedginger.github.io/foundation/methodology.html"
+    />
+    <meta property="og:title" content="Methodology — The Foundation" />
+    <meta
+      property="og:description"
+      content="Dual-axis framework, Population Anchor ranking, Minimum Sustainable Living Cost 50-state model, and deterministic tax engine."
+    />
+    <meta
+      property="og:url"
+      content="https://sumosizedginger.github.io/foundation/methodology.html"
+    />
+    <meta
+      property="og:image"
+      content="https://sumosizedginger.github.io/foundation/assets/og-preview.svg"
+    />
 
-    <!-- SECTION 1: DUAL AXIS -->
-    <section class="section" style="padding-top: 2.5rem;">
-      <h2 class="section-title">1. The Dual-Axis Economic Framework</h2>
-      <p style="margin: 0.8rem 0; color: #cbd5e1;">
-        Conventional economic discussions frequently conflate population definitions with adequacy standards. The Foundation strictly separates the two:
-      </p>
-      
-      <div style="background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.5rem; margin: 1.5rem 0;">
-        <h3 style="color: var(--accent); font-size: 1.1rem; margin-bottom: 0.5rem;">Axis 1 · The Population Anchor (Who are they?)</h3>
-        <p style="font-size: 0.95rem; color: var(--muted); margin-bottom: 1rem;">
-          Defines the reference population by ranking individuals according to per-person household money income. The 30th percentile represents the boundary of the Bottom 30%.
+    <title>Methodology — The Foundation</title>
+
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+    <link rel="manifest" href="site.webmanifest" />
+    <link rel="stylesheet" href="assets/app.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="index.html">
+        THE FOUNDATION
+        <span class="brand-badge">METHODOLOGY 0.2.0-DRAFT</span>
+      </a>
+      <nav aria-label="Primary Navigation">
+        <a href="index.html">Dashboard</a>
+        <a aria-current="page" href="methodology.html">Methodology</a>
+        <a href="sources.html">Sources & Audit</a>
+        <a href="history.html">History</a>
+      </nav>
+    </header>
+
+    <main style="max-width: 960px">
+      <section class="section" style="padding-top: 3.5rem">
+        <p class="eyebrow">DETERMINISTIC SPECIFICATION</p>
+        <h1>Show the work.</h1>
+        <p class="lede">
+          The methodology of The Foundation is intentionally more conservative
+          than our presentation. If a calculation cannot be independently
+          reproduced from public data, it does not belong on this site.
         </p>
-        <h3 style="color: var(--info); font-size: 1.1rem; margin-bottom: 0.5rem;">Axis 2 · The Survival Floor (What does basic life cost?)</h3>
-        <p style="font-size: 0.95rem; color: var(--muted);">
-          Models the minimum annual resources required for an independent household to cover unavoidable living necessities (housing, food, utilities, transport, healthcare, taxes).
+      </section>
+
+      <!-- SECTION 1: DUAL AXIS -->
+      <section class="section" style="padding-top: 2.5rem">
+        <h2 class="section-title">1. The Dual-Axis Economic Framework</h2>
+        <p style="margin: 0.8rem 0; color: #cbd5e1">
+          Conventional economic discussions frequently conflate population
+          definitions with adequacy standards. The Foundation strictly separates
+          the two:
+        </p>
+
+        <div
+          style="
+            background: var(--surface-2);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+          "
+        >
+          <h3
+            style="
+              color: var(--accent);
+              font-size: 1.1rem;
+              margin-bottom: 0.5rem;
+            "
+          >
+            Axis 1 · The Population Anchor (Who are they?)
+          </h3>
+          <p
+            style="font-size: 0.95rem; color: var(--muted); margin-bottom: 1rem"
+          >
+            Defines the reference population by ranking individuals according to
+            per-person household money income. The 30th percentile represents
+            the boundary of the Bottom 30%.
+          </p>
+          <h3
+            style="color: var(--info); font-size: 1.1rem; margin-bottom: 0.5rem"
+          >
+            Axis 2 · The Minimum Sustainable Living Cost (What does basic life
+            cost?)
+          </h3>
+          <p style="font-size: 0.95rem; color: var(--muted)">
+            Models the gross money income required for an independent adult to
+            maintain a minimally sustainable life without means-tested public
+            assistance, debt-financing necessities, or shared household income.
+          </p>
+        </div>
+
+        <p style="font-size: 0.95rem; color: var(--muted)">
+          The <strong>Time-Comparable Survival Gap</strong> (<code
+            >2024 Population Anchor − 2024 Living Cost</code
+          >) and <strong>Adequacy Ratio</strong> (<code
+            >2024 Population Anchor / 2024 Living Cost</code
+          >) evaluate economic margin strictly within matching temporal
+          vintages.
+        </p>
+      </section>
+
+      <!-- SECTION 2: CANONICAL BOTTOM-30 FORMULA -->
+      <section class="section" style="padding-top: 2.5rem">
+        <h2 class="section-title">2. Canonical Bottom-30 Population Anchor</h2>
+        <p style="margin: 0.8rem 0; color: #cbd5e1">
+          Each person in a household receives an income value equal to total
+          household money income divided by the number of persons supported:
+        </p>
+
+        <div
+          style="
+            background: var(--surface-3);
+            border: 1px solid var(--line-strong);
+            border-radius: 0.5rem;
+            padding: 1.25rem;
+            font-family: var(--font-mono);
+            font-size: 1.05rem;
+            margin: 1rem 0;
+          "
+        >
+          per_person_household_income = HTOTVAL / H_NUMPER
+        </div>
+
+        <ul
+          style="
+            list-style: disc;
+            margin-left: 1.5rem;
+            color: var(--muted);
+            font-size: 0.95rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+          "
+        >
+          <li>
+            <strong>Population Unit:</strong> Person. We rank humans, not
+            households. Ranking households would give a one-person household the
+            same weight as a six-person family.
+          </li>
+          <li>
+            <strong>Survey Weights:</strong> Evaluated using the official Census
+            CPS ASEC March supplement person weight (<code>MARSUPWT</code>).
+          </li>
+          <li>
+            <strong>Percentile Convention:</strong> First observation where
+            cumulative person weight reaches or exceeds 30% of total represented
+            population weight.
+          </li>
+          <li>
+            <strong>No Equivalence Scale:</strong> We do not treat children or
+            additional adults as fractional persons. One supported human counts
+            as one human.
+          </li>
+        </ul>
+      </section>
+
+      <!-- SECTION 3: MINIMUM SUSTAINABLE LIVING COST -->
+      <section class="section" style="padding-top: 2.5rem">
+        <h2 class="section-title">
+          3. Minimum Sustainable Living Cost Architecture (`0.2.0-draft`)
+        </h2>
+        <p style="margin: 0.8rem 0; color: #cbd5e1">
+          Under <strong>Decision D-015</strong>, The Foundation retired the
+          initial $27,960 synthesized national estimate and built a complete
+          bottom-up county engine across all 50 states + DC.
+        </p>
+
+        <div class="table-wrap" style="margin: 1.25rem 0">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Component</th>
+                <th scope="col">Specification & Rule</th>
+                <th scope="col">Primary Official Sources</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Housing</strong></td>
+                <td>
+                  Independent 1-Bedroom rental at HUD 40th percentile Fair
+                  Market Rent. Core tenant-paid utilities are included in HUD
+                  gross rent to prevent double-counting.
+                </td>
+                <td>HUD Fair Market Rents (FY2024, FY2026)</td>
+              </tr>
+              <tr>
+                <td><strong>Food</strong></td>
+                <td>
+                  USDA Low-Cost Food Plan (single adult age 19–50 with official
+                  +20% 1-person size adjustment). AK/HI adjusted. USDA Thrifty
+                  Food Plan serves as lower sensitivity bound.
+                </td>
+                <td>USDA CNPP Monthly Cost Reports</td>
+              </tr>
+              <tr>
+                <td><strong>Transportation</strong></td>
+                <td>
+                  Explicit automobile ownership model: 11,000 annual miles,
+                  state retail gas prices, state auto liability insurance,
+                  maintenance/tires, and vehicle replacement reserve.
+                </td>
+                <td>FHWA NHTS, EIA Gas, NAIC Insurance, BLS CE</td>
+              </tr>
+              <tr>
+                <td><strong>Healthcare</strong></td>
+                <td>
+                  Unsubsidized lowest-cost adequate Silver Marketplace plan (Age
+                  40, non-smoker, single) + MEPS expected non-catastrophic
+                  out-of-pocket medical utilization. Zero ACA subsidies or
+                  Medicaid assumed.
+                </td>
+                <td>CMS Exchange PUFs, State SBEs, AHRQ MEPS</td>
+              </tr>
+              <tr>
+                <td><strong>Connectivity & Essentials</strong></td>
+                <td>
+                  1 mobile phone line + basic residential broadband + restricted
+                  necessity basket (hygiene, cleaning products, laundry,
+                  apparel/footwear replacement) adjusted by BEA RPP.
+                </td>
+                <td>FCC Urban Survey, BLS CE, BEA RPP</td>
+              </tr>
+              <tr>
+                <td><strong>Social & Recreation</strong></td>
+                <td>
+                  Explicit, visible non-zero component based on BLS CE
+                  lower-quartile (P25) expenditure among single-person positive
+                  spenders, adjusted by BEA Regional Price Parities.
+                </td>
+                <td>BLS Consumer Expenditure Survey, BEA RPP</td>
+              </tr>
+              <tr>
+                <td><strong>Resilience Reserve</strong></td>
+                <td>
+                  Emergency buffer for unavoidable non-auto irregular household
+                  emergencies and appliance replacements.
+                </td>
+                <td>Federal Reserve SHED / BLS Baseline</td>
+              </tr>
+              <tr>
+                <td><strong>Deterministic Tax Engine</strong></td>
+                <td>
+                  Solves <code>G − Taxes(G) = NetNeeds</code> for FICA Social
+                  Security (6.2%), Medicare (1.45%), Federal Income Tax, State
+                  Income Tax (all 50 states + DC), and local income taxes.
+                </td>
+                <td>IRS Statutory Codes & State Tax Schedules</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- SECTION 4: BENCHMARK COMPARISONS -->
+      <section class="section" style="padding-top: 2.5rem">
+        <h2 class="section-title">
+          4. Benchmark Comparisons & Methodological Divergences
+        </h2>
+        <p style="margin: 0.8rem 0; color: #cbd5e1">
+          The Foundation compares its model against external benchmark models,
+          explaining all differences:
+        </p>
+
+        <div
+          style="
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin: 1.25rem 0;
+          "
+        >
+          <div class="metric-panel" style="padding: 1.25rem">
+            <h4 style="color: var(--text); font-size: 1.05rem">
+              MIT Living Wage Calculator (~$42,500/year national single adult)
+            </h4>
+            <p
+              style="
+                font-size: 0.88rem;
+                color: var(--muted);
+                margin-top: 0.35rem;
+              "
+            >
+              <strong>Divergence:</strong> MIT includes unsubsidized commercial
+              employer healthcare rates, civic engagement, and local county cost
+              aggregation. The Foundation models independent standard housing,
+              USDA Low-Cost food, explicit auto ownership, unsubsidized Silver
+              Marketplace healthcare, and full statutory taxes.
+            </p>
+          </div>
+
+          <div class="metric-panel" style="padding: 1.25rem">
+            <h4 style="color: var(--text); font-size: 1.05rem">
+              United For ALICE Survival Budget (~$31,200/year national single
+              adult)
+            </h4>
+            <p
+              style="
+                font-size: 0.88rem;
+                color: var(--muted);
+                margin-top: 0.35rem;
+              "
+            >
+              <strong>Divergence:</strong> ALICE includes a 10% contingency
+              reserve but assumes smaller healthcare and transport baselines.
+              The Foundation models full automobile ownership and unsubsidized
+              Silver health insurance.
+            </p>
+          </div>
+
+          <div class="metric-panel" style="padding: 1.25rem">
+            <h4 style="color: var(--text); font-size: 1.05rem">
+              Official Poverty Measure ($15,650/year single adult)
+            </h4>
+            <p
+              style="
+                font-size: 0.88rem;
+                color: var(--muted);
+                margin-top: 0.35rem;
+              "
+            >
+              <strong>Divergence:</strong> The OPM is based on a 1963
+              food-multiplier formula (3x food) and severely underestimates
+              modern housing, healthcare, transit, and utility expenses.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 5: COMPOSITE SCORE POLICY -->
+      <section class="section" style="padding-top: 2.5rem; margin-bottom: 4rem">
+        <h2 class="section-title">
+          5. Composite Foundation Score: Locked in Prelaunch
+        </h2>
+        <p style="margin: 0.8rem 0; color: #cbd5e1">
+          The composite Foundation Score remains
+          <strong>locked in PRELAUNCH / RESEARCH</strong>. No provisional 0–100
+          headline score will be published until normalization freezing, weight
+          sensitivity analysis, and double-counting audits pass all project
+          release gates.
+        </p>
+      </section>
+    </main>
+
+    <footer>
+      <div>
+        <p style="font-weight: 800; color: var(--text); margin-bottom: 0.25rem">
+          THE FOUNDATION
+        </p>
+        <p>An open, deterministic, auditable economic research instrument.</p>
+      </div>
+      <div style="text-align: right">
+        <p>
+          <a href="index.html">Dashboard</a> ·
+          <a href="sources.html">Sources</a> ·
+          <a href="history.html">History</a>
         </p>
       </div>
-
-      <p style="font-size: 0.95rem; color: var(--muted);">
-        The <strong>Survival Gap</strong> (<code>Population Anchor − Survival Floor</code>) and <strong>Adequacy Ratio</strong> (<code>Population Anchor / Survival Floor</code>) quantify whether the boundary of the Bottom 30% meets modeled baseline survival needs.
-      </p>
-    </section>
-
-    <!-- SECTION 2: CANONICAL BOTTOM-30 FORMULA -->
-    <section class="section" style="padding-top: 2.5rem;">
-      <h2 class="section-title">2. Canonical Bottom-30 Population Anchor</h2>
-      <p style="margin: 0.8rem 0; color: #cbd5e1;">
-        Each person in a household receives an income value equal to total household money income divided by the number of persons supported:
-      </p>
-
-      <div style="background: var(--surface-3); border: 1px solid var(--line-strong); border-radius: 0.5rem; padding: 1.25rem; font-family: var(--font-mono); font-size: 1.05rem; margin: 1rem 0;">
-        per_person_household_income = HTOTVAL / H_NUMPER
-      </div>
-
-      <ul style="list-style: disc; margin-left: 1.5rem; color: var(--muted); font-size: 0.95rem; display: flex; flex-direction: column; gap: 0.5rem;">
-        <li><strong>Population Unit:</strong> Person. We rank humans, not households. Ranking households would give a one-person household the same weight as a six-person family.</li>
-        <li><strong>Survey Weights:</strong> Evaluated using the official Census CPS ASEC March supplement person weight (<code>MARSUPWT</code>).</li>
-        <li><strong>Percentile Convention:</strong> First observation where cumulative person weight reaches or exceeds 30% of total represented population weight.</li>
-        <li><strong>No Equivalence Scale:</strong> We do not treat children or additional adults as fractional persons. One supported human counts as one human.</li>
-      </ul>
-    </section>
-
-    <!-- SECTION 3: SURVIVAL FLOOR RESEARCH MODEL -->
-    <section class="section" style="padding-top: 2.5rem;">
-      <h2 class="section-title">3. Survival Floor Component Model</h2>
-      <p style="margin: 0.8rem 0; color: #cbd5e1;">
-        Status: <code>RESEARCH ESTIMATE</code>. The baseline single-adult survival floor of <strong>$27,960/year</strong> ($2,330/month) is constructed from official public baselines:
-      </p>
-
-      <div class="table-wrap" style="margin: 1.25rem 0;">
-        <table>
-          <thead>
-            <tr>
-              <th scope="col">Component</th>
-              <th scope="col" class="text-right">Annual Cost</th>
-              <th scope="col" class="text-right">Monthly Cost</th>
-              <th scope="col">Primary Public Source</th>
-              <th scope="col">Methodology</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><strong>Housing</strong></td>
-              <td class="mono text-right">$13,200</td>
-              <td class="mono text-right">$1,100</td>
-              <td>HUD Fair Market Rents / ACS</td>
-              <td>40th percentile efficiency/1BR rental baseline including essential utilities.</td>
-            </tr>
-            <tr>
-              <td><strong>Food</strong></td>
-              <td class="mono text-right">$3,600</td>
-              <td class="mono text-right">$300</td>
-              <td>USDA Thrifty Food Plan</td>
-              <td>Nutritious low-cost food basket for adult 19-50 with official +20% single-person factor.</td>
-            </tr>
-            <tr>
-              <td><strong>Utilities & Telecom</strong></td>
-              <td class="mono text-right">$2,640</td>
-              <td class="mono text-right">$220</td>
-              <td>EIA RECS & BLS CE</td>
-              <td>Basic residential electricity, heating, water, and minimum broadband service.</td>
-            </tr>
-            <tr>
-              <td><strong>Transportation</strong></td>
-              <td class="mono text-right">$3,840</td>
-              <td class="mono text-right">$320</td>
-              <td>BLS Consumer Expenditure</td>
-              <td>Operating costs for reliable used commuting vehicle or public transit pass.</td>
-            </tr>
-            <tr>
-              <td><strong>Healthcare</strong></td>
-              <td class="mono text-right">$1,680</td>
-              <td class="mono text-right">$140</td>
-              <td>MEPS & ACA Benchmark</td>
-              <td>Median out-of-pocket medical costs plus subsidized ACA benchmark Silver premium.</td>
-            </tr>
-            <tr>
-              <td><strong>Taxes & Basics</strong></td>
-              <td class="mono text-right">$3,000</td>
-              <td class="mono text-right">$250</td>
-              <td>IRS FICA & BLS Supplies</td>
-              <td>Mandatory 7.65% FICA payroll taxes plus state/local sales taxes and essential hygiene.</td>
-            </tr>
-            <tr style="background: var(--surface-2); font-weight: 800;">
-              <td>Total Single-Adult Floor</td>
-              <td class="mono text-right" style="color: var(--accent);">$27,960</td>
-              <td class="mono text-right" style="color: var(--accent);">$2,330</td>
-              <td colspan="2">Synthesized Government Baseline (Research Estimate)</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- SECTION 4: BENCHMARK COMPARISONS -->
-    <section class="section" style="padding-top: 2.5rem;">
-      <h2 class="section-title">4. Benchmark Comparisons & Methodological Divergences</h2>
-      <p style="margin: 0.8rem 0; color: #cbd5e1;">
-        The Foundation compares its research estimates against external benchmark models, explaining all differences:
-      </p>
-
-      <div style="display: flex; flex-direction: column; gap: 1rem; margin: 1.25rem 0;">
-        <div class="metric-panel" style="padding: 1.25rem;">
-          <h4 style="color: var(--text); font-size: 1.05rem;">MIT Living Wage Calculator (~$42,500/year national single adult)</h4>
-          <p style="font-size: 0.88rem; color: var(--muted); margin-top: 0.35rem;">
-            <strong>Divergence:</strong> MIT includes civic engagement expenses, unsubsidized commercial healthcare premiums, and county-level cost aggregation, whereas The Foundation models bare-minimum survival assuming ACA subsidies and 100% home meal preparation.
-          </p>
-        </div>
-
-        <div class="metric-panel" style="padding: 1.25rem;">
-          <h4 style="color: var(--text); font-size: 1.05rem;">United For ALICE Survival Budget (~$31,200/year national single adult)</h4>
-          <p style="font-size: 0.88rem; color: var(--muted); margin-top: 0.35rem;">
-            <strong>Divergence:</strong> ALICE includes an explicit 10% miscellaneous contingency reserve and higher technology allowances. When the contingency buffer is excluded, ALICE aligns closely with The Foundation's $27,960 estimate.
-          </p>
-        </div>
-
-        <div class="metric-panel" style="padding: 1.25rem;">
-          <h4 style="color: var(--text); font-size: 1.05rem;">Official Poverty Measure ($15,650/year single adult)</h4>
-          <p style="font-size: 0.88rem; color: var(--muted); margin-top: 0.35rem;">
-            <strong>Divergence:</strong> The OPM is based on a 1963 food-multiplier formula (3x food) and severely underestimates modern housing, healthcare, transit, and utility expenses.
-          </p>
-        </div>
-      </div>
-    </section>
-
-    <!-- SECTION 5: COMPOSITE SCORE POLICY -->
-    <section class="section" style="padding-top: 2.5rem; margin-bottom: 4rem;">
-      <h2 class="section-title">5. Composite Foundation Score: Locked in Prelaunch</h2>
-      <p style="margin: 0.8rem 0; color: #cbd5e1;">
-        The composite Foundation Score remains <strong>locked in PRELAUNCH / RESEARCH</strong>. No fake 0–100 headline score will be published until normalization freezing, weight sensitivity analysis, and double-counting audits pass the project's release gates.
-      </p>
-    </section>
-  </main>
-
-  <footer>
-    <div>
-      <p style="font-weight: 800; color: var(--text); margin-bottom: 0.25rem;">THE FOUNDATION</p>
-      <p>An open, deterministic, auditable economic research instrument.</p>
-    </div>
-    <div style="text-align: right;">
-      <p><a href="index.html">Dashboard</a> · <a href="sources.html">Sources</a> · <a href="history.html">History</a></p>
-    </div>
-  </footer>
-</body>
+    </footer>
+  </body>
 </html>

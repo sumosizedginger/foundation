@@ -138,18 +138,23 @@ Deploy:
 ## Fail-closed examples
 
 ### BLS series missing
+
 Do not pick another series.
 
 ### Census column renamed
+
 Research official documentation, then update connector only if semantic equivalence is verified.
 
 ### Redfin unavailable
+
 Do not scrape around it or replace with Zillow without approval.
 
 ### One test fails
+
 No official result publication.
 
 ### Weird result
+
 Investigate. Do not adjust a weight or filter until the result "looks right."
 
 ## Scheduling

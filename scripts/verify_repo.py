@@ -26,6 +26,10 @@ def main() -> int:
         "data/current/survival.json",
         "data/current/pressures.json",
         "data/current/history.json",
+        "data/current/living_cost_2024.json",
+        "data/current/living_cost_2026.json",
+        "data/current/state_living_costs_2024.json",
+        "data/current/state_living_costs_2026.json",
         "data/metadata/validation_report_2025.json",
         "data/metadata/validation_report_2024.json",
         "data/metadata/validation_report_2023.json",
@@ -63,10 +67,15 @@ def main() -> int:
     if latest["population_anchor"]["cutoff"] != 21800.00:
         raise SystemExit(f"Unexpected Population Anchor cutoff: {latest['population_anchor']['cutoff']}")
 
-    if latest["survival_floor"]["status"] not in ("in_development", "research_estimate"):
-        raise SystemExit(f"Survival floor must be in_development or research_estimate, got: {latest['survival_floor']['status']}")
+    if latest["survival_floor"]["status"] != "research_estimate":
+        raise SystemExit(f"Survival floor must be research_estimate, got: {latest['survival_floor']['status']}")
 
-    print("Repository structural, schema, and release-gate verification passed.")
+    with (ROOT / "data/current/living_cost_2024.json").open("r", encoding="utf-8") as fh:
+        lc_2024 = json.load(fh)
+        if len(lc_2024["state_distributions"]) != 51:
+            raise SystemExit(f"Expected 51 states/DC in 2024 living cost, got {len(lc_2024['state_distributions'])}")
+
+    print("Repository structural, schema, living cost, and release-gate verification passed.")
     return 0
 
 

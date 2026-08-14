@@ -49,9 +49,11 @@ GitHub Pages
 ## 3. Separation of responsibility
 
 ### `config/`
+
 Machine-readable definitions, sources, candidates and provisional weights.
 
 ### `src/foundation/sources/`
+
 Network/source-specific acquisition only.
 
 These modules should know how to fetch/parse a publisher.
@@ -59,21 +61,27 @@ These modules should know how to fetch/parse a publisher.
 They should not decide what constitutes a healthy economy.
 
 ### `src/foundation/`
+
 Canonical calculations, validation, models and export.
 
 ### `tests/`
+
 Synthetic and regression tests.
 
 ### `data/current/`
+
 Latest valid generated state.
 
 ### `data/history/`
+
 Immutable published vintages.
 
 ### `data/revisions/`
+
 Explicit revision records.
 
 ### `site/`
+
 Static presentation.
 
 The site may format, filter, sort and visualize.
@@ -81,6 +89,7 @@ The site may format, filter, sort and visualize.
 The site may not calculate official economic values.
 
 ### `.agents/skills/`
+
 Agent operating procedures.
 
 ## 4. No required database

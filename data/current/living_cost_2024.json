@@ -1,45 +1,33 @@
 {
-  "status": "research_estimate",
-  "status_label": "RESEARCH ESTIMATE",
   "reference_year": 2024,
   "methodology_version": "0.2.0-draft",
-  "minimum_sustainable_living_cost_2024": {
-    "weighted_median_gross": 51220.16158284187,
+  "status": "research_estimate",
+  "status_label": "RESEARCH ESTIMATE (0.2.0-draft)",
+  "national_distribution": {
+    "geography": "United States",
+    "reference_year": 2024,
+    "profile_id": "single_adult_independent",
+    "represented_adult_population": 263484992,
+    "locality_count": 153,
     "weighted_p25_gross": 46294.17074556351,
+    "weighted_median_gross": 51220.16158284187,
     "weighted_p75_gross": 56847.40731808663,
     "weighted_mean_gross": 52347.02,
-    "lowest_state": {
+    "lowest_state_median": {
       "state": "AR",
       "state_name": "Arkansas",
       "median_gross": 40013.36952713013
     },
-    "highest_state": {
+    "highest_state_median": {
       "state": "HI",
       "state_name": "Hawaii",
       "median_gross": 69951.99591825486
-    }
-  },
-  "minimum_sustainable_living_cost_2026": {
-    "weighted_median_gross": 55551.887335939406,
-    "weighted_p25_gross": 50349.302361011505,
-    "weighted_p75_gross": 61649.41647146226,
-    "lowest_state": {
-      "state": "AR",
-      "state_name": "Arkansas",
-      "median_gross": 43355.17347720146
     },
-    "highest_state": {
-      "state": "HI",
-      "state_name": "Hawaii",
-      "median_gross": 75896.98824726103
-    }
+    "status": "research_estimate",
+    "methodology_version": "0.2.0-draft",
+    "calculated_at": "2026-08-14T01:42:28+00:00"
   },
-  "population_anchor_2024": 21800.0,
-  "survival_gap_2024": -29420.16,
-  "adequacy_ratio_2024": 0.4256,
-  "adequacy_percent_2024": 43,
-  "time_comparability_verified": true,
-  "state_distributions_2024": [
+  "state_distributions": [
     {
       "state": "AK",
       "state_name": "Alaska",
@@ -915,7 +903,7 @@
     "transport_low_mileage_gross": 50500.16,
     "transport_high_mileage_gross": 52320.16
   },
-  "benchmark_comparisons": {
+  "benchmarks": {
     "mit_living_wage": {
       "name": "MIT Living Wage Calculator",
       "author": "Dr. Amy Glasmeier / MIT",

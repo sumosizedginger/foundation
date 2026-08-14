@@ -7,10 +7,15 @@ from foundation.pipeline import run_full_pipeline
 def main() -> int:
     print("Executing full Foundation pipeline update...")
     result = run_full_pipeline()
+    surv = result["survival_floor"]
+    lc_2024 = surv["minimum_sustainable_living_cost_2024"]["weighted_median_gross"]
+    lc_2026 = surv["minimum_sustainable_living_cost_2026"]["weighted_median_gross"]
+
     print("\nUpdate completed successfully.")
-    print(f"Population Anchor: ${result['population_anchor']['cutoff']:,.2f}")
-    print(f"Survival Floor: ${result['survival_floor']['single_adult_floor_annual']:,.2f} ({result['survival_floor']['status_label']})")
-    print(f"Survival Gap: ${result['survival_floor']['survival_gap_annual']:,.2f}")
+    print(f"Population Anchor (2024 Income): ${result['population_anchor']['cutoff']:,.2f}")
+    print(f"Minimum Sustainable Living Cost (2024 National Weighted Median): ${lc_2024:,.2f} ({surv['status_label']})")
+    print(f"Time-Comparable 2024 Survival Gap: ${surv['survival_gap_2024']:,.2f} (Adequacy Ratio: {surv['adequacy_ratio_2024']:.2f})")
+    print(f"Current Minimum Sustainable Living Cost (2026 National Weighted Median): ${lc_2026:,.2f}")
     return 0
 
 

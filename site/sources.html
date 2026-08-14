@@ -1,168 +1,466 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Data Source Registry and Provenance Audit for The Foundation.">
-  <meta name="theme-color" content="#f59e0b">
-  
-  <link rel="canonical" href="https://sumosizedginger.github.io/foundation/sources.html">
-  <meta property="og:title" content="Sources & Audit — The Foundation">
-  <meta property="og:description" content="Official publisher endpoints, series IDs, and downloadable machine-readable validation reports.">
-  <meta property="og:url" content="https://sumosizedginger.github.io/foundation/sources.html">
-  <meta property="og:image" content="https://sumosizedginger.github.io/foundation/assets/og-preview.svg">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Data Source Registry and Provenance Audit for The Foundation."
+    />
+    <meta name="theme-color" content="#f59e0b" />
 
-  <title>Sources & Audit — The Foundation</title>
-  
-  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-  <link rel="manifest" href="site.webmanifest">
-  <link rel="stylesheet" href="assets/app.css">
-</head>
-<body>
-  <header class="site-header">
-    <a class="brand" href="index.html">
-      THE FOUNDATION
-      <span class="brand-badge">SOURCES & AUDIT</span>
-    </a>
-    <nav aria-label="Primary Navigation">
-      <a href="index.html">Dashboard</a>
-      <a href="methodology.html">Methodology</a>
-      <a aria-current="page" href="sources.html">Sources & Audit</a>
-      <a href="history.html">History</a>
-    </nav>
-  </header>
+    <link
+      rel="canonical"
+      href="https://sumosizedginger.github.io/foundation/sources.html"
+    />
+    <meta property="og:title" content="Sources & Audit — The Foundation" />
+    <meta
+      property="og:description"
+      content="Official publisher endpoints, series IDs, and downloadable machine-readable validation reports."
+    />
+    <meta
+      property="og:url"
+      content="https://sumosizedginger.github.io/foundation/sources.html"
+    />
+    <meta
+      property="og:image"
+      content="https://sumosizedginger.github.io/foundation/assets/og-preview.svg"
+    />
 
-  <main style="max-width: 1040px;">
-    <section class="section" style="padding-top: 3.5rem;">
-      <p class="eyebrow">SOURCE REGISTRY & PROVENANCE</p>
-      <h1>Primary sources first.</h1>
-      <p class="lede">
-        Production data come directly from original government statistical publishers. Aggregators are used solely for discovery and cross-checking.
-      </p>
-    </section>
+    <title>Sources & Audit — The Foundation</title>
 
-    <!-- SECTION 1: APPROVED SOURCES -->
-    <section class="section" style="padding-top: 2.5rem;">
-      <h2 class="section-title">Registered Source Connectors</h2>
-      
-      <div style="display: flex; flex-direction: column; gap: 1.5rem; margin-top: 1.5rem;">
-        <!-- SOURCE: CENSUS CPS ASEC -->
-        <article class="metric-panel" style="padding: 1.5rem;">
-          <div class="panel-tag">
-            <span>U.S. CENSUS BUREAU · CPS ASEC</span>
-            <span class="badge verified">CANONICAL ANCHOR</span>
-          </div>
-          <h3 style="font-size: 1.2rem; font-weight: 800;">Current Population Survey — Annual Social & Economic Supplement</h3>
-          <p style="font-size: 0.92rem; color: var(--muted); margin: 0.5rem 0;">
-            Primary microdata archive used to compute person-ranked household income percentiles (P10–P90) and the Bottom-30 Population Anchor.
-          </p>
-          <div style="font-size: 0.84rem; color: var(--subtle); font-family: var(--font-mono); margin: 0.4rem 0;">
-            Variables: HTOTVAL · H_NUMPER · MARSUPWT · H_SEQ · A_LINENO<br>
-            Cadence: Annual (March Supplement) · Universe: Civilian Noninstitutional Population
-          </div>
-          <div class="metric-footer" style="margin-top: 0.8rem;">
-            <span>Official Dataset: <a href="https://www.census.gov/data/datasets/time-series/demo/cps/cps-asec.html" target="_blank" rel="noopener" style="color:var(--accent);">census.gov/cps-asec</a></span>
-            <span class="badge verified">Verified (2023, 2024, 2025)</span>
-          </div>
-        </article>
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+    <link rel="manifest" href="site.webmanifest" />
+    <link rel="stylesheet" href="assets/app.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="index.html">
+        THE FOUNDATION
+        <span class="brand-badge">SOURCES & AUDIT</span>
+      </a>
+      <nav aria-label="Primary Navigation">
+        <a href="index.html">Dashboard</a>
+        <a href="methodology.html">Methodology</a>
+        <a aria-current="page" href="sources.html">Sources & Audit</a>
+        <a href="history.html">History</a>
+      </nav>
+    </header>
 
-        <!-- SOURCE: BLS -->
-        <article class="metric-panel" style="padding: 1.5rem;">
-          <div class="panel-tag">
-            <span>U.S. BUREAU OF LABOR STATISTICS</span>
-            <span class="badge verified">PRESSURE SIGNALS</span>
-          </div>
-          <h3 style="font-size: 1.2rem; font-weight: 800;">BLS Public Data API v2</h3>
-          <p style="font-size: 0.92rem; color: var(--muted); margin: 0.5rem 0;">
-            High-frequency monthly labor underutilization, employment attachment, and Consumer Price Index (CPI) sub-indices.
-          </p>
-          <div style="font-size: 0.84rem; color: var(--subtle); font-family: var(--font-mono); margin: 0.4rem 0;">
-            Series IDs: LNS13327709 (U-6) · LNS11300000 (Participation) · LNS12300000 (Emp-Pop) · LNS15026639 (Want Job) · CUSR0000SA0 (CPI) · CUSR0000SAH1 (Shelter) · CUSR0000SAF11 (Food) · CUSR0000SAM (Medical) · CUSR0000SETB01 (Gasoline)<br>
-            Cadence: Monthly · Endpoint: api.bls.gov/publicAPI/v2/timeseries/data/
-          </div>
-          <div class="metric-footer" style="margin-top: 0.8rem;">
-            <span>Official Portal: <a href="https://www.bls.gov/developers/" target="_blank" rel="noopener" style="color:var(--accent);">bls.gov/developers</a></span>
-            <span class="badge verified">9 Series Ingested</span>
-          </div>
-        </article>
+    <main style="max-width: 1040px">
+      <section class="section" style="padding-top: 3.5rem">
+        <p class="eyebrow">SOURCE REGISTRY & PROVENANCE</p>
+        <h1>Primary sources first.</h1>
+        <p class="lede">
+          Production data come directly from original government statistical
+          publishers. Aggregators are used solely for discovery and
+          cross-checking.
+        </p>
+      </section>
 
-        <!-- SOURCE: HUD -->
-        <article class="metric-panel" style="padding: 1.5rem;">
-          <div class="panel-tag">
-            <span>U.S. DEPT. OF HOUSING & URBAN DEVELOPMENT (HUD)</span>
-            <span class="badge research">SURVIVAL BASELINE</span>
-          </div>
-          <h3 style="font-size: 1.2rem; font-weight: 800;">Fair Market Rents (FMR) & ACS Gross Rent</h3>
-          <p style="font-size: 0.92rem; color: var(--muted); margin: 0.5rem 0;">
-            Used to establish the 40th-percentile residential shelter cost baseline across 0BR/1BR/2BR/3BR units for the Survival Floor.
-          </p>
-          <div class="metric-footer" style="margin-top: 0.8rem;">
-            <span>Official Portal: <a href="https://www.huduser.gov/portal/datasets/fmr.html" target="_blank" rel="noopener" style="color:var(--accent);">huduser.gov/fmr</a></span>
-            <span class="badge research">Research Baseline</span>
-          </div>
-        </article>
+      <!-- SECTION 1: APPROVED SOURCES -->
+      <section class="section" style="padding-top: 2.5rem">
+        <h2 class="section-title">Registered Source Connectors</h2>
 
-        <!-- SOURCE: USDA -->
-        <article class="metric-panel" style="padding: 1.5rem;">
-          <div class="panel-tag">
-            <span>U.S. DEPT. OF AGRICULTURE (USDA)</span>
-            <span class="badge research">SURVIVAL BASELINE</span>
+        <div
+          style="
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+          "
+        >
+          <!-- SOURCE: CENSUS CPS ASEC -->
+          <article class="metric-panel" style="padding: 1.5rem">
+            <div class="panel-tag">
+              <span>U.S. CENSUS BUREAU · CPS ASEC & ACS</span>
+              <span class="badge verified">CANONICAL ANCHOR & WEIGHTS</span>
+            </div>
+            <h3 style="font-size: 1.2rem; font-weight: 800">
+              Current Population Survey (ASEC) & American Community Survey
+            </h3>
+            <p
+              style="font-size: 0.92rem; color: var(--muted); margin: 0.5rem 0"
+            >
+              Primary microdata archive used to compute person-ranked household
+              income percentiles (P10–P90), the Bottom-30 Population Anchor, and
+              county-level adult population weights.
+            </p>
+            <div
+              style="
+                font-size: 0.84rem;
+                color: var(--subtle);
+                font-family: var(--font-mono);
+                margin: 0.4rem 0;
+              "
+            >
+              Variables: HTOTVAL · H_NUMPER · MARSUPWT · H_SEQ · A_LINENO ·
+              B01001_001E · B01001_007E-025E<br />
+              Cadence: Annual (March Supplement & 5-Year ACS) · Universe:
+              Civilian Noninstitutional Population
+            </div>
+            <div class="metric-footer" style="margin-top: 0.8rem">
+              <span
+                >Official Dataset:
+                <a
+                  href="https://www.census.gov/data/datasets/time-series/demo/cps/cps-asec.html"
+                  target="_blank"
+                  rel="noopener"
+                  style="color: var(--accent)"
+                  >census.gov/cps-asec</a
+                ></span
+              >
+              <span class="badge verified">Verified (2023, 2024, 2025)</span>
+            </div>
+          </article>
+
+          <!-- SOURCE: BLS -->
+          <article class="metric-panel" style="padding: 1.5rem">
+            <div class="panel-tag">
+              <span>U.S. BUREAU OF LABOR STATISTICS</span>
+              <span class="badge verified"
+                >PRESSURE SIGNALS & EXPENDITURES</span
+              >
+            </div>
+            <h3 style="font-size: 1.2rem; font-weight: 800">
+              BLS Public API v2 & Consumer Expenditure Survey (CE)
+            </h3>
+            <p
+              style="font-size: 0.92rem; color: var(--muted); margin: 0.5rem 0"
+            >
+              High-frequency monthly labor underutilization, employment
+              attachment, CPI sub-indices, plus single-person necessities,
+              vehicle maintenance, and recreation expenditures.
+            </p>
+            <div
+              style="
+                font-size: 0.84rem;
+                color: var(--subtle);
+                font-family: var(--font-mono);
+                margin: 0.4rem 0;
+              "
+            >
+              Series IDs: LNS13327709 (U-6) · LNS11300000 (Participation) ·
+              LNS12300000 (Emp-Pop) · LNS15026639 (Want Job) · CUSR0000SA0 (CPI)
+              · CUSR0000SAH1 (Shelter) · CUSR0000SAF11 (Food) · CUSR0000SAM
+              (Medical) · CUSR0000SETB01 (Gasoline)<br />
+              Cadence: Monthly & Annual · Endpoint:
+              api.bls.gov/publicAPI/v2/timeseries/data/
+            </div>
+            <div class="metric-footer" style="margin-top: 0.8rem">
+              <span
+                >Official Portal:
+                <a
+                  href="https://www.bls.gov/developers/"
+                  target="_blank"
+                  rel="noopener"
+                  style="color: var(--accent)"
+                  >bls.gov/developers</a
+                ></span
+              >
+              <span class="badge verified">9 Series Ingested</span>
+            </div>
+          </article>
+
+          <!-- SOURCE: HUD -->
+          <article class="metric-panel" style="padding: 1.5rem">
+            <div class="panel-tag">
+              <span>U.S. DEPT. OF HOUSING & URBAN DEVELOPMENT (HUD)</span>
+              <span class="badge research">HOUSING BASELINE</span>
+            </div>
+            <h3 style="font-size: 1.2rem; font-weight: 800">
+              Fair Market Rents (FMR) 1-Bedroom 40th Percentile
+            </h3>
+            <p
+              style="font-size: 0.92rem; color: var(--muted); margin: 0.5rem 0"
+            >
+              Used to establish independent 1-Bedroom rental housing costs
+              across all ~3,143 U.S. counties and FMR areas for FY2024 and
+              FY2026.
+            </p>
+            <div class="metric-footer" style="margin-top: 0.8rem">
+              <span
+                >Official Portal:
+                <a
+                  href="https://www.huduser.gov/portal/datasets/fmr.html"
+                  target="_blank"
+                  rel="noopener"
+                  style="color: var(--accent)"
+                  >huduser.gov/fmr</a
+                ></span
+              >
+              <span class="badge research">50 States + DC Coverage</span>
+            </div>
+          </article>
+
+          <!-- SOURCE: USDA -->
+          <article class="metric-panel" style="padding: 1.5rem">
+            <div class="panel-tag">
+              <span>U.S. DEPT. OF AGRICULTURE (USDA)</span>
+              <span class="badge research">FOOD BASELINE</span>
+            </div>
+            <h3 style="font-size: 1.2rem; font-weight: 800">
+              USDA Low-Cost & Thrifty Food Plans
+            </h3>
+            <p
+              style="font-size: 0.92rem; color: var(--muted); margin: 0.5rem 0"
+            >
+              Nutritional cost baseline for home-prepared meals for single
+              adults age 19–50 with official +20% 1-person size adjustments and
+              AK/HI factors.
+            </p>
+            <div class="metric-footer" style="margin-top: 0.8rem">
+              <span
+                >Official Portal:
+                <a
+                  href="https://www.fns.usda.gov/cnpp/usda-food-plans-cost-food-monthly-reports"
+                  target="_blank"
+                  rel="noopener"
+                  style="color: var(--accent)"
+                  >fns.usda.gov</a
+                ></span
+              >
+              <span class="badge research">Low-Cost & Thrifty Reports</span>
+            </div>
+          </article>
+
+          <!-- SOURCE: CMS & MEPS -->
+          <article class="metric-panel" style="padding: 1.5rem">
+            <div class="panel-tag">
+              <span>CMS & AHRQ MEPS</span>
+              <span class="badge research">HEALTHCARE BASELINE</span>
+            </div>
+            <h3 style="font-size: 1.2rem; font-weight: 800">
+              Marketplace Public Use Files (PUF) & Medical Expenditure Panel
+              Survey
+            </h3>
+            <p
+              style="font-size: 0.92rem; color: var(--muted); margin: 0.5rem 0"
+            >
+              Unsubsidized lowest-cost adequate Silver health insurance premiums
+              for single adults age 40 plus expected non-catastrophic
+              out-of-pocket medical utilization.
+            </p>
+            <div class="metric-footer" style="margin-top: 0.8rem">
+              <span
+                >Official Portal:
+                <a
+                  href="https://www.cms.gov/marketplace/resources/data/public-use-files"
+                  target="_blank"
+                  rel="noopener"
+                  style="color: var(--accent)"
+                  >cms.gov/marketplace</a
+                ></span
+              >
+              <span class="badge research">Zero Subsidies Baseline</span>
+            </div>
+          </article>
+
+          <!-- SOURCE: FHWA, EIA & NAIC -->
+          <article class="metric-panel" style="padding: 1.5rem">
+            <div class="panel-tag">
+              <span>FHWA, EIA, NAIC & BEA</span>
+              <span class="badge research"
+                >TRANSIT & REGIONAL PRICE PARITIES</span
+              >
+            </div>
+            <h3 style="font-size: 1.2rem; font-weight: 800">
+              Automobile Model & BEA Regional Price Parities (RPP)
+            </h3>
+            <p
+              style="font-size: 0.92rem; color: var(--muted); margin: 0.5rem 0"
+            >
+              Synthesizes FHWA NHTS mileage (~11k miles), EIA state retail
+              gasoline prices, NAIC state auto liability insurance, and BEA RPP
+              regional cost adjustments.
+            </p>
+            <div class="metric-footer" style="margin-top: 0.8rem">
+              <span
+                >Official Portal:
+                <a
+                  href="https://www.bea.gov/data/prices-inflation/regional-price-parities-state-and-metro-area"
+                  target="_blank"
+                  rel="noopener"
+                  style="color: var(--accent)"
+                  >bea.gov/rpp</a
+                ></span
+              >
+              <span class="badge research">Regional Adjustments</span>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- SECTION 2: VALIDATION REPORTS -->
+      <section
+        class="section"
+        id="validation-reports"
+        style="padding-top: 3rem; margin-bottom: 4rem"
+      >
+        <h2 class="section-title">Machine-Readable Validation Reports</h2>
+        <p style="margin: 0.8rem 0; color: #cbd5e1">
+          Every CPS ASEC vintage and living cost model build produces an
+          immutable, machine-readable validation report containing SHA-256
+          hashes, record counts, and algorithm cross-checks:
+        </p>
+
+        <div
+          style="
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 1rem;
+          "
+        >
+          <div
+            class="metric-panel"
+            style="
+              padding: 1.25rem;
+              display: flex;
+              flex-direction: row;
+              justify-content: space-between;
+              align-items: center;
+            "
+          >
+            <div>
+              <h4 style="font-size: 1.05rem">
+                2025 CPS ASEC (2024 Income Reference Year)
+              </h4>
+              <p
+                style="
+                  font-size: 0.82rem;
+                  color: var(--muted);
+                  font-family: var(--font-mono);
+                "
+              >
+                SHA-256:
+                318845a2b5e0034e357900b991196ce28ecdd0c99a0937b27ff77f8ea6497284
+              </p>
+            </div>
+            <a
+              class="btn-link"
+              href="data/validation_report_2025.json"
+              target="_blank"
+              >View JSON Report →</a
+            >
           </div>
-          <h3 style="font-size: 1.2rem; font-weight: 800;">Thrifty Food Plan (TFP) Monthly Reports</h3>
-          <p style="font-size: 0.92rem; color: var(--muted); margin: 0.5rem 0;">
-            Nutritional cost baseline for home-prepared meals across age groups and household compositions with official size adjustments.
-          </p>
-          <div class="metric-footer" style="margin-top: 0.8rem;">
-            <span>Official Portal: <a href="https://www.fns.usda.gov/cnpp/usda-food-plans-cost-food-monthly-reports" target="_blank" rel="noopener" style="color:var(--accent);">fns.usda.gov</a></span>
-            <span class="badge research">Monthly Cadence</span>
+
+          <div
+            class="metric-panel"
+            style="
+              padding: 1.25rem;
+              display: flex;
+              flex-direction: row;
+              justify-content: space-between;
+              align-items: center;
+            "
+          >
+            <div>
+              <h4 style="font-size: 1.05rem">
+                2024 CPS ASEC (2023 Income Reference Year)
+              </h4>
+              <p
+                style="
+                  font-size: 0.82rem;
+                  color: var(--muted);
+                  font-family: var(--font-mono);
+                "
+              >
+                SHA-256:
+                cdb39cdac34bef991206d738ffae2bb0e6fc8daec02c8e31a1e0c326d9c6be4b
+              </p>
+            </div>
+            <a
+              class="btn-link"
+              href="data/validation_report_2024.json"
+              target="_blank"
+              >View JSON Report →</a
+            >
           </div>
-        </article>
+
+          <div
+            class="metric-panel"
+            style="
+              padding: 1.25rem;
+              display: flex;
+              flex-direction: row;
+              justify-content: space-between;
+              align-items: center;
+            "
+          >
+            <div>
+              <h4 style="font-size: 1.05rem">
+                2023 CPS ASEC (2022 Income Reference Year)
+              </h4>
+              <p
+                style="
+                  font-size: 0.82rem;
+                  color: var(--muted);
+                  font-family: var(--font-mono);
+                "
+              >
+                SHA-256:
+                d2e000250782adfb0f10c6fb0cffca5a3a776ee46f73111c1d8157e84a282f16
+              </p>
+            </div>
+            <a
+              class="btn-link"
+              href="data/validation_report_2023.json"
+              target="_blank"
+              >View JSON Report →</a
+            >
+          </div>
+
+          <div
+            class="metric-panel"
+            style="
+              padding: 1.25rem;
+              display: flex;
+              flex-direction: row;
+              justify-content: space-between;
+              align-items: center;
+            "
+          >
+            <div>
+              <h4 style="font-size: 1.05rem">
+                2024 Minimum Sustainable Living Cost (50 States + DC)
+              </h4>
+              <p
+                style="
+                  font-size: 0.82rem;
+                  color: var(--muted);
+                  font-family: var(--font-mono);
+                "
+              >
+                Format: JSON · 51 Jurisdictions · Population-Weighted
+                Percentiles
+              </p>
+            </div>
+            <a
+              class="btn-link"
+              href="data/living_cost_2024.json"
+              target="_blank"
+              >View JSON Dataset →</a
+            >
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div>
+        <p style="font-weight: 800; color: var(--text); margin-bottom: 0.25rem">
+          THE FOUNDATION
+        </p>
+        <p>An open, deterministic, auditable economic research instrument.</p>
       </div>
-    </section>
-
-    <!-- SECTION 2: VALIDATION REPORTS -->
-    <section class="section" id="validation-reports" style="padding-top: 3rem; margin-bottom: 4rem;">
-      <h2 class="section-title">Machine-Readable Validation Reports</h2>
-      <p style="margin: 0.8rem 0; color: #cbd5e1;">
-        Every CPS ASEC vintage processed by the production pipeline produces an immutable, machine-readable validation report containing SHA-256 hashes, record counts, and algorithm cross-checks:
-      </p>
-
-      <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
-        <div class="metric-panel" style="padding: 1.25rem; display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
-          <div>
-            <h4 style="font-size: 1.05rem;">2025 CPS ASEC (2024 Income Reference Year)</h4>
-            <p style="font-size: 0.82rem; color: var(--muted); font-family: var(--font-mono);">SHA-256: 318845a2b5e0034e357900b991196ce28ecdd0c99a0937b27ff77f8ea6497284</p>
-          </div>
-          <a class="btn-link" href="data/validation_report_2025.json" target="_blank">View JSON Report →</a>
-        </div>
-
-        <div class="metric-panel" style="padding: 1.25rem; display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
-          <div>
-            <h4 style="font-size: 1.05rem;">2024 CPS ASEC (2023 Income Reference Year)</h4>
-            <p style="font-size: 0.82rem; color: var(--muted); font-family: var(--font-mono);">SHA-256: cdb39cdac34bef991206d738ffae2bb0e6fc8daec02c8e31a1e0c326d9c6be4b</p>
-          </div>
-          <a class="btn-link" href="data/validation_report_2024.json" target="_blank">View JSON Report →</a>
-        </div>
-
-        <div class="metric-panel" style="padding: 1.25rem; display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
-          <div>
-            <h4 style="font-size: 1.05rem;">2023 CPS ASEC (2022 Income Reference Year)</h4>
-            <p style="font-size: 0.82rem; color: var(--muted); font-family: var(--font-mono);">SHA-256: d2e000250782adfb0f10c6fb0cffca5a3a776ee46f73111c1d8157e84a282f16</p>
-          </div>
-          <a class="btn-link" href="data/validation_report_2023.json" target="_blank">View JSON Report →</a>
-        </div>
+      <div style="text-align: right">
+        <p>
+          <a href="index.html">Dashboard</a> ·
+          <a href="methodology.html">Methodology</a> ·
+          <a href="history.html">History</a>
+        </p>
       </div>
-    </section>
-  </main>
-
-  <footer>
-    <div>
-      <p style="font-weight: 800; color: var(--text); margin-bottom: 0.25rem;">THE FOUNDATION</p>
-      <p>An open, deterministic, auditable economic research instrument.</p>
-    </div>
-    <div style="text-align: right;">
-      <p><a href="index.html">Dashboard</a> · <a href="methodology.html">Methodology</a> · <a href="history.html">History</a></p>
-    </div>
-  </footer>
-</body>
+    </footer>
+  </body>
 </html>

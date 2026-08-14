@@ -15,6 +15,7 @@ It does not earn a place because it is easy to download.
 ### Population anchor
 
 #### Bottom-30 annual cutoff
+
 **Question:** What annual household money income per person marks the weighted 30th percentile?
 
 Source: CPS ASEC.
@@ -26,6 +27,7 @@ This is a population-definition output, not itself a pillar score.
 ## Work
 
 ### U-6 labor underutilization
+
 Question: How much visible labor underutilization exists beyond headline unemployment?
 
 Population match: broad national labor force, not Bottom-30 specific.
@@ -33,6 +35,7 @@ Population match: broad national labor force, not Bottom-30 specific.
 Role: context/proxy.
 
 ### Want-a-job population
+
 Question: How many people outside the labor force report wanting a job?
 
 Population match: broad.
@@ -40,11 +43,13 @@ Population match: broad.
 Role: corrects the misleading impression created by headline unemployment alone.
 
 ### Employment-population ratio / participation
+
 Question: How much of the eligible population is actually attached to paid work?
 
 Role: structural labor context.
 
 ### Bottom wage-quartile wage growth
+
 Question: Are wages near the bottom of the wage distribution improving in real terms?
 
 Preferred source: Atlanta Fed Wage Growth Tracker plus inflation comparison.
@@ -56,11 +61,13 @@ Population caveat: lowest wage quartile is not identical to the Bottom 30% by ho
 ## Cost of Life
 
 ### Low-income inflation / distributional inflation
+
 Question: Are prices faced by low-resource households rising faster or slower than their incomes?
 
 Preferred source: New York Fed heterogeneity work/data when methodologically usable.
 
 ### Fuel/transport pressure
+
 Question: Are transportation energy costs creating a new short-run burden?
 
 Preferred source: EIA.
@@ -68,6 +75,7 @@ Preferred source: EIA.
 Role: Daily Pressure first; composite inclusion requires double-counting review.
 
 ### Essential-cost basket
+
 Future candidate combining housing, food, transport, healthcare and utilities using explicit weights.
 
 Do not invent this basket before expenditure-weight methodology is approved.
@@ -77,11 +85,13 @@ Do not invent this basket before expenditure-weight methodology is approved.
 ## Housing
 
 ### Rent burden
+
 Question: What share of lower-resource households is paying >30% or >50% of income toward housing?
 
 Preferred public sources: Census/HUD.
 
 ### Entry-home affordability
+
 Question: How far is ownership entry from the resources available to the reference population?
 
 Requires a transparent construction.
@@ -89,6 +99,7 @@ Requires a transparent construction.
 Do not simply use median home price.
 
 ### Housing insecurity
+
 Candidate measures: eviction risk, missed rent/mortgage, survey-reported housing instability.
 
 ---
@@ -96,6 +107,7 @@ Candidate measures: eviction risk, missed rent/mortgage, survey-reported housing
 ## Resilience
 
 ### $400 emergency capacity
+
 Question: Can households absorb a modest unexpected expense without borrowing/selling something?
 
 Source: Federal Reserve SHED.
@@ -103,11 +115,13 @@ Source: Federal Reserve SHED.
 Frequency caveat: annual.
 
 ### Difficulty paying normal expenses
+
 Question: Are households reporting that ordinary bills exceed available resources?
 
 Candidate Census survey source.
 
 ### Delinquency pressure
+
 Question: Are debt payments beginning to fail?
 
 Preferred source: New York Fed/Federal Reserve.
@@ -117,14 +131,17 @@ Preferred source: New York Fed/Federal Reserve.
 ## Ownership
 
 ### Liquid financial assets among lower-resource households
+
 Question: Is a buffer accumulating?
 
 ### Bottom-group net worth
+
 Question: Is wealth ownership broadening or concentrating?
 
 Preferred source: Federal Reserve Distributional Financial Accounts.
 
 ### Retirement asset participation
+
 Question: Are households building long-horizon ownership claims?
 
 ---

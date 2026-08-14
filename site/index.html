@@ -1,275 +1,475 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="The Foundation: An open, deterministic economic research instrument measuring the economic condition of the bottom 30% of Americans.">
-  <meta name="theme-color" content="#f59e0b">
-  
-  <!-- Canonical & Social Metadata -->
-  <link rel="canonical" href="https://sumosizedginger.github.io/foundation/">
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="The Foundation">
-  <meta property="og:title" content="The Foundation — Economic Health from the Bottom 30% Up">
-  <meta property="og:description" content="A public, reproducible research instrument tracking the Bottom 30% Population Anchor, Survival Floor, and economic pressures.">
-  <meta property="og:url" content="https://sumosizedginger.github.io/foundation/">
-  <meta property="og:image" content="https://sumosizedginger.github.io/foundation/assets/og-preview.svg">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="The Foundation — Economic Health from the Bottom 30% Up">
-  <meta name="twitter:description" content="A public, reproducible research instrument tracking the Bottom 30% Population Anchor, Survival Floor, and economic pressures.">
-  <meta name="twitter:image" content="https://sumosizedginger.github.io/foundation/assets/og-preview.svg">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="The Foundation: An open, deterministic economic research instrument measuring the economic condition of the bottom 30% of Americans."
+    />
+    <meta name="theme-color" content="#f59e0b" />
 
-  <title>The Foundation — Economic Health from the Bottom 30% Up</title>
-  
-  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-  <link rel="manifest" href="site.webmanifest">
-  <link rel="stylesheet" href="assets/app.css">
+    <!-- Canonical & Social Metadata -->
+    <link
+      rel="canonical"
+      href="https://sumosizedginger.github.io/foundation/"
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="The Foundation" />
+    <meta
+      property="og:title"
+      content="The Foundation — Economic Health from the Bottom 30% Up"
+    />
+    <meta
+      property="og:description"
+      content="A public, reproducible research instrument tracking the Bottom 30% Population Anchor, Minimum Sustainable Living Cost, and economic pressure signals."
+    />
+    <meta
+      property="og:url"
+      content="https://sumosizedginger.github.io/foundation/"
+    />
+    <meta
+      property="og:image"
+      content="https://sumosizedginger.github.io/foundation/assets/og-preview.svg"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="The Foundation — Economic Health from the Bottom 30% Up"
+    />
+    <meta
+      name="twitter:description"
+      content="A public, reproducible research instrument tracking the Bottom 30% Population Anchor, Minimum Sustainable Living Cost, and economic pressure signals."
+    />
+    <meta
+      name="twitter:image"
+      content="https://sumosizedginger.github.io/foundation/assets/og-preview.svg"
+    />
 
-  <!-- JSON-LD Structured Metadata -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "ResearchProject",
-    "name": "The Foundation",
-    "url": "https://sumosizedginger.github.io/foundation/",
-    "description": "An open economic measurement instrument evaluating the bottom 30% of Americans using official microdata.",
-    "publisher": {
-      "@type": "Organization",
-      "name": "The Foundation"
-    }
-  }
-  </script>
-</head>
-<body>
-  <header class="site-header">
-    <a class="brand" href="index.html">
-      THE FOUNDATION
-      <span class="brand-badge">V0.1 RESEARCH</span>
-    </a>
-    <nav aria-label="Primary Navigation">
-      <a aria-current="page" href="index.html">Dashboard</a>
-      <a href="methodology.html">Methodology</a>
-      <a href="sources.html">Sources & Audit</a>
-      <a href="history.html">History</a>
-    </nav>
-  </header>
+    <title>The Foundation — Economic Health from the Bottom 30% Up</title>
 
-  <main>
-    <!-- HERO SECTION -->
-    <section class="hero">
-      <p class="eyebrow">ECONOMIC RESEARCH INSTRUMENT</p>
-      <h1>How are the bottom 30% actually doing?</h1>
-      <p class="lede">
-        The roof does not prove the foundation is sound. We evaluate economic health from the position of Americans with the least financial margin using deterministic calculations and verified public data.
-      </p>
-      <div class="status-strip" id="stage-status" aria-live="polite">
-        <span id="stage-status-text">Loading instrument data…</span>
-      </div>
-    </section>
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+    <link rel="manifest" href="site.webmanifest" />
+    <link rel="stylesheet" href="assets/app.css" />
 
-    <!-- QUESTION 1 & 2: DUAL AXIS -->
-    <section class="section" id="dual-axis">
-      <div class="section-header">
-        <p class="eyebrow">THE DUAL-AXIS ECONOMIC FRAMEWORK</p>
-        <h2 class="section-title">1. Population Anchor vs. Survival Floor</h2>
-        <p class="section-desc">
-          We separate the definition of <em>who</em> the Bottom 30% are from the estimation of <em>what it costs</em> to survive.
+    <!-- JSON-LD Structured Metadata -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "ResearchProject",
+        "name": "The Foundation",
+        "url": "https://sumosizedginger.github.io/foundation/",
+        "description": "An open economic measurement instrument evaluating the bottom 30% of Americans using official microdata.",
+        "publisher": {
+          "@type": "Organization",
+          "name": "The Foundation"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="index.html">
+        THE FOUNDATION
+        <span class="brand-badge">0.2.0-DRAFT</span>
+      </a>
+      <nav aria-label="Primary Navigation">
+        <a aria-current="page" href="index.html">Dashboard</a>
+        <a href="methodology.html">Methodology</a>
+        <a href="sources.html">Sources & Audit</a>
+        <a href="history.html">History</a>
+      </nav>
+    </header>
+
+    <main>
+      <!-- HERO SECTION -->
+      <section class="hero">
+        <p class="eyebrow">ECONOMIC RESEARCH INSTRUMENT</p>
+        <h1>How are the bottom 30% actually doing?</h1>
+        <p class="lede">
+          The roof does not prove the foundation is sound. We evaluate economic
+          health from the position of Americans with the least financial margin
+          using deterministic calculations and verified public data.
         </p>
-      </div>
+        <div class="status-strip" id="stage-status" aria-live="polite">
+          <span id="stage-status-text">Loading instrument data…</span>
+        </div>
+      </section>
 
-      <div class="dual-axis-grid">
-        <!-- AXIS 1: POPULATION ANCHOR -->
-        <article class="metric-panel highlight" id="panel-anchor">
-          <div>
-            <div class="panel-tag">
-              <span>AXIS 1 · POPULATION ANCHOR</span>
-              <span class="badge verified" id="anchor-badge">—</span>
+      <!-- QUESTION 1 & 2: DUAL AXIS -->
+      <section class="section" id="dual-axis">
+        <div class="section-header">
+          <p class="eyebrow">THE DUAL-AXIS ECONOMIC FRAMEWORK</p>
+          <h2 class="section-title">
+            1. Population Anchor vs. Minimum Sustainable Living Cost
+          </h2>
+          <p class="section-desc">
+            We separate the definition of <em>who</em> the Bottom 30% are from
+            the estimation of <em>what gross income is required</em> to live an
+            independent, minimally sustainable life.
+          </p>
+        </div>
+
+        <div class="dual-axis-grid">
+          <!-- AXIS 1: POPULATION ANCHOR -->
+          <article class="metric-panel highlight" id="panel-anchor">
+            <div>
+              <div class="panel-tag">
+                <span>AXIS 1 · POPULATION ANCHOR (2024 INCOME)</span>
+                <span class="badge verified" id="anchor-badge">—</span>
+              </div>
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 700;
+                  margin-bottom: 0.4rem;
+                "
+              >
+                Bottom-30 Per-Person Income Cutoff
+              </h3>
+              <div class="metric-number" id="cutoff-value">—</div>
+              <p class="metric-sub" id="cutoff-monthly">—</p>
+              <p
+                class="metric-sub"
+                id="cutoff-detail"
+                style="font-size: 0.88rem"
+              >
+                Loading verified CPS ASEC anchor…
+              </p>
             </div>
-            <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 0.4rem;">Bottom-30 Per-Person Income Cutoff</h3>
-            <div class="metric-number" id="cutoff-value">—</div>
-            <p class="metric-sub" id="cutoff-monthly">—</p>
-            <p class="metric-sub" id="cutoff-detail" style="font-size: 0.88rem;">Loading verified CPS ASEC anchor…</p>
-          </div>
-          <div class="metric-footer">
-            <span>Source: U.S. Census Bureau (CPS ASEC)</span>
-            <button type="button" class="btn-link" id="btn-inspect-anchor">Inspect Provenance →</button>
-          </div>
-        </article>
-
-        <!-- AXIS 2: SURVIVAL FLOOR -->
-        <article class="metric-panel" id="panel-survival">
-          <div>
-            <div class="panel-tag">
-              <span>AXIS 2 · SURVIVAL FLOOR</span>
-              <span class="badge research" id="survival-badge">—</span>
+            <div class="metric-footer">
+              <span>Source: U.S. Census Bureau (CPS ASEC)</span>
+              <button type="button" class="btn-link" id="btn-inspect-anchor">
+                Inspect Provenance →
+              </button>
             </div>
-            <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 0.4rem;">Single-Adult Basic Survival Cost</h3>
-            <div class="metric-number" id="survival-value">—</div>
-            <p class="metric-sub" id="survival-monthly">—</p>
-            <p class="metric-sub" id="survival-detail" style="font-size: 0.88rem;">Loading basic necessities floor…</p>
+          </article>
+
+          <!-- AXIS 2: MINIMUM SUSTAINABLE LIVING COST -->
+          <article class="metric-panel" id="panel-living-cost">
+            <div>
+              <div class="panel-tag">
+                <span>AXIS 2 · MINIMUM SUSTAINABLE LIVING COST (2024)</span>
+                <span class="badge research" id="living-cost-badge">—</span>
+              </div>
+              <h3
+                style="
+                  font-size: 1.15rem;
+                  font-weight: 700;
+                  margin-bottom: 0.4rem;
+                "
+              >
+                Single-Adult Required Gross Income
+              </h3>
+              <div class="metric-number" id="living-cost-value">—</div>
+              <p class="metric-sub" id="living-cost-monthly">—</p>
+              <p
+                class="metric-sub"
+                id="living-cost-detail"
+                style="font-size: 0.88rem"
+              >
+                Loading bottom-up local living cost model…
+              </p>
+            </div>
+            <div class="metric-footer">
+              <span>Status: 50-State County Model (0.2.0-draft)</span>
+              <button
+                type="button"
+                class="btn-link"
+                id="btn-inspect-living-cost"
+              >
+                Inspect Model & States →
+              </button>
+            </div>
+          </article>
+        </div>
+
+        <!-- SURVIVAL GAP & ADEQUACY RATIO STRIP -->
+        <div class="axis-summary" id="axis-summary-box">
+          <div>
+            <p class="summary-stat-label">2024 Time-Comparable Survival Gap</p>
+            <p class="summary-stat-val negative" id="survival-gap-val">—</p>
+            <p class="summary-stat-desc">Population Anchor − Living Cost</p>
           </div>
-          <div class="metric-footer">
-            <span>Status: Research Baseline</span>
-            <button type="button" class="btn-link" id="btn-inspect-survival">Inspect Components →</button>
-          </div>
-        </article>
-      </div>
-
-      <!-- SURVIVAL GAP & ADEQUACY RATIO STRIP -->
-      <div class="axis-summary" id="axis-summary-box">
-        <div>
-          <p class="summary-stat-label">Single-Adult Survival Gap</p>
-          <p class="summary-stat-val negative" id="survival-gap-val">—</p>
-          <p class="summary-stat-desc">Population Anchor − Survival Floor</p>
-        </div>
-        <div>
-          <p class="summary-stat-label">Basic Adequacy Ratio</p>
-          <p class="summary-stat-val negative" id="adequacy-ratio-val">—</p>
-          <p class="summary-stat-desc">Cutoff share of single-adult floor</p>
-        </div>
-        <div>
-          <p class="summary-stat-label">Composite Foundation Score</p>
-          <p class="summary-stat-val" style="color: var(--muted);" id="composite-score-val">PRELAUNCH</p>
-          <p class="summary-stat-desc">Locked in prelaunch research</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- QUESTION 3: WHAT DOES THAT MEAN FOR HOUSEHOLDS? -->
-    <section class="section" id="household-matrix-section">
-      <div class="section-header">
-        <p class="eyebrow">HOUSEHOLD ARITHMETIC</p>
-        <h2 class="section-title">2. What does that mean for households?</h2>
-        <p class="section-desc">
-          Because households share living costs, survival floors are <strong>independently modeled by household composition</strong> and never generated by multiplying the single-adult floor.
-        </p>
-      </div>
-
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th scope="col">Household Size</th>
-              <th scope="col">Composition Profile</th>
-              <th scope="col" class="text-right">Equivalent Household Income at Bottom-30 Boundary</th>
-              <th scope="col" class="text-right">Household Survival Floor (Research Estimate)</th>
-              <th scope="col" class="text-right">Survival Gap</th>
-              <th scope="col" class="text-right">Adequacy Ratio</th>
-            </tr>
-          </thead>
-          <tbody id="household-matrix-body">
-            <tr>
-              <td colspan="6">Loading household matrix…</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <p style="font-size: 0.84rem; color: var(--subtle); margin-top: 0.75rem;">
-        * Note: "Equivalent household income at the Bottom-30 boundary" reflects per-person ranking math. It is NOT a poverty threshold or adequacy claim.
-      </p>
-    </section>
-
-    <!-- QUESTION 4: WHERE IS THE REST OF THE LADDER? -->
-    <section class="section" id="quantiles-ladder-section">
-      <div class="section-header">
-        <p class="eyebrow">INCOME DISTRIBUTION</p>
-        <h2 class="section-title">3. Where is the rest of the ladder?</h2>
-        <p class="section-desc">
-          Weighted person-level income distribution across the represented U.S. population.
-        </p>
-      </div>
-
-      <div class="quantiles-grid" id="quantiles-grid">
-        <p>Loading quantiles…</p>
-      </div>
-    </section>
-
-    <!-- QUESTION 5: WHAT ECONOMIC PRESSURES ARE MOVING? -->
-    <section class="section" id="pressures-section">
-      <div class="section-header">
-        <p class="eyebrow">HIGH-FREQUENCY SIGNALS</p>
-        <h2 class="section-title">4. National Economic Pressure Signals</h2>
-        <p class="section-desc">
-          Official monthly labor and price metrics from the Bureau of Labor Statistics (BLS). These are <strong>National Economic Pressure Signals</strong> providing macroeconomic context, not Bottom-30 specific measures.
-        </p>
-      </div>
-
-      <div class="signals-grid" id="signals-grid">
-        <p>Loading pressure observations…</p>
-      </div>
-    </section>
-
-    <!-- QUESTION 6: HOW HEALTHY IS THE DATA? -->
-    <section class="section" id="data-health-section">
-      <div class="section-header">
-        <p class="eyebrow">DATA HEALTH & PIPELINE INTEGRITY</p>
-        <h2 class="section-title">5. How healthy is the data?</h2>
-        <p class="section-desc">
-          Visible failure is better than plausible garbage. Every pipeline run produces a machine-readable audit report verifying SHA-256 hashes and key integrity.
-        </p>
-      </div>
-
-      <div class="dual-axis-grid">
-        <article class="metric-panel">
-          <p class="panel-tag">PIPELINE VALIDATION STATUS</p>
-          <div style="margin: 0.8rem 0;">
-            <p style="font-size: 1.1rem; font-weight: 700; color: var(--good); display: flex; align-items: center; gap: 0.5rem;">
-              <span style="display:inline-block;width:10px;height:10px;background:var(--good);border-radius:50%;"></span>
-              All Validation Gates Passed
-            </p>
-            <p style="font-size: 0.9rem; color: var(--muted); margin-top: 0.5rem;">
-              3 CPS ASEC vintages independently reproduced with 0.00 difference between canonical and reference algorithms.
+          <div>
+            <p class="summary-stat-label">2024 Basic Adequacy Ratio</p>
+            <p class="summary-stat-val negative" id="adequacy-ratio-val">—</p>
+            <p class="summary-stat-desc">
+              Cutoff share of sustainable living cost
             </p>
           </div>
-          <div class="metric-footer">
-            <span>Machine-Readable Reports</span>
-            <a class="btn-link" href="sources.html#validation-reports">Download Reports →</a>
+          <div>
+            <p class="summary-stat-label">2026 Current Living Cost</p>
+            <p
+              class="summary-stat-val"
+              style="color: var(--info)"
+              id="current-2026-val"
+            >
+              —
+            </p>
+            <p class="summary-stat-desc" id="current-2026-sub">
+              Current Cost Conditions
+            </p>
           </div>
-        </article>
+        </div>
+      </section>
 
-        <article class="metric-panel">
-          <p class="panel-tag">LATEST CHANGES</p>
-          <ul id="latest-changes-list" style="list-style: none; font-size: 0.88rem; color: var(--muted); margin: 0.6rem 0; display: flex; flex-direction: column; gap: 0.4rem;">
-            <li>• Loading pipeline updates…</li>
-          </ul>
-          <div class="metric-footer">
-            <span id="site-as-of">As of: —</span>
-            <a class="btn-link" href="history.html">View History →</a>
-          </div>
-        </article>
+      <!-- QUESTION 3: 50 STATES + DC DISTRIBUTION -->
+      <section class="section" id="state-table-section">
+        <div class="section-header">
+          <p class="eyebrow">GEOGRAPHIC DISTRIBUTION</p>
+          <h2 class="section-title">
+            2. Minimum Sustainable Living Cost Across All 50 States + DC
+          </h2>
+          <p class="section-desc">
+            Because living costs vary dramatically by place, we model from local
+            county data upward. Click any column header to sort, or click a
+            state name to inspect its local component breakdown.
+          </p>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col" class="text-right">#</th>
+                <th scope="col" style="cursor: pointer" data-sort-key="state">
+                  State ⇕
+                </th>
+                <th
+                  scope="col"
+                  class="text-right"
+                  style="cursor: pointer"
+                  data-sort-key="median"
+                >
+                  Weighted Median Gross ⇕
+                </th>
+                <th
+                  scope="col"
+                  class="text-right"
+                  style="cursor: pointer"
+                  data-sort-key="p25"
+                >
+                  P25 Gross ⇕
+                </th>
+                <th
+                  scope="col"
+                  class="text-right"
+                  style="cursor: pointer"
+                  data-sort-key="p75"
+                >
+                  P75 Gross ⇕
+                </th>
+                <th
+                  scope="col"
+                  class="text-right"
+                  style="cursor: pointer"
+                  data-sort-key="min"
+                >
+                  Min County ⇕
+                </th>
+                <th
+                  scope="col"
+                  class="text-right"
+                  style="cursor: pointer"
+                  data-sort-key="max"
+                >
+                  Max County ⇕
+                </th>
+              </tr>
+            </thead>
+            <tbody id="states-table-body">
+              <tr>
+                <td colspan="7">Loading state living cost distributions…</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p
+          style="font-size: 0.84rem; color: var(--subtle); margin-top: 0.75rem"
+        >
+          * Note: The primary reference value for each state is its
+          <strong>adult-population-weighted median</strong> local living cost,
+          not an unweighted arithmetic average.
+        </p>
+      </section>
+
+      <!-- QUESTION 4: WHERE IS THE REST OF THE LADDER? -->
+      <section class="section" id="quantiles-ladder-section">
+        <div class="section-header">
+          <p class="eyebrow">INCOME DISTRIBUTION</p>
+          <h2 class="section-title">3. Where is the rest of the ladder?</h2>
+          <p class="section-desc">
+            Weighted person-level income distribution across the represented
+            U.S. population (2024 Income Year).
+          </p>
+        </div>
+
+        <div class="quantiles-grid" id="quantiles-grid">
+          <p>Loading quantiles…</p>
+        </div>
+      </section>
+
+      <!-- QUESTION 5: WHAT ECONOMIC PRESSURES ARE MOVING? -->
+      <section class="section" id="pressures-section">
+        <div class="section-header">
+          <p class="eyebrow">HIGH-FREQUENCY SIGNALS</p>
+          <h2 class="section-title">4. National Economic Pressure Signals</h2>
+          <p class="section-desc">
+            Official monthly labor and price metrics from the Bureau of Labor
+            Statistics (BLS). These are
+            <strong>National Economic Pressure Signals</strong> providing
+            macroeconomic context, not Bottom-30 specific measures.
+          </p>
+        </div>
+
+        <div class="signals-grid" id="signals-grid">
+          <p>Loading pressure observations…</p>
+        </div>
+      </section>
+
+      <!-- QUESTION 6: HOW HEALTHY IS THE DATA? -->
+      <section class="section" id="data-health-section">
+        <div class="section-header">
+          <p class="eyebrow">DATA HEALTH & PIPELINE INTEGRITY</p>
+          <h2 class="section-title">5. How healthy is the data?</h2>
+          <p class="section-desc">
+            Visible failure is better than plausible garbage. Every pipeline run
+            produces machine-readable audit reports verifying SHA-256 hashes and
+            key integrity.
+          </p>
+        </div>
+
+        <div class="dual-axis-grid">
+          <article class="metric-panel">
+            <p class="panel-tag">PIPELINE VALIDATION STATUS</p>
+            <div style="margin: 0.8rem 0">
+              <p
+                style="
+                  font-size: 1.1rem;
+                  font-weight: 700;
+                  color: var(--good);
+                  display: flex;
+                  align-items: center;
+                  gap: 0.5rem;
+                "
+              >
+                <span
+                  style="
+                    display: inline-block;
+                    width: 10px;
+                    height: 10px;
+                    background: var(--good);
+                    border-radius: 50%;
+                  "
+                ></span>
+                All Validation Gates Passed
+              </p>
+              <p
+                style="
+                  font-size: 0.9rem;
+                  color: var(--muted);
+                  margin-top: 0.5rem;
+                "
+              >
+                3 CPS ASEC vintages independently reproduced. 50 states + DC
+                living costs modeled bottom-up from county data.
+              </p>
+            </div>
+            <div class="metric-footer">
+              <span>Machine-Readable Reports</span>
+              <a class="btn-link" href="sources.html#validation-reports"
+                >Download Reports →</a
+              >
+            </div>
+          </article>
+
+          <article class="metric-panel">
+            <p class="panel-tag">LATEST CHANGES</p>
+            <ul
+              id="latest-changes-list"
+              style="
+                list-style: none;
+                font-size: 0.88rem;
+                color: var(--muted);
+                margin: 0.6rem 0;
+                display: flex;
+                flex-direction: column;
+                gap: 0.4rem;
+              "
+            >
+              <li>• Loading pipeline updates…</li>
+            </ul>
+            <div class="metric-footer">
+              <span id="site-as-of">As of: —</span>
+              <a class="btn-link" href="history.html">View History →</a>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <!-- PROVENANCE MODAL (WCAG 2.2 AA) -->
+    <div
+      class="modal-backdrop"
+      id="provenance-modal"
+      aria-hidden="true"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-title"
+    >
+      <div class="modal-content">
+        <button
+          type="button"
+          class="modal-close"
+          id="modal-close-btn"
+          aria-label="Close modal"
+        >
+          ×
+        </button>
+        <p class="eyebrow" id="modal-eyebrow">DATA PROVENANCE & DETAIL</p>
+        <h3
+          style="font-size: 1.4rem; font-weight: 800; margin: 0.25rem 0 1.25rem"
+          id="modal-title"
+        >
+          Metric Provenance
+        </h3>
+
+        <div id="modal-body">
+          <!-- Injected via safe DOM construction -->
+        </div>
       </div>
-    </section>
-  </main>
+    </div>
 
-  <!-- PROVENANCE MODAL (WCAG 2.2 AA) -->
-  <div class="modal-backdrop" id="provenance-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-    <div class="modal-content">
-      <button type="button" class="modal-close" id="modal-close-btn" aria-label="Close modal">×</button>
-      <p class="eyebrow" id="modal-eyebrow">DATA PROVENANCE</p>
-      <h3 style="font-size: 1.4rem; font-weight: 800; margin: 0.25rem 0 1.25rem;" id="modal-title">Metric Provenance</h3>
-      
-      <div id="modal-body">
-        <!-- Injected via safe DOM construction -->
+    <footer>
+      <div>
+        <p style="font-weight: 800; color: var(--text); margin-bottom: 0.25rem">
+          THE FOUNDATION
+        </p>
+        <p>An open, deterministic, auditable economic research instrument.</p>
+        <p style="margin-top: 0.5rem; font-size: 0.8rem">
+          Code:
+          <a
+            href="https://github.com/sumosizedginger/foundation/blob/main/LICENSE"
+            >Apache 2.0</a
+          >
+          · Methodology:
+          <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> ·
+          Brand identity reserved.
+        </p>
       </div>
-    </div>
-  </div>
+      <div style="text-align: right">
+        <p>
+          <a href="methodology.html">Methodology</a> ·
+          <a href="sources.html">Sources</a> ·
+          <a href="history.html">History</a>
+        </p>
+        <p style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--subtle)">
+          Zero client-side economic calculations.
+        </p>
+      </div>
+    </footer>
 
-  <footer>
-    <div>
-      <p style="font-weight: 800; color: var(--text); margin-bottom: 0.25rem;">THE FOUNDATION</p>
-      <p>An open, deterministic, auditable economic research instrument.</p>
-      <p style="margin-top: 0.5rem; font-size: 0.8rem;">
-        Code: <a href="https://github.com/sumosizedginger/foundation/blob/main/LICENSE">Apache 2.0</a> · 
-        Methodology: <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> · 
-        Brand identity reserved.
-      </p>
-    </div>
-    <div style="text-align: right;">
-      <p><a href="methodology.html">Methodology</a> · <a href="sources.html">Sources</a> · <a href="history.html">History</a></p>
-      <p style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--subtle);">Zero client-side economic calculations.</p>
-    </div>
-  </footer>
-
-  <script src="assets/app.js" defer></script>
-</body>
+    <script src="assets/app.js" defer></script>
+  </body>
 </html>
