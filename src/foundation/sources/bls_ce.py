@@ -26,10 +26,17 @@ from foundation.percentiles import weighted_percentile
 from foundation.sources.acquisition import acquire_source, record_unretrieved
 from foundation.sources.bls_ce_ucc import (
     EXCLUDED_UCCS,
+    EXCLUDED_VQB_CODES,
+    HISTORICAL_ABSENT_MAINTENANCE_UCCS,
+    HISTORICAL_ABSENT_TIRE_UCCS,
     INCLUDED_UCCS,
+    INCLUDED_VQB_CODES,
     REPAIR_UCCS,
+    REPAIR_VQB_CODES,
     ROUTINE_UCCS,
+    ROUTINE_VQB_CODES,
     TIRE_UCCS,
+    TIRE_VQB_CODES,
     allowlist_document,
 )
 
@@ -378,16 +385,35 @@ def _weighted_mean(values: list[float], weights: list[float]) -> float | None:
     return sum(v * w for v, w in zip(values, weights, strict=True)) / sum(weights)
 
 
-def _fmli_quarter_key(name: str) -> str:
-    lower = name.lower().replace("\\", "/")
-    stem = lower.rsplit("/", 1)[-1]
-    return stem.replace("fmli", "").replace(".csv", "")
+def _empty_spend() -> dict[str, float]:
+    return {"combined": 0.0, "routine": 0.0, "repairs": 0.0, "tires": 0.0}
 
 
-def _mtbi_quarter_key(name: str) -> str:
-    lower = name.lower().replace("\\", "/")
-    stem = lower.rsplit("/", 1)[-1]
-    return stem.replace("mtbi", "").replace(".csv", "")
+def _vqb_quarterly_amount(row: dict[str, str]) -> float:
+    """VQBEXPX is the amount for VQBMO, or the monthly amount when VQBMO=13.
+
+    Official 2024 CEQ: enter 13 for the same amount each month of the
+    three-month reference period. Quarterly total is then 3 × VQBEXPX.
+    """
+    try:
+        amount = float(row.get("VQBEXPX") or 0.0)
+    except ValueError:
+        return 0.0
+    if amount <= 0:
+        return 0.0
+    month = str(row.get("VQBMO") or "").strip()
+    if month == "13":
+        return amount * 3.0
+    return amount
+
+
+def _maintenance_status(retrieved_at: str, file_sha256: str, parsed_ok: bool) -> str:
+    """Do not promote cached BLS CE to MODELED merely because the parser runs."""
+    if not parsed_ok:
+        return "UNAVAILABLE"
+    if retrieved_at.strip() and len(file_sha256) == 64:
+        return "MODELED_FROM_MEASURED_INPUTS"
+    return "INCOMPLETE_PROVENANCE"
 
 
 def parse_bls_ce_maintenance_candidates(
@@ -398,8 +424,10 @@ def parse_bls_ce_maintenance_candidates(
 ) -> dict[str, Any]:
     """Candidate maintenance/repair/tire statistics for OD-007. Not frozen.
 
-    FMLI supplies CU characteristics/weights. MTBI supplies UCC expenditures.
-    TIRECQ absence is not measured zero tire spending.
+    FMLI supplies CU characteristics/weights. VQB supplies detailed
+    vehicle-maintenance events (VQBCODE / VQBEXPX). MTBI supplies the
+    official UCC map and is used only if VQB is absent. TIRECQ absence
+    and absent historical UCCs 470211/470220 are not measured zeros.
     """
     import io
 
@@ -418,6 +446,8 @@ def parse_bls_ce_maintenance_candidates(
         "allowlist": allowlist_document(),
         "tirecq_present": False,
         "tirecq_interpreted_as_measured_zero": False,
+        "retrieved_at": retrieved_at,
+        "source_artifact_sha256": file_sha256,
     }
     if not zip_path.exists():
         return empty
@@ -427,46 +457,78 @@ def parse_bls_ce_maintenance_candidates(
     repair_all: list[tuple[float, float]] = []
     tire_all: list[tuple[float, float]] = []
     uccs_seen: set[str] = set()
+    vqb_codes_seen: set[str] = set()
     tirecq_present = False
+    vqb_rows_used = 0
+    mtbi_fallback_rows = 0
     n_cus = 0
     weighted_pop = 0.0
+    detail_source = "none"
     try:
         with zipfile.ZipFile(zip_path) as z:
-            fmli_files = [f for f in z.namelist() if "fmli" in f.lower() and f.endswith(".csv")]
-            mtbi_files = [f for f in z.namelist() if "mtbi" in f.lower() and f.endswith(".csv")]
-            mtbi_by_q = {_mtbi_quarter_key(f): f for f in mtbi_files}
-            for fmli_file in fmli_files:
-                qkey = _fmli_quarter_key(fmli_file)
-                mtbi_file = mtbi_by_q.get(qkey)
-                spend_by_newid: dict[str, dict[str, float]] = {}
-                if mtbi_file:
-                    with z.open(mtbi_file) as fh:
+            names = z.namelist()
+            fmli_files = [f for f in names if "fmli" in f.lower() and f.endswith(".csv")]
+            mtbi_files = [f for f in names if "mtbi" in f.lower() and f.endswith(".csv")]
+            vqb_files = [f for f in names if "vqb" in f.lower() and f.endswith(".csv")]
+            spend_by_newid: dict[str, dict[str, float]] = {}
+            if vqb_files:
+                detail_source = "vqb"
+                for vqb_file in vqb_files:
+                    with z.open(vqb_file) as fh:
                         reader = csv.DictReader(
                             io.TextIOWrapper(fh, encoding="utf-8-sig", errors="replace")
                         )
                         for row in reader:
                             newid = str(row.get("NEWID") or "").strip()
-                            ucc = str(row.get("UCC") or "").strip()
-                            if not newid or ucc not in INCLUDED_UCCS:
-                                if ucc:
-                                    uccs_seen.add(ucc)
+                            code = str(row.get("VQBCODE") or "").strip()
+                            if code:
+                                vqb_codes_seen.add(code)
+                            if not newid or code not in INCLUDED_VQB_CODES:
                                 continue
+                            amount = _vqb_quarterly_amount(row)
+                            if amount <= 0:
+                                continue
+                            bucket = spend_by_newid.setdefault(newid, _empty_spend())
+                            bucket["combined"] += amount
+                            if code in ROUTINE_VQB_CODES:
+                                bucket["routine"] += amount
+                            if code in REPAIR_VQB_CODES:
+                                bucket["repairs"] += amount
+                            if code in TIRE_VQB_CODES:
+                                bucket["tires"] += amount
+                            vqb_rows_used += 1
+            for mtbi_file in mtbi_files:
+                with z.open(mtbi_file) as fh:
+                    reader = csv.DictReader(
+                        io.TextIOWrapper(fh, encoding="utf-8-sig", errors="replace")
+                    )
+                    for row in reader:
+                        ucc = str(row.get("UCC") or "").strip()
+                        if ucc:
                             uccs_seen.add(ucc)
-                            try:
-                                cost = float(row.get("COST") or 0.0)
-                            except ValueError:
-                                continue
-                            bucket = spend_by_newid.setdefault(
-                                newid,
-                                {"combined": 0.0, "routine": 0.0, "repairs": 0.0, "tires": 0.0},
-                            )
-                            bucket["combined"] += max(cost, 0.0)
-                            if ucc in ROUTINE_UCCS:
-                                bucket["routine"] += max(cost, 0.0)
-                            if ucc in REPAIR_UCCS:
-                                bucket["repairs"] += max(cost, 0.0)
-                            if ucc in TIRE_UCCS:
-                                bucket["tires"] += max(cost, 0.0)
+                        if detail_source == "vqb":
+                            continue
+                        newid = str(row.get("NEWID") or "").strip()
+                        if not newid or ucc not in INCLUDED_UCCS:
+                            continue
+                        try:
+                            cost = float(row.get("COST") or 0.0)
+                        except ValueError:
+                            continue
+                        if cost <= 0:
+                            continue
+                        bucket = spend_by_newid.setdefault(newid, _empty_spend())
+                        bucket["combined"] += cost
+                        if ucc in ROUTINE_UCCS:
+                            bucket["routine"] += cost
+                        if ucc in REPAIR_UCCS:
+                            bucket["repairs"] += cost
+                        if ucc in TIRE_UCCS:
+                            bucket["tires"] += cost
+                        mtbi_fallback_rows += 1
+            if detail_source != "vqb" and mtbi_fallback_rows:
+                detail_source = "mtbi_ucc_fallback"
+            for fmli_file in fmli_files:
                 with z.open(fmli_file) as fh:
                     reader = csv.DictReader(
                         io.TextIOWrapper(fh, encoding="utf-8-sig", errors="replace")
@@ -501,12 +563,9 @@ def parse_bls_ce_maintenance_candidates(
                                 continue
                             if veh <= 0:
                                 continue
-                        spend = spend_by_newid.get(
-                            newid, {"combined": 0.0, "routine": 0.0, "repairs": 0.0, "tires": 0.0}
-                        )
-                        # MTBI COST is monthly within the interview reference
-                        # period. Annualize the quarterly total * 4, matching
-                        # the FMLI CQ convention. Zero-spend CUs stay in.
+                        spend = spend_by_newid.get(newid, _empty_spend())
+                        # VQB/MTBI amounts above are quarterly. Annualize * 4,
+                        # matching the FMLI CQ convention. Zero-spend CUs stay in.
                         combined_all.append((spend["combined"] * 4.0, weight))
                         routine_all.append((spend["routine"] * 4.0, weight))
                         repair_all.append((spend["repairs"] * 4.0, weight))
@@ -523,6 +582,8 @@ def parse_bls_ce_maintenance_candidates(
             "allowlist": allowlist_document(),
             "tirecq_present": False,
             "tirecq_interpreted_as_measured_zero": False,
+            "retrieved_at": retrieved_at,
+            "source_artifact_sha256": file_sha256,
         }
 
     def _stats(pairs: list[tuple[float, float]]) -> dict[str, float | int | None]:
@@ -560,48 +621,110 @@ def parse_bls_ce_maintenance_candidates(
             "weighted_population": round(sum(wts), 2),
         }
 
+    def _group(
+        pairs: list[tuple[float, float]],
+        present: bool,
+        measured_label: str,
+        absent_note: str,
+    ) -> dict[str, Any]:
+        if present:
+            return {**_stats(pairs), "status": measured_label, "note": ""}
+        return {
+            **_stats([]),
+            "status": "UCC_ABSENT_NOT_MEASURED_ZERO",
+            "note": absent_note,
+        }
+
+    tires_present = bool(TIRE_VQB_CODES & vqb_codes_seen) or (
+        detail_source != "vqb" and bool(TIRE_UCCS & uccs_seen)
+    )
+    routine_present = bool(ROUTINE_VQB_CODES & vqb_codes_seen) or (
+        detail_source != "vqb" and bool(ROUTINE_UCCS & uccs_seen)
+    )
+    repair_present = bool(REPAIR_VQB_CODES & vqb_codes_seen) or (
+        detail_source != "vqb" and bool(REPAIR_UCCS & uccs_seen)
+    )
+    combined_present = tires_present or routine_present or repair_present
     present_included = sorted(code for code in INCLUDED_UCCS if code in uccs_seen)
     absent_included = sorted(code for code in INCLUDED_UCCS if code not in uccs_seen)
-    tire_status = (
-        "MEASURED_FROM_MTBI_UCC" if TIRE_UCCS & uccs_seen else "UCC_ABSENT_NOT_MEASURED_ZERO"
-    )
+    present_vqb = sorted(code for code in INCLUDED_VQB_CODES if code in vqb_codes_seen)
+    absent_vqb = sorted(code for code in INCLUDED_VQB_CODES if code not in vqb_codes_seen)
     candidates = {
-        "maintenance_repairs_tires_combined": _stats(combined_all),
-        "routine_maintenance": _stats(routine_all),
-        "repairs_parts": _stats(repair_all),
-        "tires": {
-            **_stats(tire_all if TIRE_UCCS & uccs_seen else []),
-            "status": tire_status,
-            "note": (
-                "Official tire UCC 470211 is absent from this Interview MTBI vintage. "
-                "This is not measured zero tire spending. TIRECQ on FMLI is also "
-                f"{'present' if tirecq_present else 'absent'}."
+        "maintenance_repairs_tires_combined": _group(
+            combined_all if combined_present else [],
+            combined_present,
+            "MEASURED_FROM_VQB" if detail_source == "vqb" else "MEASURED_FROM_MTBI_UCC",
+            "No included VQB/UCC maintenance codes are present. Not measured zero.",
+        ),
+        "routine_maintenance": _group(
+            routine_all if routine_present else [],
+            routine_present,
+            "MEASURED_FROM_VQB" if detail_source == "vqb" else "MEASURED_FROM_MTBI_UCC",
+            "Routine-maintenance VQB/UCC codes are absent. Not measured zero.",
+        ),
+        "repairs_parts": _group(
+            repair_all if repair_present else [],
+            repair_present,
+            "MEASURED_FROM_VQB" if detail_source == "vqb" else "MEASURED_FROM_MTBI_UCC",
+            "Repair VQB/UCC codes are absent. Not measured zero.",
+        ),
+        "tires": _group(
+            tire_all if tires_present else [],
+            tires_present,
+            "MEASURED_FROM_VQB" if detail_source == "vqb" else "MEASURED_FROM_MTBI_UCC",
+            (
+                "Official 2024 tire path is VQBCODE 140 / UCC 480110. Historical "
+                "UCC 470211 and FMLI TIRECQ are "
+                f"{'present' if tirecq_present else 'absent'} / "
+                f"{'present' if HISTORICAL_ABSENT_TIRE_UCCS & uccs_seen else 'absent'}. "
+                "Absence is not measured zero tire spending."
             ),
-        },
+        ),
     }
+    parsed_ok = bool(combined_all)
     return {
-        "status": "MODELED_FROM_MEASURED_INPUTS" if combined_all else "UNAVAILABLE",
+        "status": _maintenance_status(retrieved_at, file_sha256, parsed_ok),
         "source_data_year": data_year,
         "project_cost_year": reference_year,
         "translation_method": "NONE" if reference_year == data_year else "CPI_UPDATED_CANDIDATE",
         "price_index_series": None
         if reference_year == data_year
         else "CPI-U motor vehicle maintenance and repair (not applied)",
-        "architecture": "FMLI characteristics + MTBI UCC expenditures",
+        "architecture": (
+            "FMLI characteristics + VQB detailed vehicle operating expenses "
+            "(VQBCODE/VQBEXPX); MTBI UCC map for official classification "
+            "and fallback if VQB is absent"
+        ),
+        "detail_source": detail_source,
+        "vqb_rows_used": vqb_rows_used,
+        "mtbi_fallback_rows": mtbi_fallback_rows,
+        "included_vqb_codes_present": present_vqb,
+        "included_vqb_codes_absent": absent_vqb,
+        "excluded_vqb_codes": sorted(EXCLUDED_VQB_CODES),
         "included_uccs_present": present_included,
         "included_uccs_absent": absent_included,
         "excluded_uccs": sorted(EXCLUDED_UCCS),
+        "historical_uccs_absent_not_measured_zero": sorted(
+            HISTORICAL_ABSENT_TIRE_UCCS | HISTORICAL_ABSENT_MAINTENANCE_UCCS
+        ),
         "allowlist": allowlist_document(),
         "tirecq_present": tirecq_present,
         "tirecq_interpreted_as_measured_zero": False,
         "sample_size": n_cus,
         "represented_weighted_population": round(weighted_pop, 2),
         "notes": (
-            "OD-007 MTBI/UCC candidates among single-person vehicle-owning CE units. "
-            "Zero-spend CUs included in mean/median. Absent tire UCC is not a measured "
-            "zero. Not frozen. $1,200 is not used."
+            "OD-007 VQB/UCC candidates among single-person vehicle-owning CE units. "
+            "Zero-spend CUs included in mean/median when the group is present. "
+            "Absent VQB/UCC codes and absent TIRECQ are not measured zeros. "
+            "UCC 470212 is fuel/oil residual and is excluded. Not frozen. "
+            "$1,200 is not used. Content parsed from cached official artifact "
+            "is not fully reproducible retrieval provenance."
         ),
         "candidates": candidates,
         "retrieved_at": retrieved_at,
         "source_artifact_sha256": file_sha256,
+        "content_schema_validated_from_cached_official_artifact": parsed_ok,
+        "fully_reproducible_retrieval_provenance": bool(
+            retrieved_at.strip() and len(file_sha256) == 64
+        ),
     }

@@ -144,17 +144,22 @@ DECISIONS: list[dict[str, Any]] = [
         "option_c": (
             "P25/P50 among positive spenders, and/or a multi-year annualized result if "
             "sufficient CE vintages can be reproduced. Split routine maintenance, tires, "
-            "and repairs using official MTBI UCC codes (470211/470220/470212), not an "
-            "absent FMLI TIRECQ column."
+            "and repairs using the official 2024 Interview VQB file (VQBCODE/VQBEXPX) "
+            "and the official MTBI UCC assigned to each VQBEXPX row — not an absent "
+            "FMLI TIRECQ column and not UCC 470212 (2024 GASOILX fuel residual)."
         ),
         "recommended": "Do not freeze one until owner review. Emit all candidates.",
         "directional_effect": "Including zeros lowers the reserve vs positive-spender P25/mean; multi-year annualization smooths lumps.",
         "source_support": (
             "BLS CE 2024 Interview PUMD: FMLI (NEWID, FAM_SIZE, VEHQ, FINLWT21) joined "
-            "to MTBI (NEWID, UCC, COST). Official allowlisted UCCs 470211 tires, "
-            "470220 maintenance/repair, 470212 parts. TIRECQ absence or a missing "
-            "tire UCC is not measured zero tire spending. Fuel/insurance/purchase/"
-            "finance/registration/parking UCCs are excluded. No $1,200 constant."
+            "to VQB (NEWID, VQBCODE, VQBEXPX). Official included VQBCODEs: 140 tires "
+            "(UCC 480110), 190/367 routine maintenance (UCC 490100), 320/200/230/240 "
+            "repairs (UCC 490100/480100/490900). Historical UCCs 470211/470220 are "
+            "absent from this vintage and are not measured zeros. UCC 470212 is a "
+            "gasoline/oil allocation and is excluded. Fuel/insurance/purchase/finance/"
+            "registration/parking/service-club/cleaning VQB items are excluded. "
+            "Cached artifact remains INCOMPLETE_PROVENANCE (official retrieve 403). "
+            "No $1,200 constant."
         ),
         "sensitivity_plan": "Compare mean-with-zeros, median-with-zeros, positive-spender P25/P50, and split maintenance/tires/repairs.",
     },

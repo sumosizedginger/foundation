@@ -14,7 +14,13 @@ from foundation.living_cost.geo_join import (
 )
 from foundation.living_cost.models import ComponentStatus, LivingCostComponentObservation
 from foundation.sources.bls_ce import parse_bls_ce_maintenance_candidates
-from foundation.sources.bls_ce_ucc import EXCLUDED_UCCS, INCLUDED_UCCS, TIRE_UCCS
+from foundation.sources.bls_ce_ucc import (
+    EXCLUDED_UCCS,
+    INCLUDED_UCCS,
+    INCLUDED_VQB_CODES,
+    TIRE_UCCS,
+    TIRE_VQB_CODES,
+)
 from foundation.sources.cms_marketplace import (
     SBE_STANDALONE_STATES,
     SBE_STATE_ZIP_SLUGS,
@@ -210,12 +216,18 @@ def test_sbe_lowest_silver_join_on_real_state_file():
 
 
 def test_maintenance_allowlist_excludes_gas_insurance_purchase_registration():
-    for code in ("470111", "510110", "450110", "520541", "520516"):
+    for code in ("470111", "470212", "510110", "450110", "520541", "520516"):
         assert code in EXCLUDED_UCCS
-    assert "470211" in INCLUDED_UCCS
-    assert "470220" in INCLUDED_UCCS
-    assert "470212" in INCLUDED_UCCS
-    assert TIRE_UCCS == {"470211"}
+    assert "470212" not in INCLUDED_UCCS
+    assert "470211" not in INCLUDED_UCCS
+    assert "470220" not in INCLUDED_UCCS
+    assert "480110" in INCLUDED_UCCS
+    assert "490100" in INCLUDED_UCCS
+    assert TIRE_UCCS == {"480110"}
+    assert TIRE_VQB_CODES == {"140"}
+    assert "140" in INCLUDED_VQB_CODES
+    assert "190" in INCLUDED_VQB_CODES
+    assert "420" not in INCLUDED_VQB_CODES
 
 
 def test_missing_tirecq_is_not_measured_zero(tmp_path: Path):
@@ -228,20 +240,83 @@ def test_missing_tirecq_is_not_measured_zero(tmp_path: Path):
         writer.writerow({"NEWID": "2", "FAM_SIZE": "1", "FINLWT21": "10", "VEHQ": "1"})
         zf.writestr("intrvw24/fmli241x.csv", fmli.getvalue())
         mtbi = io.StringIO()
-        writer = csv.DictWriter(mtbi, fieldnames=["NEWID", "UCC", "COST"])
+        writer = csv.DictWriter(mtbi, fieldnames=["NEWID", "UCC", "COST", "EXPNAME"])
         writer.writeheader()
-        writer.writerow({"NEWID": "1", "UCC": "470212", "COST": "25"})
-        writer.writerow({"NEWID": "1", "UCC": "470111", "COST": "80"})
-        writer.writerow({"NEWID": "2", "UCC": "510110", "COST": "200"})
+        writer.writerow({"NEWID": "1", "UCC": "470212", "COST": "25", "EXPNAME": "GASOILX"})
+        writer.writerow({"NEWID": "1", "UCC": "470111", "COST": "80", "EXPNAME": "JGASOXQV"})
+        writer.writerow({"NEWID": "2", "UCC": "510110", "COST": "200", "EXPNAME": "QADITR1X"})
         zf.writestr("intrvw24/mtbi241x.csv", mtbi.getvalue())
     result = parse_bls_ce_maintenance_candidates(zip_path, reference_year=2024)
     assert result["tirecq_interpreted_as_measured_zero"] is False
     assert result["tirecq_present"] is False
-    assert "470211" in result["included_uccs_absent"]
+    assert result["status"] == "INCOMPLETE_PROVENANCE"
     assert result["candidates"]["tires"]["status"] == "UCC_ABSENT_NOT_MEASURED_ZERO"
     assert result["candidates"]["tires"]["n"] == 0
+    assert result["candidates"]["routine_maintenance"]["status"] == "UCC_ABSENT_NOT_MEASURED_ZERO"
+    assert result["candidates"]["routine_maintenance"]["n"] == 0
+    combined = result["candidates"]["maintenance_repairs_tires_combined"]
+    # Fuel residual 470212 and insurance must not enter the basket.
+    assert combined["status"] == "UCC_ABSENT_NOT_MEASURED_ZERO"
+    assert combined["n"] == 0
+
+
+def test_vqb_file_is_used_for_maintenance_split(tmp_path: Path):
+    zip_path = tmp_path / "intrvw24.zip"
+    with zipfile.ZipFile(zip_path, "w") as zf:
+        fmli = io.StringIO()
+        writer = csv.DictWriter(fmli, fieldnames=["NEWID", "FAM_SIZE", "FINLWT21", "VEHQ"])
+        writer.writeheader()
+        writer.writerow({"NEWID": "1", "FAM_SIZE": "1", "FINLWT21": "10", "VEHQ": "1"})
+        writer.writerow({"NEWID": "2", "FAM_SIZE": "1", "FINLWT21": "10", "VEHQ": "1"})
+        zf.writestr("intrvw24/fmli241x.csv", fmli.getvalue())
+        vqb = io.StringIO()
+        writer = csv.DictWriter(vqb, fieldnames=["NEWID", "VQBCODE", "VQBEXPX", "VQBMO"])
+        writer.writeheader()
+        writer.writerow({"NEWID": "1", "VQBCODE": "140", "VQBEXPX": "100", "VQBMO": "1"})
+        writer.writerow({"NEWID": "1", "VQBCODE": "250", "VQBEXPX": "80", "VQBMO": "1"})
+        writer.writerow({"NEWID": "2", "VQBCODE": "420", "VQBEXPX": "200", "VQBMO": "1"})
+        zf.writestr("intrvw24/expn24/vqb24.csv", vqb.getvalue())
+        mtbi = io.StringIO()
+        writer = csv.DictWriter(mtbi, fieldnames=["NEWID", "UCC", "COST", "EXPNAME"])
+        writer.writeheader()
+        writer.writerow({"NEWID": "1", "UCC": "470212", "COST": "25", "EXPNAME": "GASOILX"})
+        zf.writestr("intrvw24/mtbi241x.csv", mtbi.getvalue())
+    result = parse_bls_ce_maintenance_candidates(zip_path, reference_year=2024)
+    assert result["detail_source"] == "vqb"
+    assert result["status"] == "INCOMPLETE_PROVENANCE"
+    assert result["candidates"]["tires"]["status"] == "MEASURED_FROM_VQB"
+    assert result["candidates"]["tires"]["n_positive"] == 1
+    # Quarterly 100 * 4 = 400 annual; CU 2 is a zero-spend vehicle owner.
+    assert result["candidates"]["tires"]["mean_incl_zero"] == 200.0
+    assert result["candidates"]["routine_maintenance"]["status"] == "UCC_ABSENT_NOT_MEASURED_ZERO"
     combined = result["candidates"]["maintenance_repairs_tires_combined"]
     assert combined["n"] == 2
     assert combined["n_positive"] == 1
-    # Gas and insurance must not enter the maintenance basket.
-    assert combined["mean_incl_zero"] == 50.0
+    # Registration (250) and warranties (420) must not enter the basket.
+    assert combined["mean_incl_zero"] == 200.0
+
+
+def test_official_cached_interview_uses_vqb_not_fuel_residual():
+    zip_path = CACHE / "intrvw24.zip"
+    if not zip_path.exists():
+        return
+    result = parse_bls_ce_maintenance_candidates(zip_path, reference_year=2024)
+    assert result["detail_source"] == "vqb"
+    assert result["status"] == "INCOMPLETE_PROVENANCE"
+    assert result["fully_reproducible_retrieval_provenance"] is False
+    assert result["tirecq_interpreted_as_measured_zero"] is False
+    assert "140" in result["included_vqb_codes_present"]
+    assert "190" in result["included_vqb_codes_present"]
+    assert "470212" in result["excluded_uccs"]
+    combined = result["candidates"]["maintenance_repairs_tires_combined"]
+    assert combined["status"] == "MEASURED_FROM_VQB"
+    assert combined["n"] > 1000
+    assert combined["n_positive"] > 100
+    assert combined["mean_incl_zero"] is not None
+    assert combined["mean_incl_zero"] > 100
+    tires = result["candidates"]["tires"]
+    assert tires["status"] == "MEASURED_FROM_VQB"
+    assert tires["n_positive"] > 0
+    routine = result["candidates"]["routine_maintenance"]
+    assert routine["status"] == "MEASURED_FROM_VQB"
+    assert routine["mean_incl_zero"] != 0.0

@@ -921,8 +921,9 @@ def write_transport_coverage() -> None:
             "maintenance": {
                 "status": "ESTIMATED_OWNER_REVIEW",
                 "note": (
-                    "MTBI/UCC candidates among single-person vehicle-owning CE units. "
-                    "TIRECQ/UCC 470211 absence is not measured zero tire spending. "
+                    "VQB/UCC candidates among single-person vehicle-owning CE units. "
+                    "TIRECQ / historical UCC 470211 absence is not measured zero "
+                    "tire spending. UCC 470212 is excluded as fuel residual. "
                     "OD-007 not frozen."
                 ),
             },

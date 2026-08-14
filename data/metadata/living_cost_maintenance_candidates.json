@@ -1,20 +1,46 @@
 {
   "report_type": "living_cost_maintenance_candidates",
-  "generated_at": "2026-08-14T21:48:41+00:00",
-  "status": "MODELED_FROM_MEASURED_INPUTS",
+  "generated_at": "2026-08-14T22:17:15+00:00",
+  "status": "INCOMPLETE_PROVENANCE",
   "source_data_year": 2024,
   "project_cost_year": 2024,
   "translation_method": "NONE",
   "price_index_series": null,
-  "architecture": "FMLI characteristics + MTBI UCC expenditures",
+  "architecture": "FMLI characteristics + VQB detailed vehicle operating expenses (VQBCODE/VQBEXPX); MTBI UCC map for official classification and fallback if VQB is absent",
+  "detail_source": "vqb",
+  "vqb_rows_used": 16871,
+  "mtbi_fallback_rows": 0,
+  "included_vqb_codes_present": [
+    "140",
+    "190",
+    "200",
+    "230",
+    "240",
+    "320",
+    "367"
+  ],
+  "included_vqb_codes_absent": [],
+  "excluded_vqb_codes": [
+    "210",
+    "220",
+    "250",
+    "260",
+    "270",
+    "280",
+    "400",
+    "410",
+    "420",
+    "900"
+  ],
   "included_uccs_present": [
-    "470212"
+    "480100",
+    "480110",
+    "490100",
+    "490900"
   ],
-  "included_uccs_absent": [
-    "470211",
-    "470220"
-  ],
+  "included_uccs_absent": [],
   "excluded_uccs": [
+    "250213",
     "450110",
     "450210",
     "450220",
@@ -22,67 +48,232 @@
     "460901",
     "470111",
     "470112",
-    "470114",
-    "480110",
+    "470113",
+    "470211",
+    "470212",
+    "470220",
     "510110",
+    "510115",
     "520110",
+    "520310",
+    "520410",
     "520516",
     "520517",
     "520531",
     "520541",
     "520550",
-    "520902"
+    "520901",
+    "520902",
+    "620114"
+  ],
+  "historical_uccs_absent_not_measured_zero": [
+    "470211",
+    "470220"
   ],
   "allowlist": {
     "report_type": "bls_ce_vehicle_ucc_allowlist",
     "dictionary_url": "https://www.bls.gov/cex/pumd/ce-pumd-interview-diary-dictionary.xlsx",
     "stubs_url": "https://www.bls.gov/cex/pumd/stubs.zip",
     "getting_started_url": "https://www.bls.gov/cex/pumd-getting-started-guide.htm",
-    "architecture": "FMLI supplies NEWID, FAM_SIZE, vehicle ownership, FINLWT21. MTBI supplies NEWID, UCC, COST, REF_MO, REF_YR. Do not use FMLI summary columns such as TIRECQ as the sole detail source.",
-    "included": {
-      "470211": {
-        "label": "Tires \u2014 purchased, replaced, installed",
+    "ceq_questionnaire_url": "https://www.bls.gov/cex/research_papers/pdf/2024-2025-ceqquestionnaire.pdf",
+    "architecture": "FMLI supplies NEWID, FAM_SIZE, vehicle ownership, FINLWT21. VQB (official detailed vehicle-maintenance/repair file) supplies NEWID, VQBCODE, VQBEXPX, VQBMO. MTBI supplies the official UCC assigned to each VQBEXPX row and is the fallback if VQB is absent. Do not use FMLI summary columns such as TIRECQ as the sole detail source. Do not treat UCC 470212 as parts.",
+    "included_vqb_codes": {
+      "140": {
+        "label": "Tire purchases or mounting",
         "foundation_group": "tires",
         "include": "yes",
-        "reason": "Official Interview tire UCC."
+        "official_mtbi_ucc": "480110",
+        "reason": "Historical VOPSERVY 140 = tires; 2024 CEQ item 8; official 2024 MTBI maps VQBEXPX to UCC 480110."
       },
-      "470212": {
-        "label": "Vehicle parts, equipment, and accessories",
-        "foundation_group": "repairs",
-        "include": "yes",
-        "reason": "Official Interview parts/equipment UCC."
-      },
-      "470220": {
-        "label": "Vehicle maintenance and servicing / repairs",
+      "190": {
+        "label": "Vehicle maintenance, parts, or services including oil changes",
         "foundation_group": "routine_maintenance",
         "include": "yes",
-        "reason": "Official Interview maintenance/repair services UCC."
+        "official_mtbi_ucc": "490100",
+        "reason": "2017/2020 CAPI code 190 = oil change / lubrication / oil filter; 2024 CEQ item 9; official 2024 MTBI maps VQBEXPX to UCC 490100."
+      },
+      "367": {
+        "label": "Vehicle maintenance (BLS UCC 490100; small/frequent VQB events)",
+        "foundation_group": "routine_maintenance",
+        "include": "yes",
+        "official_mtbi_ucc": "490100",
+        "reason": "Official 2024 MTBI assigns VQBCODE 367 almost entirely to UCC 490100, the same maintenance family as code 190. Not mapped to fuel, insurance, registration, parking, or purchase UCCs."
+      },
+      "320": {
+        "label": "Vehicle accident or damage repair",
+        "foundation_group": "repairs",
+        "include": "yes",
+        "official_mtbi_ucc": "490100",
+        "reason": "2024 CEQ item 10 (accident or damage repair, including mechanic service); official 2024 MTBI maps VQBEXPX to UCC 490100/480100."
+      },
+      "200": {
+        "label": "Other vehicle maintenance/repair (UCC 490900)",
+        "foundation_group": "repairs",
+        "include": "yes",
+        "official_mtbi_ucc": "490900",
+        "reason": "Official 2024 MTBI maps VQBCODE 200 to UCC 490900 (VQBEXPX in the 490xxx vehicle-maintenance family)."
+      },
+      "230": {
+        "label": "Vehicle maintenance/repair (UCC 490100/480100)",
+        "foundation_group": "repairs",
+        "include": "yes",
+        "official_mtbi_ucc": "490100",
+        "reason": "Official 2024 MTBI maps VQBCODE 230 to UCC 490100/480100."
+      },
+      "240": {
+        "label": "Vehicle maintenance/repair (UCC 490100/480100)",
+        "foundation_group": "repairs",
+        "include": "yes",
+        "official_mtbi_ucc": "490100",
+        "reason": "Official 2024 MTBI maps VQBCODE 240 to UCC 490100/480100. Included on that UCC assignment; the PUMD file does not print a separate item label for 240."
       }
     },
-    "excluded": {
+    "excluded_vqb_codes": {
+      "220": {
+        "label": "Driver's licenses",
+        "foundation_group": "registration",
+        "include": "no",
+        "official_mtbi_ucc": "520550",
+        "reason": "2024 CEQ item 1; official UCC 520550. Licensing is not maintenance."
+      },
+      "250": {
+        "label": "Vehicle registration or personal property taxes",
+        "foundation_group": "registration",
+        "include": "no",
+        "official_mtbi_ucc": "520541",
+        "reason": "2024 CEQ item 3; official UCC 520541. Separate registration component."
+      },
+      "260": {
+        "label": "Automobile service clubs (AAA, OnStar, LoJack)",
+        "foundation_group": "service_clubs",
+        "include": "no",
+        "official_mtbi_ucc": "520531",
+        "reason": "2024 CEQ item 5; official UCC 520531. Club dues are not a repair event."
+      },
+      "270": {
+        "label": "Other vehicle operating expense (UCC 520901)",
+        "foundation_group": "other_vehicle",
+        "include": "no",
+        "official_mtbi_ucc": "520901",
+        "reason": "Official 2024 MTBI maps VQBCODE 270 to UCC 520901, not 490xxx."
+      },
+      "280": {
+        "label": "Vehicle cleaning / detailing / car washes",
+        "foundation_group": "cleaning",
+        "include": "no",
+        "official_mtbi_ucc": "250213",
+        "reason": "2024 CEQ item 7; official UCC 250213. Cleaning is not the repair reserve."
+      },
+      "210": {
+        "label": "Non-maintenance VQB expense (UCC 620114)",
+        "foundation_group": "other",
+        "include": "no",
+        "official_mtbi_ucc": "620114",
+        "reason": "Official 2024 MTBI maps VQBCODE 210 to UCC 620114, not 490xxx."
+      },
+      "400": {
+        "label": "Other vehicle operating expense (UCC 520310)",
+        "foundation_group": "parking_tolls",
+        "include": "no",
+        "official_mtbi_ucc": "520310",
+        "reason": "Official 2024 MTBI maps VQBCODE 400 to UCC 520310 (52xxx, not 490xxx)."
+      },
+      "410": {
+        "label": "Tolls or parking (UCC 520410)",
+        "foundation_group": "parking_tolls",
+        "include": "no",
+        "official_mtbi_ucc": "520410",
+        "reason": "2024 CEQ items 13\u201314; official UCC 520410. Parking/tolls are separate."
+      },
+      "420": {
+        "label": "Auto repair service policies / extended warranties",
+        "foundation_group": "insurance",
+        "include": "no",
+        "official_mtbi_ucc": "510115",
+        "reason": "2024 CEQ item 4; official UCC 510115 (51xxx insurance family)."
+      },
+      "900": {
+        "label": "Parent / combined VQB overwrite ($0)",
+        "foundation_group": "parent_record",
+        "include": "no",
+        "official_mtbi_ucc": "",
+        "reason": "2024 VQBCODE 900 has VQBEXPX=0 (BLS parent overwrite). Not spending."
+      }
+    },
+    "included_uccs": {
+      "480110": {
+        "label": "VQBEXPX tire purchases / mounting (VQBCODE 140)",
+        "foundation_group": "tires",
+        "include": "yes",
+        "reason": "Official 2024 MTBI UCC for VQBCODE 140 tire events."
+      },
+      "490100": {
+        "label": "VQBEXPX vehicle maintenance and repair",
+        "foundation_group": "routine_maintenance",
+        "include": "yes",
+        "reason": "Official 2024 MTBI UCC for VQBCODE 190/367/320/230/240."
+      },
+      "480100": {
+        "label": "VQBEXPX vehicle maintenance/repair allocation",
+        "foundation_group": "repairs",
+        "include": "yes",
+        "reason": "Official 2024 MTBI companion UCC for a subset of 190/230/240/320."
+      },
+      "490900": {
+        "label": "VQBEXPX other vehicle maintenance/repair",
+        "foundation_group": "repairs",
+        "include": "yes",
+        "reason": "Official 2024 MTBI UCC for VQBCODE 200."
+      }
+    },
+    "excluded_uccs": {
+      "470211": {
+        "label": "Historical Interview tire UCC (pre-Section-11 redesign)",
+        "foundation_group": "tires",
+        "include": "no",
+        "reason": "Absent from 2024 Interview MTBI. Absence is not measured zero tire spending. 2024 tires are VQBCODE 140 / UCC 480110."
+      },
+      "470220": {
+        "label": "Historical Interview maintenance/repair UCC (pre-redesign)",
+        "foundation_group": "routine_maintenance",
+        "include": "no",
+        "reason": "Absent from 2024 Interview MTBI. Absence is not measured zero maintenance. 2024 maintenance is VQB / UCC 490100."
+      },
+      "470212": {
+        "label": "2024 MTBI GASOILX / TOTYUPDX / TRNONCUX residual",
+        "foundation_group": "fuel",
+        "include": "no",
+        "reason": "In official 2024 MTBI this UCC is a gasoline/oil allocation split, not vehicle parts. Excluded as fuel."
+      },
       "470111": {
-        "label": "Gasoline",
+        "label": "Gasoline (JGASOXQV)",
         "foundation_group": "fuel",
         "include": "no",
         "reason": "Separate Foundation fuel component (EIA)."
       },
       "470112": {
-        "label": "Diesel fuel",
+        "label": "Diesel fuel (JDIESXQV)",
         "foundation_group": "fuel",
         "include": "no",
         "reason": "Separate Foundation fuel component (EIA)."
       },
-      "470114": {
-        "label": "Gasohol / other motor fuel",
+      "470113": {
+        "label": "Gasoline/oil allocation (GASOILX)",
         "foundation_group": "fuel",
         "include": "no",
-        "reason": "Separate Foundation fuel component (EIA)."
+        "reason": "Fuel/oil allocation. Separate Foundation fuel component."
       },
       "510110": {
         "label": "Vehicle insurance",
         "foundation_group": "insurance",
         "include": "no",
         "reason": "Separate Foundation insurance component (NAIC)."
+      },
+      "510115": {
+        "label": "VQBEXPX extended warranties / service policies (VQBCODE 420)",
+        "foundation_group": "insurance",
+        "include": "no",
+        "reason": "Official 2024 MTBI UCC for VQBCODE 420. Insurance-like."
       },
       "450110": {
         "label": "New cars",
@@ -109,69 +300,121 @@
         "reason": "Separate Foundation vehicle-replacement component."
       },
       "460901": {
-        "label": "Vehicle finance charges",
-        "foundation_group": "finance",
-        "include": "no",
-        "reason": "Finance charges are not maintenance."
-      },
-      "480110": {
-        "label": "Vehicle finance charges (Interview finance UCC)",
+        "label": "Vehicle finance / trade residual",
         "foundation_group": "finance",
         "include": "no",
         "reason": "Finance charges are not maintenance."
       },
       "520541": {
-        "label": "Vehicle registration",
+        "label": "VQBEXPX vehicle registration (VQBCODE 250)",
         "foundation_group": "registration",
         "include": "no",
         "reason": "Separate Foundation registration component."
       },
       "520550": {
-        "label": "Drivers' licenses",
+        "label": "VQBEXPX driver's licenses (VQBCODE 220)",
         "foundation_group": "registration",
         "include": "no",
         "reason": "Licensing is not maintenance."
       },
       "520902": {
-        "label": "Vehicle inspection",
+        "label": "Vehicle inspection (pre-redesign UCC)",
         "foundation_group": "registration",
         "include": "no",
         "reason": "Inspection/registration-adjacent, not maintenance reserve."
       },
       "520516": {
-        "label": "Parking fees",
+        "label": "Parking fees (QADRENTX / RTCARX)",
         "foundation_group": "parking_tolls",
         "include": "no",
         "reason": "Parking/tolls are a separate component."
       },
       "520517": {
-        "label": "Tolls",
+        "label": "Tolls (QADRENTX / RTCARX)",
         "foundation_group": "parking_tolls",
         "include": "no",
         "reason": "Parking/tolls are a separate component."
       },
+      "520310": {
+        "label": "VQBEXPX other vehicle operating (VQBCODE 400)",
+        "foundation_group": "parking_tolls",
+        "include": "no",
+        "reason": "Official 2024 MTBI UCC for VQBCODE 400. Not 490xxx."
+      },
+      "520410": {
+        "label": "VQBEXPX tolls/parking (VQBCODE 410)",
+        "foundation_group": "parking_tolls",
+        "include": "no",
+        "reason": "Official 2024 MTBI UCC for VQBCODE 410."
+      },
       "520110": {
-        "label": "Vehicle rental / lease",
+        "label": "VQBEXPX allocated companion of 510115/950024",
         "foundation_group": "rental",
         "include": "no",
-        "reason": "Rental/lease is not owned-vehicle maintenance."
+        "reason": "2024 MTBI VQBEXPX allocation, not owned-vehicle maintenance."
       },
       "520531": {
-        "label": "Automobile service clubs",
+        "label": "VQBEXPX automobile service clubs (VQBCODE 260)",
         "foundation_group": "service_clubs",
         "include": "no",
         "reason": "Club dues are not a repair/tire/maintenance event."
+      },
+      "250213": {
+        "label": "VQBEXPX vehicle cleaning (VQBCODE 280)",
+        "foundation_group": "cleaning",
+        "include": "no",
+        "reason": "Cleaning/detailing is not the maintenance/repair reserve."
+      },
+      "620114": {
+        "label": "VQBEXPX non-maintenance (VQBCODE 210)",
+        "foundation_group": "other",
+        "include": "no",
+        "reason": "Official 2024 MTBI UCC 620114 is outside the 490xxx family."
+      },
+      "520901": {
+        "label": "VQBEXPX other vehicle operating (VQBCODE 270)",
+        "foundation_group": "other_vehicle",
+        "include": "no",
+        "reason": "Official 2024 MTBI UCC 520901 is not maintenance."
       }
     },
     "groups": {
+      "tires": {
+        "vqb_codes": [
+          "140"
+        ],
+        "uccs": [
+          "480110"
+        ]
+      },
+      "routine_maintenance": {
+        "vqb_codes": [
+          "190",
+          "367"
+        ],
+        "uccs": [
+          "490100"
+        ]
+      },
+      "repairs": {
+        "vqb_codes": [
+          "200",
+          "230",
+          "240",
+          "320"
+        ],
+        "uccs": [
+          "480100",
+          "490900"
+        ]
+      }
+    },
+    "historical_absent_not_measured_zero": {
       "tires": [
         "470211"
       ],
       "routine_maintenance": [
         "470220"
-      ],
-      "repairs": [
-        "470212"
       ]
     }
   },
@@ -179,52 +422,60 @@
   "tirecq_interpreted_as_measured_zero": false,
   "sample_size": 5733,
   "represented_weighted_population": 156403117.03,
-  "notes": "OD-007 MTBI/UCC candidates among single-person vehicle-owning CE units. Zero-spend CUs included in mean/median. Absent tire UCC is not a measured zero. Not frozen. $1,200 is not used.",
+  "notes": "OD-007 VQB/UCC candidates among single-person vehicle-owning CE units. Zero-spend CUs included in mean/median when the group is present. Absent VQB/UCC codes and absent TIRECQ are not measured zeros. UCC 470212 is fuel/oil residual and is excluded. Not frozen. $1,200 is not used. Content parsed from cached official artifact is not fully reproducible retrieval provenance.",
   "candidates": {
     "maintenance_repairs_tires_combined": {
       "n": 5733,
-      "mean_incl_zero": 1.0,
+      "mean_incl_zero": 781.22,
       "median_incl_zero": 0.0,
-      "p25_positive": 1.68,
-      "p50_positive": 3.96,
-      "positive_spender_mean": 5.78,
-      "n_positive": 975,
-      "weighted_population": 156403117.03
+      "p25_positive": 276.0,
+      "p50_positive": 560.0,
+      "positive_spender_mean": 1728.47,
+      "n_positive": 2593,
+      "weighted_population": 156403117.03,
+      "status": "MEASURED_FROM_VQB",
+      "note": ""
     },
     "routine_maintenance": {
       "n": 5733,
-      "mean_incl_zero": 0.0,
+      "mean_incl_zero": 499.58,
       "median_incl_zero": 0.0,
-      "p25_positive": null,
-      "p50_positive": null,
-      "positive_spender_mean": null,
-      "n_positive": 0,
-      "weighted_population": 156403117.03
+      "p25_positive": 240.0,
+      "p50_positive": 420.0,
+      "positive_spender_mean": 1227.74,
+      "n_positive": 2323,
+      "weighted_population": 156403117.03,
+      "status": "MEASURED_FROM_VQB",
+      "note": ""
     },
     "repairs_parts": {
       "n": 5733,
-      "mean_incl_zero": 1.0,
+      "mean_incl_zero": 118.72,
       "median_incl_zero": 0.0,
-      "p25_positive": 1.68,
-      "p50_positive": 3.96,
-      "positive_spender_mean": 5.78,
-      "n_positive": 975,
-      "weighted_population": 156403117.03
+      "p25_positive": 572.0,
+      "p50_positive": 1812.0,
+      "positive_spender_mean": 3174.77,
+      "n_positive": 236,
+      "weighted_population": 156403117.03,
+      "status": "MEASURED_FROM_VQB",
+      "note": ""
     },
     "tires": {
-      "n": 0,
-      "mean_incl_zero": null,
-      "median_incl_zero": null,
-      "p25_positive": null,
-      "p50_positive": null,
-      "positive_spender_mean": null,
-      "n_positive": 0,
-      "weighted_population": 0.0,
-      "status": "UCC_ABSENT_NOT_MEASURED_ZERO",
-      "note": "Official tire UCC 470211 is absent from this Interview MTBI vintage. This is not measured zero tire spending. TIRECQ on FMLI is also absent."
+      "n": 5733,
+      "mean_incl_zero": 162.92,
+      "median_incl_zero": 0.0,
+      "p25_positive": 800.0,
+      "p50_positive": 1600.0,
+      "positive_spender_mean": 2257.96,
+      "n_positive": 420,
+      "weighted_population": 156403117.03,
+      "status": "MEASURED_FROM_VQB",
+      "note": ""
     }
   },
   "retrieved_at": "",
   "source_artifact_sha256": "",
+  "content_schema_validated_from_cached_official_artifact": true,
+  "fully_reproducible_retrieval_provenance": false,
   "headline_calculated": false
 }
