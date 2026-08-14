@@ -365,12 +365,12 @@ def write_coverage(artifacts: list[RetrievedSourceArtifact]) -> dict:
             "health_premium": "RETRIEVED_UNVALIDATED",
             "health_oop": _component_status(artifacts, f"meps_table1_{year}"),
             "mileage": _component_status(artifacts, f"fhwa_nhts_{year}"),
-            "mpg": "SOURCE_GAP",
+            "mpg": "ESTIMATED_OWNER_REVIEW",
             "gas": _component_status(artifacts, f"eia_gas_price_{year}"),
             "insurance": _component_status(artifacts, f"naic_auto_ins_{year}"),
-            "maintenance": "SOURCE_GAP",
+            "maintenance": "ESTIMATED_OWNER_REVIEW",
             "registration": "SOURCE_GAP",
-            "replacement": "SOURCE_GAP",
+            "replacement": "ESTIMATED_OWNER_REVIEW",
             "connectivity": "SOURCE_GAP",
             "essentials": "MODELED_FROM_MEASURED_INPUTS"
             if _component_status(artifacts, f"bls_ce_{year}") == "VALIDATED"
