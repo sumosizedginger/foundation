@@ -1,9 +1,10 @@
-# THE FOUNDATION — LAST FRESHNESS-CONTROL CLEANUP STATUS
+# THE FOUNDATION — FINAL CANDIDATE-GATE HARDENING STATUS
 
-Cleanup SHA: `32a6abf2bf0ecc8df29e1e53105258b831ed8b76`  
-Started from audited HEAD: `6ed5ee9118b243d9bf416b048235053bdf547dcc`
+Implementation SHA: `733f9d46ef7cea338da1555314e32903167a8901`  
+Started from audited HEAD: `32a6abf2bf0ecc8df29e1e53105258b831ed8b76`  
+(plus the later docs commit `6c5b665`)
 
-OD-001 through OD-013 remain **ACCEPTED / FROZEN**. They were not reopened.
+OD-001 through OD-013 remain **ACCEPTED / FROZEN**.
 
 Authorization source of truth is only `config/definitions.yml`:
 
@@ -11,10 +12,12 @@ Authorization source of truth is only `config/definitions.yml`:
 living_cost:
   candidate_calculation_authorized: false
   release_authorized: false
+  required_project_cost_years: [2024, 2026]
 ```
 
 `states_modeled = 0`  
 `ready_for_private_candidate = false`  
+`candidate_inputs_bound = false`  
 `translation_index_bound = false`  
 `headline_calculated = false`
 
@@ -24,113 +27,95 @@ The private candidate assembler was not built.
 
 ---
 
-## GitHub CI (implementation SHA `32a6abf`)
+## GitHub CI (implementation SHA `733f9d4`)
 
 These are GitHub Actions results, not local pytest.
 
 | Workflow | Run | Result |
 |---|---|---|
-| Tests & Code Quality | [31866623783](https://github.com/sumosizedginger/foundation/actions/runs/31866623783) | **success — 151 passed, 5 skipped, 1 warning** |
-| Validate Living Cost Sources | [31866623766](https://github.com/sumosizedginger/foundation/actions/runs/31866623766) | **success** |
-| Deploy Pages | [31866623729](https://github.com/sumosizedginger/foundation/actions/runs/31866623729) | **success** |
+| Tests & Code Quality | [31894205899](https://github.com/sumosizedginger/foundation/actions/runs/31894205899) | **success — 161 passed, 5 skipped, 1 warning** |
+| Validate Living Cost Sources | [31894205780](https://github.com/sumosizedginger/foundation/actions/runs/31894205780) | **success** |
+| Deploy Pages | [31894205831](https://github.com/sumosizedginger/foundation/actions/runs/31894205831) | **success** |
 
 Dual independent verifiers: both `VERDICT: PASS`  
-(`/tmp/goal-verifier-23a579966517-code-review.md`, `/tmp/goal-verifier-23a579966517-qa.md`).  
-PASS issues were `[nit]` only.
+(`/tmp/goal-verifier-a9cbc4c02224-code-review.md`, `/tmp/goal-verifier-a9cbc4c02224-qa.md`).
 
 ---
 
 ## Completed this pass
 
-1. **USDA years stay separate.**  
-   `historical_2024`: 12 official months, January–December.  
-   `current_2026`: official YTD January–May (5 months).  
-   Top-level `months_included` is the 2026 YTD set.  
-   `substituted_2024_for_2026 = false`.  
-   A complete 2024 series cannot overwrite 2026 YTD.
+1. **Public freshness-gate bypasses removed.**  
+   `assert_candidate_freshness_ready(checks)` and `evaluate_freshness_readiness(checks)` accept only `checks`.  
+   No `required_families`, `translation_index_bound`, `silent_source_year_relabel`, `candidate_inputs_bound`, or `project_cost_year` parameters.  
+   The production gate always uses `REQUIRED_FRESHNESS_FAMILIES` and `is_translation_index_bound()`.  
+   Silent year-relabel is derived from check metadata (`substituted_2024_for_2026` / `silent_relabel`).  
+   Tests monkeypatch providers, not truth-value kwargs.
 
-2. **USDA workbook URLs are parsed official FNS hrefs.**  
-   Discovery and the download adapter do not construct `fna.usda.gov` URLs.  
-   Example: `https://www.fns.usda.gov/sites/default/files/resource-files/usda-lowcostplan-sept2007-present.xlsx`  
-   Missing hrefs fail closed to the official FNS landing.
+2. **Candidate year bundle is real.**  
+   `required_project_cost_years = [2024, 2026]` lives in `config/definitions.yml`.  
+   The gate refuses a family that does not cover a required year.  
+   A 2024-only record cannot silently satisfy 2026.
 
-3. **CMS records the federal + standalone SBE artifacts actually used.**  
-   Combined family is `VERIFIED_CURRENT` only when both listing checks succeed.  
-   Federal-only success does not pass the family.  
-   Artifact list includes hashed federal PUF files and year-specific SBE archives, including `cms_sbe_or_2024` and `cms_sbe_or_2026`.  
-   Oregon individual-market source remains `federal_exchange_puf`.  
-   Oregon SBE archive remains **SHOP-only** in `living_cost_cms_sbe_lowest_silver.json` (`market_scope: SHOP_only`) and is not treated as individual-market QHP.
+3. **`candidate_inputs_bound` is part of the assertion gate.**  
+   Canonical reader: `are_candidate_inputs_bound()` from  
+   `data/metadata/living_cost_candidate_input_bindings.json`.  
+   The file does not exist. The value is **false**.  
+   The public assertion raises `REQUIRED_CANDIDATE_INPUTS_NOT_BOUND`.  
+   No caller override. Assembler not built.
 
-4. **Authorization has one source of truth.**  
-   Public gates have no override parameters.  
-   Readers load `config/definitions.yml` and fail closed if the config is absent or malformed.  
-   Both flags remain false.
+4. **Listing freshness is separate from artifact-byte freshness.**  
+   New fields: `listing_freshness_status`, `artifact_currentness_status`,  
+   `selected_artifact_matches_latest`.  
+   A mutable source cannot be `VERIFIED_CURRENT` from a landing-page filename alone.
 
-5. **Pipeline release logic is not inverted.**  
-   `release_authorized=true` would fail as  
-   “Public living-cost release engine is not implemented/approved.”  
-   It does not say “not authorized.”  
-   Candidate=true no longer calls the freshness gate with `{}`.
+5. **USDA mutable workbook currentness.**  
+   Official latest month is parsed from the FNS page and from official workbook bytes  
+   downloaded to a temp file (cache is not overwritten).  
+   Official latest = selected latest = **May 2026**. Hashes match. Family `VERIFIED_CURRENT`.  
+   Cached May + official June => `NEWER_AVAILABLE`.  
+   Same month + changed bytes => `NEWER_AVAILABLE`.  
+   2024 remains 12 months. 2026 remains January–May.  
+   `substituted_2024_for_2026 = false`.
 
-6. **NAIC official landing is the real publications listing.**  
-   Landing: `https://content.naic.org/publications` (HTTP 200).  
-   Obsolete `research-actuarial-services/auto-insurance-database-report` 404 is gone from source modules.  
-   Leftover `content.naic.org/sites/default/files/inline-files/` FNA URLs are gone from live code/registry.  
-   Latest identifier is parsed from the page. Evidence remains `RETRIEVED_UNVALIDATED`.
+6. **Mutable-artifact rule applied to other rolling sources.**  
+   EIA `pswrgvwall.xls`: official max observation **2026-08-10** matches selected; hashes match; `VERIFIED_CURRENT`.  
+   EPA `vehicles.csv.zip`: listing current, bytes not proven; family `CHECK_FAILED`.  
+   BEA `SARPP.zip`: official zip hashed against selected; `VERIFIED_CURRENT` on this run.  
+   CMS current plan-year PUF: dual federal+SBE listing still required; mutable current-year archives are not treated as byte-current; family `CHECK_FAILED`.  
+   NAIC current report: vintage parsed, local PDF not proven to be that report; family `CHECK_FAILED`.
 
-7. **NHTS has an optional FHWA corroboration page.**  
-   If both official checks fail, status stays `CHECK_FAILED`.
+7. **NAIC vintage discovery.**  
+   Latest identifier: **AUT-PB 2022-2023**.  
+   Parser accepts `2022/2023`, `2022-2023`, `AUT-PB 2022-2023`.  
+   Highest ending year is selected.  
+   Generic title without a year range cannot be `VERIFIED_CURRENT`.  
+   Evidence remains `RETRIEVED_UNVALIDATED`.
 
-8. **Blocker accounting is split.**  
+8. **Duplicate gate reasons counted once.**  
    `empirical_blocker_family_count = 12`  
-   `gate_blocker_reason_count = 24`  
-   These are not 24 missing datasets.  
-   Freshness artifact still **FAIL**s. That is correct.
+   `gate_blocker_reason_count = 38` (unique strings)  
+   Freshness still **FAIL**s. That is correct.
 
-9. **Freshness remains a real check.**  
-   `timestamps_from_hardcoded_snapshot = false`.  
-   Statuses used: `VERIFIED_CURRENT` / `NEWER_AVAILABLE` / `CHECK_FAILED` / `MANUAL_VERIFICATION_REQUIRED` / `SOURCE_GAP`.
+9. **Preserved good state.**  
+   Frozen ODs, config-only authorization, both flags false, Oregon individual = federal PUF,  
+   Oregon SBE = SHOP-only, local tax unresolved ≠ 0, unsupported tax years fail closed.
 
 ---
 
-## Actual discovery statuses (committed artifact)
+## Report values (committed artifact)
 
-From `freshness_status_summary()`, not a hand-written override:
-
-```
-acs_population_weights: VERIFIED_CURRENT
-hud_fmr: VERIFIED_CURRENT
-usda_food: VERIFIED_CURRENT
-cms_marketplace_sbe: VERIFIED_CURRENT
-meps_full_year_consolidated: VERIFIED_CURRENT
-nhts_mileage: CHECK_FAILED
-epa_vehicle: VERIFIED_CURRENT
-eia_gasoline: VERIFIED_CURRENT
-naic_auto_insurance: VERIFIED_CURRENT
-bls_ce: CHECK_FAILED
-fcc_broadband: CHECK_FAILED
-mobile_price: SOURCE_GAP
-bea_rpp: VERIFIED_CURRENT
-federal_tax_law: MANUAL_VERIFICATION_REQUIRED
-state_tax_law: MANUAL_VERIFICATION_REQUIRED
-local_tax_law: MANUAL_VERIFICATION_REQUIRED
-vehicle_registration: SOURCE_GAP
-vehicle_replacement: SOURCE_GAP
-od010_price_index: MANUAL_VERIFICATION_REQUIRED
-```
-
-Automated/verified discovery: ACS, HUD, USDA, CMS, MEPS listing, EPA, EIA, NAIC listing, BEA RPP.  
-Manual: federal / state / local tax, OD-010.  
-Check failed: NHTS, BLS CE, FCC.  
-Source gap: mobile price, vehicle registration, vehicle replacement.
-
-USDA 2024 months: January–December (12)  
-USDA 2026 YTD months: January–May (5)  
-CMS federal: VERIFIED_CURRENT  
-CMS SBE: VERIFIED_CURRENT  
-NAIC: VERIFIED_CURRENT (publications listing; tables unvalidated)  
-BEA: VERIFIED_CURRENT  
-NHTS: CHECK_FAILED
+| Field | Value |
+|---|---|
+| `candidate_calculation_authorized` | false |
+| `living_cost.release_authorized` | false |
+| `candidate_inputs_bound` | false |
+| `required_project_cost_years` | [2024, 2026] |
+| USDA official latest month | May 2026 |
+| USDA selected latest month | May 2026 |
+| EIA latest observation | 2026-08-10 |
+| NAIC discovered identifier | AUT-PB 2022-2023 |
+| empirical blocker families | 12 |
+| unique gate blocker reasons | 38 |
 
 ---
 
@@ -140,26 +125,21 @@ These remain open. This pass did not paper over them.
 
 - Private candidate engine (not authorized; do not build)
 - Public MSLC / Gap / Adequacy / rankings / national median / Composite
-- `candidate_calculation_authorized` still false
-- `living_cost.release_authorized` still false
-- Bound OD-010 CPI/medical translation table (`OD010_TRANSLATION_INDEX_NOT_BOUND`)
-- Bound vehicle-replacement inputs (acquisition / residual / usable years)
+- Binding file for candidate inputs (`candidate_inputs_bound` stays false)
+- Bound OD-010 CPI/medical translation table
+- Bound vehicle-replacement inputs
 - Official BLS CE ZIP retrieve (HTTP 403 / `INCOMPLETE_PROVENANCE`)
 - Successful NHTS listing discovery
-- Successful FCC Urban Rate Survey retrieve (HTTP 403 / `SOURCE_GAP`)
+- Successful FCC Urban Rate Survey retrieve
 - Mobile phone price (`SOURCE_GAP`)
 - Vehicle registration inventory (`SOURCE_GAP`)
-- NAIC state-table extraction (`RETRIEVED_UNVALIDATED`)
+- NAIC local PDF bound to AUT-PB 2022-2023 and state-table extraction validated
+- EPA MPG cohort extraction (`RETRIEVED_UNVALIDATED`; listing is not byte proof)
+- CMS current-year PUF byte currentness
 - Federal tax inventory (`INVENTORY_NOT_VALIDATED`)
-- State/local tax inventories; most FIPS unresolved; class-C overlay not generally implemented
-- MEPS health OOP derivation (`RETRIEVED_UNVALIDATED`; newest released FY Consolidated is HC-251 / 2023; 2024 scheduled Aug 2026 ≠ released)
-- EPA MPG cohort extraction (`RETRIEVED_UNVALIDATED`; methodology frozen ≠ validated evidence)
+- State/local tax inventories
+- MEPS health OOP derivation (`RETRIEVED_UNVALIDATED`; HC-251 / 2023)
 - 12 empirical evidence blocker families
-
-Leftover nits (not blockers; do not treat as current):
-
-- `living_cost_source_manifest.json` USDA `landing_page` still uses a host-swapped `fns.usda.gov/research/cnpp/...` path. Live GET 200s to the same official Cost of Food page. Workbook `url` / `resolved_url` are official FNS hrefs.
-- Historical USDA cache `.provenance.json` sidecars still record old `fna.usda.gov` URLs. Live download/discovery no longer constructs that host.
 
 ---
 
@@ -167,8 +147,8 @@ Leftover nits (not blockers; do not treat as current):
 
 Do not calculate an MSLC.
 
-A later owner may set `candidate_calculation_authorized: true` only after freshness can pass.
+A later owner may set `candidate_calculation_authorized: true` only after freshness can pass, candidate inputs are bound, and the year bundle is covered.
 
-Publication still needs `release_authorized` and a built, approved release engine. Candidate authorization never implies publication.
+Publication still needs `release_authorized` and a built, approved release engine.
 
 STOP.
