@@ -1,0 +1,61 @@
+{
+  "report_type": "living_cost_epa_mpg_cohorts",
+  "generated_at": "2026-08-15T22:15:38Z",
+  "publisher": "EPA / DOE fueleconomy.gov",
+  "landing_url": "https://www.fueleconomy.gov/feg/download.shtml",
+  "artifact_url": "https://www.fueleconomy.gov/feg/epadata/vehicles.csv.zip",
+  "artifact_filename": "epa_fueleconomy_vehicles.csv.zip",
+  "sha256": "66a2948c425c3cf8ad61a184a12296099ef368217d3012b3f7531dcc9c5e2649",
+  "byte_size": 2200745,
+  "csv_member": "vehicles.csv",
+  "source_row_count": 50242,
+  "combined_mpg_field": "comb08",
+  "cohorts": {
+    "2024": {
+      "project_cost_year": 2024,
+      "model_year_low": 2012,
+      "model_year_high": 2016,
+      "total_source_rows": 50242,
+      "rows_after_fuel_filter": 45251,
+      "rows_after_body_class_filter": 20031,
+      "rows_after_model_year_filter": 2508,
+      "final_cohort_row_count": 2508,
+      "median_mpg": 24.0,
+      "mean_mpg": 24.7,
+      "compact_only_median_mpg": 24.0,
+      "midsize_only_median_mpg": 24.0,
+      "filter_columns": [
+        "fuelType",
+        "fuelType1",
+        "atvType",
+        "VClass",
+        "year",
+        "comb08"
+      ]
+    },
+    "2026": {
+      "project_cost_year": 2026,
+      "model_year_low": 2014,
+      "model_year_high": 2018,
+      "total_source_rows": 50242,
+      "rows_after_fuel_filter": 45251,
+      "rows_after_body_class_filter": 20031,
+      "rows_after_model_year_filter": 2618,
+      "final_cohort_row_count": 2618,
+      "median_mpg": 25.0,
+      "mean_mpg": 25.2,
+      "compact_only_median_mpg": 25.0,
+      "midsize_only_median_mpg": 25.0,
+      "filter_columns": [
+        "fuelType",
+        "fuelType1",
+        "atvType",
+        "VClass",
+        "year",
+        "comb08"
+      ]
+    }
+  },
+  "canonical_cohort": "used_compact_midsize_gasoline",
+  "calculates_mslc": false
+}

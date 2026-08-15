@@ -1,0 +1,32 @@
+{
+  "report_type": "mobile_price_source_candidate_review",
+  "generated_at": "2026-08-15T21:30:00Z",
+  "status": "OWNER_SOURCE_DECISION_REQUIRED",
+  "evidence_status": "SOURCE_GAP",
+  "frozen_requirement": "OD-009: one ordinary low-cost smartphone line with unlimited or sufficiently high-data service. Exclude Lifeline, emergency-only, zero-data, family-plan sharing.",
+  "calculates_mslc": false,
+  "candidates": [
+    {
+      "source": "FCC Urban Rate Survey / Measuring Broadband America",
+      "authority": "FCC",
+      "coverage": "broadband-focused; mobile PRICE not a published official national statistic for a single unlimited line",
+      "satisfies_od009_price": false,
+      "problem": "URS is a broadband rate survey. No official FCC mobile unlimited-line price series was found that matches the frozen single-line definition."
+    },
+    {
+      "source": "BLS CPI wireless telephone services",
+      "authority": "BLS",
+      "coverage": "index, not a dollar price",
+      "satisfies_od009_price": false,
+      "problem": "CPI is a translation index, not the frozen mobile PRICE observation."
+    },
+    {
+      "source": "Nationwide first-party prepaid carrier advertised unlimited plans",
+      "authority": "carrier first-party",
+      "coverage": "national advertised prices",
+      "satisfies_od009_price": "maybe",
+      "problem": "Choosing among carriers/plans is a material methodology decision not frozen in OD-009. Do not invent $50/month."
+    }
+  ],
+  "recommendation": "Leave SOURCE_GAP until the owner selects a first-party carrier methodology or an official statistical mobile PRICE series."
+}

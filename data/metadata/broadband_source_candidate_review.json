@@ -1,0 +1,19 @@
+{
+  "report_type": "broadband_source_candidate_review",
+  "generated_at": "2026-08-15T21:30:00Z",
+  "status": "SOURCE_GAP",
+  "frozen_requirement": "OD-009: one residential broadband connection representing ordinary meaningful service. Working standard remains 100/20 unless methodology changes.",
+  "calculates_mslc": false,
+  "candidates": [
+    {
+      "source": "FCC Urban Rate Survey",
+      "authority": "FCC",
+      "coverage": "study-area urban rates; retrieve historically HTTP 403",
+      "price_statistic": "reasonable comparability urban rates",
+      "geographic_resolution": "study area / census",
+      "satisfies_od009": "maybe, if 100/20 rates can be selected without a new owner method",
+      "problem": "Automated official retrieve has been HTTP 403. Selecting which URS rate is the canonical 100/20 ordinary price may be a new methodology decision."
+    }
+  ],
+  "recommendation": "Leave SOURCE_GAP until official URS bytes are retrievable and the owner confirms the 100/20 URS statistic mapping."
+}

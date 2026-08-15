@@ -12,9 +12,12 @@ Official sources researched:
 from __future__ import annotations
 
 import csv
+import hashlib
 import io
+import json
 import logging
 import zipfile
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -114,6 +117,64 @@ def _model_year(row: dict[str, str]) -> int | None:
     except ValueError:
         return None
     return year if 1980 <= year <= 2030 else None
+
+
+def filter_funnel(rows: list[dict[str, str]], cost_year: int) -> dict[str, Any]:
+    """Record official filter counts required by the evidence campaign."""
+    used_lo = cost_year - 12
+    used_hi = cost_year - 8
+    after_fuel = 0
+    after_class = 0
+    after_year = 0
+    final_mpgs: list[float] = []
+    compact_mpgs: list[float] = []
+    midsize_mpgs: list[float] = []
+    for row in rows:
+        if not _row_is_gasoline_ice(row):
+            continue
+        after_fuel += 1
+        klass = _row_class(row)
+        if klass not in {"compact", "midsize"}:
+            continue
+        after_class += 1
+        year = _model_year(row)
+        if year is None or year < used_lo or year > used_hi:
+            continue
+        after_year += 1
+        mpg = _combined_mpg(row)
+        if mpg is None:
+            continue
+        final_mpgs.append(mpg)
+        if klass == "compact":
+            compact_mpgs.append(mpg)
+        else:
+            midsize_mpgs.append(mpg)
+    weights = [1.0] * len(final_mpgs)
+    return {
+        "project_cost_year": cost_year,
+        "model_year_low": used_lo,
+        "model_year_high": used_hi,
+        "total_source_rows": len(rows),
+        "rows_after_fuel_filter": after_fuel,
+        "rows_after_body_class_filter": after_class,
+        "rows_after_model_year_filter": after_year,
+        "final_cohort_row_count": len(final_mpgs),
+        "median_mpg": (
+            round(weighted_percentile(final_mpgs, weights, 0.50), 1) if final_mpgs else None
+        ),
+        "mean_mpg": round(sum(final_mpgs) / len(final_mpgs), 1) if final_mpgs else None,
+        "compact_only_median_mpg": (
+            round(weighted_percentile(compact_mpgs, [1.0] * len(compact_mpgs), 0.50), 1)
+            if compact_mpgs
+            else None
+        ),
+        "midsize_only_median_mpg": (
+            round(weighted_percentile(midsize_mpgs, [1.0] * len(midsize_mpgs), 0.50), 1)
+            if midsize_mpgs
+            else None
+        ),
+        "filter_columns": ["fuelType", "fuelType1", "atvType", "VClass", "year", "comb08"],
+    }
 
 
 def build_mpg_candidates(rows: list[dict[str, str]], cost_year: int) -> list[dict[str, Any]]:
@@ -285,3 +346,39 @@ def parse_epa_mpg_candidates(
             )
         )
     return observations
+
+
+def write_mpg_cohort_report(cache_zip: Path, dest: Path) -> dict[str, Any]:
+    """Derive official EPA cohort statistics for 2024 and 2026. No MSLC."""
+    raw = cache_zip.read_bytes()
+    sha = hashlib.sha256(raw).hexdigest()
+    with zipfile.ZipFile(io.BytesIO(raw)) as archive:
+        members = [n for n in archive.namelist() if n.lower().endswith(".csv")]
+        if not members:
+            raise ValueError("EPA vehicles zip has no CSV member")
+        with archive.open(members[0]) as handle:
+            rows = list(
+                csv.DictReader(io.TextIOWrapper(handle, encoding="utf-8-sig", errors="replace"))
+            )
+    years = {
+        str(year): filter_funnel(rows, year) for year in (2024, 2026)
+    }
+    payload = {
+        "report_type": "living_cost_epa_mpg_cohorts",
+        "generated_at": datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+        "publisher": "EPA / DOE fueleconomy.gov",
+        "landing_url": EPA_FUELEconomy_LANDING,
+        "artifact_url": EPA_VEHICLES_ZIP,
+        "artifact_filename": cache_zip.name,
+        "sha256": sha,
+        "byte_size": len(raw),
+        "csv_member": members[0],
+        "source_row_count": len(rows),
+        "combined_mpg_field": "comb08",
+        "cohorts": years,
+        "canonical_cohort": "used_compact_midsize_gasoline",
+        "calculates_mslc": False,
+    }
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    dest.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    return payload

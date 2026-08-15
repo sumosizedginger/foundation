@@ -1,0 +1,25 @@
+{
+  "report_type": "vehicle_replacement_source_candidate_review",
+  "generated_at": "2026-08-15T21:30:00Z",
+  "status": "FORMULA_FROZEN_INPUTS_PENDING",
+  "formula": "(reference used-car acquisition cost - expected residual/salvage) / expected remaining usable years",
+  "calculates_mslc": false,
+  "inputs": {
+    "acquisition": {
+      "needed": "official or reproducible used-car price for the frozen modest gasoline compact/midsize 8-12 year cohort",
+      "candidates": ["BLS CPI used cars and trucks (index only)", "BEA NIPA used auto prices", "BTS/NHTS not a price"],
+      "bound": false
+    },
+    "residual": {
+      "needed": "expected residual/salvage at end of remaining usable years",
+      "candidates": ["no official national salvage schedule for this cohort"],
+      "bound": false
+    },
+    "usable_years": {
+      "needed": "remaining usable years for the frozen cohort",
+      "candidates": ["NHTS vehicle age distributions are usage, not remaining-life tables"],
+      "bound": false
+    }
+  },
+  "recommendation": "Do not invent $10,000 / $2,000 / 5 years. Leave FORMULA_FROZEN_INPUTS_PENDING."
+}
