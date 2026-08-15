@@ -250,8 +250,8 @@ def test_empirical_blockers_unchanged():
     coverage = json.loads((METADATA / "living_cost_source_coverage.json").read_text())
     for year in ("2024", "2026"):
         row = coverage["coverage_by_year"][year]
-        assert row["health_oop"] == "RETRIEVED_UNVALIDATED"
-        assert row["mpg"] == "RETRIEVED_UNVALIDATED"
+        assert row["health_oop"] == "MODELED_FROM_MEASURED_INPUTS"
+        assert row["mpg"] == "MODELED_FROM_MEASURED_INPUTS"
         assert row["insurance"] == "RETRIEVED_UNVALIDATED"
         assert row["maintenance"] == "INCOMPLETE_PROVENANCE"
         assert row["essentials"] == "INCOMPLETE_PROVENANCE"

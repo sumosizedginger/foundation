@@ -587,10 +587,10 @@ def test_production_coverage_keeps_evidence_separate_from_frozen_methodology():
     assert coverage["living_cost_release_authorized"] is False
     assert coverage["candidate_calculation_authorized"] is False
     assert coverage["decisions_frozen"] is True
-    assert coverage["coverage_by_year"]["2024"]["health_oop"] == "RETRIEVED_UNVALIDATED"
-    assert coverage["coverage_by_year"]["2024"]["mpg"] == "RETRIEVED_UNVALIDATED"
+    assert coverage["coverage_by_year"]["2024"]["health_oop"] == "MODELED_FROM_MEASURED_INPUTS"
+    assert coverage["coverage_by_year"]["2024"]["mpg"] == "MODELED_FROM_MEASURED_INPUTS"
     assert "MEPS HEALTH OOP DERIVATION" in coverage["blocker_notes"]["health_oop"]
-    assert "RETRIEVED_UNVALIDATED" in coverage["blocker_notes"]["mpg"]
+    assert "MODELED_FROM_MEASURED_INPUTS" in coverage["blocker_notes"]["mpg"]
     blob = json.dumps(coverage)
     assert "unfrozen" not in blob.lower()
     assert "OD-004 not frozen" not in blob

@@ -301,7 +301,8 @@ def test_acs_source_data_year_cross_bind():
         payload, checks, years=(2024, 2026), od010_payload=_complete_od010()
     )
     assert not any(
-        "population_weights:" in item and "SOURCE_DATA_YEAR_MISMATCH" in item for item in ok["issues"]
+        "population_weights:" in item and "SOURCE_DATA_YEAR_MISMATCH" in item
+        for item in ok["issues"]
     )
 
     payload["inputs"]["population_weights"]["2026"]["source_data_year"] = 2026
@@ -360,9 +361,7 @@ def test_od010_all_blocking_states_fail_and_validated_may_pass():
     assert _translation_record_complete(rec, component="health_oop", year=2024) is True
     for state in sorted(BLOCKING_BINDING_EVIDENCE):
         rec["retrieval_validation_state"] = state
-        assert (
-            _translation_record_complete(rec, component="health_oop", year=2024) is False
-        ), state
+        assert _translation_record_complete(rec, component="health_oop", year=2024) is False, state
     rec["retrieval_validation_state"] = "OK"
     assert _translation_record_complete(rec, component="health_oop", year=2024) is False
     rec["retrieval_validation_state"] = "VALIDATED"
@@ -422,7 +421,9 @@ def test_translation_policy_separates_method_from_evidence():
     assert FROZEN_TRANSLATION_POLICY["local_tax"] != "SOURCE_GAP"
     assert FROZEN_TRANSLATION_POLICY["replacement"] != "FORMULA_PENDING_INPUTS"
     assert FROZEN_TRANSLATION_POLICY["connectivity"] != "YTD"
-    coverage = json.loads((METADATA / "living_cost_source_coverage.json").read_text(encoding="utf-8"))
+    coverage = json.loads(
+        (METADATA / "living_cost_source_coverage.json").read_text(encoding="utf-8")
+    )
     assert coverage["source_lag"]["registration"]["translation_method"] == "RULE_YEAR"
     assert coverage["source_lag"]["local_tax"]["translation_method"] == "RULE_YEAR"
     assert coverage["coverage_by_year"]["2024"]["registration"] == "SOURCE_GAP"
@@ -534,9 +535,7 @@ def test_current_locks_and_no_fake_bindings():
     assert living["states_modeled"] == 0
     assert living["owner_freeze"]["status"] == "ACCEPTED"
     assert living["owner_freeze"]["methodology_status"] == "FROZEN"
-    assert living["owner_freeze"]["decisions"] == [
-        f"OD-{n:03d}" for n in range(1, 14)
-    ]
+    assert living["owner_freeze"]["decisions"] == [f"OD-{n:03d}" for n in range(1, 14)]
     assert OWNER_FREEZE_STATUS == "ACCEPTED"
     assert METHODOLOGY_STATUS_FROZEN == "FROZEN"
     assert freshness_candidate_auth() is False
@@ -560,7 +559,9 @@ def test_current_locks_and_no_fake_bindings():
     snapshot = snapshot_from_context(ctx)
     assert snapshot["ready_for_private_candidate"] is False
     assert snapshot["headline_calculated"] is False
-    coverage = json.loads((METADATA / "living_cost_source_coverage.json").read_text(encoding="utf-8"))
+    coverage = json.loads(
+        (METADATA / "living_cost_source_coverage.json").read_text(encoding="utf-8")
+    )
     assert coverage["states_modeled"] == 0
     assert coverage["candidate_calculation_authorized"] is False
     assert coverage["living_cost_release_authorized"] is False
@@ -569,7 +570,9 @@ def test_current_locks_and_no_fake_bindings():
     )
     assert freshness["ready_for_private_candidate"] is False
     assert freshness["candidate_inputs_bound"] is False
-    assert freshness.get("calculates_mslc") is False or freshness.get("headline_calculated") is False
+    assert (
+        freshness.get("calculates_mslc") is False or freshness.get("headline_calculated") is False
+    )
 
 
 def test_capture_json_artifact_hashes_the_same_bytes_it_parses(tmp_path: Path):

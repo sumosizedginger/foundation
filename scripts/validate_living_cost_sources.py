@@ -514,13 +514,26 @@ def write_coverage(artifacts: list[RetrievedSourceArtifact]) -> dict:
             in {"VALIDATED", "MODELED_FROM_MEASURED_INPUTS", "RETRIEVED_UNVALIDATED"}
             else _component_status(artifacts, f"usda_food_low_cost_{year}"),
             "health_premium": "MODELED_FROM_MEASURED_INPUTS",
-            "health_oop": _component_status(artifacts, f"meps_table1_{year}"),
+            "health_oop": (
+                "MODELED_FROM_MEASURED_INPUTS"
+                if (METADATA_DIR / "living_cost_meps_oop_derivation.json").exists()
+                else _component_status(artifacts, f"meps_table1_{year}")
+            ),
             "mileage": _component_status(artifacts, f"fhwa_nhts_{year}"),
             "mpg": (
-                "RETRIEVED_UNVALIDATED"
-                if _component_status(artifacts, f"epa_mpg_{year}")
-                in {"VALIDATED", "RETRIEVED_UNVALIDATED", "INCOMPLETE_PROVENANCE"}
-                else "SOURCE_GAP"
+                "MODELED_FROM_MEASURED_INPUTS"
+                if (METADATA_DIR / "living_cost_epa_mpg_cohorts.json").exists()
+                else (
+                    "RETRIEVED_UNVALIDATED"
+                    if _component_status(artifacts, f"epa_mpg_{year}")
+                    in {
+                        "VALIDATED",
+                        "RETRIEVED_UNVALIDATED",
+                        "INCOMPLETE_PROVENANCE",
+                        "MODELED_FROM_MEASURED_INPUTS",
+                    }
+                    else "SOURCE_GAP"
+                )
             ),
             "gas": _component_status(artifacts, f"eia_gas_price_{year}"),
             "insurance": _component_status(artifacts, f"naic_auto_ins_{year}"),
@@ -1020,8 +1033,8 @@ def write_transport_coverage() -> None:
                 "note": "FOUNDATION MOBILITY STANDARD = NHTS weighted median. Observed, not MEASURED MINIMUM NECESSARY MILEAGE. OD-003 FROZEN.",
             },
             "mpg": {
-                "status": "RETRIEVED_UNVALIDATED",
-                "note": "EPA fueleconomy.gov vehicle-level candidates built. OD-004 FROZEN: used-car compact+midsize gasoline median. 24/28/32 are not the empirical model.",
+                "status": "MODELED_FROM_MEASURED_INPUTS",
+                "note": "EPA fueleconomy.gov official cohort derived. OD-004 FROZEN: used-car compact+midsize gasoline median. 24/28/32 are not the empirical model.",
             },
             "gas": {
                 "status": "VALIDATED",

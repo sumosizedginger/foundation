@@ -990,12 +990,14 @@ def write_candidate_freshness_report(metadata_dir: Path) -> dict[str, Any]:
         },
         "notes": {
             "health_oop": (
-                "MEPS HEALTH OOP DERIVATION: RETRIEVED_UNVALIDATED. "
-                "Do not claim healthcare OOP ready merely because HC-251 was downloaded."
+                "MEPS HEALTH OOP DERIVATION: MODELED_FROM_MEASURED_INPUTS from official "
+                "HC-251 when living_cost_meps_oop_derivation.json matches the cached zip. "
+                "source_data_year remains 2023. Download is not derivation."
             ),
             "mpg": (
-                "EPA MPG evidence is RETRIEVED_UNVALIDATED. "
-                "OD-004 methodology FROZEN is not VALIDATED evidence."
+                "EPA MPG evidence is MODELED_FROM_MEASURED_INPUTS when the official "
+                "cohort report matches cached fueleconomy.gov bytes. "
+                "OD-004 methodology FROZEN is not a 24/28/32 constant."
             ),
             "vehicle_replacement": (
                 "Formula frozen. Acquisition, residual, and usable years pending."
@@ -1025,20 +1027,18 @@ def freshness_status_summary(payload: dict[str, Any]) -> str:
 
 BLOCKER_NOTES: dict[str, str] = {
     "health_oop": (
-        "MEPS HEALTH OOP DERIVATION: RETRIEVED_UNVALIDATED. "
-        "Tasks still required: use newest officially released Full Year Consolidated PUF; "
-        "validate fixed-width/codebook parsing; enforce approved age/private-insurance "
-        "filter; apply correct survey weights; derive weighted-mean canonical OOP; "
-        "retain median/P75 sensitivity; produce source hash/provenance; bind OD-010 "
-        "medical price translation for lagged years. Do not claim healthcare OOP ready "
-        "merely because HC-251 was downloaded."
+        "MEPS HEALTH OOP DERIVATION: MODELED_FROM_MEASURED_INPUTS from official HC-251 "
+        "(2023). OD-002 weighted mean of TOTSLF23 among AGELAST 18-64 / INSCOV23=1. "
+        "Median and P75 retained as sensitivities. source_data_year remains 2023. "
+        "2024 Full Year Consolidated is not listed (scheduled August 2026). "
+        "Lagged years use OD-010 medical-care CPI. Download is not derivation."
     ),
     "mpg": (
-        "EPA MPG: RETRIEVED_UNVALIDATED. OD-004 methodology is FROZEN; evidence is not "
-        "VALIDATED. Before candidate readiness validate gasoline non-BEV/non-PHEV "
-        "compact+midsize 8-12 model-year window median combined MPG from official EPA/"
-        "DOE rows. Record artifact, vintage, cohort model-year range, row count, filter "
-        "criteria, median MPG, sensitivities, hash/provenance."
+        "EPA MPG: MODELED_FROM_MEASURED_INPUTS from official fueleconomy.gov "
+        "vehicles.csv.zip. OD-004 methodology is FROZEN. Used-car gasoline "
+        "compact+midsize median comb08 for model years cost_year-12..cost_year-8. "
+        "24/28/32 are not the model. The vehicles.csv.zip URL is mutable; listing "
+        "is not byte currentness."
     ),
 }
 
@@ -1067,8 +1067,8 @@ def stamp_source_coverage_from_current_truth(coverage_path: Path) -> dict[str, A
         assert_source_lag_preserves_frozen_od010(lag)
     coverage["blocker_notes"] = dict(BLOCKER_NOTES)
     required_blockers = {
-        "health_oop": "RETRIEVED_UNVALIDATED",
-        "mpg": "RETRIEVED_UNVALIDATED",
+        "health_oop": "MODELED_FROM_MEASURED_INPUTS",
+        "mpg": "MODELED_FROM_MEASURED_INPUTS",
         "maintenance": "INCOMPLETE_PROVENANCE",
         "essentials": "INCOMPLETE_PROVENANCE",
         "recreation": "INCOMPLETE_PROVENANCE",

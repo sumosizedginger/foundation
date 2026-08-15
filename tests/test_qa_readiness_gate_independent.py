@@ -119,7 +119,7 @@ def test_live_freshness_writer_is_fail_closed(tmp_path: Path, monkeypatch: pytes
         bea["newer_data_exists"] is not True or bea["freshness_check_status"] == "NEWER_AVAILABLE"
     )
     assert payload["notes"]["health_oop"].startswith("MEPS HEALTH OOP DERIVATION")
-    assert "RETRIEVED_UNVALIDATED" in payload["notes"]["mpg"]
+    assert "MODELED_FROM_MEASURED_INPUTS" in payload["notes"]["mpg"]
     # Fail-closed: a VALIDATED family must not invent a pass for OOP/MPG.
     for family in payload["required_families"]:
         check = payload["checks"][family]
@@ -180,16 +180,16 @@ def test_coverage_documents_oop_and_mpg_as_retrieved_unvalidated():
     assert coverage["headline_calculated"] is False
     assert coverage["states_modeled"] == 0
     for year in ("2024", "2026"):
-        assert coverage["coverage_by_year"][year]["health_oop"] == "RETRIEVED_UNVALIDATED"
-        assert coverage["coverage_by_year"][year]["mpg"] == "RETRIEVED_UNVALIDATED"
+        assert coverage["coverage_by_year"][year]["health_oop"] == "MODELED_FROM_MEASURED_INPUTS"
+        assert coverage["coverage_by_year"][year]["mpg"] == "MODELED_FROM_MEASURED_INPUTS"
         assert coverage["coverage_by_year"][year]["replacement"] == (
             "FORMULA_FROZEN_INPUTS_PENDING"
         )
         assert coverage["coverage_by_year"][year]["rpp"] == "VALIDATED"
     notes = coverage["blocker_notes"]
-    assert "RETRIEVED_UNVALIDATED" in notes["health_oop"]
+    assert "MODELED_FROM_MEASURED_INPUTS" in notes["health_oop"]
     assert "HC-251" in notes["health_oop"]
-    assert "RETRIEVED_UNVALIDATED" in notes["mpg"]
+    assert "MODELED_FROM_MEASURED_INPUTS" in notes["mpg"]
     assert "FROZEN" in notes["mpg"]
 
 

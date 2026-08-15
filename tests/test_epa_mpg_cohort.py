@@ -18,9 +18,7 @@ def test_committed_epa_cohort_report_matches_official_bytes():
     payload = json.loads(REPORT.read_text(encoding="utf-8"))
     assert payload["calculates_mslc"] is False
     assert payload["combined_mpg_field"] == "comb08"
-    assert payload["sha256"] == (
-        "66a2948c425c3cf8ad61a184a12296099ef368217d3012b3f7531dcc9c5e2649"
-    )
+    assert payload["sha256"] == ("66a2948c425c3cf8ad61a184a12296099ef368217d3012b3f7531dcc9c5e2649")
     c2024 = payload["cohorts"]["2024"]
     c2026 = payload["cohorts"]["2026"]
     assert c2024["model_year_low"] == 2012

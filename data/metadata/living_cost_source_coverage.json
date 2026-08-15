@@ -29,9 +29,9 @@
       "population_weights": "VALIDATED",
       "food": "MODELED_FROM_MEASURED_INPUTS",
       "health_premium": "MODELED_FROM_MEASURED_INPUTS",
-      "health_oop": "RETRIEVED_UNVALIDATED",
+      "health_oop": "MODELED_FROM_MEASURED_INPUTS",
       "mileage": "VALIDATED",
-      "mpg": "RETRIEVED_UNVALIDATED",
+      "mpg": "MODELED_FROM_MEASURED_INPUTS",
       "gas": "VALIDATED",
       "insurance": "RETRIEVED_UNVALIDATED",
       "maintenance": "INCOMPLETE_PROVENANCE",
@@ -50,9 +50,9 @@
       "population_weights": "VALIDATED",
       "food": "MODELED_FROM_MEASURED_INPUTS",
       "health_premium": "MODELED_FROM_MEASURED_INPUTS",
-      "health_oop": "RETRIEVED_UNVALIDATED",
+      "health_oop": "MODELED_FROM_MEASURED_INPUTS",
       "mileage": "VALIDATED",
-      "mpg": "RETRIEVED_UNVALIDATED",
+      "mpg": "MODELED_FROM_MEASURED_INPUTS",
       "gas": "VALIDATED",
       "insurance": "RETRIEVED_UNVALIDATED",
       "maintenance": "INCOMPLETE_PROVENANCE",
@@ -976,7 +976,7 @@
           "methodology_status": "FROZEN"
         },
         "health_oop": {
-          "evidence_status": "RETRIEVED_UNVALIDATED",
+          "evidence_status": "MODELED_FROM_MEASURED_INPUTS",
           "methodology_status": "FROZEN"
         },
         "mileage": {
@@ -984,7 +984,7 @@
           "methodology_status": "FROZEN"
         },
         "mpg": {
-          "evidence_status": "RETRIEVED_UNVALIDATED",
+          "evidence_status": "MODELED_FROM_MEASURED_INPUTS",
           "methodology_status": "FROZEN"
         },
         "gas": {
@@ -1054,7 +1054,7 @@
           "methodology_status": "FROZEN"
         },
         "health_oop": {
-          "evidence_status": "RETRIEVED_UNVALIDATED",
+          "evidence_status": "MODELED_FROM_MEASURED_INPUTS",
           "methodology_status": "FROZEN"
         },
         "mileage": {
@@ -1062,7 +1062,7 @@
           "methodology_status": "FROZEN"
         },
         "mpg": {
-          "evidence_status": "RETRIEVED_UNVALIDATED",
+          "evidence_status": "MODELED_FROM_MEASURED_INPUTS",
           "methodology_status": "FROZEN"
         },
         "gas": {
@@ -1117,8 +1117,6 @@
     }
   },
   "blocking_components": [
-    "2024:health_oop:RETRIEVED_UNVALIDATED",
-    "2024:mpg:RETRIEVED_UNVALIDATED",
     "2024:insurance:RETRIEVED_UNVALIDATED",
     "2024:maintenance:INCOMPLETE_PROVENANCE",
     "2024:registration:SOURCE_GAP",
@@ -1129,8 +1127,6 @@
     "2024:federal_tax:INVENTORY_NOT_VALIDATED",
     "2024:state_tax:SOURCE_GAP",
     "2024:local_tax:SOURCE_GAP",
-    "2026:health_oop:RETRIEVED_UNVALIDATED",
-    "2026:mpg:RETRIEVED_UNVALIDATED",
     "2026:insurance:RETRIEVED_UNVALIDATED",
     "2026:maintenance:INCOMPLETE_PROVENANCE",
     "2026:registration:SOURCE_GAP",
@@ -1151,7 +1147,7 @@
   "methodology_frozen_is_not_source_validated": true,
   "candidate_calculation_authorized": false,
   "blocker_notes": {
-    "health_oop": "MEPS HEALTH OOP DERIVATION: RETRIEVED_UNVALIDATED. Tasks still required: use newest officially released Full Year Consolidated PUF; validate fixed-width/codebook parsing; enforce approved age/private-insurance filter; apply correct survey weights; derive weighted-mean canonical OOP; retain median/P75 sensitivity; produce source hash/provenance; bind OD-010 medical price translation for lagged years. Do not claim healthcare OOP ready merely because HC-251 was downloaded.",
-    "mpg": "EPA MPG: RETRIEVED_UNVALIDATED. OD-004 methodology is FROZEN; evidence is not VALIDATED. Before candidate readiness validate gasoline non-BEV/non-PHEV compact+midsize 8-12 model-year window median combined MPG from official EPA/DOE rows. Record artifact, vintage, cohort model-year range, row count, filter criteria, median MPG, sensitivities, hash/provenance."
+    "health_oop": "MEPS HEALTH OOP DERIVATION: MODELED_FROM_MEASURED_INPUTS from official HC-251 (2023). OD-002 weighted mean of TOTSLF23 among AGELAST 18-64 / INSCOV23=1. Median and P75 retained as sensitivities. source_data_year remains 2023. 2024 Full Year Consolidated is not listed (scheduled August 2026). Lagged years use OD-010 medical-care CPI. Download is not derivation.",
+    "mpg": "EPA MPG: MODELED_FROM_MEASURED_INPUTS from official fueleconomy.gov vehicles.csv.zip. OD-004 methodology is FROZEN. Used-car gasoline compact+midsize median comb08 for model years cost_year-12..cost_year-8. 24/28/32 are not the model. The vehicles.csv.zip URL is mutable; listing is not byte currentness."
   }
 }

@@ -1,0 +1,55 @@
+{
+  "source_data_year": 2023,
+  "puf_id": "HC-251",
+  "source_variable": "TOTSLF23",
+  "weight_variable": "PERWT23F",
+  "age_variable": "AGELAST",
+  "insurance_variable": "INSCOV23",
+  "insurance_code": 1,
+  "insurance_code_label": "ANY PRIVATE",
+  "age_low": 18,
+  "age_high": 64,
+  "includes_zero_oop": true,
+  "row_count": 18919,
+  "rejected_parse_count": 0,
+  "in_universe_n": 7039,
+  "weighted_population": 146009156.11308452,
+  "weighted_mean": 1117.72,
+  "weighted_median": 311.0,
+  "weighted_p75": 1114.0,
+  "unweighted_mean": 1168.75,
+  "layout": {
+    "AGELAST": [
+      194,
+      195
+    ],
+    "INSCOV23": [
+      2090,
+      2090
+    ],
+    "TOTSLF23": [
+      2483,
+      2488
+    ],
+    "PERWT23F": [
+      3847,
+      3859
+    ]
+  },
+  "report_type": "living_cost_meps_oop_derivation",
+  "generated_at": "2026-08-15T22:37:39Z",
+  "publisher": "AHRQ MEPS",
+  "landing_url": "https://meps.ahrq.gov/mepsweb/data_stats/download_data_files_detail.jsp?cboPufNumber=HC-251",
+  "codebook_url": "https://meps.ahrq.gov/mepsweb/data_stats/download_data_files_codebook.jsp?PUFId=H251",
+  "sas_statements_url": "https://meps.ahrq.gov/mepsweb/data_stats/download_data/pufs/h251/h251su.txt",
+  "artifact_url": "https://meps.ahrq.gov/mepsweb/data_files/pufs/h251/h251dat.zip",
+  "artifact_filename": "h251dat.zip",
+  "dat_member": "h251.dat",
+  "sha256": "ad0edc2e34b28b90c8c89f43869f4e90338c93c97c0bfc2cad73140b96edd55a",
+  "byte_size": 5037048,
+  "sas_sha256": "5348bbc7d71ebb9294743556739af05051cff813e3ace4cb7ea8bccdd8e83735",
+  "download_is_not_derivation": true,
+  "calculates_mslc": false,
+  "evidence_status": "MODELED_FROM_MEASURED_INPUTS",
+  "notes": "OD-002 canonical statistic is the person-weighted mean of TOTSLF23 among AGELAST 18-64 with INSCOV23=1 (ANY PRIVATE). Weighted median and P75 are required sensitivities. source_data_year remains 2023. Newest official Full Year Consolidated PUF actually listed is HC-251 (2023). AHRQ official 2026 release schedule lists the 2024 Full Year Consolidated Data File for AUGUST 2026. Do not claim the 2024 file exists until it appears in the official MEPS PUF listing."
+}

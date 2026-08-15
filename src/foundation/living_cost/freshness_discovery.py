@@ -785,13 +785,40 @@ def discover_meps() -> FreshnessCheck:
         status = "VERIFIED_CURRENT"
         newer = False
     sidecar = _sidecar("h251dat.zip")
+    from foundation.sources.meps import load_meps_oop_derivation
+
+    derivation = load_meps_oop_derivation()
+    derived = (
+        derivation is not None
+        and derivation.get("sha256") == (sidecar or {}).get("sha256")
+        and derivation.get("source_data_year") == MEPS_DATA_YEAR
+        and derivation.get("weighted_mean") is not None
+    )
+    evidence = "MODELED_FROM_MEASURED_INPUTS" if derived else "RETRIEVED_UNVALIDATED"
     art = _artifact_record(
         artifact_id="h251dat.zip",
         url="https://meps.ahrq.gov/mepsweb/data_files/pufs/h251/h251dat.zip",
         sha256=(sidecar or {}).get("sha256"),
         retrieved_at=(sidecar or {}).get("retrieved_at"),
-        validation_status="RETRIEVED_UNVALIDATED",
+        validation_status=evidence,
     )
+    if derived:
+        reason = (
+            "MEPS HEALTH OOP DERIVATION: MODELED_FROM_MEASURED_INPUTS from official HC-251. "
+            f"OD-002 weighted mean TOTSLF23={derivation['weighted_mean']}; "
+            f"n={derivation['in_universe_n']}; source_data_year={MEPS_DATA_YEAR}. "
+            f"Official PUF listing checked at {MEPS_LISTING_URL}. {notes} "
+            "Download is not derivation. 2024 FYC remains unreleased."
+        )
+        method = "OD-002 weighted mean of TOTSLF23; AGELAST 18-64; INSCOV23=1"
+    else:
+        reason = (
+            "MEPS HEALTH OOP DERIVATION: RETRIEVED_UNVALIDATED. "
+            f"Official PUF listing checked at {MEPS_LISTING_URL}. {notes} "
+            "Scheduled future releases do not count as released. "
+            "HC-251 download is not derivation-ready."
+        )
+        method = "weighted-mean OOP pending; not yet derived"
     return FreshnessCheck(
         source_id="meps_full_year_consolidated",
         latest_checked_at=checked,
@@ -801,20 +828,15 @@ def discover_meps() -> FreshnessCheck:
         selected_vintage=f"{MEPS_PUF_ID} / {MEPS_DATA_YEAR}",
         selected_artifact="h251dat.zip",
         newer_data_exists=newer,
-        retrieval_validation_status="RETRIEVED_UNVALIDATED",
-        reason_if_not_refreshed=(
-            "MEPS HEALTH OOP DERIVATION: RETRIEVED_UNVALIDATED. "
-            f"Official PUF listing checked at {MEPS_LISTING_URL}. {notes} "
-            "Scheduled future releases do not count as released. "
-            "HC-251 download is not derivation-ready."
-        ),
+        retrieval_validation_status=evidence,
+        reason_if_not_refreshed=reason,
         freshness_check_status=status,
         publisher="AHRQ MEPS",
         landing_url=MEPS_LISTING_URL,
         selected_artifacts=(art,),
         retrieved_at=(sidecar or {}).get("retrieved_at"),
-        transformation_method="weighted-mean OOP pending; not yet derived",
-        input_evidence_status="RETRIEVED_UNVALIDATED",
+        transformation_method=method,
+        input_evidence_status=evidence,
         year_coverage=_year_coverage(
             {
                 "covered": True,
@@ -831,7 +853,7 @@ def discover_meps() -> FreshnessCheck:
                 "note": "MEPS source year 2023; 2026 uses OD-010 translation",
             },
         ),
-        extra={"listing": refresh},
+        extra={"listing": refresh, "derivation": derivation if derived else None},
     )
 
 
@@ -930,12 +952,28 @@ def discover_nhts() -> FreshnessCheck:
 
 def discover_epa() -> FreshnessCheck:
     sidecar = _sidecar("epa_fueleconomy_vehicles.csv.zip") or _sidecar("vehicles.csv.zip")
+    cohort_path = METADATA_DIR / "living_cost_epa_mpg_cohorts.json"
+    cohort = None
+    if cohort_path.exists():
+        try:
+            cohort = json.loads(cohort_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            cohort = None
+    derived_mpg = bool(
+        isinstance(cohort, dict)
+        and cohort.get("sha256") == (sidecar or {}).get("sha256")
+        and cohort.get("calculates_mslc") is False
+        and isinstance(cohort.get("cohorts"), dict)
+        and cohort["cohorts"].get("2024", {}).get("median_mpg")
+        and cohort["cohorts"].get("2026", {}).get("median_mpg")
+    )
+    epa_evidence = "MODELED_FROM_MEASURED_INPUTS" if derived_mpg else "RETRIEVED_UNVALIDATED"
     art = _artifact_record(
         artifact_id="epa_fueleconomy_vehicles.csv.zip",
         url="https://www.fueleconomy.gov/feg/epadata/vehicles.csv.zip",
         sha256=(sidecar or {}).get("sha256"),
         retrieved_at=(sidecar or {}).get("retrieved_at"),
-        validation_status="RETRIEVED_UNVALIDATED",
+        validation_status=epa_evidence,
     )
     try:
         html, checked = fetch_text(EPA_FUELEconomy_LANDING)
@@ -976,10 +1014,17 @@ def discover_epa() -> FreshnessCheck:
         selected_vintage="EPA/DOE fueleconomy.gov vehicles.csv.zip",
         selected_artifact="epa_fueleconomy_vehicles.csv.zip",
         newer_data_exists=currentness["newer_data_exists"],
-        retrieval_validation_status="RETRIEVED_UNVALIDATED",
+        retrieval_validation_status=epa_evidence,
         reason_if_not_refreshed=(
-            "OD-004 methodology is FROZEN; EPA MPG evidence is RETRIEVED_UNVALIDATED. "
-            "Official fueleconomy.gov download page still lists vehicles.csv. "
+            "OD-004 methodology is FROZEN. "
+            + (
+                "EPA MPG evidence is MODELED_FROM_MEASURED_INPUTS from official "
+                "fueleconomy.gov vehicles.csv.zip using cost_year-12..cost_year-8 "
+                "gasoline compact+midsize comb08 medians. "
+                if derived_mpg
+                else "EPA MPG evidence is RETRIEVED_UNVALIDATED. "
+            )
+            + "Official fueleconomy.gov download page still lists vehicles.csv. "
             "The URL is mutable. Listing the filename is not byte currentness. "
             f"{currentness['reason']}"
         ),
@@ -988,8 +1033,12 @@ def discover_epa() -> FreshnessCheck:
         landing_url=EPA_FUELEconomy_LANDING,
         selected_artifacts=(art,),
         retrieved_at=(sidecar or {}).get("retrieved_at"),
-        transformation_method="median combined MPG cohort pending validation",
-        input_evidence_status="RETRIEVED_UNVALIDATED",
+        transformation_method=(
+            "OD-004 used compact+midsize gasoline median comb08"
+            if derived_mpg
+            else "median combined MPG cohort pending validation"
+        ),
+        input_evidence_status=epa_evidence,
         listing_freshness_status=currentness["listing_freshness_status"],
         artifact_currentness_status=currentness["artifact_currentness_status"],
         selected_artifact_matches_latest=currentness["selected_artifact_matches_latest"],

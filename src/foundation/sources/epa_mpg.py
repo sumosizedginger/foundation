@@ -360,9 +360,7 @@ def write_mpg_cohort_report(cache_zip: Path, dest: Path) -> dict[str, Any]:
             rows = list(
                 csv.DictReader(io.TextIOWrapper(handle, encoding="utf-8-sig", errors="replace"))
             )
-    years = {
-        str(year): filter_funnel(rows, year) for year in (2024, 2026)
-    }
+    years = {str(year): filter_funnel(rows, year) for year in (2024, 2026)}
     payload = {
         "report_type": "living_cost_epa_mpg_cohorts",
         "generated_at": datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
