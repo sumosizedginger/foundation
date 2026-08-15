@@ -1,7 +1,7 @@
 {
   "report_type": "living_cost_candidate_freshness",
-  "generated_at": "2026-08-15T02:51:42Z",
-  "schema_version": "1.0",
+  "generated_at": "2026-08-15T04:18:29Z",
+  "schema_version": "2.0",
   "calculates_mslc": false,
   "required_families": [
     "acs_population_weights",
@@ -27,215 +27,1177 @@
   "checks": {
     "acs_population_weights": {
       "source_id": "acs_population_weights",
-      "latest_checked_at": "2026-08-15T02:51:42Z",
-      "latest_authoritative_vintage_found": "2024 ACS 5-Year B01001",
+      "latest_checked_at": "2026-08-15T04:18:28Z",
+      "latest_authoritative_vintage_found": "2024",
       "selected_vintage": "2024 ACS 5-Year B01001",
-      "selected_artifact": "census_acs5_2024 / acsdt5y2024-b01001.dat",
+      "selected_artifact": "acsdt5y2024-b01001.dat",
       "newer_data_exists": false,
       "retrieval_validation_status": "VALIDATED",
-      "reason_if_not_refreshed": "Newest county-level ACS 5-Year vintage at check time is 2024; used for current and historical 2024. Fixed-2024 sensitivity retained."
+      "reason_if_not_refreshed": "Official ACS summary_file listing checked at https://www2.census.gov/programs-surveys/acs/summary_file/. ACS 5-Year listing years=[2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024]; selected 2024 B01001. Selected county adult weights remain 2024 ACS 5-Year B01001. Do not relabel 2024 as a later year.",
+      "freshness_check_status": "VERIFIED_CURRENT",
+      "publisher": "U.S. Census Bureau",
+      "landing_url": "https://www2.census.gov/programs-surveys/acs/summary_file/",
+      "selected_artifacts": [
+        {
+          "artifact_id": "acsdt5y2024-b01001.dat",
+          "filename": "acsdt5y2024-b01001.dat",
+          "url": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b01001.dat",
+          "sha256": "1637b18a96881b81e050df1cd3d5ac38a33208b9b69b40e1dbeb3c4e13718f0e",
+          "retrieved_at": "2026-08-14T20:18:18+00:00",
+          "validation_status": "VALIDATED"
+        }
+      ],
+      "retrieved_at": "2026-08-14T20:18:18+00:00",
+      "transformation_method": "LATEST_AVAILABLE county adult 18+ weights; historical 2024 fixed",
+      "input_evidence_status": "VALIDATED",
+      "months_included": null,
+      "month_count": null,
+      "first_month": null,
+      "last_month": null,
+      "extra": {
+        "listed_years": [
+          2005,
+          2006,
+          2007,
+          2008,
+          2009,
+          2010,
+          2011,
+          2012,
+          2013,
+          2014,
+          2015,
+          2016,
+          2017,
+          2018,
+          2019,
+          2020,
+          2021,
+          2022,
+          2023,
+          2024
+        ]
+      }
     },
     "hud_fmr": {
       "source_id": "hud_fmr",
-      "latest_checked_at": "2026-08-15T02:51:42Z",
+      "latest_checked_at": "2026-08-15T04:18:29Z",
       "latest_authoritative_vintage_found": "FY2024 / FY2026",
       "selected_vintage": "FY2024 / FY2026",
       "selected_artifact": "FMR2024_final_revised.xlsx / FY26_FMRs_revised.xlsx",
       "newer_data_exists": false,
       "retrieval_validation_status": "VALIDATED",
-      "reason_if_not_refreshed": "Official HUD FY2024 and FY2026 county workbooks are the newest applicable FMR vintages."
+      "reason_if_not_refreshed": "Official HUD FMR dataset page checked. Selected historical FY2024 present=True; target FY2026 present=True; FY2027 listed=False.",
+      "freshness_check_status": "VERIFIED_CURRENT",
+      "publisher": "U.S. Department of Housing and Urban Development",
+      "landing_url": "https://www.huduser.gov/portal/datasets/fmr.html",
+      "selected_artifacts": [
+        {
+          "artifact_id": "FMR2024_final_revised.xlsx",
+          "filename": "FMR2024_final_revised.xlsx",
+          "url": "https://www.huduser.gov/portal/datasets/fmr/fmr2024/FMR2024_final_revised.xlsx",
+          "sha256": "0a6634d5745e07f0638efe2aca65161b4b8d6982ebd4d257e8191ed18ecfbf98",
+          "retrieved_at": "2026-08-14T20:17:47+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "FY26_FMRs_revised.xlsx",
+          "filename": "FY26_FMRs_revised.xlsx",
+          "url": "https://www.huduser.gov/portal/datasets/fmr/fmr2026/FY26_FMRs_revised.xlsx",
+          "sha256": "0b130fd046c7bedbee5d206ab55654d390d27da423ff22e307e0698fbb56ad9c",
+          "retrieved_at": "2026-08-14T20:19:10+00:00",
+          "validation_status": "VALIDATED"
+        }
+      ],
+      "retrieved_at": null,
+      "transformation_method": "NONE (year-specific FMR workbooks)",
+      "input_evidence_status": "VALIDATED",
+      "months_included": null,
+      "month_count": null,
+      "first_month": null,
+      "last_month": null,
+      "extra": null
     },
     "usda_food": {
       "source_id": "usda_food",
-      "latest_checked_at": "2026-08-15T02:51:42Z",
-      "latest_authoritative_vintage_found": "target-year monthly reports / YTD",
-      "selected_vintage": "target-year monthly reports / YTD",
-      "selected_artifact": "usda food-plan monthly reports",
+      "latest_checked_at": "2026-08-15T04:18:29Z",
+      "latest_authoritative_vintage_found": "USDA Low-Cost / Thrifty monthly archives",
+      "selected_vintage": "USDA official monthly archives (2024 full year; 2026 YTD if incomplete)",
+      "selected_artifact": "usda-lowcostplan-sept2007-present.xlsx / usda-thriftyplan-june2021-present.xlsx",
       "newer_data_exists": false,
       "retrieval_validation_status": "MODELED_FROM_MEASURED_INPUTS",
-      "reason_if_not_refreshed": "Canonical USDA Low-Cost; Thrifty sensitivity. Incomplete years use YTD."
+      "reason_if_not_refreshed": "Official USDA Cost of Food archive page checked. Canonical plan is Low-Cost; Thrifty is sensitivity. Months below are from parsed official workbook rows, not a label.",
+      "freshness_check_status": "VERIFIED_CURRENT",
+      "publisher": "USDA Center for Nutrition Policy and Promotion",
+      "landing_url": "https://www.fns.usda.gov/cnpp/usda-food-plans-cost-food-monthly-reports",
+      "selected_artifacts": [
+        {
+          "artifact_id": "usda-lowcostplan-sept2007-present.xlsx",
+          "filename": "usda-lowcostplan-sept2007-present.xlsx",
+          "url": "https://www.fna.usda.gov/sites/default/files/resource-files/usda-lowcostplan-sept2007-present.xlsx",
+          "sha256": "3944b5dea8cb966fe85acbfd795bb4ec79c0f63a63141abd63913712e0698e86",
+          "retrieved_at": "2026-08-14T17:30:05+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "usda-thriftyplan-june2021-present.xlsx",
+          "filename": "usda-thriftyplan-june2021-present.xlsx",
+          "url": "https://www.fna.usda.gov/sites/default/files/resource-files/usda-thriftyplan-june2021-present.xlsx",
+          "sha256": "ca4a32b7001f50f5a73ac32a8d07badd2937ec3d801e018f7ac7b5300b1fc164",
+          "retrieved_at": "2026-08-14T20:18:57+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "usda-alaska-june2023-present.xlsx",
+          "filename": "usda-alaska-june2023-present.xlsx",
+          "url": "https://www.fna.usda.gov/sites/default/files/resource-files/usda-alaska-june2023-present.xlsx",
+          "sha256": "67c1f7ad894b44b84f8a57b8971b16d093fa9d673be689a3c0056174dc0ddd13",
+          "retrieved_at": "2026-08-14T20:18:58+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "usda-hawaii-june2023-present.xlsx",
+          "filename": "usda-hawaii-june2023-present.xlsx",
+          "url": "https://www.fna.usda.gov/sites/default/files/resource-files/usda-hawaii-june2023-present.xlsx",
+          "sha256": "9043d9da254c237dab20710f8f37b57682a9800da0d3adddce70a7fe0d39096d",
+          "retrieved_at": "2026-08-14T20:18:59+00:00",
+          "validation_status": "VALIDATED"
+        }
+      ],
+      "retrieved_at": null,
+      "transformation_method": "adult 19-50 midpoint \u00d7 official 1.20 one-person factor",
+      "input_evidence_status": "MODELED_FROM_MEASURED_INPUTS",
+      "months_included": [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December"
+      ],
+      "month_count": 12,
+      "first_month": "January",
+      "last_month": "December",
+      "extra": {
+        "plans": {
+          "low_cost": {
+            "filename": "usda-lowcostplan-sept2007-present.xlsx",
+            "sha256": "3944b5dea8cb966fe85acbfd795bb4ec79c0f63a63141abd63913712e0698e86",
+            "retrieved_at": "2026-08-14T17:30:05+00:00",
+            "months_included": [
+              "January",
+              "February",
+              "March",
+              "April",
+              "May",
+              "June",
+              "July",
+              "August",
+              "September",
+              "October",
+              "November",
+              "December"
+            ],
+            "month_count": 12,
+            "first_month": "January",
+            "last_month": "December"
+          },
+          "thrifty": {
+            "filename": "usda-thriftyplan-june2021-present.xlsx",
+            "sha256": "ca4a32b7001f50f5a73ac32a8d07badd2937ec3d801e018f7ac7b5300b1fc164",
+            "retrieved_at": "2026-08-14T20:18:57+00:00",
+            "months_included": [
+              "January",
+              "February",
+              "March",
+              "April",
+              "May",
+              "June",
+              "July",
+              "August",
+              "September",
+              "October",
+              "November",
+              "December"
+            ],
+            "month_count": 12,
+            "first_month": "January",
+            "last_month": "December"
+          },
+          "alaska": {
+            "filename": "usda-alaska-june2023-present.xlsx",
+            "sha256": "67c1f7ad894b44b84f8a57b8971b16d093fa9d673be689a3c0056174dc0ddd13",
+            "retrieved_at": "2026-08-14T20:18:58+00:00",
+            "months_included": [
+              "January",
+              "February",
+              "March",
+              "April",
+              "May",
+              "June",
+              "July",
+              "August",
+              "September",
+              "October",
+              "November",
+              "December"
+            ],
+            "month_count": 12,
+            "first_month": "January",
+            "last_month": "December"
+          },
+          "hawaii": {
+            "filename": "usda-hawaii-june2023-present.xlsx",
+            "sha256": "9043d9da254c237dab20710f8f37b57682a9800da0d3adddce70a7fe0d39096d",
+            "retrieved_at": "2026-08-14T20:18:59+00:00",
+            "months_included": [
+              "January",
+              "February",
+              "March",
+              "April",
+              "May",
+              "June",
+              "July",
+              "August",
+              "September",
+              "October",
+              "November",
+              "December"
+            ],
+            "month_count": 12,
+            "first_month": "January",
+            "last_month": "December"
+          }
+        }
+      }
     },
     "cms_marketplace_sbe": {
       "source_id": "cms_marketplace_sbe",
-      "latest_checked_at": "2026-08-15T02:51:42Z",
-      "latest_authoritative_vintage_found": "PY2024 / PY2026 Exchange PUF + SBE",
-      "selected_vintage": "PY2024 / PY2026 Exchange PUF + SBE",
-      "selected_artifact": "cms rate/plan/service-area PUF zips",
+      "latest_checked_at": "2026-08-15T04:18:28Z",
+      "latest_authoritative_vintage_found": "PY2024 / PY2026",
+      "selected_vintage": "PY2024 / PY2026 Exchange PUF + year-specific SBE",
+      "selected_artifact": "cms_rate_puf / plan_puf / service_area_puf + SBE archives",
       "newer_data_exists": false,
       "retrieval_validation_status": "MODELED_FROM_MEASURED_INPUTS",
-      "reason_if_not_refreshed": "Federal PUF plus year-specific SBE archives. Not a published healthcare headline."
+      "reason_if_not_refreshed": "Official CMS Marketplace PUF page checked (https://www.cms.gov/marketplace/resources/data/public-use-files). SBE listing: https://www.cms.gov/marketplace/resources/data/state-based-public-use-files. Selected artifacts listed with hashes from the current coverage retrieve record. Not a published healthcare headline.",
+      "freshness_check_status": "VERIFIED_CURRENT",
+      "publisher": "Centers for Medicare & Medicaid Services",
+      "landing_url": "https://www.cms.gov/marketplace/resources/data/public-use-files",
+      "selected_artifacts": [
+        {
+          "artifact_id": "cms_rate_puf_2024",
+          "filename": "cms_rate_puf_2024",
+          "url": null,
+          "sha256": "b3b440b7eb50adf1d9172139ad79aef630d1d12ad856e57080a226357555ee25",
+          "retrieved_at": "2026-08-14T14:41:33+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        },
+        {
+          "artifact_id": "cms_plan_attributes_puf_2024",
+          "filename": "cms_plan_attributes_puf_2024",
+          "url": null,
+          "sha256": "8630732e2abe79d01f191e0463a3a2ac4de1ace4bdf1ddab404270752115e095",
+          "retrieved_at": "2026-08-14T14:41:34+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        },
+        {
+          "artifact_id": "cms_service_area_puf_2024",
+          "filename": "cms_service_area_puf_2024",
+          "url": null,
+          "sha256": "24eb357b1cff4f439d7428303cbf79fa11e541e9782cbea2745b401dd080f64f",
+          "retrieved_at": "2026-08-14T14:41:36+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        },
+        {
+          "artifact_id": "cms_benefits_puf_2024",
+          "filename": "cms_benefits_puf_2024",
+          "url": null,
+          "sha256": "7e06895def0fa32cc0026ad7694cd84c4582bb48ce93dad6ee41f1c7e004a570",
+          "retrieved_at": "2026-08-14T14:41:42+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        },
+        {
+          "artifact_id": "cms_sbe_ca_2024",
+          "filename": "cms_sbe_ca_2024",
+          "url": null,
+          "sha256": "b7de6be71897e1607bfb55366ad21b6ef88d013efd0c33842cc49e7cf252065d",
+          "retrieved_at": "2026-08-14T20:22:29+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        },
+        {
+          "artifact_id": "cms_sbe_co_2024",
+          "filename": "cms_sbe_co_2024",
+          "url": null,
+          "sha256": "054233c7c2ab2ed90878b0f826404dd60bd1e2a66b59621ace742240fb216cf3",
+          "retrieved_at": "2026-08-14T20:18:23+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        },
+        {
+          "artifact_id": "cms_sbe_ct_2024",
+          "filename": "cms_sbe_ct_2024",
+          "url": null,
+          "sha256": "ab7d8572eaaf75358a4e7f429d34be717e7d81ffbb15b1cc4574a31d0d543282",
+          "retrieved_at": "2026-08-14T20:18:24+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        },
+        {
+          "artifact_id": "cms_sbe_dc_2024",
+          "filename": "cms_sbe_dc_2024",
+          "url": null,
+          "sha256": "159c1fa14058346d9b99da1bca84f7dc93dfc8d56afd8d46f3adc19d3c8b4c9f",
+          "retrieved_at": "2026-08-14T20:18:25+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        },
+        {
+          "artifact_id": "cms_sbe_id_2024",
+          "filename": "cms_sbe_id_2024",
+          "url": null,
+          "sha256": "fc3a26e4649885a9ef96013c2cbe000c6d1e66bbf124235d623a9dd4fac70431",
+          "retrieved_at": "2026-08-14T20:18:27+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        },
+        {
+          "artifact_id": "cms_sbe_ky_2024",
+          "filename": "cms_sbe_ky_2024",
+          "url": null,
+          "sha256": "308bf370c809f9717f1d62da0a4e27b9bf382ff7cefbb93c977a0f5116a6cd4b",
+          "retrieved_at": "2026-08-14T20:18:28+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        },
+        {
+          "artifact_id": "cms_sbe_me_2024",
+          "filename": "cms_sbe_me_2024",
+          "url": null,
+          "sha256": "88f8d7867283c23d7e102d14418616691808c3042158a674f319611b421ffc55",
+          "retrieved_at": "2026-08-14T20:18:29+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        },
+        {
+          "artifact_id": "cms_sbe_md_2024",
+          "filename": "cms_sbe_md_2024",
+          "url": null,
+          "sha256": "5da1f7e849ac3e3d3d393e7e6b616a822104c5aa9d167d8d571237c39e2485cb",
+          "retrieved_at": "2026-08-14T20:18:29+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        },
+        {
+          "artifact_id": "cms_sbe_ma_2024",
+          "filename": "cms_sbe_ma_2024",
+          "url": null,
+          "sha256": "e6c3a4f32504aed6a8e700faca7d548cb2666b77ae2c56cc04b5153550a3e0c4",
+          "retrieved_at": "2026-08-14T20:18:30+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        },
+        {
+          "artifact_id": "cms_sbe_mn_2024",
+          "filename": "cms_sbe_mn_2024",
+          "url": null,
+          "sha256": "3eb3ab9dc350124208d6df823f1b0ecb722e71b1c9281244d2ca70e9788ae0d3",
+          "retrieved_at": "2026-08-14T20:18:31+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        },
+        {
+          "artifact_id": "cms_sbe_nv_2024",
+          "filename": "cms_sbe_nv_2024",
+          "url": null,
+          "sha256": "40cb83eac070c50a29c47cf733530bc982d57767693b121f333c31542e5dc431",
+          "retrieved_at": "2026-08-14T20:18:32+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        },
+        {
+          "artifact_id": "cms_sbe_nj_2024",
+          "filename": "cms_sbe_nj_2024",
+          "url": null,
+          "sha256": "df7dda5999dbb4d2e961b5ff120cbe564e1128f173df81d8f008c0db95b1ac67",
+          "retrieved_at": "2026-08-14T20:18:33+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        },
+        {
+          "artifact_id": "cms_sbe_nm_2024",
+          "filename": "cms_sbe_nm_2024",
+          "url": null,
+          "sha256": "4c80c8c98ab06512d7b0003d77ab4aed2c573df55c77ab9483c30234a5105637",
+          "retrieved_at": "2026-08-14T20:18:33+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        },
+        {
+          "artifact_id": "cms_sbe_ny_2024",
+          "filename": "cms_sbe_ny_2024",
+          "url": null,
+          "sha256": "9c4134db43763bf9dcc7cd06ff4e1c6d1e4a3b5902e0ff3df6f1236386de9a93",
+          "retrieved_at": "2026-08-14T20:18:34+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        },
+        {
+          "artifact_id": "cms_sbe_or_2024",
+          "filename": "cms_sbe_or_2024",
+          "url": null,
+          "sha256": "41fbdeac2441a0eb8c8163cc61c9c2a8508b21d365d3c40436a834ed76dec909",
+          "retrieved_at": "2026-08-14T20:18:35+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        },
+        {
+          "artifact_id": "cms_sbe_pa_2024",
+          "filename": "cms_sbe_pa_2024",
+          "url": null,
+          "sha256": "b666b92b3f68a1cb7064a76cf047a3d67be14e87a494fbac09e895608effa361",
+          "retrieved_at": "2026-08-14T20:18:36+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        },
+        {
+          "artifact_id": "cms_sbe_ri_2024",
+          "filename": "cms_sbe_ri_2024",
+          "url": null,
+          "sha256": "63adaa15fefed05d5a727321b0f1478a952af68e2b33c98b13bc15daf86af52c",
+          "retrieved_at": "2026-08-14T20:18:37+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        },
+        {
+          "artifact_id": "cms_sbe_vt_2024",
+          "filename": "cms_sbe_vt_2024",
+          "url": null,
+          "sha256": "230af604a80122c558767a084ab9cfab332ce6c7cd212080bbe3b6fee258fe6e",
+          "retrieved_at": "2026-08-14T20:18:37+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        },
+        {
+          "artifact_id": "cms_sbe_va_2024",
+          "filename": "cms_sbe_va_2024",
+          "url": null,
+          "sha256": "4fc907e0a04e9775bad276f50b9ef980a71d084a9a3e52d28f9abe041fa7cd47",
+          "retrieved_at": "2026-08-14T20:18:38+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        },
+        {
+          "artifact_id": "cms_sbe_wa_2024",
+          "filename": "cms_sbe_wa_2024",
+          "url": null,
+          "sha256": "271153371896dc37b7fd59e9c2f84dca1907a2c2a0be08f4bd495397c10df8fc",
+          "retrieved_at": "2026-08-14T20:18:39+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        },
+        {
+          "artifact_id": "cms_sbe_puf_2024",
+          "filename": "cms_sbe_puf_2024",
+          "url": null,
+          "sha256": null,
+          "retrieved_at": null,
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        },
+        {
+          "artifact_id": "cms_rate_puf_2026",
+          "filename": "cms_rate_puf_2026",
+          "url": null,
+          "sha256": "a05423ee91d137420510ca0d325fb8538861ace21d07ea062e8c3f6410732edf",
+          "retrieved_at": "2026-08-14T14:41:46+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        },
+        {
+          "artifact_id": "cms_plan_attributes_puf_2026",
+          "filename": "cms_plan_attributes_puf_2026",
+          "url": null,
+          "sha256": "954e697885efcb709aed0be1de14075afe11704bf3447372960d08c879950af2",
+          "retrieved_at": "2026-08-14T14:41:46+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        },
+        {
+          "artifact_id": "cms_service_area_puf_2026",
+          "filename": "cms_service_area_puf_2026",
+          "url": null,
+          "sha256": "eb2d7d18b6c4b9a6124e7841862c5f51384511840791ac30a72f98a248b7817f",
+          "retrieved_at": "2026-08-14T14:41:46+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        },
+        {
+          "artifact_id": "cms_benefits_puf_2026",
+          "filename": "cms_benefits_puf_2026",
+          "url": null,
+          "sha256": "aa2d6874704bc951ed28792af3e65a4bd5b48eb3dbc086325f5ce053f08d8682",
+          "retrieved_at": "2026-08-14T14:41:48+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        },
+        {
+          "artifact_id": "cms_sbe_ca_2026",
+          "filename": "cms_sbe_ca_2026",
+          "url": null,
+          "sha256": "8a6d606a6da66b6d61296416d720f0d6b7a2766b398f52757f6ebe3600c52225",
+          "retrieved_at": "2026-08-14T20:19:15+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        },
+        {
+          "artifact_id": "cms_sbe_co_2026",
+          "filename": "cms_sbe_co_2026",
+          "url": null,
+          "sha256": "a0d99c414894c5660c3dd4450d7df5255ca08d8349a6ba92b69699a68d62ee1f",
+          "retrieved_at": "2026-08-14T20:19:16+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        },
+        {
+          "artifact_id": "cms_sbe_ct_2026",
+          "filename": "cms_sbe_ct_2026",
+          "url": null,
+          "sha256": "d42b475b6e049a8eea8fcd1be28e1e7039189464ce8dcdab0445d3f4ac9deb3a",
+          "retrieved_at": "2026-08-14T20:19:17+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        },
+        {
+          "artifact_id": "cms_sbe_dc_2026",
+          "filename": "cms_sbe_dc_2026",
+          "url": null,
+          "sha256": "ef965634e5384b8ec5892229d57eee9e868ab3d33e6163f0541dec2ff11ae522",
+          "retrieved_at": "2026-08-14T20:19:18+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        },
+        {
+          "artifact_id": "cms_sbe_ga_2026",
+          "filename": "cms_sbe_ga_2026",
+          "url": null,
+          "sha256": "4e33017f3c9a05d38a6f765df26982f258eaa999bd39dc6b8221e191f9011933",
+          "retrieved_at": "2026-08-14T20:19:18+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        },
+        {
+          "artifact_id": "cms_sbe_id_2026",
+          "filename": "cms_sbe_id_2026",
+          "url": null,
+          "sha256": "e983caa820967b0131706714186cce40700e2486a9b970b531448e29bd45c157",
+          "retrieved_at": "2026-08-14T20:19:19+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        },
+        {
+          "artifact_id": "cms_sbe_il_2026",
+          "filename": "cms_sbe_il_2026",
+          "url": null,
+          "sha256": "59c46abf772009bc4783ae7336f4f27d72d67b13749eb1b9b5b649339491fb5e",
+          "retrieved_at": "2026-08-14T20:19:20+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        },
+        {
+          "artifact_id": "cms_sbe_ky_2026",
+          "filename": "cms_sbe_ky_2026",
+          "url": null,
+          "sha256": "72cdbcd1143f7709e3677529805b2f4641ef9dd12d92342826c86fe085fde4cc",
+          "retrieved_at": "2026-08-14T20:19:21+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        },
+        {
+          "artifact_id": "cms_sbe_me_2026",
+          "filename": "cms_sbe_me_2026",
+          "url": null,
+          "sha256": "8366e430c262063acb0aff27d1450e63ec049236ce1af63aa1a5372585ab5f2d",
+          "retrieved_at": "2026-08-14T20:19:22+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        },
+        {
+          "artifact_id": "cms_sbe_md_2026",
+          "filename": "cms_sbe_md_2026",
+          "url": null,
+          "sha256": "28272dd43ea826dd9baa10f6ca5dac68dd8d7761522b6361c45b36f7f3c31b7b",
+          "retrieved_at": "2026-08-14T20:19:22+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        },
+        {
+          "artifact_id": "cms_sbe_ma_2026",
+          "filename": "cms_sbe_ma_2026",
+          "url": null,
+          "sha256": "17eff4b9002331ce73b8eca1d8c0dbd05bfc9fe4132eaf01f1c83df795782482",
+          "retrieved_at": "2026-08-14T20:19:23+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        },
+        {
+          "artifact_id": "cms_sbe_mn_2026",
+          "filename": "cms_sbe_mn_2026",
+          "url": null,
+          "sha256": "0b23dea50073639221cb9f5b9ff74f96dcf11ee52f0c560796ca348afcd1ca02",
+          "retrieved_at": "2026-08-14T20:19:24+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        },
+        {
+          "artifact_id": "cms_sbe_nv_2026",
+          "filename": "cms_sbe_nv_2026",
+          "url": null,
+          "sha256": "e9274bd97a33c355adaffaebd187bcb11759e3863be18085580a37527e0f1590",
+          "retrieved_at": "2026-08-14T20:19:25+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        },
+        {
+          "artifact_id": "cms_sbe_nj_2026",
+          "filename": "cms_sbe_nj_2026",
+          "url": null,
+          "sha256": "3eee69957082ea6278db0ca933ccbb454c5d3a750644d87f29b70dcb5d0af468",
+          "retrieved_at": "2026-08-14T20:19:25+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        },
+        {
+          "artifact_id": "cms_sbe_nm_2026",
+          "filename": "cms_sbe_nm_2026",
+          "url": null,
+          "sha256": "bbee73de4ddb097187c3da2d14a6756fc8d0871692f7580a430a456bd42156b8",
+          "retrieved_at": "2026-08-14T20:19:26+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        },
+        {
+          "artifact_id": "cms_sbe_ny_2026",
+          "filename": "cms_sbe_ny_2026",
+          "url": null,
+          "sha256": "add2693a835b2f042e43c1bbf1207020ac484c5d18b2cbc0cda49700bb9a30ad",
+          "retrieved_at": "2026-08-14T20:19:27+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        },
+        {
+          "artifact_id": "cms_sbe_or_2026",
+          "filename": "cms_sbe_or_2026",
+          "url": null,
+          "sha256": "7b11a1f33908261b7b529c6ae84b420a607ce41cf949f9de866a240f548bb716",
+          "retrieved_at": "2026-08-14T20:19:28+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        },
+        {
+          "artifact_id": "cms_sbe_pa_2026",
+          "filename": "cms_sbe_pa_2026",
+          "url": null,
+          "sha256": "427a126ed79003bf28eac6630c51aab187d78fec8b3b6d9e87ce3b001491e3ac",
+          "retrieved_at": "2026-08-14T20:19:29+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        },
+        {
+          "artifact_id": "cms_sbe_ri_2026",
+          "filename": "cms_sbe_ri_2026",
+          "url": null,
+          "sha256": "99f29381837a27bc25a2d4fadb7bf53fa30693ad7f4e2068be07cf994f7c6615",
+          "retrieved_at": "2026-08-14T20:19:29+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        },
+        {
+          "artifact_id": "cms_sbe_vt_2026",
+          "filename": "cms_sbe_vt_2026",
+          "url": null,
+          "sha256": "a16f28e7d50ecf93c1d92335f116dd272cffbfc5c261088459bb866cc4aa6342",
+          "retrieved_at": "2026-08-14T20:19:30+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        },
+        {
+          "artifact_id": "cms_sbe_va_2026",
+          "filename": "cms_sbe_va_2026",
+          "url": null,
+          "sha256": "67d026a742ea1d396d31f4f251e9a23bef8d17ad4e46042fdc80b303dcb8fc92",
+          "retrieved_at": "2026-08-14T20:19:31+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        },
+        {
+          "artifact_id": "cms_sbe_wa_2026",
+          "filename": "cms_sbe_wa_2026",
+          "url": null,
+          "sha256": "1951f01534321596874f77e72f3d750048bb0333c5b8278d7dfdbd2e08c8f21a",
+          "retrieved_at": "2026-08-14T20:19:31+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        },
+        {
+          "artifact_id": "cms_sbe_puf_2026",
+          "filename": "cms_sbe_puf_2026",
+          "url": null,
+          "sha256": null,
+          "retrieved_at": null,
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        }
+      ],
+      "retrieved_at": null,
+      "transformation_method": "lowest Silver age-40 join of federal PUF + year-specific SBE",
+      "input_evidence_status": "MODELED_FROM_MEASURED_INPUTS",
+      "months_included": null,
+      "month_count": null,
+      "first_month": null,
+      "last_month": null,
+      "extra": {
+        "sbe_landing": "https://www.cms.gov/marketplace/resources/data/state-based-public-use-files",
+        "has_2024": true,
+        "has_2026": true
+      }
     },
     "meps_full_year_consolidated": {
       "source_id": "meps_full_year_consolidated",
-      "latest_checked_at": "2026-08-15T02:51:42Z",
+      "latest_checked_at": "2026-08-15T04:18:29Z",
       "latest_authoritative_vintage_found": "HC-251 / 2023",
       "selected_vintage": "HC-251 / 2023",
       "selected_artifact": "h251dat.zip",
       "newer_data_exists": false,
       "retrieval_validation_status": "RETRIEVED_UNVALIDATED",
-      "reason_if_not_refreshed": "MEPS HEALTH OOP DERIVATION: RETRIEVED_UNVALIDATED. HC-251 downloaded is not sufficient. Still required: newest officially released Full Year Consolidated PUF; validate fixed-width/codebook parse; enforce age 18-64 privately insured filter; apply survey weights; derive weighted-mean canonical OOP; retain median/P75; hash/provenance; bind OD-010 medical price translation for lagged years."
+      "reason_if_not_refreshed": "MEPS HEALTH OOP DERIVATION: RETRIEVED_UNVALIDATED. Official PUF listing checked at https://meps.ahrq.gov/mepsweb/data_stats/download_data_files.jsp. 2024 Full Year Consolidated is NOT in the official MEPS PUF listing. AHRQ schedule still lists it for AUGUST 2026. Continue using HC-251 with true source year = 2023. Scheduled future releases do not count as released. HC-251 download is not derivation-ready.",
+      "freshness_check_status": "VERIFIED_CURRENT",
+      "publisher": "AHRQ MEPS",
+      "landing_url": "https://meps.ahrq.gov/mepsweb/data_stats/download_data_files.jsp",
+      "selected_artifacts": [
+        {
+          "artifact_id": "h251dat.zip",
+          "filename": "h251dat.zip",
+          "url": "https://meps.ahrq.gov/mepsweb/data_files/pufs/h251/h251dat.zip",
+          "sha256": "ad0edc2e34b28b90c8c89f43869f4e90338c93c97c0bfc2cad73140b96edd55a",
+          "retrieved_at": "2026-08-14T20:18:54+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        }
+      ],
+      "retrieved_at": "2026-08-14T20:18:54+00:00",
+      "transformation_method": "weighted-mean OOP pending; not yet derived",
+      "input_evidence_status": "RETRIEVED_UNVALIDATED",
+      "months_included": null,
+      "month_count": null,
+      "first_month": null,
+      "last_month": null,
+      "extra": {
+        "listing": {
+          "checked_at_source": "https://meps.ahrq.gov/mepsweb/data_stats/download_data_files.jsp",
+          "schedule_url": "https://meps.ahrq.gov/mepsweb/about_meps/releaseschedule.jsp",
+          "schedule_states_2024_fy": "AUGUST 2026",
+          "released": false,
+          "listed_puf_id": null,
+          "ascii_zip_url": null,
+          "notes": "2024 Full Year Consolidated is NOT in the official MEPS PUF listing. AHRQ schedule still lists it for AUGUST 2026. Continue using HC-251 with true source year = 2023."
+        }
+      }
     },
     "nhts_mileage": {
       "source_id": "nhts_mileage",
-      "latest_checked_at": "2026-08-15T02:51:42Z",
+      "latest_checked_at": "2026-08-15T04:18:29Z",
       "latest_authoritative_vintage_found": "2022 NHTS V2.1",
       "selected_vintage": "2022 NHTS V2.1",
       "selected_artifact": "nhts_2022_csv.zip",
-      "newer_data_exists": false,
+      "newer_data_exists": null,
       "retrieval_validation_status": "VALIDATED",
-      "reason_if_not_refreshed": "Structural quantity. Foundation Mobility Standard is weighted median. Do not inflate miles."
+      "reason_if_not_refreshed": "NHTS page retrieved but 2022 survey vintage was not found.",
+      "freshness_check_status": "CHECK_FAILED",
+      "publisher": "FHWA / ORNL NHTS",
+      "landing_url": "https://nhts.ornl.gov/downloads",
+      "selected_artifacts": [
+        {
+          "artifact_id": "nhts_2022_csv.zip",
+          "filename": "nhts_2022_csv.zip",
+          "url": "https://nhts.ornl.gov/downloads",
+          "sha256": "210a4e7092a0135f15c95f001836669949cd6a1f515620bce496c84250527bf2",
+          "retrieved_at": "2026-08-14T20:18:50+00:00",
+          "validation_status": "VALIDATED"
+        }
+      ],
+      "retrieved_at": null,
+      "transformation_method": null,
+      "input_evidence_status": "VALIDATED",
+      "months_included": null,
+      "month_count": null,
+      "first_month": null,
+      "last_month": null,
+      "extra": null
     },
     "epa_vehicle": {
       "source_id": "epa_vehicle",
-      "latest_checked_at": "2026-08-15T02:51:42Z",
+      "latest_checked_at": "2026-08-15T04:18:28Z",
       "latest_authoritative_vintage_found": "EPA/DOE fueleconomy.gov vehicles.csv.zip",
       "selected_vintage": "EPA/DOE fueleconomy.gov vehicles.csv.zip",
       "selected_artifact": "epa_fueleconomy_vehicles.csv.zip",
       "newer_data_exists": false,
       "retrieval_validation_status": "RETRIEVED_UNVALIDATED",
-      "reason_if_not_refreshed": "OD-004 methodology is FROZEN; EPA MPG evidence is RETRIEVED_UNVALIDATED. Before candidate readiness validate gasoline non-BEV/non-PHEV compact+midsize 8-12 model-year window median combined MPG from official rows; record artifact, vintage, model-year range, row count, filters, median, sensitivities, hash/provenance. Frozen methodology is not VALIDATED evidence."
+      "reason_if_not_refreshed": "OD-004 methodology is FROZEN; EPA MPG evidence is RETRIEVED_UNVALIDATED. Official fueleconomy.gov download page still lists vehicles.csv. Frozen methodology is not VALIDATED cohort extraction.",
+      "freshness_check_status": "VERIFIED_CURRENT",
+      "publisher": "EPA / DOE",
+      "landing_url": "https://www.fueleconomy.gov/feg/download.shtml",
+      "selected_artifacts": [
+        {
+          "artifact_id": "epa_fueleconomy_vehicles.csv.zip",
+          "filename": "epa_fueleconomy_vehicles.csv.zip",
+          "url": "https://www.fueleconomy.gov/feg/epadata/vehicles.csv.zip",
+          "sha256": "66a2948c425c3cf8ad61a184a12296099ef368217d3012b3f7531dcc9c5e2649",
+          "retrieved_at": "2026-08-14T20:19:07+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        }
+      ],
+      "retrieved_at": "2026-08-14T20:19:07+00:00",
+      "transformation_method": "median combined MPG cohort pending validation",
+      "input_evidence_status": "RETRIEVED_UNVALIDATED",
+      "months_included": null,
+      "month_count": null,
+      "first_month": null,
+      "last_month": null,
+      "extra": null
     },
     "eia_gasoline": {
       "source_id": "eia_gasoline",
-      "latest_checked_at": "2026-08-15T02:51:42Z",
-      "latest_authoritative_vintage_found": "EIA weekly retail gasoline",
+      "latest_checked_at": "2026-08-15T04:18:28Z",
+      "latest_authoritative_vintage_found": "EIA weekly retail gasoline pswrgvwall.xls",
       "selected_vintage": "EIA weekly retail gasoline",
       "selected_artifact": "pswrgvwall.xls",
       "newer_data_exists": false,
       "retrieval_validation_status": "VALIDATED",
-      "reason_if_not_refreshed": "High-frequency price. Use target-year observations / YTD."
+      "reason_if_not_refreshed": "Official EIA gasoline/diesel page checked. Selected workbook is still pswrgvwall.xls. Use target-year observations / YTD. Do not relabel source year.",
+      "freshness_check_status": "VERIFIED_CURRENT",
+      "publisher": "U.S. Energy Information Administration",
+      "landing_url": "https://www.eia.gov/petroleum/gasdiesel/",
+      "selected_artifacts": [
+        {
+          "artifact_id": "pswrgvwall.xls",
+          "filename": "pswrgvwall.xls",
+          "url": "https://www.eia.gov/petroleum/gasdiesel/xls/pswrgvwall.xls",
+          "sha256": "658c4b7a34f3f466246f3ac762a880f4fd53cf56f7ab2505ff213f5905e0ff6c",
+          "retrieved_at": "2026-08-14T20:19:00+00:00",
+          "validation_status": "VALIDATED"
+        }
+      ],
+      "retrieved_at": "2026-08-14T20:19:00+00:00",
+      "transformation_method": "target-year / YTD weekly retail regular gasoline",
+      "input_evidence_status": "VALIDATED",
+      "months_included": null,
+      "month_count": null,
+      "first_month": null,
+      "last_month": null,
+      "extra": null
     },
     "naic_auto_insurance": {
       "source_id": "naic_auto_insurance",
-      "latest_checked_at": "2026-08-15T02:51:42Z",
-      "latest_authoritative_vintage_found": "2022/2023 Auto Insurance Database Report / data through 2023",
-      "selected_vintage": "2022/2023 Auto Insurance Database Report / data through 2023",
+      "latest_checked_at": "2026-08-15T04:18:28Z",
+      "latest_authoritative_vintage_found": "2022/2023 Auto Insurance Database Report",
+      "selected_vintage": "2022/2023 Auto Insurance Database Report",
       "selected_artifact": "publication-aut-pb-auto-insurance-database.pdf",
-      "newer_data_exists": false,
+      "newer_data_exists": null,
       "retrieval_validation_status": "RETRIEVED_UNVALIDATED",
-      "reason_if_not_refreshed": "Official PDF retrieved. State-table extraction is not a validated numeric series."
+      "reason_if_not_refreshed": "NAIC Auto Insurance Database Report page could not be retrieved: 404 Client Error: Not Found for url: https://content.naic.org/research-actuarial-services/auto-insurance-database-report",
+      "freshness_check_status": "CHECK_FAILED",
+      "publisher": "NAIC",
+      "landing_url": "https://content.naic.org/research-actuarial-services/auto-insurance-database-report",
+      "selected_artifacts": [
+        {
+          "artifact_id": "publication-aut-pb-auto-insurance-database.pdf",
+          "filename": "publication-aut-pb-auto-insurance-database.pdf",
+          "url": "https://content.naic.org/research-actuarial-services/auto-insurance-database-report",
+          "sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+          "retrieved_at": "2026-08-14T20:19:04+00:00",
+          "validation_status": "RETRIEVED_UNVALIDATED"
+        }
+      ],
+      "retrieved_at": null,
+      "transformation_method": null,
+      "input_evidence_status": "RETRIEVED_UNVALIDATED",
+      "months_included": null,
+      "month_count": null,
+      "first_month": null,
+      "last_month": null,
+      "extra": null
     },
     "bls_ce": {
       "source_id": "bls_ce",
-      "latest_checked_at": "2026-08-15T02:51:42Z",
-      "latest_authoritative_vintage_found": "2024 Interview PUMD cache",
-      "selected_vintage": "2024 Interview PUMD cache",
+      "latest_checked_at": "2026-08-15T04:18:29Z",
+      "latest_authoritative_vintage_found": "2024 Interview PUMD",
+      "selected_vintage": "2024 Interview PUMD",
       "selected_artifact": "intrvw24.zip",
-      "newer_data_exists": false,
+      "newer_data_exists": null,
       "retrieval_validation_status": "INCOMPLETE_PROVENANCE",
-      "reason_if_not_refreshed": "Official re-retrieve remains HTTP 403. Cached parse is not VALIDATED."
+      "reason_if_not_refreshed": "BLS CE PUMD listing could not be retrieved: 403 Client Error: Forbidden for url: https://www.bls.gov/cex/pumd_data.htm",
+      "freshness_check_status": "CHECK_FAILED",
+      "publisher": "U.S. Bureau of Labor Statistics",
+      "landing_url": "https://www.bls.gov/cex/pumd_data.htm",
+      "selected_artifacts": [
+        {
+          "artifact_id": "intrvw24.zip",
+          "filename": "intrvw24.zip",
+          "url": "https://www.bls.gov/cex/pumd/data/csv/intrvw24.zip",
+          "sha256": null,
+          "retrieved_at": null,
+          "validation_status": "INCOMPLETE_PROVENANCE"
+        }
+      ],
+      "retrieved_at": null,
+      "transformation_method": null,
+      "input_evidence_status": "INCOMPLETE_PROVENANCE",
+      "months_included": null,
+      "month_count": null,
+      "first_month": null,
+      "last_month": null,
+      "extra": null
     },
     "fcc_broadband": {
       "source_id": "fcc_broadband",
-      "latest_checked_at": "2026-08-15T02:51:42Z",
+      "latest_checked_at": "2026-08-15T04:18:29Z",
       "latest_authoritative_vintage_found": null,
       "selected_vintage": null,
       "selected_artifact": null,
-      "newer_data_exists": false,
+      "newer_data_exists": null,
       "retrieval_validation_status": "SOURCE_GAP",
-      "reason_if_not_refreshed": "FCC Urban Rate Survey retrieve historically HTTP 403 / incomplete."
+      "reason_if_not_refreshed": "FCC Urban Rate Survey page retrieve failed: 403 Client Error: Forbidden for url: https://www.fcc.gov/economics-analytics/industry-analysis-division/urban-rate-survey-data-resources. Historical retrieve HTTP 403 / incomplete. Broadband price remains SOURCE_GAP.",
+      "freshness_check_status": "CHECK_FAILED",
+      "publisher": "Federal Communications Commission",
+      "landing_url": "https://www.fcc.gov/economics-analytics/industry-analysis-division/urban-rate-survey-data-resources",
+      "selected_artifacts": [],
+      "retrieved_at": null,
+      "transformation_method": null,
+      "input_evidence_status": "SOURCE_GAP",
+      "months_included": null,
+      "month_count": null,
+      "first_month": null,
+      "last_month": null,
+      "extra": null
     },
     "mobile_price": {
       "source_id": "mobile_price",
-      "latest_checked_at": "2026-08-15T02:51:42Z",
+      "latest_checked_at": "2026-08-15T04:18:28Z",
       "latest_authoritative_vintage_found": null,
       "selected_vintage": null,
       "selected_artifact": null,
-      "newer_data_exists": false,
+      "newer_data_exists": null,
       "retrieval_validation_status": "SOURCE_GAP",
-      "reason_if_not_refreshed": "No accepted authoritative mobile PRICE source. Do not invent a price."
+      "reason_if_not_refreshed": "No accepted authoritative mobile PRICE source. Do not invent a price.",
+      "freshness_check_status": "SOURCE_GAP",
+      "publisher": "none accepted",
+      "landing_url": null,
+      "selected_artifacts": [],
+      "retrieved_at": null,
+      "transformation_method": null,
+      "input_evidence_status": "SOURCE_GAP",
+      "months_included": null,
+      "month_count": null,
+      "first_month": null,
+      "last_month": null,
+      "extra": null
     },
     "bea_rpp": {
       "source_id": "bea_rpp",
-      "latest_checked_at": "2026-08-15T02:51:42Z",
-      "latest_authoritative_vintage_found": "BEA SARPP All-items 2024 / current release February 19, 2026",
-      "selected_vintage": "BEA SARPP All-items 2024 / current release February 19, 2026",
+      "latest_checked_at": "2026-08-15T04:18:29Z",
+      "latest_authoritative_vintage_found": "BEA SARPP All-items",
+      "selected_vintage": "BEA SARPP All-items",
       "selected_artifact": "SARPP.zip",
-      "newer_data_exists": false,
+      "newer_data_exists": null,
       "retrieval_validation_status": "VALIDATED",
-      "reason_if_not_refreshed": "Official BEA RPP landing page still lists Current Release February 19, 2026 and Next release December 10, 2026. Newest official All-items state RPP data year is 2024. Selected artifact is apps.bea.gov/regional/zip/SARPP.zip (sha256 38713c6224c4c26ae020ffecd4549b82dca84f43d34f93dfdb43f4070cf011da; retrieved_at 2026-08-14T20:18:54Z). 2026 cost year reuses 2024 as LATEST_AVAILABLE and does not relabel the source year. This record \u2014 not a prior VALIDATED parse alone \u2014 establishes the vintage is still the newest appropriate authoritative release."
+      "reason_if_not_refreshed": "BEA RPP landing page could not be retrieved: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))",
+      "freshness_check_status": "CHECK_FAILED",
+      "publisher": "U.S. Bureau of Economic Analysis",
+      "landing_url": "https://www.bea.gov/data/prices-inflation/regional-price-parities-state-and-metro-area",
+      "selected_artifacts": [
+        {
+          "artifact_id": "SARPP.zip",
+          "filename": "SARPP.zip",
+          "url": "https://apps.bea.gov/regional/zip/SARPP.zip",
+          "sha256": "38713c6224c4c26ae020ffecd4549b82dca84f43d34f93dfdb43f4070cf011da",
+          "retrieved_at": "2026-08-14T20:18:54+00:00",
+          "validation_status": "VALIDATED"
+        }
+      ],
+      "retrieved_at": null,
+      "transformation_method": null,
+      "input_evidence_status": "VALIDATED",
+      "months_included": null,
+      "month_count": null,
+      "first_month": null,
+      "last_month": null,
+      "extra": null
     },
     "federal_tax_law": {
       "source_id": "federal_tax_law",
-      "latest_checked_at": "2026-08-15T02:51:42Z",
-      "latest_authoritative_vintage_found": "2024 and 2026 statutory tables in code",
+      "latest_checked_at": "2026-08-15T04:18:29Z",
+      "latest_authoritative_vintage_found": "code tables [2024, 2026]",
       "selected_vintage": "2024 and 2026 statutory tables in code",
       "selected_artifact": null,
-      "newer_data_exists": false,
+      "newer_data_exists": null,
       "retrieval_validation_status": "INVENTORY_NOT_VALIDATED",
-      "reason_if_not_refreshed": "RULE_YEAR tables exist for 2024 and 2026 only. Inventory not validated against primary IRS/SSA artifacts."
+      "reason_if_not_refreshed": "IRS IRB page was reached, but presence of in-code 2024/2026 tables is not proof they remain the newest applicable Rev. Proc. Manual verification required. Years present in code: [2024, 2026].",
+      "freshness_check_status": "MANUAL_VERIFICATION_REQUIRED",
+      "publisher": "Internal Revenue Service / SSA",
+      "landing_url": "https://www.irs.gov/irb",
+      "selected_artifacts": [],
+      "retrieved_at": null,
+      "transformation_method": "RULE_YEAR; no silent fallback to another year",
+      "input_evidence_status": "INVENTORY_NOT_VALIDATED",
+      "months_included": null,
+      "month_count": null,
+      "first_month": null,
+      "last_month": null,
+      "extra": {
+        "rule_years_present": [
+          2024,
+          2026
+        ]
+      }
     },
     "state_tax_law": {
       "source_id": "state_tax_law",
-      "latest_checked_at": "2026-08-15T02:51:42Z",
+      "latest_checked_at": "2026-08-15T04:18:29Z",
       "latest_authoritative_vintage_found": "2024 and 2026 schedules in code",
       "selected_vintage": "2024 and 2026 schedules in code",
       "selected_artifact": null,
-      "newer_data_exists": false,
+      "newer_data_exists": null,
       "retrieval_validation_status": "SOURCE_GAP",
-      "reason_if_not_refreshed": "State schedule inventory incomplete / unvalidated as applicable."
+      "reason_if_not_refreshed": "State schedule inventory is incomplete / unvalidated. No programmatic 51-state official discovery of current-year statutes is bound. MANUAL_VERIFICATION_REQUIRED for remaining states; evidence stays SOURCE_GAP.",
+      "freshness_check_status": "MANUAL_VERIFICATION_REQUIRED",
+      "publisher": "State revenue departments",
+      "landing_url": null,
+      "selected_artifacts": [],
+      "retrieved_at": null,
+      "transformation_method": "RULE_YEAR",
+      "input_evidence_status": "SOURCE_GAP",
+      "months_included": null,
+      "month_count": null,
+      "first_month": null,
+      "last_month": null,
+      "extra": null
     },
     "local_tax_law": {
       "source_id": "local_tax_law",
-      "latest_checked_at": "2026-08-15T02:51:42Z",
+      "latest_checked_at": "2026-08-15T04:18:29Z",
       "latest_authoritative_vintage_found": "MD county / NYC / Philadelphia verified; Harris County TX verified no local EIT",
-      "selected_vintage": "MD county / NYC / Philadelphia verified; Harris County TX verified no local EIT",
+      "selected_vintage": "partial verified inventory",
       "selected_artifact": null,
-      "newer_data_exists": false,
+      "newer_data_exists": null,
       "retrieval_validation_status": "SOURCE_GAP",
-      "reason_if_not_refreshed": "Most county FIPS remain UNRESOLVED_SOURCE_GAP. Place-level class-C overlay not generally implemented."
+      "reason_if_not_refreshed": "Most county FIPS remain UNRESOLVED_SOURCE_GAP. Place-level class-C overlay not generally implemented. No complete official local-tax discovery is bound.",
+      "freshness_check_status": "MANUAL_VERIFICATION_REQUIRED",
+      "publisher": "Local jurisdictions / state revenue agencies",
+      "landing_url": null,
+      "selected_artifacts": [],
+      "retrieved_at": null,
+      "transformation_method": "typed LocalTaxResult; unresolved \u2260 0",
+      "input_evidence_status": "SOURCE_GAP",
+      "months_included": null,
+      "month_count": null,
+      "first_month": null,
+      "last_month": null,
+      "extra": null
     },
     "vehicle_registration": {
       "source_id": "vehicle_registration",
-      "latest_checked_at": "2026-08-15T02:51:42Z",
+      "latest_checked_at": "2026-08-15T04:18:29Z",
       "latest_authoritative_vintage_found": null,
       "selected_vintage": null,
       "selected_artifact": null,
-      "newer_data_exists": false,
+      "newer_data_exists": null,
       "retrieval_validation_status": "SOURCE_GAP",
-      "reason_if_not_refreshed": "No accepted 51-state official registration-fee inventory."
+      "reason_if_not_refreshed": "No accepted 51-state official registration-fee inventory.",
+      "freshness_check_status": "SOURCE_GAP",
+      "publisher": "state DMVs",
+      "landing_url": null,
+      "selected_artifacts": [],
+      "retrieved_at": null,
+      "transformation_method": null,
+      "input_evidence_status": "SOURCE_GAP",
+      "months_included": null,
+      "month_count": null,
+      "first_month": null,
+      "last_month": null,
+      "extra": null
     },
     "vehicle_replacement": {
       "source_id": "vehicle_replacement",
-      "latest_checked_at": "2026-08-15T02:51:42Z",
+      "latest_checked_at": "2026-08-15T04:18:29Z",
       "latest_authoritative_vintage_found": null,
       "selected_vintage": null,
       "selected_artifact": null,
-      "newer_data_exists": false,
+      "newer_data_exists": null,
       "retrieval_validation_status": "FORMULA_FROZEN_INPUTS_PENDING",
-      "reason_if_not_refreshed": "OD-005 formula frozen: (acquisition - residual) / usable remaining years. Acquisition price, residual/salvage value, and usable remaining years are not bound. Do not invent numeric values."
+      "reason_if_not_refreshed": "OD-005 formula frozen: (acquisition - residual) / usable remaining years. Acquisition price, residual/salvage value, and usable remaining years are not bound. Do not invent numeric values.",
+      "freshness_check_status": "SOURCE_GAP",
+      "publisher": null,
+      "landing_url": null,
+      "selected_artifacts": [],
+      "retrieved_at": null,
+      "transformation_method": "(acquisition - residual) / usable remaining years",
+      "input_evidence_status": "FORMULA_FROZEN_INPUTS_PENDING",
+      "months_included": null,
+      "month_count": null,
+      "first_month": null,
+      "last_month": null,
+      "extra": null
     },
     "od010_price_index": {
       "source_id": "od010_price_index",
-      "latest_checked_at": "2026-08-15T02:51:42Z",
+      "latest_checked_at": "2026-08-15T04:18:29Z",
       "latest_authoritative_vintage_found": null,
       "selected_vintage": null,
       "selected_artifact": null,
-      "newer_data_exists": false,
+      "newer_data_exists": null,
       "retrieval_validation_status": "INVENTORY_NOT_VALIDATED",
-      "reason_if_not_refreshed": "Component-specific CPI/index series for lagged nominal dollars are not bound into a live translation table."
+      "reason_if_not_refreshed": "Component-specific CPI/index series for lagged nominal dollars are not bound into a live translation table (bound=False). translation_index_bound remains false until a real series table exists.",
+      "freshness_check_status": "MANUAL_VERIFICATION_REQUIRED",
+      "publisher": "BLS CPI / medical / motor-vehicle indexes",
+      "landing_url": "https://www.bls.gov/cpi/",
+      "selected_artifacts": [],
+      "retrieved_at": null,
+      "transformation_method": "CPI_UPDATED pending binding",
+      "input_evidence_status": "INVENTORY_NOT_VALIDATED",
+      "months_included": null,
+      "month_count": null,
+      "first_month": null,
+      "last_month": null,
+      "extra": {
+        "translation_table_bound": false
+      }
     }
   },
   "ready_for_private_candidate": false,
   "candidate_calculation_authorized": false,
   "living_cost_release_authorized": false,
   "translation_index_bound": false,
-  "blocker_count": 12,
+  "silent_source_year_relabel": false,
+  "candidate_inputs_bound": false,
+  "blocker_count": 26,
   "blockers": [
+    "OD010_TRANSLATION_INDEX_NOT_BOUND",
+    "REQUIRED_CANDIDATE_INPUTS_NOT_BOUND",
     "meps_full_year_consolidated:RETRIEVED_UNVALIDATED",
+    "nhts_mileage:CHECK_FAILED",
     "epa_vehicle:RETRIEVED_UNVALIDATED",
+    "naic_auto_insurance:CHECK_FAILED",
     "naic_auto_insurance:RETRIEVED_UNVALIDATED",
+    "bls_ce:CHECK_FAILED",
     "bls_ce:INCOMPLETE_PROVENANCE",
+    "fcc_broadband:CHECK_FAILED",
     "fcc_broadband:SOURCE_GAP",
     "mobile_price:SOURCE_GAP",
+    "mobile_price:SOURCE_GAP",
+    "bea_rpp:CHECK_FAILED",
+    "federal_tax_law:MANUAL_VERIFICATION_REQUIRED",
     "federal_tax_law:INVENTORY_NOT_VALIDATED",
+    "state_tax_law:MANUAL_VERIFICATION_REQUIRED",
     "state_tax_law:SOURCE_GAP",
+    "local_tax_law:MANUAL_VERIFICATION_REQUIRED",
     "local_tax_law:SOURCE_GAP",
     "vehicle_registration:SOURCE_GAP",
+    "vehicle_registration:SOURCE_GAP",
+    "vehicle_replacement:SOURCE_GAP",
     "vehicle_replacement:FORMULA_FROZEN_INPUTS_PENDING",
+    "od010_price_index:MANUAL_VERIFICATION_REQUIRED",
     "od010_price_index:INVENTORY_NOT_VALIDATED"
   ],
   "headline_calculated": false,
+  "authorization_source": "config/definitions.yml",
+  "discovery": {
+    "automated_or_verified": [
+      "acs_population_weights",
+      "hud_fmr",
+      "usda_food",
+      "cms_marketplace_sbe",
+      "meps_full_year_consolidated",
+      "epa_vehicle",
+      "eia_gasoline"
+    ],
+    "manual_verification_required": [
+      "federal_tax_law",
+      "state_tax_law",
+      "local_tax_law",
+      "od010_price_index"
+    ],
+    "check_failed": [
+      "nhts_mileage",
+      "naic_auto_insurance",
+      "bls_ce",
+      "fcc_broadband",
+      "bea_rpp"
+    ],
+    "source_gap": [
+      "mobile_price",
+      "vehicle_registration",
+      "vehicle_replacement"
+    ],
+    "timestamps_from_hardcoded_snapshot": false
+  },
   "notes": {
     "health_oop": "MEPS HEALTH OOP DERIVATION: RETRIEVED_UNVALIDATED. Do not claim healthcare OOP ready merely because HC-251 was downloaded.",
     "mpg": "EPA MPG evidence is RETRIEVED_UNVALIDATED. OD-004 methodology FROZEN is not VALIDATED evidence.",

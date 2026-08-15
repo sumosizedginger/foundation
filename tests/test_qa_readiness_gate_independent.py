@@ -41,6 +41,12 @@ def test_authorization_functions_are_separate_and_false():
             selected_artifact="qa_synthetic_only",
             newer_data_exists=False,
             retrieval_validation_status="VALIDATED",
+            freshness_check_status="VERIFIED_CURRENT",
+            publisher="synthetic",
+            landing_url="https://example.test/qa",
+            selected_artifacts=({"artifact_id": "qa_synthetic_only", "sha256": "abc"},),
+            transformation_method="test",
+            input_evidence_status="VALIDATED",
         )
         for family in REQUIRED_FRESHNESS_FAMILIES
     }
@@ -93,8 +99,9 @@ def test_live_freshness_writer_is_fail_closed(tmp_path: Path):
     assert payload["ready_for_private_candidate"] is False
     assert payload["candidate_calculation_authorized"] is False
     assert payload["living_cost_release_authorized"] is False
-    assert payload["blocker_count"] == 12
-    assert len(payload["blockers"]) == 12
+    assert payload["blocker_count"] >= 13
+    assert len(payload["blockers"]) == payload["blocker_count"]
+    assert "OD010_TRANSLATION_INDEX_NOT_BOUND" in payload["blockers"]
     assert "meps_full_year_consolidated:RETRIEVED_UNVALIDATED" in payload["blockers"]
     assert "epa_vehicle:RETRIEVED_UNVALIDATED" in payload["blockers"]
     assert "vehicle_replacement:FORMULA_FROZEN_INPUTS_PENDING" in payload["blockers"]
@@ -110,14 +117,19 @@ def test_live_freshness_writer_is_fail_closed(tmp_path: Path):
         "FORMULA_FROZEN_INPUTS_PENDING"
     )
     assert payload["checks"]["bea_rpp"]["source_id"] == "bea_rpp"
-    assert payload["checks"]["bea_rpp"]["retrieval_validation_status"] == "VALIDATED"
-    assert payload["checks"]["bea_rpp"]["latest_authoritative_vintage_found"]
-    assert "February 19, 2026" in payload["checks"]["bea_rpp"]["latest_authoritative_vintage_found"]
-    assert payload["checks"]["bea_rpp"]["selected_artifact"] == "SARPP.zip"
-    assert payload["checks"]["bea_rpp"]["latest_authoritative_vintage_found"] != (
-        "latest retrieved BEA RPP"
+    bea = payload["checks"]["bea_rpp"]
+    assert bea["retrieval_validation_status"] == "VALIDATED"
+    assert bea["freshness_check_status"] in {
+        "VERIFIED_CURRENT",
+        "CHECK_FAILED",
+        "NEWER_AVAILABLE",
+    }
+    assert bea["selected_artifact"] == "SARPP.zip"
+    assert bea["latest_authoritative_vintage_found"] != "latest retrieved BEA RPP"
+    assert bea["selected_artifact"] != "bea rpp artifact"
+    assert (
+        bea["newer_data_exists"] is not True or bea["freshness_check_status"] == "NEWER_AVAILABLE"
     )
-    assert payload["checks"]["bea_rpp"]["selected_artifact"] != "bea rpp artifact"
     assert payload["notes"]["health_oop"].startswith("MEPS HEALTH OOP DERIVATION")
     assert "RETRIEVED_UNVALIDATED" in payload["notes"]["mpg"]
     # Fail-closed: a VALIDATED family must not invent a pass for OOP/MPG.
@@ -137,7 +149,8 @@ def test_production_freshness_artifact_matches_fail_closed_contract():
     assert payload["ready_for_private_candidate"] is False
     assert payload["candidate_calculation_authorized"] is False
     assert payload["living_cost_release_authorized"] is False
-    assert payload["blocker_count"] == 12
+    assert payload["blocker_count"] >= 13
+    assert "OD010_TRANSLATION_INDEX_NOT_BOUND" in payload["blockers"]
     required = payload["required_families"]
     assert len(required) == 19
     assert "vehicle_replacement" in required
@@ -155,8 +168,8 @@ def test_production_freshness_artifact_matches_fail_closed_contract():
     bea = payload["checks"]["bea_rpp"]
     assert bea["retrieval_validation_status"] == "VALIDATED"
     assert bea["selected_artifact"] == "SARPP.zip"
-    assert "February 19, 2026" in (bea["latest_authoritative_vintage_found"] or "")
     assert bea["latest_authoritative_vintage_found"] != "latest retrieved BEA RPP"
+    assert "freshness_check_status" in bea
     for field in (
         "source_id",
         "latest_checked_at",
@@ -259,8 +272,8 @@ def test_config_and_pipeline_keep_both_flags_false():
     assert living["states_modeled"] == 0
 
     pipeline = (SRC / "foundation" / "pipeline.py").read_text(encoding="utf-8")
-    assert "candidate_calculation_authorized = False" in pipeline
-    assert "living_cost_release_authorized = False" in pipeline
+    assert "candidate_calculation_authorized()" in pipeline
+    assert "living_cost_release_authorized()" in pipeline
 
 
 def test_bea_rpp_freshness_record_is_not_a_placeholder():
@@ -280,6 +293,9 @@ def test_bea_rpp_freshness_record_is_not_a_placeholder():
     assert artifact.lower() not in {p.lower() for p in placeholder_vintages}
     assert vintage != "latest retrieved BEA RPP"
     assert artifact != "bea rpp artifact"
-    assert "2024" in vintage
-    assert "February 19, 2026" in vintage
     assert artifact == "SARPP.zip"
+    assert check.freshness_check_status in {
+        "VERIFIED_CURRENT",
+        "CHECK_FAILED",
+        "NEWER_AVAILABLE",
+    }

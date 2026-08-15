@@ -475,7 +475,7 @@ def test_freshness_gate_exists_and_does_not_authorize_headline():
         )
         for family in REQUIRED_FRESHNESS_FAMILIES
     }
-    with pytest.raises(FreshnessGateError, match="SOURCE_GAP"):
+    with pytest.raises(FreshnessGateError, match="CHECK_FAILED|SOURCE_GAP"):
         assert_candidate_freshness_ready(
             checks,
             project_cost_year=2026,
@@ -508,6 +508,18 @@ def test_candidate_authorization_is_separate_from_public_release(tmp_path: Path)
             selected_artifact="synthetic_test_only",
             newer_data_exists=False,
             retrieval_validation_status="VALIDATED",
+            freshness_check_status="VERIFIED_CURRENT",
+            publisher="synthetic",
+            landing_url="https://example.test/synthetic",
+            selected_artifacts=(
+                {
+                    "artifact_id": "synthetic_test_only",
+                    "sha256": "abc",
+                    "url": "https://example.test",
+                },
+            ),
+            transformation_method="test",
+            input_evidence_status="VALIDATED",
         )
         for family in REQUIRED_FRESHNESS_FAMILIES
     }
@@ -616,6 +628,6 @@ def test_nhts_parser_uses_median_as_canonical(tmp_path: Path):
 
 def test_pipeline_still_refuses_headline_after_freeze():
     src = (ROOT / "src" / "foundation" / "pipeline.py").read_text(encoding="utf-8")
-    assert "living_cost_release_authorized = False" in src
-    assert "candidate_calculation_authorized = False" in src
+    assert "candidate_calculation_authorized()" in src
+    assert "living_cost_release_authorized()" in src
     assert run_full_pipeline  # importable; do not flip the gate

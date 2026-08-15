@@ -1,6 +1,6 @@
 {
   "report_type": "living_cost_source_coverage",
-  "generated_at": "2026-08-15T02:51:42+00:00",
+  "generated_at": "2026-08-15T04:18:09+00:00",
   "question": "What still prevents the living-cost model from being calculated?",
   "required_components": [
     "housing",

@@ -17,7 +17,11 @@ from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from foundation.living_cost.freshness import BLOCKER_NOTES
+from foundation.living_cost.freshness import (
+    BLOCKER_NOTES,
+    candidate_calculation_authorized,
+    living_cost_release_authorized,
+)
 from foundation.living_cost.geo_join import execute_geo_join_audit
 from foundation.living_cost.manifest import RetrievedSourceArtifact, generate_source_manifest
 from foundation.living_cost.owner_freeze import methodology_status_for_component
@@ -780,8 +784,8 @@ def write_coverage(artifacts: list[RetrievedSourceArtifact]) -> dict:
         "headline_calculated": False,
         "gap_calculated": False,
         "adequacy_calculated": False,
-        "candidate_calculation_authorized": False,
-        "living_cost_release_authorized": False,
+        "candidate_calculation_authorized": candidate_calculation_authorized(),
+        "living_cost_release_authorized": living_cost_release_authorized(),
         "states_modeled": 0,
         "decisions_frozen": True,
         "methodology_frozen_is_not_source_validated": True,

@@ -3,19 +3,20 @@
 This module does not calculate or publish a Minimum Sustainable Living Cost.
 It only refuses a future candidate when authorization or freshness is unmet.
 
-candidate_calculation_authorized:
-    owner permission to calculate PRIVATE / UNPUBLISHED candidate outputs.
+Authorization is read from config/definitions.yml (one source of truth):
 
-living_cost_release_authorized:
-    owner permission to publish headline MSLC / rankings / Gap / Adequacy /
-    Composite. Never implied by candidate authorization.
+    living_cost.candidate_calculation_authorized
+    living_cost.release_authorized
+
+Freshness records come from source-specific discovery, not from a timestamped
+hard-coded snapshot.
 """
 
 from __future__ import annotations
 
 import json
 from collections.abc import Iterable
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -51,9 +52,31 @@ BLOCKING_EVIDENCE = {
     "RETRIEVED_UNVALIDATED",
 }
 
+PASSING_EVIDENCE = {
+    "VALIDATED",
+    "MODELED_FROM_MEASURED_INPUTS",
+}
+
+FRESHNESS_CHECK_STATUSES = {
+    "VERIFIED_CURRENT",
+    "NEWER_AVAILABLE",
+    "CHECK_FAILED",
+    "MANUAL_VERIFICATION_REQUIRED",
+    "SOURCE_GAP",
+}
+
+BLOCKING_CHECK_STATUSES = FRESHNESS_CHECK_STATUSES - {"VERIFIED_CURRENT"}
+
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
+OD010_TABLE = PROJECT_ROOT / "data" / "metadata" / "living_cost_od010_translation_table.json"
+
 
 class FreshnessGateError(RuntimeError):
     """Future candidate calculation is not allowed."""
+
+
+class AuthorizationConfigError(FreshnessGateError):
+    """Canonical authorization record is missing or malformed."""
 
 
 @dataclass(frozen=True)
@@ -63,22 +86,97 @@ class FreshnessCheck:
     latest_authoritative_vintage_found: str | None
     selected_vintage: str | None
     selected_artifact: str | None
-    newer_data_exists: bool
+    newer_data_exists: bool | None
     retrieval_validation_status: str
     reason_if_not_refreshed: str | None = None
+    freshness_check_status: str = "CHECK_FAILED"
+    publisher: str | None = None
+    landing_url: str | None = None
+    selected_artifacts: tuple[dict[str, Any], ...] = ()
+    retrieved_at: str | None = None
+    transformation_method: str | None = None
+    input_evidence_status: str | None = None
+    months_included: tuple[str, ...] | None = None
+    month_count: int | None = None
+    first_month: str | None = None
+    last_month: str | None = None
+    extra: dict[str, Any] | None = field(default=None)
 
     def to_dict(self) -> dict[str, Any]:
-        return asdict(self)
+        payload = asdict(self)
+        if payload.get("selected_artifacts") is not None:
+            payload["selected_artifacts"] = list(payload["selected_artifacts"])
+        if payload.get("months_included") is not None:
+            payload["months_included"] = list(payload["months_included"])
+        return payload
+
+
+_PLACEHOLDER_LABELS = {
+    "latest retrieved bea rpp",
+    "bea rpp artifact",
+    "latest retrieved",
+    "current artifact",
+    "validated artifact",
+    "usda food-plan monthly reports",
+    "target-year monthly reports / ytd",
+    "cms rate/plan/service-area puf zips",
+}
+
+
+def _is_placeholder_label(*labels: str | None) -> bool:
+    tokens = {str(label).strip().lower() for label in labels if label}
+    return bool(tokens & _PLACEHOLDER_LABELS)
+
+
+def _now_iso() -> str:
+    return datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def _living_cost_config() -> dict[str, Any]:
+    from foundation.config import definitions
+
+    try:
+        data = definitions()
+    except (OSError, TypeError, ValueError) as exc:
+        raise AuthorizationConfigError(f"canonical authorization record unreadable: {exc}") from exc
+    living = data.get("living_cost") if isinstance(data, dict) else None
+    if not isinstance(living, dict):
+        raise AuthorizationConfigError("definitions.yml missing living_cost mapping")
+    return living
+
+
+def _read_bool_flag(name: str) -> bool:
+    living = _living_cost_config()
+    if name not in living:
+        raise AuthorizationConfigError(f"living_cost.{name} is absent")
+    value = living[name]
+    if not isinstance(value, bool):
+        raise AuthorizationConfigError(f"living_cost.{name} must be a boolean, got {type(value)}")
+    return value
 
 
 def candidate_calculation_authorized() -> bool:
-    """Private unpublished candidate calculation is not authorized."""
-    return False
+    """Private unpublished candidate permission from definitions.yml."""
+    return _read_bool_flag("candidate_calculation_authorized")
 
 
 def living_cost_release_authorized() -> bool:
-    """Public headline publication is not authorized."""
-    return False
+    """Public headline permission from definitions.yml (release_authorized)."""
+    return _read_bool_flag("release_authorized")
+
+
+def is_translation_index_bound() -> bool:
+    """True only when a live OD-010 translation table exists and is marked bound."""
+    if not OD010_TABLE.exists():
+        return False
+    try:
+        payload = json.loads(OD010_TABLE.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return False
+    if not isinstance(payload, dict):
+        return False
+    series = payload.get("series")
+    return payload.get("bound") is True and bool(series)
 
 
 def freshness_gate_checklist() -> dict[str, Any]:
@@ -96,7 +194,34 @@ def freshness_gate_checklist() -> dict[str, Any]:
         "candidate_calculation_authorized": candidate_calculation_authorized(),
         "living_cost_release_authorized": living_cost_release_authorized(),
         "private_candidate_never_implies_publication": True,
+        "authorization_source": "config/definitions.yml",
+        "translation_index_bound": is_translation_index_bound(),
     }
+
+
+def _has_concrete_provenance(check: FreshnessCheck) -> bool:
+    if _is_placeholder_label(
+        check.selected_vintage,
+        check.selected_artifact,
+        check.latest_authoritative_vintage_found,
+    ):
+        return False
+    if not check.latest_checked_at:
+        return False
+    if not (check.publisher or check.landing_url or check.source_id):
+        return False
+    period = (check.selected_vintage or check.latest_authoritative_vintage_found or "").strip()
+    if not period:
+        return False
+    artifacts = list(check.selected_artifacts)
+    if artifacts:
+        return any(
+            (item.get("artifact_id") or item.get("filename"))
+            and not _is_placeholder_label(str(item.get("artifact_id") or item.get("filename")))
+            for item in artifacts
+        )
+    artifact = (check.selected_artifact or "").strip()
+    return bool(artifact) and not _is_placeholder_label(artifact)
 
 
 def assert_candidate_freshness_ready(
@@ -104,21 +229,30 @@ def assert_candidate_freshness_ready(
     *,
     project_cost_year: int,
     required_families: Iterable[str] = REQUIRED_FRESHNESS_FAMILIES,
-    translation_index_bound: bool = False,
+    translation_index_bound: bool | None = None,
     silent_source_year_relabel: bool = False,
-    candidate_calculation_authorized: bool = False,
-    living_cost_release_authorized: bool = False,
+    candidate_calculation_authorized: bool | None = None,
+    living_cost_release_authorized: bool | None = None,
 ) -> None:
     """Refuse a future PRIVATE candidate when freshness or candidate auth is incomplete.
 
     Does not compute MSLC, Gap, Adequacy, rankings, or a national median.
     Does not require living_cost_release_authorized (publication is a later gate).
+    Authorization defaults to the canonical config record when the flag is omitted.
     """
     del living_cost_release_authorized  # publication is a separate owner permission
-    if not candidate_calculation_authorized:
+    del project_cost_year
+    authorized = (
+        candidate_calculation_authorized
+        if candidate_calculation_authorized is not None
+        else globals()["candidate_calculation_authorized"]()
+    )
+    if not authorized:
         raise FreshnessGateError(
             "candidate_calculation_authorized is false; private candidate refused"
         )
+    if translation_index_bound is None:
+        translation_index_bound = is_translation_index_bound()
     by_id: dict[str, FreshnessCheck]
     if isinstance(checks, dict):
         by_id = dict(checks)
@@ -135,239 +269,73 @@ def assert_candidate_freshness_ready(
         raise FreshnessGateError("source year is being silently relabeled")
 
     if not translation_index_bound:
-        raise FreshnessGateError("required OD-010 translation index is not bound")
+        raise FreshnessGateError(
+            "OD010_TRANSLATION_INDEX_NOT_BOUND: required OD-010 translation index is not bound"
+        )
 
     for family in required_families:
         check = by_id[family]
         if not check.latest_checked_at:
             raise FreshnessGateError(f"{family}: freshness check has no latest_checked_at")
-        if check.newer_data_exists:
+        if check.freshness_check_status in BLOCKING_CHECK_STATUSES:
+            raise FreshnessGateError(
+                f"{family}: freshness_check_status is {check.freshness_check_status}"
+            )
+        if check.newer_data_exists is True:
             raise FreshnessGateError(
                 f"{family}: newer authoritative source is known but not processed"
+            )
+        if check.newer_data_exists is None:
+            raise FreshnessGateError(
+                f"{family}: currentness was not established (newer_data_exists is null)"
             )
         if check.retrieval_validation_status in BLOCKING_EVIDENCE:
             raise FreshnessGateError(
                 f"{family}: required source remains {check.retrieval_validation_status}"
             )
-        if check.retrieval_validation_status == "VALIDATED":
-            vintage = (check.latest_authoritative_vintage_found or "").strip()
-            artifact = (check.selected_artifact or "").strip()
-            if not vintage or not artifact or _is_placeholder_label(vintage, artifact):
-                raise FreshnessGateError(
-                    f"{family}: VALIDATED freshness record lacks a concrete vintage/artifact"
-                )
+        if check.retrieval_validation_status in PASSING_EVIDENCE and not _has_concrete_provenance(
+            check
+        ):
+            raise FreshnessGateError(f"{family}: passing evidence state lacks concrete provenance")
 
 
-def assert_public_release_authorized(*, living_cost_release_authorized: bool = False) -> None:
+def assert_public_release_authorized(*, living_cost_release_authorized: bool | None = None) -> None:
     """Public headline publication requires the separate release authorization."""
-    if not living_cost_release_authorized:
+    authorized = (
+        living_cost_release_authorized
+        if living_cost_release_authorized is not None
+        else globals()["living_cost_release_authorized"]()
+    )
+    if not authorized:
         raise FreshnessGateError(
             "living_cost_release_authorized is false; public headline publication refused"
         )
 
 
-def _now_iso() -> str:
-    return datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
-
-
-_PLACEHOLDER_LABELS = {
-    "latest retrieved bea rpp",
-    "bea rpp artifact",
-    "latest retrieved",
-    "current artifact",
-    "validated artifact",
-}
-
-
-def _is_placeholder_label(vintage: str, artifact: str) -> bool:
-    labels = {vintage.strip().lower(), artifact.strip().lower()}
-    return bool(labels & _PLACEHOLDER_LABELS)
-
-
 def current_family_truth() -> dict[str, FreshnessCheck]:
-    """Honest current-state freshness records. Do not fake readiness."""
-    checked = _now_iso()
-    specs: list[tuple[str, str, str | None, str | None, str]] = [
-        (
-            "acs_population_weights",
-            "VALIDATED",
-            "2024 ACS 5-Year B01001",
-            "census_acs5_2024 / acsdt5y2024-b01001.dat",
-            "Newest county-level ACS 5-Year vintage at check time is 2024; used for current and historical 2024. Fixed-2024 sensitivity retained.",
-        ),
-        (
-            "hud_fmr",
-            "VALIDATED",
-            "FY2024 / FY2026",
-            "FMR2024_final_revised.xlsx / FY26_FMRs_revised.xlsx",
-            "Official HUD FY2024 and FY2026 county workbooks are the newest applicable FMR vintages.",
-        ),
-        (
-            "usda_food",
-            "MODELED_FROM_MEASURED_INPUTS",
-            "target-year monthly reports / YTD",
-            "usda food-plan monthly reports",
-            "Canonical USDA Low-Cost; Thrifty sensitivity. Incomplete years use YTD.",
-        ),
-        (
-            "cms_marketplace_sbe",
-            "MODELED_FROM_MEASURED_INPUTS",
-            "PY2024 / PY2026 Exchange PUF + SBE",
-            "cms rate/plan/service-area PUF zips",
-            "Federal PUF plus year-specific SBE archives. Not a published healthcare headline.",
-        ),
-        (
-            "meps_full_year_consolidated",
-            "RETRIEVED_UNVALIDATED",
-            "HC-251 / 2023",
-            "h251dat.zip",
-            (
-                "MEPS HEALTH OOP DERIVATION: RETRIEVED_UNVALIDATED. "
-                "HC-251 downloaded is not sufficient. Still required: newest officially "
-                "released Full Year Consolidated PUF; validate fixed-width/codebook parse; "
-                "enforce age 18-64 privately insured filter; apply survey weights; derive "
-                "weighted-mean canonical OOP; retain median/P75; hash/provenance; bind "
-                "OD-010 medical price translation for lagged years."
-            ),
-        ),
-        (
-            "nhts_mileage",
-            "VALIDATED",
-            "2022 NHTS V2.1",
-            "nhts_2022_csv.zip",
-            "Structural quantity. Foundation Mobility Standard is weighted median. Do not inflate miles.",
-        ),
-        (
-            "epa_vehicle",
-            "RETRIEVED_UNVALIDATED",
-            "EPA/DOE fueleconomy.gov vehicles.csv.zip",
-            "epa_fueleconomy_vehicles.csv.zip",
-            (
-                "OD-004 methodology is FROZEN; EPA MPG evidence is RETRIEVED_UNVALIDATED. "
-                "Before candidate readiness validate gasoline non-BEV/non-PHEV compact+"
-                "midsize 8-12 model-year window median combined MPG from official rows; "
-                "record artifact, vintage, model-year range, row count, filters, median, "
-                "sensitivities, hash/provenance. Frozen methodology is not VALIDATED evidence."
-            ),
-        ),
-        (
-            "eia_gasoline",
-            "VALIDATED",
-            "EIA weekly retail gasoline",
-            "pswrgvwall.xls",
-            "High-frequency price. Use target-year observations / YTD.",
-        ),
-        (
-            "naic_auto_insurance",
-            "RETRIEVED_UNVALIDATED",
-            "2022/2023 Auto Insurance Database Report / data through 2023",
-            "publication-aut-pb-auto-insurance-database.pdf",
-            "Official PDF retrieved. State-table extraction is not a validated numeric series.",
-        ),
-        (
-            "bls_ce",
-            "INCOMPLETE_PROVENANCE",
-            "2024 Interview PUMD cache",
-            "intrvw24.zip",
-            "Official re-retrieve remains HTTP 403. Cached parse is not VALIDATED.",
-        ),
-        (
-            "fcc_broadband",
-            "SOURCE_GAP",
-            None,
-            None,
-            "FCC Urban Rate Survey retrieve historically HTTP 403 / incomplete.",
-        ),
-        (
-            "mobile_price",
-            "SOURCE_GAP",
-            None,
-            None,
-            "No accepted authoritative mobile PRICE source. Do not invent a price.",
-        ),
-        (
-            "bea_rpp",
-            "VALIDATED",
-            "BEA SARPP All-items 2024 / current release February 19, 2026",
-            "SARPP.zip",
-            (
-                "Official BEA RPP landing page still lists Current Release "
-                "February 19, 2026 and Next release December 10, 2026. "
-                "Newest official All-items state RPP data year is 2024. "
-                "Selected artifact is apps.bea.gov/regional/zip/SARPP.zip "
-                "(sha256 38713c6224c4c26ae020ffecd4549b82dca84f43d34f93dfdb43f4070cf011da; "
-                "retrieved_at 2026-08-14T20:18:54Z). 2026 cost year reuses 2024 "
-                "as LATEST_AVAILABLE and does not relabel the source year. "
-                "This record — not a prior VALIDATED parse alone — establishes "
-                "the vintage is still the newest appropriate authoritative release."
-            ),
-        ),
-        (
-            "federal_tax_law",
-            "INVENTORY_NOT_VALIDATED",
-            "2024 and 2026 statutory tables in code",
-            None,
-            "RULE_YEAR tables exist for 2024 and 2026 only. Inventory not validated against primary IRS/SSA artifacts.",
-        ),
-        (
-            "state_tax_law",
-            "SOURCE_GAP",
-            "2024 and 2026 schedules in code",
-            None,
-            "State schedule inventory incomplete / unvalidated as applicable.",
-        ),
-        (
-            "local_tax_law",
-            "SOURCE_GAP",
-            "MD county / NYC / Philadelphia verified; Harris County TX verified no local EIT",
-            None,
-            "Most county FIPS remain UNRESOLVED_SOURCE_GAP. Place-level class-C overlay not generally implemented.",
-        ),
-        (
-            "vehicle_registration",
-            "SOURCE_GAP",
-            None,
-            None,
-            "No accepted 51-state official registration-fee inventory.",
-        ),
-        (
-            "vehicle_replacement",
-            "FORMULA_FROZEN_INPUTS_PENDING",
-            None,
-            None,
-            (
-                "OD-005 formula frozen: (acquisition - residual) / usable remaining years. "
-                "Acquisition price, residual/salvage value, and usable remaining years "
-                "are not bound. Do not invent numeric values."
-            ),
-        ),
-        (
-            "od010_price_index",
-            "INVENTORY_NOT_VALIDATED",
-            None,
-            None,
-            "Component-specific CPI/index series for lagged nominal dollars are not bound into a live translation table.",
-        ),
-    ]
-    return {
-        source_id: FreshnessCheck(
-            source_id=source_id,
-            latest_checked_at=checked,
-            latest_authoritative_vintage_found=vintage,
-            selected_vintage=vintage,
-            selected_artifact=artifact,
-            newer_data_exists=False,
-            retrieval_validation_status=status,
-            reason_if_not_refreshed=reason,
-        )
-        for source_id, status, vintage, artifact, reason in specs
-    }
+    """Run source-specific discovery. Do not fake readiness."""
+    from foundation.living_cost.freshness_discovery import discover_all_families
+
+    return discover_all_families()
 
 
 def evaluate_freshness_readiness(
     checks: dict[str, FreshnessCheck],
+    *,
+    translation_index_bound: bool | None = None,
+    silent_source_year_relabel: bool = False,
+    candidate_inputs_bound: bool = False,
 ) -> dict[str, Any]:
     blocking: list[str] = []
+    bound = (
+        is_translation_index_bound() if translation_index_bound is None else translation_index_bound
+    )
+    if not bound:
+        blocking.append("OD010_TRANSLATION_INDEX_NOT_BOUND")
+    if silent_source_year_relabel:
+        blocking.append("SILENT_SOURCE_YEAR_RELABEL")
+    if not candidate_inputs_bound:
+        blocking.append("REQUIRED_CANDIDATE_INPUTS_NOT_BOUND")
     for family in REQUIRED_FRESHNESS_FAMILIES:
         check = checks.get(family)
         if check is None:
@@ -375,39 +343,72 @@ def evaluate_freshness_readiness(
             continue
         if not check.latest_checked_at:
             blocking.append(f"{family}:MISSING_CHECKED_AT")
-        if check.newer_data_exists:
+        if check.freshness_check_status in BLOCKING_CHECK_STATUSES:
+            blocking.append(f"{family}:{check.freshness_check_status}")
+        if check.newer_data_exists is True:
             blocking.append(f"{family}:NEWER_DATA_NOT_PROCESSED")
         if check.retrieval_validation_status in BLOCKING_EVIDENCE:
             blocking.append(f"{family}:{check.retrieval_validation_status}")
-        if check.retrieval_validation_status == "VALIDATED":
-            vintage = (check.latest_authoritative_vintage_found or "").strip()
-            artifact = (check.selected_artifact or "").strip()
-            if not vintage or not artifact or _is_placeholder_label(vintage, artifact):
-                blocking.append(f"{family}:VALIDATED_WITHOUT_CONCRETE_VINTAGE")
+        if check.retrieval_validation_status in PASSING_EVIDENCE and not _has_concrete_provenance(
+            check
+        ):
+            blocking.append(f"{family}:MISSING_CONCRETE_PROVENANCE")
     authorized = candidate_calculation_authorized()
+    ready = (
+        authorized
+        and bound
+        and not silent_source_year_relabel
+        and candidate_inputs_bound
+        and not blocking
+    )
     return {
-        "ready_for_private_candidate": authorized and not blocking,
+        "ready_for_private_candidate": ready,
         "candidate_calculation_authorized": authorized,
         "living_cost_release_authorized": living_cost_release_authorized(),
-        "translation_index_bound": False,
+        "translation_index_bound": bound,
+        "silent_source_year_relabel": silent_source_year_relabel,
+        "candidate_inputs_bound": candidate_inputs_bound,
         "blocker_count": len(blocking),
         "blockers": blocking,
         "headline_calculated": False,
+        "authorization_source": "config/definitions.yml",
     }
 
 
 def write_candidate_freshness_report(metadata_dir: Path) -> dict[str, Any]:
-    """Write a truthful fail-closed freshness artifact. Does not calculate MSLC."""
+    """Write a truthful fail-closed freshness artifact from real discovery."""
     checks = current_family_truth()
     readiness = evaluate_freshness_readiness(checks)
+    automated = []
+    manual = []
+    failed = []
+    gaps = []
+    for family, check in checks.items():
+        if check.freshness_check_status == "VERIFIED_CURRENT":
+            automated.append(family)
+        elif check.freshness_check_status == "MANUAL_VERIFICATION_REQUIRED":
+            manual.append(family)
+        elif check.freshness_check_status == "CHECK_FAILED":
+            failed.append(family)
+        elif check.freshness_check_status == "SOURCE_GAP":
+            gaps.append(family)
+        else:
+            automated.append(family)
     payload = {
         "report_type": "living_cost_candidate_freshness",
         "generated_at": _now_iso(),
-        "schema_version": "1.0",
+        "schema_version": "2.0",
         "calculates_mslc": False,
         "required_families": list(REQUIRED_FRESHNESS_FAMILIES),
         "checks": {key: check.to_dict() for key, check in checks.items()},
         **readiness,
+        "discovery": {
+            "automated_or_verified": automated,
+            "manual_verification_required": manual,
+            "check_failed": failed,
+            "source_gap": gaps,
+            "timestamps_from_hardcoded_snapshot": False,
+        },
         "notes": {
             "health_oop": (
                 "MEPS HEALTH OOP DERIVATION: RETRIEVED_UNVALIDATED. "
@@ -455,8 +456,8 @@ def stamp_source_coverage_from_current_truth(coverage_path: Path) -> dict[str, A
     """
     coverage = json.loads(coverage_path.read_text(encoding="utf-8"))
     coverage["generated_at"] = datetime.now(UTC).replace(microsecond=0).isoformat()
-    coverage["candidate_calculation_authorized"] = False
-    coverage["living_cost_release_authorized"] = False
+    coverage["candidate_calculation_authorized"] = candidate_calculation_authorized()
+    coverage["living_cost_release_authorized"] = living_cost_release_authorized()
     coverage["states_modeled"] = 0
     coverage["headline_calculated"] = False
     coverage["gap_calculated"] = False
