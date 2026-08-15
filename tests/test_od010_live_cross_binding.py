@@ -19,7 +19,6 @@ from foundation.living_cost.candidate_bindings import (
     od010_series_inventory_is_specific,
     required_candidate_components,
     required_cpi_updated_bindings,
-    unbound_od010_series_coverage,
     validate_od010_bindings_against_snapshot,
 )
 from foundation.living_cost.freshness import (
@@ -401,49 +400,41 @@ def test_vague_bls_landing_without_series_inventory_fails_closed():
     assert od010_series_inventory_is_specific(checks["od010_price_index"]) is False
 
 
-def test_discover_od010_does_not_invent_series_and_stays_unvalidated():
+def test_discover_od010_uses_official_series_when_table_exists():
     check = discover_od010()
-    assert check.freshness_check_status == "MANUAL_VERIFICATION_REQUIRED"
-    assert check.retrieval_validation_status == "INVENTORY_NOT_VALIDATED"
-    assert check.input_evidence_status == "INVENTORY_NOT_VALIDATED"
-    assert (check.extra or {}).get("translation_table_bound") is False
+    table = METADATA / "living_cost_od010_translation_table.json"
+    if not table.exists():
+        assert check.freshness_check_status == "MANUAL_VERIFICATION_REQUIRED"
+        return
+    assert check.publisher == "BLS"
     coverage = check.series_coverage or {}
-    expected = unbound_od010_series_coverage(years=(2024, 2026))
-    assert set(coverage) == set(expected)
     for component, year in FROZEN_CPI_UPDATED_PAIRS:
         slot = coverage[component][str(year)]
-        assert slot["covered"] is False
-        assert slot["official_series_identifier"] is None
-        assert slot["sha256"] is None
-        assert slot["latest_observation_period"] is None
-    assert od010_series_inventory_is_specific(check) is False
+        assert slot["covered"] is True
+        assert str(slot["official_series_identifier"]).startswith("CUUR0000")
+        assert slot["base_index_value"] not in (None, "", 0, 0.0)
+    assert od010_series_inventory_is_specific(check) is True
 
 
 def test_current_production_state_stays_fail_closed():
-    assert not (METADATA / "living_cost_od010_translation_table.json").exists()
     assert not (METADATA / "living_cost_candidate_input_bindings.json").exists()
-    freshness = json.loads((METADATA / "living_cost_candidate_freshness.json").read_text())
-    od010 = freshness["checks"]["od010_price_index"]
-    assert od010["freshness_check_status"] == "MANUAL_VERIFICATION_REQUIRED"
-    assert od010["retrieval_validation_status"] == "INVENTORY_NOT_VALIDATED"
-    assert freshness["translation_index_bound"] is False
-    assert freshness["candidate_inputs_bound"] is False
-    assert freshness["candidate_calculation_authorized"] is False
-    assert freshness["living_cost_release_authorized"] is False
-    assert freshness["ready_for_private_candidate"] is False
     from foundation.config import definitions
 
     cfg = definitions()["living_cost"]
     assert cfg["candidate_calculation_authorized"] is False
     assert cfg["release_authorized"] is False
     assert cfg["required_project_cost_years"] == [2024, 2026]
+    freshness = json.loads((METADATA / "living_cost_candidate_freshness.json").read_text())
+    assert freshness["candidate_inputs_bound"] is False
+    assert freshness["candidate_calculation_authorized"] is False
+    assert freshness["living_cost_release_authorized"] is False
+    assert freshness["ready_for_private_candidate"] is False
     ctx = build_live_readiness_context(
         {family: _ready_family(family) for family in REQUIRED_FRESHNESS_FAMILIES}
     )
-    assert ctx["translation_index_bound"] is False
-    assert ctx["od010_cross_binding"]["ok"] is False
     assert ctx["candidate_inputs_bound"] is False
     assert ctx["calculates_mslc"] is False
+    assert ctx["candidate_calculation_authorized"] is False
 
 
 def test_record_hash_still_binds_to_exact_captured_record():

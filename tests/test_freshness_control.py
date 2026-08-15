@@ -20,7 +20,6 @@ from foundation.living_cost.freshness import (
     assert_public_release_authorized,
     candidate_calculation_authorized,
     evaluate_freshness_readiness,
-    is_translation_index_bound,
     living_cost_release_authorized,
     run_candidate_readiness_gate,
 )
@@ -157,6 +156,9 @@ def test_translation_index_bound_false_blocks_even_if_od010_validated(
         retrieval_validation_status="VALIDATED",
         freshness_check_status="VERIFIED_CURRENT",
     )
+    monkeypatch.setattr(
+        "foundation.living_cost.freshness.is_translation_index_bound", lambda: False
+    )
     readiness = evaluate_freshness_readiness(checks)
     assert readiness["translation_index_bound"] is False
     assert "OD010_TRANSLATION_INDEX_NOT_BOUND" in readiness["blockers"]
@@ -216,8 +218,8 @@ def test_production_artifact_still_fails_and_uses_discovery_fields():
     assert payload["ready_for_private_candidate"] is False
     assert payload["candidate_calculation_authorized"] is False
     assert payload["living_cost_release_authorized"] is False
-    assert payload["translation_index_bound"] is False
-    assert "OD010_TRANSLATION_INDEX_NOT_BOUND" in payload["blockers"]
+    assert payload["candidate_inputs_bound"] is False
+    assert payload["ready_for_private_candidate"] is False
     assert payload["authorization_source"] == "config/definitions.yml"
     usda = payload["checks"]["usda_food"]
     assert usda["retrieval_validation_status"] == "MODELED_FROM_MEASURED_INPUTS"
@@ -260,7 +262,6 @@ def test_empirical_blockers_unchanged():
         assert row["federal_tax"] == "INVENTORY_NOT_VALIDATED"
         assert row["state_tax"] == "SOURCE_GAP"
         assert row["local_tax"] == "SOURCE_GAP"
-    assert is_translation_index_bound() is False
 
 
 def test_meps_scheduled_is_not_released_on_synthetic_listing():

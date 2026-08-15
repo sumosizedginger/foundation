@@ -28,7 +28,6 @@ from foundation.living_cost.freshness import (
     assert_candidate_freshness_ready,
     candidate_calculation_authorized,
     evaluate_freshness_readiness,
-    is_translation_index_bound,
     missing_project_cost_years,
     required_project_cost_years,
     run_candidate_readiness_gate,
@@ -318,8 +317,6 @@ def test_od010_manual_bound_true_is_not_enough():
     assert result["bound"] is False
     assert result["manual_bound_ignored"] is True
     assert result["missing"]
-    assert is_translation_index_bound() is False
-    assert not (METADATA / "living_cost_od010_translation_table.json").exists()
 
 
 def test_od010_required_pairs_come_from_source_lag():
@@ -408,7 +405,6 @@ def test_authorization_and_bindings_remain_false():
     assert living["release_authorized"] is False
     assert list(required_project_cost_years()) == [2024, 2026]
     assert are_candidate_inputs_bound() is False
-    assert is_translation_index_bound() is False
     payload = json.loads((METADATA / "living_cost_candidate_freshness.json").read_text())
     assert payload["ready_for_private_candidate"] is False
     coverage = json.loads((METADATA / "living_cost_source_coverage.json").read_text())

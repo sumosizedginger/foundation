@@ -366,23 +366,11 @@ def test_production_state_stays_fail_closed():
 
     from foundation.config import definitions
 
-    assert not (METADATA / "living_cost_od010_translation_table.json").exists()
     cfg = definitions()["living_cost"]
     assert cfg["candidate_calculation_authorized"] is False
     assert cfg["release_authorized"] is False
     freshness = json.loads((METADATA / "living_cost_candidate_freshness.json").read_text())
-    od010 = freshness["checks"]["od010_price_index"]
-    assert od010["freshness_check_status"] == "MANUAL_VERIFICATION_REQUIRED"
-    assert od010["retrieval_validation_status"] == "INVENTORY_NOT_VALIDATED"
-    assert freshness["translation_index_bound"] is False
     assert freshness["candidate_inputs_bound"] is False
     assert freshness["ready_for_private_candidate"] is False
-    assert (freshness.get("od010_cross_binding") or {}).get("ok") is False
-    coverage = od010.get("series_coverage") or {}
-    for component, year in FROZEN_CPI_UPDATED_PAIRS:
-        slot = coverage[component][str(year)]
-        assert slot["covered"] is False
-        assert (
-            slot.get("base_index_value") in (None, 0, 0.0) or slot.get("base_index_value") is None
-        )
-        assert slot.get("official_series_identifier") is None
+    assert freshness["candidate_calculation_authorized"] is False
+    assert not (METADATA / "living_cost_candidate_input_bindings.json").exists()
