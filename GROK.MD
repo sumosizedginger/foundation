@@ -1,126 +1,275 @@
-# THE FOUNDATION — FINAL YEAR-SPECIFIC / ATOMIC BINDING INTEGRITY FIX
+# THE FOUNDATION — OD-010 LIVE-FRESHNESS CROSS-BIND
 
-## Status: COMPLETE (fail-closed)
+## STATUS: COMPLETE
 
-Implementation HEAD: `20e515dadea7de7e0cbbacf7a8ce0d24b064bdd8`  
-Audited FROM: `ad7df23c9a19073b0210fb692670c63049494d1b`
+This bar is finished. This file is the completed-vs-remaining write-up.
 
-OD-001 through OD-013 remain **ACCEPTED / FROZEN**.
+OD-001 through OD-013 remain ACCEPTED / FROZEN.
 
-**NO MINIMUM SUSTAINABLE LIVING COST WAS CALCULATED OR PUBLISHED.**  
-**The private candidate assembler was not built.**
+**Implementation SHA:** `a26d7a56b3811c160e93aea7e3fdcf9e72f0779b`
+
+**Audited FROM:** `20e515dadea7de7e0cbbacf7a8ce0d24b064bdd8` (year-specific / atomic binding)
+
+**Prior docs HEAD:** `2e028351d77ed6680794faf6556b258ec65acbb8`
 
 ---
 
-## End-state flags
+## WHAT THIS BAR DID
 
-| Flag | Value |
+Sealed the last architecture chain-of-custody gap: a structurally complete OD-010 translation table can no longer bind independently of the live `od010_price_index` FreshnessCheck.
+
+Before this pass, candidate components were year-specific-bound to live artifacts, and OD-010 records were structurally validated and individually hashed — but the captured translation table was not cross-bound to the live index series inventory. Live freshness could later authorize artifact B while the table still held factors derived from artifact A.
+
+That gap is now fail-closed.
+
+**This pass did not:**
+
+- calculate or publish an MSLC, Gap, Adequacy, rankings, national median, or Composite
+- build the private candidate assembler
+- authorize private calculation or public release
+- reopen OD-001–OD-013
+- solve the 12 empirical evidence blocker families
+- invent CPI series IDs or observations
+- create `living_cost_od010_translation_table.json`
+
+---
+
+## COMPLETED
+
+### 1. OD-010 → live freshness cross-binding
+
+`validate_od010_bindings_against_snapshot(od010_payload, live_checks, years)` in [`src/foundation/living_cost/candidate_bindings.py`](src/foundation/living_cost/candidate_bindings.py) compares every frozen CPI_UPDATED pair to live `od010_price_index` evidence.
+
+Frozen pairs (unchanged):
+
+| component | project_cost_year |
 |---|---|
-| `candidate_calculation_authorized` | `false` |
-| `living_cost.release_authorized` | `false` |
-| `states_modeled` | `0` |
-| `candidate_inputs_bound` | `false` |
-| `translation_index_bound` | `false` |
-| `ready_for_private_candidate` | `false` |
-| Canonical required components | **19** |
-| Canonical CPI_UPDATED pairs | **7** |
+| health_oop | 2024 |
+| health_oop | 2026 |
+| insurance | 2024 |
+| insurance | 2026 |
+| maintenance | 2026 |
+| essentials | 2026 |
+| recreation | 2026 |
 
----
+### 2. Live OD-010 freshness identifies series, not just "BLS CPI"
 
-## What this pass completed
+`FreshnessCheck.series_coverage` is a structured inventory:
 
-### 1. Year-specific artifact cross-bind
+```text
+series_coverage[component][year] = {
+  covered,
+  official_series_identifier,
+  publisher,
+  latest_observation_period / target_observation_period / base_observation_period,
+  source_data_year,
+  selected_artifact / api_identity,
+  sha256,
+}
+```
 
-Bindings match `year_coverage[project_cost_year]`, not the whole family.
+`discover_od010()` now emits required slots for all seven pairs with `covered: false` and **no invented identifiers**. A vague `publisher=BLS` + `landing_url=/cpi/` cannot authorize a translation factor (`OD010_SERIES_COVERAGE_TOO_VAGUE`).
 
-HUD 2024 cannot bind `FY26_FMRs_revised.xlsx`. HUD 2026 cannot bind `FMR2024_final_revised.xlsx`.
+### 3. Series identifier match
 
-### 2. source_data_year cross-check
+Table `official_series_identifier` must exactly equal the live authorized identifier for that component / project year. Mismatch → `SERIES_IDENTIFIER_MISMATCH` → FAIL CLOSED.
 
-`binding.source_data_year` must equal live `year_coverage[year].source_data_year`.
+### 4. Source / observation period / artifact match
 
-ACS 2026 may use source year 2024. ACS 2026 claiming 2026 fails. MEPS binding year must match the live selected FYC year (currently 2023).
+Cross-bound where applicable:
 
-### 3. OD-010 passing evidence
+- component
+- project_cost_year
+- source_data_year
+- official_series_identifier
+- publisher
+- observation period / latest observation
+- selected artifact or API identity
+- artifact SHA / response hash when either side retains one
 
-Translation records bind only if `retrieval_validation_state` is `VALIDATED` or `MODELED_FROM_MEASURED_INPUTS`.
+### 5. Calculation inputs bound to live observations
 
-`SOURCE_GAP`, `RETRIEVED_UNVALIDATED`, `INCOMPLETE_PROVENANCE`, and the other blocking states fail.
+A naked `translation_factor` without `calculation_inputs` matching live series / periods / index values cannot become bound (`TRANSLATION_FACTOR_UNBOUND`).
 
-### 4. Real OD-010 record hashes
+Expected `calculation_inputs`:
 
-`od010_record_hash(record)` is SHA-256 of the canonical authorizing fields. The candidate binding's `record_hash` must equal that hash for the exact captured record. An arbitrary 64-character value fails.
+- base_observation_period
+- base_index_value
+- target_observation_period
+- target_index_value
+- translation_factor
+- official_series_identifier / source_artifact / sha256 when retained
 
-### 5–6. Method vs evidence
+### 6. Cross-bind is part of candidate readiness
 
-| Component | Translation method | Evidence (unchanged) |
-|---|---|---|
-| registration | `RULE_YEAR` | `SOURCE_GAP` |
-| local_tax | `RULE_YEAR` | `SOURCE_GAP` |
-| replacement | `MODEL_SUBINPUT` (formula + sub-input policy) | `FORMULA_FROZEN_INPUTS_PENDING` |
-| connectivity | `SOURCE_CLASSIFIED` (`high_frequency`→YTD, `point_in_time`→NONE) | `SOURCE_GAP` |
+`build_live_readiness_context()` captures `od010_cross_binding` from the same atomic read as the OD-010 payload and live checks.
 
-No registration fees or local rates were invented.
+```text
+translation_index_bound =
+    od010_eval.bound
+    AND
+    od010_cross_binding.ok
+```
 
-### 7–8. Atomic capture
+No caller override. Structurally complete table + failed live cross-bind ⇒ `translation_index_bound = false`.
 
-`CapturedJsonArtifact` reads each binding file once. SHA-256 and parsed payload come from those exact bytes. Mid-run file rewrite to B leaves payload A + SHA(A). `freshness_run_id` uses those captured identities.
+### 7. Cross-binding is in `freshness_run_id`
 
-### 9–10. Tests
+`authorizing_state_core` now includes:
 
-Year-specific HUD/ACS/MEPS tests and mutating-disk atomic-capture tests are in [tests/test_snapshot_cross_binding.py](tests/test_snapshot_cross_binding.py).
+- per-family `series_coverage`
+- normalized `od010_cross_binding` (`ok`, `issues`, `required`, `normalized` pairs)
 
----
+Changing series identifier, artifact/hash, base/target observation, observation period, source data year, or live index evidence changes the run id.
 
-## GitHub CI (real Actions)
+Committed `freshness_run_id`: `4b966f664968da6e938167e74eb8a12b921db10924f95b6f8ce61ec293aa24ff`
 
-On HEAD `20e515d`:
+### 8. Current evidence status preserved
 
-| Workflow | Result |
+Production today:
+
+```text
+od010_price_index freshness = MANUAL_VERIFICATION_REQUIRED
+od010_price_index evidence  = INVENTORY_NOT_VALIDATED
+translation_table_bound     = false
+series_inventory_status     = NOT_INVENTORIED
+od010_cross_binding.ok      = false
+issues                      = OD010_SERIES_COVERAGE_TOO_VAGUE, OD010_TABLE_ABSENT
+```
+
+No fake table. No invented series IDs. No CPI retrieve in this pass.
+
+### 9. Tests
+
+[`tests/test_od010_live_cross_binding.py`](tests/test_od010_live_cross_binding.py) — 14 tests, no network:
+
+1. live series X + table series X ⇒ may pass
+2. live X + table Y ⇒ FAIL
+3. same series, live hash B + table hash A ⇒ FAIL
+4. source_data_year differs ⇒ FAIL
+5. target observation period differs ⇒ FAIL
+6. structurally complete + failed cross-bind ⇒ `translation_index_bound = false`
+7. structurally complete + successful cross-bind ⇒ `translation_index_bound` may become true
+8. changing live series / artifact / observation changes `freshness_run_id`
+
+Plus: naked factor unbound; vague BLS landing fail-closed; discover_od010 invents nothing; production locks stay fail-closed.
+
+### 10. Preserved good state
+
+- year-specific candidate artifact binding
+- source_data_year binding
+- atomic `CapturedJsonArtifact` capture
+- real `od010_record_hash()` identity
+- passing evidence states only (`VALIDATED`, `MODELED_FROM_MEASURED_INPUTS`)
+- registration / local_tax method = `RULE_YEAR`; evidence = `SOURCE_GAP`
+- replacement = `MODEL_SUBINPUT`
+- connectivity = `SOURCE_CLASSIFIED`
+- 19 canonical required components
+- 7 frozen CPI_UPDATED pairs
+- OD-001–OD-013 ACCEPTED / FROZEN
+- both authorization flags false
+
+### 11. Dual verifiers
+
+Both wrote `VERDICT: PASS` on SHA `a26d7a5` after the last source edit (`2026-08-15T19:18:38Z`):
+
+- `/tmp/goal-verifier-4f28b7d8ddac-code-review.md` — PASS at `2026-08-15T19:32:55Z` (nits only)
+- `/tmp/goal-verifier-4f28b7d8ddac-qa.md` — PASS at `2026-08-15T19:23:28Z`
+
+### 12. GitHub CI on `a26d7a5`
+
+| workflow | result |
 |---|---|
-| Tests & Code Quality | **success — 209 passed, 5 skipped, 1 warning** ([31901597152](https://github.com/sumosizedginger/foundation/actions/runs/31901597152)) |
-| Validate Living Cost Sources | **success** ([31901597127](https://github.com/sumosizedginger/foundation/actions/runs/31901597127)) |
-| Deploy Pages | **success** ([31901597096](https://github.com/sumosizedginger/foundation/actions/runs/31901597096)) |
-
-Local pytest (not CI): 214 passed, 1 warning.
+| Tests & Code Quality | **success — 223 passed, 5 skipped, 1 warning** [31903557769](https://github.com/sumosizedginger/foundation/actions/runs/31903557769) |
+| Validate Living Cost Sources | **success** [31903557625](https://github.com/sumosizedginger/foundation/actions/runs/31903557625) |
+| Deploy Pages | **success** [31903557672](https://github.com/sumosizedginger/foundation/actions/runs/31903557672) |
 
 ---
 
-## Dual verifiers
+## END-STATE CONTROLS (all still fail-closed)
 
-Both `VERDICT: PASS` on HEAD `20e515d`:
+```text
+candidate_calculation_authorized = false
+living_cost.release_authorized   = false
+candidate_inputs_bound           = false
+translation_index_bound          = false
+ready_for_private_candidate      = false
+states_modeled                   = 0
+od010_cross_binding.ok           = false
+```
 
-- `/tmp/goal-verifier-30d5bb00b8ee-code-review.md`
-- `/tmp/goal-verifier-30d5bb00b8ee-qa.md`
+Public gate still takes no `checks` argument and still runs live discovery.
+One readiness context is still atomically captured.
+Year-specific artifact / source_data_year cross-binding still holds.
+OD-010 record hashes still bind to the exact captured record.
+OD-010 table is now also cross-bound to live series inventory.
+Candidate assembler = **not built**.
 
----
-
-## NOT COMPLETED (still remaining)
-
-Do not paper these over.
-
-1. BLS CE HTTP 403 / `INCOMPLETE_PROVENANCE`
-2. Mobile phone price `SOURCE_GAP`
-3. FCC broadband `SOURCE_GAP`
-4. Vehicle registration `SOURCE_GAP` (method is now `RULE_YEAR`; evidence still gap)
-5. Vehicle replacement inputs pending
-6. NAIC tables `RETRIEVED_UNVALIDATED`
-7. Federal tax `INVENTORY_NOT_VALIDATED`
-8. State / local tax `SOURCE_GAP`
-9. MEPS health OOP `RETRIEVED_UNVALIDATED`
-10. EPA MPG `RETRIEVED_UNVALIDATED`
-11. OD-010 series not bound
-12. Candidate inputs unbound — assembler not built
-13. CMS current-year PUF byte currentness `CHECK_FAILED`
-14. NHTS live discovery `CHECK_FAILED`
-15. Both authorization flags remain `false`
-16. Some discoverers still omit `source_data_year` on year_coverage (validator fail-closes; does not reopen family-wide matching)
-17. No MSLC until later owner authorization **and** a passing freshness gate
+`empirical_blocker_family_count = 12`
+`gate_blocker_reason_count = 75` (includes per-component `CROSS_BIND:*:STRUCTURALLY_INCOMPLETE` plus `OD010_CROSS_BIND:OD010_SERIES_COVERAGE_TOO_VAGUE` and `OD010_CROSS_BIND:OD010_TABLE_ABSENT`)
 
 ---
 
-## Stop
+## NOT COMPLETED (still remaining; do not paper over)
 
-DO NOT BUILD THE CANDIDATE ASSEMBLER.
+These were **out of scope** for this bar. They remain real blockers.
 
-NO MINIMUM SUSTAINABLE LIVING COST WAS CALCULATED OR PUBLISHED.
+- BLS CE official retrieve HTTP 403 / `INCOMPLETE_PROVENANCE` (maintenance, essentials, recreation cache)
+- Mobile phone price `SOURCE_GAP`
+- FCC broadband `SOURCE_GAP` / incomplete (often HTTP 403)
+- Vehicle registration `SOURCE_GAP` (methodology `RULE_YEAR`; evidence still `SOURCE_GAP`)
+- Vehicle replacement `FORMULA_FROZEN_INPUTS_PENDING` / `MODEL_SUBINPUT` (acquisition / residual / usable years unbound)
+- NAIC state-table extraction `RETRIEVED_UNVALIDATED` (landing current; vintage AUT-PB 2022-2023; local PDF not bound; tables unvalidated)
+- Federal tax `INVENTORY_NOT_VALIDATED`
+- State/local tax `SOURCE_GAP` / most FIPS unresolved; class-C overlay not generally implemented
+- MEPS health OOP `RETRIEVED_UNVALIDATED` (download ≠ derivation; newest released FY Consolidated is HC-251 / 2023)
+- EPA MPG `RETRIEVED_UNVALIDATED` (methodology frozen ≠ validated cohort extraction)
+- OD-010 CPI/medical translation series not inventoried (`translation_index_bound=false` / `OD010_TRANSLATION_INDEX_NOT_BOUND` / `OD010_SERIES_COVERAGE_TOO_VAGUE`)
+- `candidate_inputs_bound=false` (assembler not built — do not build it unless authorized; no fake binding file)
+- CMS current-year byte currentness still `CHECK_FAILED`; NHTS `CHECK_FAILED`; EPA `CHECK_FAILED`; NAIC PDF bind `CHECK_FAILED`
+- No MSLC until later owner authorization **and** a passing freshness gate
+- `candidate_calculation_authorized` and `release_authorized` both remain false
+
+Do not solve the 12 empirical blocker families unless a later GROK.MD explicitly authorizes that work.
+
+---
+
+## NEVER-DO (still in force)
+
+Do not calculate or publish MSLC / 2024/2026 MSLC / Gap / Adequacy / state rankings / national median / Composite.
+
+Do not reopen OD-001–OD-013.
+
+Do not change the Bottom-30 definition.
+
+Do not introduce an equivalence scale.
+
+Do not change pillar or metric weights.
+
+Do not substitute a failed source.
+
+Do not treat missing as zero.
+
+Do not interpolate official observations merely to make a daily line move.
+
+Do not overwrite historical vintages.
+
+Do not delete raw-source metadata.
+
+Do not publish an unvalidated score.
+
+Do not build the candidate assembler.
+
+Do not create a fake OD-010 table or fake bindings to make gates pass.
+
+Do not invent series IDs or observations.
+
+---
+
+## STOP
+
+OD-010 live-freshness cross-binding is fail-closed.
+
+No MSLC was calculated or published.
+
+The candidate assembler was not built.
