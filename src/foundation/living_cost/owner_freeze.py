@@ -504,8 +504,21 @@ def freshness_gate_checklist() -> dict[str, Any]:
 
 
 def living_cost_release_authorized() -> bool:
-    """Owner freeze does not authorize headline release."""
-    return False
+    """Public headline publication is not authorized."""
+    from foundation.living_cost.freshness import (
+        living_cost_release_authorized as _release,
+    )
+
+    return _release()
+
+
+def candidate_calculation_authorized() -> bool:
+    """Private unpublished candidate calculation is not authorized."""
+    from foundation.living_cost.freshness import (
+        candidate_calculation_authorized as _candidate,
+    )
+
+    return _candidate()
 
 
 def public_states_modeled() -> int:
@@ -1024,6 +1037,7 @@ def freeze_payload() -> dict[str, Any]:
         "headline_calculated": False,
         "gap_calculated": False,
         "adequacy_calculated": False,
+        "candidate_calculation_authorized": False,
         "living_cost_release_authorized": False,
         "states_modeled": 0,
         "decisions_frozen": True,

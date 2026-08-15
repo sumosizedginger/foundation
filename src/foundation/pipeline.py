@@ -54,18 +54,22 @@ def run_full_pipeline(project_root: Path | None = None) -> dict[str, Any]:
     atomic_write_json(current_dir / "population.json", latest_pop.to_dict())
 
     # 2. Axis 2 remains unpublished. The engine writes transition-state files only.
-    # Do not flip this flag. Headline living-cost aggregation is not authorized.
-    # Even if later flipped, assert_candidate_freshness_ready must pass first.
+    # Two separate owner permissions. Both stay false.
+    # candidate_calculation_authorized: private unpublished candidate (not built).
+    # living_cost_release_authorized: public headline / Gap / Adequacy / Composite.
+    candidate_calculation_authorized = False
     living_cost_release_authorized = False
     if living_cost_release_authorized:
+        raise RuntimeError("Living-cost publication is not authorized.")
+    if candidate_calculation_authorized:
         from foundation.living_cost.freshness import assert_candidate_freshness_ready
 
         assert_candidate_freshness_ready(
             {},
             project_cost_year=2026,
-            living_cost_release_authorized=True,
+            candidate_calculation_authorized=True,
         )
-        raise RuntimeError("Living-cost publication is not authorized.")
+        raise RuntimeError("Private candidate assembler is not built.")
 
     living_cost_res = run_living_cost_pipeline(project_root)
     survival_consolidated = living_cost_res["survival_consolidated"]

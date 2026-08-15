@@ -1,0 +1,244 @@
+{
+  "report_type": "living_cost_candidate_freshness",
+  "generated_at": "2026-08-15T02:51:42Z",
+  "schema_version": "1.0",
+  "calculates_mslc": false,
+  "required_families": [
+    "acs_population_weights",
+    "hud_fmr",
+    "usda_food",
+    "cms_marketplace_sbe",
+    "meps_full_year_consolidated",
+    "nhts_mileage",
+    "epa_vehicle",
+    "eia_gasoline",
+    "naic_auto_insurance",
+    "bls_ce",
+    "fcc_broadband",
+    "mobile_price",
+    "bea_rpp",
+    "federal_tax_law",
+    "state_tax_law",
+    "local_tax_law",
+    "vehicle_registration",
+    "vehicle_replacement",
+    "od010_price_index"
+  ],
+  "checks": {
+    "acs_population_weights": {
+      "source_id": "acs_population_weights",
+      "latest_checked_at": "2026-08-15T02:51:42Z",
+      "latest_authoritative_vintage_found": "2024 ACS 5-Year B01001",
+      "selected_vintage": "2024 ACS 5-Year B01001",
+      "selected_artifact": "census_acs5_2024 / acsdt5y2024-b01001.dat",
+      "newer_data_exists": false,
+      "retrieval_validation_status": "VALIDATED",
+      "reason_if_not_refreshed": "Newest county-level ACS 5-Year vintage at check time is 2024; used for current and historical 2024. Fixed-2024 sensitivity retained."
+    },
+    "hud_fmr": {
+      "source_id": "hud_fmr",
+      "latest_checked_at": "2026-08-15T02:51:42Z",
+      "latest_authoritative_vintage_found": "FY2024 / FY2026",
+      "selected_vintage": "FY2024 / FY2026",
+      "selected_artifact": "FMR2024_final_revised.xlsx / FY26_FMRs_revised.xlsx",
+      "newer_data_exists": false,
+      "retrieval_validation_status": "VALIDATED",
+      "reason_if_not_refreshed": "Official HUD FY2024 and FY2026 county workbooks are the newest applicable FMR vintages."
+    },
+    "usda_food": {
+      "source_id": "usda_food",
+      "latest_checked_at": "2026-08-15T02:51:42Z",
+      "latest_authoritative_vintage_found": "target-year monthly reports / YTD",
+      "selected_vintage": "target-year monthly reports / YTD",
+      "selected_artifact": "usda food-plan monthly reports",
+      "newer_data_exists": false,
+      "retrieval_validation_status": "MODELED_FROM_MEASURED_INPUTS",
+      "reason_if_not_refreshed": "Canonical USDA Low-Cost; Thrifty sensitivity. Incomplete years use YTD."
+    },
+    "cms_marketplace_sbe": {
+      "source_id": "cms_marketplace_sbe",
+      "latest_checked_at": "2026-08-15T02:51:42Z",
+      "latest_authoritative_vintage_found": "PY2024 / PY2026 Exchange PUF + SBE",
+      "selected_vintage": "PY2024 / PY2026 Exchange PUF + SBE",
+      "selected_artifact": "cms rate/plan/service-area PUF zips",
+      "newer_data_exists": false,
+      "retrieval_validation_status": "MODELED_FROM_MEASURED_INPUTS",
+      "reason_if_not_refreshed": "Federal PUF plus year-specific SBE archives. Not a published healthcare headline."
+    },
+    "meps_full_year_consolidated": {
+      "source_id": "meps_full_year_consolidated",
+      "latest_checked_at": "2026-08-15T02:51:42Z",
+      "latest_authoritative_vintage_found": "HC-251 / 2023",
+      "selected_vintage": "HC-251 / 2023",
+      "selected_artifact": "h251dat.zip",
+      "newer_data_exists": false,
+      "retrieval_validation_status": "RETRIEVED_UNVALIDATED",
+      "reason_if_not_refreshed": "MEPS HEALTH OOP DERIVATION: RETRIEVED_UNVALIDATED. HC-251 downloaded is not sufficient. Still required: newest officially released Full Year Consolidated PUF; validate fixed-width/codebook parse; enforce age 18-64 privately insured filter; apply survey weights; derive weighted-mean canonical OOP; retain median/P75; hash/provenance; bind OD-010 medical price translation for lagged years."
+    },
+    "nhts_mileage": {
+      "source_id": "nhts_mileage",
+      "latest_checked_at": "2026-08-15T02:51:42Z",
+      "latest_authoritative_vintage_found": "2022 NHTS V2.1",
+      "selected_vintage": "2022 NHTS V2.1",
+      "selected_artifact": "nhts_2022_csv.zip",
+      "newer_data_exists": false,
+      "retrieval_validation_status": "VALIDATED",
+      "reason_if_not_refreshed": "Structural quantity. Foundation Mobility Standard is weighted median. Do not inflate miles."
+    },
+    "epa_vehicle": {
+      "source_id": "epa_vehicle",
+      "latest_checked_at": "2026-08-15T02:51:42Z",
+      "latest_authoritative_vintage_found": "EPA/DOE fueleconomy.gov vehicles.csv.zip",
+      "selected_vintage": "EPA/DOE fueleconomy.gov vehicles.csv.zip",
+      "selected_artifact": "epa_fueleconomy_vehicles.csv.zip",
+      "newer_data_exists": false,
+      "retrieval_validation_status": "RETRIEVED_UNVALIDATED",
+      "reason_if_not_refreshed": "OD-004 methodology is FROZEN; EPA MPG evidence is RETRIEVED_UNVALIDATED. Before candidate readiness validate gasoline non-BEV/non-PHEV compact+midsize 8-12 model-year window median combined MPG from official rows; record artifact, vintage, model-year range, row count, filters, median, sensitivities, hash/provenance. Frozen methodology is not VALIDATED evidence."
+    },
+    "eia_gasoline": {
+      "source_id": "eia_gasoline",
+      "latest_checked_at": "2026-08-15T02:51:42Z",
+      "latest_authoritative_vintage_found": "EIA weekly retail gasoline",
+      "selected_vintage": "EIA weekly retail gasoline",
+      "selected_artifact": "pswrgvwall.xls",
+      "newer_data_exists": false,
+      "retrieval_validation_status": "VALIDATED",
+      "reason_if_not_refreshed": "High-frequency price. Use target-year observations / YTD."
+    },
+    "naic_auto_insurance": {
+      "source_id": "naic_auto_insurance",
+      "latest_checked_at": "2026-08-15T02:51:42Z",
+      "latest_authoritative_vintage_found": "2022/2023 Auto Insurance Database Report / data through 2023",
+      "selected_vintage": "2022/2023 Auto Insurance Database Report / data through 2023",
+      "selected_artifact": "publication-aut-pb-auto-insurance-database.pdf",
+      "newer_data_exists": false,
+      "retrieval_validation_status": "RETRIEVED_UNVALIDATED",
+      "reason_if_not_refreshed": "Official PDF retrieved. State-table extraction is not a validated numeric series."
+    },
+    "bls_ce": {
+      "source_id": "bls_ce",
+      "latest_checked_at": "2026-08-15T02:51:42Z",
+      "latest_authoritative_vintage_found": "2024 Interview PUMD cache",
+      "selected_vintage": "2024 Interview PUMD cache",
+      "selected_artifact": "intrvw24.zip",
+      "newer_data_exists": false,
+      "retrieval_validation_status": "INCOMPLETE_PROVENANCE",
+      "reason_if_not_refreshed": "Official re-retrieve remains HTTP 403. Cached parse is not VALIDATED."
+    },
+    "fcc_broadband": {
+      "source_id": "fcc_broadband",
+      "latest_checked_at": "2026-08-15T02:51:42Z",
+      "latest_authoritative_vintage_found": null,
+      "selected_vintage": null,
+      "selected_artifact": null,
+      "newer_data_exists": false,
+      "retrieval_validation_status": "SOURCE_GAP",
+      "reason_if_not_refreshed": "FCC Urban Rate Survey retrieve historically HTTP 403 / incomplete."
+    },
+    "mobile_price": {
+      "source_id": "mobile_price",
+      "latest_checked_at": "2026-08-15T02:51:42Z",
+      "latest_authoritative_vintage_found": null,
+      "selected_vintage": null,
+      "selected_artifact": null,
+      "newer_data_exists": false,
+      "retrieval_validation_status": "SOURCE_GAP",
+      "reason_if_not_refreshed": "No accepted authoritative mobile PRICE source. Do not invent a price."
+    },
+    "bea_rpp": {
+      "source_id": "bea_rpp",
+      "latest_checked_at": "2026-08-15T02:51:42Z",
+      "latest_authoritative_vintage_found": "BEA SARPP All-items 2024 / current release February 19, 2026",
+      "selected_vintage": "BEA SARPP All-items 2024 / current release February 19, 2026",
+      "selected_artifact": "SARPP.zip",
+      "newer_data_exists": false,
+      "retrieval_validation_status": "VALIDATED",
+      "reason_if_not_refreshed": "Official BEA RPP landing page still lists Current Release February 19, 2026 and Next release December 10, 2026. Newest official All-items state RPP data year is 2024. Selected artifact is apps.bea.gov/regional/zip/SARPP.zip (sha256 38713c6224c4c26ae020ffecd4549b82dca84f43d34f93dfdb43f4070cf011da; retrieved_at 2026-08-14T20:18:54Z). 2026 cost year reuses 2024 as LATEST_AVAILABLE and does not relabel the source year. This record \u2014 not a prior VALIDATED parse alone \u2014 establishes the vintage is still the newest appropriate authoritative release."
+    },
+    "federal_tax_law": {
+      "source_id": "federal_tax_law",
+      "latest_checked_at": "2026-08-15T02:51:42Z",
+      "latest_authoritative_vintage_found": "2024 and 2026 statutory tables in code",
+      "selected_vintage": "2024 and 2026 statutory tables in code",
+      "selected_artifact": null,
+      "newer_data_exists": false,
+      "retrieval_validation_status": "INVENTORY_NOT_VALIDATED",
+      "reason_if_not_refreshed": "RULE_YEAR tables exist for 2024 and 2026 only. Inventory not validated against primary IRS/SSA artifacts."
+    },
+    "state_tax_law": {
+      "source_id": "state_tax_law",
+      "latest_checked_at": "2026-08-15T02:51:42Z",
+      "latest_authoritative_vintage_found": "2024 and 2026 schedules in code",
+      "selected_vintage": "2024 and 2026 schedules in code",
+      "selected_artifact": null,
+      "newer_data_exists": false,
+      "retrieval_validation_status": "SOURCE_GAP",
+      "reason_if_not_refreshed": "State schedule inventory incomplete / unvalidated as applicable."
+    },
+    "local_tax_law": {
+      "source_id": "local_tax_law",
+      "latest_checked_at": "2026-08-15T02:51:42Z",
+      "latest_authoritative_vintage_found": "MD county / NYC / Philadelphia verified; Harris County TX verified no local EIT",
+      "selected_vintage": "MD county / NYC / Philadelphia verified; Harris County TX verified no local EIT",
+      "selected_artifact": null,
+      "newer_data_exists": false,
+      "retrieval_validation_status": "SOURCE_GAP",
+      "reason_if_not_refreshed": "Most county FIPS remain UNRESOLVED_SOURCE_GAP. Place-level class-C overlay not generally implemented."
+    },
+    "vehicle_registration": {
+      "source_id": "vehicle_registration",
+      "latest_checked_at": "2026-08-15T02:51:42Z",
+      "latest_authoritative_vintage_found": null,
+      "selected_vintage": null,
+      "selected_artifact": null,
+      "newer_data_exists": false,
+      "retrieval_validation_status": "SOURCE_GAP",
+      "reason_if_not_refreshed": "No accepted 51-state official registration-fee inventory."
+    },
+    "vehicle_replacement": {
+      "source_id": "vehicle_replacement",
+      "latest_checked_at": "2026-08-15T02:51:42Z",
+      "latest_authoritative_vintage_found": null,
+      "selected_vintage": null,
+      "selected_artifact": null,
+      "newer_data_exists": false,
+      "retrieval_validation_status": "FORMULA_FROZEN_INPUTS_PENDING",
+      "reason_if_not_refreshed": "OD-005 formula frozen: (acquisition - residual) / usable remaining years. Acquisition price, residual/salvage value, and usable remaining years are not bound. Do not invent numeric values."
+    },
+    "od010_price_index": {
+      "source_id": "od010_price_index",
+      "latest_checked_at": "2026-08-15T02:51:42Z",
+      "latest_authoritative_vintage_found": null,
+      "selected_vintage": null,
+      "selected_artifact": null,
+      "newer_data_exists": false,
+      "retrieval_validation_status": "INVENTORY_NOT_VALIDATED",
+      "reason_if_not_refreshed": "Component-specific CPI/index series for lagged nominal dollars are not bound into a live translation table."
+    }
+  },
+  "ready_for_private_candidate": false,
+  "candidate_calculation_authorized": false,
+  "living_cost_release_authorized": false,
+  "translation_index_bound": false,
+  "blocker_count": 12,
+  "blockers": [
+    "meps_full_year_consolidated:RETRIEVED_UNVALIDATED",
+    "epa_vehicle:RETRIEVED_UNVALIDATED",
+    "naic_auto_insurance:RETRIEVED_UNVALIDATED",
+    "bls_ce:INCOMPLETE_PROVENANCE",
+    "fcc_broadband:SOURCE_GAP",
+    "mobile_price:SOURCE_GAP",
+    "federal_tax_law:INVENTORY_NOT_VALIDATED",
+    "state_tax_law:SOURCE_GAP",
+    "local_tax_law:SOURCE_GAP",
+    "vehicle_registration:SOURCE_GAP",
+    "vehicle_replacement:FORMULA_FROZEN_INPUTS_PENDING",
+    "od010_price_index:INVENTORY_NOT_VALIDATED"
+  ],
+  "headline_calculated": false,
+  "notes": {
+    "health_oop": "MEPS HEALTH OOP DERIVATION: RETRIEVED_UNVALIDATED. Do not claim healthcare OOP ready merely because HC-251 was downloaded.",
+    "mpg": "EPA MPG evidence is RETRIEVED_UNVALIDATED. OD-004 methodology FROZEN is not VALIDATED evidence.",
+    "vehicle_replacement": "Formula frozen. Acquisition, residual, and usable years pending."
+  }
+}

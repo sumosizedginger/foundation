@@ -1,6 +1,6 @@
 {
   "report_type": "living_cost_source_coverage",
-  "generated_at": "2026-08-15T01:06:27+00:00",
+  "generated_at": "2026-08-15T02:51:42+00:00",
   "question": "What still prevents the living-cost model from being calculated?",
   "required_components": [
     "housing",
@@ -1151,5 +1151,10 @@
   "living_cost_release_authorized": false,
   "states_modeled": 0,
   "decisions_frozen": true,
-  "methodology_frozen_is_not_source_validated": true
+  "methodology_frozen_is_not_source_validated": true,
+  "candidate_calculation_authorized": false,
+  "blocker_notes": {
+    "health_oop": "MEPS HEALTH OOP DERIVATION: RETRIEVED_UNVALIDATED. Tasks still required: use newest officially released Full Year Consolidated PUF; validate fixed-width/codebook parsing; enforce approved age/private-insurance filter; apply correct survey weights; derive weighted-mean canonical OOP; retain median/P75 sensitivity; produce source hash/provenance; bind OD-010 medical price translation for lagged years. Do not claim healthcare OOP ready merely because HC-251 was downloaded.",
+    "mpg": "EPA MPG: RETRIEVED_UNVALIDATED. OD-004 methodology is FROZEN; evidence is not VALIDATED. Before candidate readiness validate gasoline non-BEV/non-PHEV compact+midsize 8-12 model-year window median combined MPG from official EPA/DOE rows. Record artifact, vintage, cohort model-year range, row count, filter criteria, median MPG, sensitivities, hash/provenance."
+  }
 }

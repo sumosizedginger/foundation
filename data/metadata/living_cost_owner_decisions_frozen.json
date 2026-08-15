@@ -1,12 +1,13 @@
 {
   "report_type": "living_cost_owner_decisions_frozen",
-  "generated_at": "2026-08-15T02:07:33+00:00",
+  "generated_at": "2026-08-15T03:02:58+00:00",
   "effective_date": "2026-08-15",
   "status": "ACCEPTED",
   "methodology_status": "FROZEN",
   "headline_calculated": false,
   "gap_calculated": false,
   "adequacy_calculated": false,
+  "candidate_calculation_authorized": false,
   "living_cost_release_authorized": false,
   "states_modeled": 0,
   "decisions_frozen": true,
@@ -68,10 +69,12 @@
       "bls_ce",
       "fcc_broadband",
       "mobile_price",
+      "bea_rpp",
       "federal_tax_law",
       "state_tax_law",
       "local_tax_law",
       "vehicle_registration",
+      "vehicle_replacement",
       "od010_price_index"
     ],
     "if_newer_authoritative_data_exist": [
@@ -83,6 +86,9 @@
     "do_not_recalculate_historical_2024_with_2026_prices": true,
     "headline_authorized_by_this_gate": false,
     "calculates_mslc": false,
+    "candidate_calculation_authorized": false,
+    "living_cost_release_authorized": false,
+    "private_candidate_never_implies_publication": true,
     "legacy_named_families": [
       "acs_population_weights",
       "hud_fmr",

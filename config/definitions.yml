@@ -24,6 +24,7 @@ display:
   show_fake_precision: false
 
 living_cost:
+  candidate_calculation_authorized: false
   release_authorized: false
   states_modeled: 0
   owner_freeze:

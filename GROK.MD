@@ -1,80 +1,106 @@
-# THE FOUNDATION — POST-OWNER-FREEZE AUDIT CORRECTIONS STATUS
+# THE FOUNDATION — FINAL READINESS-GATE CORRECTION STATUS
+
+HEAD this pass started from: `2baec0caaeaa3f4f40f64b10833fdb7bd4b332d7`
 
 Audited freeze SHA: `8a4157f62e41d54f58eb361f9188990ffb69c7b7`
 
 OD-001 through OD-013 remain **ACCEPTED / FROZEN**. Owner choices were not reopened.
 
-`living_cost_release_authorized = false`. `states_modeled = 0`.
+`candidate_calculation_authorized = false`  
+`living_cost_release_authorized = false`  
+`states_modeled = 0`
 
-NO MINIMUM SUSTAINABLE LIVING COST HEADLINE WAS CALCULATED OR PUBLISHED.
+**NO MINIMUM SUSTAINABLE LIVING COST WAS CALCULATED OR PUBLISHED.**
+
+The two authorizations are separate. Private-candidate permission never implies publication.
 
 ---
 
 ## Completed this pass
 
-1. **OD-007 schema mismatch fixed.**
-   `select_maintenance_statistic()` now reads the production keys
-   `mean_incl_zero`, `median_incl_zero`, `p25_positive`, `p50_positive`,
-   `positive_spender_mean`. It accepts the live
-   `living_cost_maintenance_candidates.json` artifact.
-   Recovered values: 781.22 / 0.0 / 276.0 / 560.0 / 1728.47.
-   Evidence remains `INCOMPLETE_PROVENANCE`, not VALIDATED.
+1. **Separated authorization.**
+   `candidate_calculation_authorized` is distinct from
+   `living_cost_release_authorized`. The freshness gate for a PRIVATE
+   candidate requires candidate auth and **must not** require public
+   release auth. Publication still requires the separate release flag.
+   Both flags remain false.
 
-2. **Local tax fail-closed (OD-011).**
-   `calculate_local_income_tax()` returns a typed `LocalTaxResult`.
-   Unresolved FIPS (e.g. 06075) is `UNRESOLVED_SOURCE_GAP`, amount `None`.
-   Partial-city without overlay is `PARTIAL_CITY_NEEDS_OVERLAY`.
-   Only verified-no-tax or verified-rate (or no-geography request) may
-   contribute 0 / a computed amount.
-   `evaluate_taxes_for_gross()` and `solve_gross_required_income()` raise
-   `LocalTaxUnresolvedError` instead of silently omitting local tax.
+2. **Added freshness family `vehicle_replacement`.**
+   Covers OD-005 acquisition, residual, and usable remaining years.
+   Status: `FORMULA_FROZEN_INPUTS_PENDING`. No invented numbers.
 
-3. **Unsupported tax years fail closed (OD-010 RULE_YEAR).**
-   Federal, FICA, and state functions no longer fall back to 2024 law.
-   2024 uses 2024 tables. 2026 uses 2026 tables. 2025 / 2027 / 2019 raise
-   `UnsupportedTaxYearError`. No 2027 tables were invented.
+3. **Added freshness family `bea_rpp` with a real vintage check.**
+   Official BEA landing page still lists Current Release
+   February 19, 2026 and Next release December 10, 2026.
+   Newest official All-items state RPP data year is 2024.
+   Selected artifact is `SARPP.zip`
+   (sha256 `38713c6224c4c26ae020ffecd4549b82dca84f43d34f93dfdb43f4070cf011da`).
+   A VALIDATED parse alone is not enough; the freshness record must name
+   the concrete vintage/artifact. Placeholder strings
+   `"latest retrieved BEA RPP"` / `"bea rpp artifact"` are refused.
 
-4. **Freshness gate is now enforceable.**
-   `assert_candidate_freshness_ready()` requires a machine-readable check
-   for every required family (ACS, HUD, USDA, CMS, MEPS, NHTS, EPA, EIA,
-   NAIC, BLS CE, FCC, mobile, federal/state/local tax, registration,
-   OD-010 index). It refuses if a check is missing, newer data is unused,
-   a required source is SOURCE_GAP / incomplete, the translation index is
-   unbound, source year is silently relabeled, or release is not authorized.
-   The guard does **not** calculate an MSLC.
+4. **Documented MEPS health OOP as RETRIEVED_UNVALIDATED.**
+   HC-251 download is not derivation-ready. Remaining tasks are listed in
+   coverage `blocker_notes.health_oop` and the freshness artifact.
 
-5. **Release lock preserved.**
-   Pipeline flag remains false. Public state lists remain empty.
-   National living-cost distributions remain unpublished.
+5. **Documented EPA MPG as RETRIEVED_UNVALIDATED.**
+   Frozen OD-004 methodology is not VALIDATED evidence. Cohort-validation
+   tasks are listed in `blocker_notes.mpg`.
 
-6. **Tests** cover production OD-007 keys, local-tax statuses, solver
-   refusal on 06075, year fail-closed, and freshness refusal.
+6. **Generated `data/metadata/living_cost_candidate_freshness.json`.**
+   19 required families, each with source_id, latest_checked_at, vintage,
+   artifact, newer_data_exists, retrieval_validation_status, reason.
+   **Readiness verdict: FAIL.** `ready_for_private_candidate = false`.
+   `blocker_count = 12`. That is desired. Do not fake readiness.
 
-## NOT COMPLETED / still blocking a future candidate
+7. **Regenerated source coverage from current truth.**
+   Evidence statuses were not improved.
+   Official `write_coverage()` now persists `blocker_notes` so a later
+   validator run cannot drop the OOP/MPG documentation.
 
-These were **not** solved by this audit pass and must stay truthful:
+8. **Tests no longer rewrite the production freshness artifact.**
+   Writers use `tmp_path`. Production `generated_at` is stable across the
+   suite.
 
-- BLS CE official retrieve: HTTP 403 / `INCOMPLETE_PROVENANCE`
-- Mobile phone price: `SOURCE_GAP`
-- FCC broadband price evidence: `SOURCE_GAP` / incomplete retrieval
-- Vehicle registration: `SOURCE_GAP`
-- Vehicle replacement numeric inputs: `FORMULA_FROZEN_INPUTS_PENDING`
-- NAIC state-table extraction: `RETRIEVED_UNVALIDATED`
-- Federal tax tables: `INVENTORY_NOT_VALIDATED`
-- State tax inventory: incomplete / unvalidated as applicable
-- Local tax: `SOURCE_GAP` for any FIPS not in the verified-rate or
-  verified-no-tax inventory (almost the entire county universe)
-- MEPS 2024 Full Year Consolidated: use only if officially listed
-- OD-010 component-specific CPI series: not yet bound into a live
-  translation table (`translation_index_bound` is false)
-- Place-level municipal overlay (OD-011 class C) is not generally
-  implemented
-- Independent audit of this correction SHA
-- Any 2024/2026 MSLC, Gap, Adequacy, rankings, national median, Composite
+9. **Did not build the private candidate assembler.**
+   Engine still emits transition-state UNAVAILABLE outputs only.
 
-## Next human task
+10. Dual independent verifiers on this correction:
+    `/tmp/goal-verifier-88f296288823-code-review.md` **PASS**
+    `/tmp/goal-verifier-88f296288823-qa.md` **PASS**
 
-Independent review of this correction. Then, only with a later owner
-authorization **and** a passing freshness gate: candidate calculation.
+## NOT COMPLETED
 
-Until then: do not calculate or publish a living-cost headline.
+These remain truthful blockers. This pass did not paper them over.
+
+- Private candidate engine (not authorized)
+- Public MSLC / Gap / Adequacy / rankings / national median / Composite
+- 12 current freshness blockers:
+    - MEPS OOP `RETRIEVED_UNVALIDATED` (download ≠ derivation)
+    - EPA MPG `RETRIEVED_UNVALIDATED` (frozen methodology ≠ validated cohort)
+    - BLS CE official retrieve HTTP 403 / `INCOMPLETE_PROVENANCE`
+      (maintenance, essentials, recreation cache)
+    - NAIC state-table extraction `RETRIEVED_UNVALIDATED`
+    - Mobile phone price `SOURCE_GAP`
+    - FCC broadband `SOURCE_GAP` / incomplete
+    - Vehicle registration `SOURCE_GAP`
+    - Vehicle replacement inputs unbound
+      (`FORMULA_FROZEN_INPUTS_PENDING`)
+    - Federal tax `INVENTORY_NOT_VALIDATED`
+    - State tax `SOURCE_GAP`
+    - Local tax `SOURCE_GAP` for most FIPS; class-C overlay not generally
+      implemented
+    - OD-010 CPI/medical translation series not bound
+- Place-level municipal overlay
+- Binding real numeric replacement inputs
+- Official BLS CE re-retrieve
+- Authoritative mobile price source
+- Independent audit of this readiness-gate SHA after push
+
+## Next
+
+Owner authorization of a PRIVATE candidate
+(`candidate_calculation_authorized`) only after freshness can pass.
+A later, separate authorization is still required to publish.
+
+Until then: do not calculate or publish an MSLC.

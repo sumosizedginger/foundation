@@ -1,0 +1,285 @@
+"""Independent QA tests for the final readiness-gate correction.
+
+Does not calculate or publish an MSLC. Exercises the live modules and
+on-disk artifacts the way a later operator would.
+"""
+
+from __future__ import annotations
+
+import ast
+import json
+from pathlib import Path
+
+import pytest
+
+ROOT = Path(__file__).resolve().parents[1]
+METADATA = ROOT / "data" / "metadata"
+SRC = ROOT / "src"
+
+
+def test_authorization_functions_are_separate_and_false():
+    from foundation.living_cost.freshness import (
+        REQUIRED_FRESHNESS_FAMILIES,
+        FreshnessCheck,
+        FreshnessGateError,
+        assert_candidate_freshness_ready,
+        assert_public_release_authorized,
+        candidate_calculation_authorized,
+        living_cost_release_authorized,
+    )
+
+    assert candidate_calculation_authorized() is False
+    assert living_cost_release_authorized() is False
+    assert candidate_calculation_authorized is not living_cost_release_authorized
+
+    ready = {
+        family: FreshnessCheck(
+            source_id=family,
+            latest_checked_at="2026-08-15T00:00:00Z",
+            latest_authoritative_vintage_found="2026",
+            selected_vintage="2026",
+            selected_artifact="qa_synthetic_only",
+            newer_data_exists=False,
+            retrieval_validation_status="VALIDATED",
+        )
+        for family in REQUIRED_FRESHNESS_FAMILIES
+    }
+
+    # Private candidate gate must refuse when candidate auth is false,
+    # even if every family is VALIDATED and public release is true.
+    with pytest.raises(FreshnessGateError, match="candidate_calculation_authorized"):
+        assert_candidate_freshness_ready(
+            ready,
+            project_cost_year=2026,
+            candidate_calculation_authorized=False,
+            living_cost_release_authorized=True,
+            translation_index_bound=True,
+        )
+
+    # Private candidate may proceed without public-release authorization.
+    assert_candidate_freshness_ready(
+        ready,
+        project_cost_year=2026,
+        candidate_calculation_authorized=True,
+        living_cost_release_authorized=False,
+        translation_index_bound=True,
+    )
+
+    # Public release is a later, separate gate.
+    with pytest.raises(FreshnessGateError, match="living_cost_release_authorized"):
+        assert_public_release_authorized(living_cost_release_authorized=False)
+    assert_public_release_authorized(living_cost_release_authorized=True)
+
+
+def test_required_families_include_vehicle_replacement_and_bea_rpp():
+    from foundation.living_cost.freshness import REQUIRED_FRESHNESS_FAMILIES
+
+    families = list(REQUIRED_FRESHNESS_FAMILIES)
+    assert len(families) == 19
+    assert families.count("vehicle_replacement") == 1
+    assert families.count("bea_rpp") == 1
+    assert "vehicle_replacement" in families
+    assert "bea_rpp" in families
+
+
+def test_live_freshness_writer_is_fail_closed(tmp_path: Path):
+    from foundation.living_cost.freshness import write_candidate_freshness_report
+
+    payload = write_candidate_freshness_report(tmp_path)
+    on_disk = json.loads((tmp_path / "living_cost_candidate_freshness.json").read_text())
+    assert payload == on_disk
+    assert payload["calculates_mslc"] is False
+    assert payload["headline_calculated"] is False
+    assert payload["ready_for_private_candidate"] is False
+    assert payload["candidate_calculation_authorized"] is False
+    assert payload["living_cost_release_authorized"] is False
+    assert payload["blocker_count"] == 12
+    assert len(payload["blockers"]) == 12
+    assert "meps_full_year_consolidated:RETRIEVED_UNVALIDATED" in payload["blockers"]
+    assert "epa_vehicle:RETRIEVED_UNVALIDATED" in payload["blockers"]
+    assert "vehicle_replacement:FORMULA_FROZEN_INPUTS_PENDING" in payload["blockers"]
+    assert "bea_rpp" in payload["required_families"]
+    assert "vehicle_replacement" in payload["required_families"]
+    assert payload["checks"]["meps_full_year_consolidated"]["retrieval_validation_status"] == (
+        "RETRIEVED_UNVALIDATED"
+    )
+    assert payload["checks"]["epa_vehicle"]["retrieval_validation_status"] == (
+        "RETRIEVED_UNVALIDATED"
+    )
+    assert payload["checks"]["vehicle_replacement"]["retrieval_validation_status"] == (
+        "FORMULA_FROZEN_INPUTS_PENDING"
+    )
+    assert payload["checks"]["bea_rpp"]["source_id"] == "bea_rpp"
+    assert payload["checks"]["bea_rpp"]["retrieval_validation_status"] == "VALIDATED"
+    assert payload["checks"]["bea_rpp"]["latest_authoritative_vintage_found"]
+    assert "February 19, 2026" in payload["checks"]["bea_rpp"]["latest_authoritative_vintage_found"]
+    assert payload["checks"]["bea_rpp"]["selected_artifact"] == "SARPP.zip"
+    assert payload["checks"]["bea_rpp"]["latest_authoritative_vintage_found"] != (
+        "latest retrieved BEA RPP"
+    )
+    assert payload["checks"]["bea_rpp"]["selected_artifact"] != "bea rpp artifact"
+    assert payload["notes"]["health_oop"].startswith("MEPS HEALTH OOP DERIVATION")
+    assert "RETRIEVED_UNVALIDATED" in payload["notes"]["mpg"]
+    # Fail-closed: a VALIDATED family must not invent a pass for OOP/MPG.
+    for family in payload["required_families"]:
+        check = payload["checks"][family]
+        assert check["latest_checked_at"]
+        assert "retrieval_validation_status" in check
+        assert "newer_data_exists" in check
+
+
+def test_production_freshness_artifact_matches_fail_closed_contract():
+    path = METADATA / "living_cost_candidate_freshness.json"
+    assert path.exists()
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    assert payload["report_type"] == "living_cost_candidate_freshness"
+    assert payload["calculates_mslc"] is False
+    assert payload["ready_for_private_candidate"] is False
+    assert payload["candidate_calculation_authorized"] is False
+    assert payload["living_cost_release_authorized"] is False
+    assert payload["blocker_count"] == 12
+    required = payload["required_families"]
+    assert len(required) == 19
+    assert "vehicle_replacement" in required
+    assert "bea_rpp" in required
+    assert set(payload["checks"]) == set(required)
+    assert payload["checks"]["vehicle_replacement"]["retrieval_validation_status"] == (
+        "FORMULA_FROZEN_INPUTS_PENDING"
+    )
+    assert payload["checks"]["meps_full_year_consolidated"]["retrieval_validation_status"] == (
+        "RETRIEVED_UNVALIDATED"
+    )
+    assert payload["checks"]["epa_vehicle"]["retrieval_validation_status"] == (
+        "RETRIEVED_UNVALIDATED"
+    )
+    bea = payload["checks"]["bea_rpp"]
+    assert bea["retrieval_validation_status"] == "VALIDATED"
+    assert bea["selected_artifact"] == "SARPP.zip"
+    assert "February 19, 2026" in (bea["latest_authoritative_vintage_found"] or "")
+    assert bea["latest_authoritative_vintage_found"] != "latest retrieved BEA RPP"
+    for field in (
+        "source_id",
+        "latest_checked_at",
+        "latest_authoritative_vintage_found",
+        "selected_vintage",
+        "selected_artifact",
+        "newer_data_exists",
+        "retrieval_validation_status",
+        "reason_if_not_refreshed",
+    ):
+        for family, check in payload["checks"].items():
+            assert field in check, f"{family} missing {field}"
+
+
+def test_coverage_documents_oop_and_mpg_as_retrieved_unvalidated():
+    coverage = json.loads((METADATA / "living_cost_source_coverage.json").read_text())
+    assert coverage["generated_at"]
+    assert coverage["candidate_calculation_authorized"] is False
+    assert coverage["living_cost_release_authorized"] is False
+    assert coverage["headline_calculated"] is False
+    assert coverage["states_modeled"] == 0
+    for year in ("2024", "2026"):
+        assert coverage["coverage_by_year"][year]["health_oop"] == "RETRIEVED_UNVALIDATED"
+        assert coverage["coverage_by_year"][year]["mpg"] == "RETRIEVED_UNVALIDATED"
+        assert coverage["coverage_by_year"][year]["replacement"] == (
+            "FORMULA_FROZEN_INPUTS_PENDING"
+        )
+        assert coverage["coverage_by_year"][year]["rpp"] == "VALIDATED"
+    notes = coverage["blocker_notes"]
+    assert "RETRIEVED_UNVALIDATED" in notes["health_oop"]
+    assert "HC-251" in notes["health_oop"]
+    assert "RETRIEVED_UNVALIDATED" in notes["mpg"]
+    assert "FROZEN" in notes["mpg"]
+
+
+def test_official_coverage_writer_persists_blocker_notes():
+    """The official regenerate path must keep the required blocker documentation."""
+    writer = (ROOT / "scripts" / "validate_living_cost_sources.py").read_text(encoding="utf-8")
+    tree = ast.parse(writer)
+    write_fn = next(
+        node
+        for node in tree.body
+        if isinstance(node, ast.FunctionDef) and node.name == "write_coverage"
+    )
+    dumped = ast.dump(write_fn)
+    assert "blocker_notes" in dumped
+    assert "BLOCKER_NOTES" in dumped
+    freshness_src = (SRC / "foundation" / "living_cost" / "freshness.py").read_text(
+        encoding="utf-8"
+    )
+    assert "def stamp_source_coverage_from_current_truth" in freshness_src
+    assert "MEPS HEALTH OOP DERIVATION" in freshness_src
+    assert "EPA MPG" in freshness_src
+
+
+def test_no_mslc_is_published_in_current_or_site_outputs():
+    from foundation.living_cost.engine import get_living_cost_transition_state
+
+    state = get_living_cost_transition_state()
+    assert state["minimum_sustainable_living_cost_2024"]["status"] == "UNAVAILABLE"
+    assert state["minimum_sustainable_living_cost_2024"]["weighted_median_gross"] is None
+    assert state["minimum_sustainable_living_cost_2026"]["weighted_median_gross"] is None
+    assert state["survival_gap_2024"] is None
+    assert state["adequacy_ratio_2024"] is None
+    assert state["state_distributions_2024"] == []
+
+    for rel in (
+        Path("data/current/survival.json"),
+        Path("site/data/survival.json"),
+        Path("data/current/living_cost_2024.json"),
+        Path("data/current/living_cost_2026.json"),
+        Path("site/data/living_cost_2024.json"),
+        Path("site/data/living_cost_2026.json"),
+    ):
+        payload = json.loads((ROOT / rel).read_text(encoding="utf-8"))
+        blob = json.dumps(payload)
+        if "minimum_sustainable_living_cost_2024" in payload:
+            assert payload["minimum_sustainable_living_cost_2024"]["weighted_median_gross"] is None
+            assert payload["minimum_sustainable_living_cost_2026"]["weighted_median_gross"] is None
+        if "national_distribution" in payload:
+            assert payload["national_distribution"] is None
+            assert payload["state_distributions"] == []
+        assert (
+            payload.get("status")
+            in {
+                "pipeline_validation_in_progress",
+                None,
+            }
+            or payload.get("status_label") == "DATA PIPELINE VALIDATION IN PROGRESS"
+        )
+        assert "51220.16" not in blob or "retired" in blob.lower()
+
+
+def test_config_and_pipeline_keep_both_flags_false():
+    from foundation.config import definitions
+
+    living = definitions()["living_cost"]
+    assert living["candidate_calculation_authorized"] is False
+    assert living["release_authorized"] is False
+    assert living["states_modeled"] == 0
+
+    pipeline = (SRC / "foundation" / "pipeline.py").read_text(encoding="utf-8")
+    assert "candidate_calculation_authorized = False" in pipeline
+    assert "living_cost_release_authorized = False" in pipeline
+
+
+def test_bea_rpp_freshness_record_is_not_a_placeholder():
+    """A VALIDATED family must name a real vintage, not a tautology."""
+    from foundation.living_cost.freshness import current_family_truth
+
+    check = current_family_truth()["bea_rpp"]
+    vintage = check.latest_authoritative_vintage_found or ""
+    artifact = check.selected_artifact or ""
+    placeholder_vintages = {
+        "latest retrieved BEA RPP",
+        "bea rpp artifact",
+        "latest retrieved",
+    }
+    assert check.retrieval_validation_status == "VALIDATED"
+    assert vintage.lower() not in {p.lower() for p in placeholder_vintages}
+    assert artifact.lower() not in {p.lower() for p in placeholder_vintages}
+    assert vintage != "latest retrieved BEA RPP"
+    assert artifact != "bea rpp artifact"
+    assert "2024" in vintage
+    assert "February 19, 2026" in vintage
+    assert artifact == "SARPP.zip"

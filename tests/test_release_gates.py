@@ -132,6 +132,7 @@ def test_living_cost_release_authorized_gate():
     pipeline_path = SRC / "foundation" / "pipeline.py"
     content = pipeline_path.read_text(encoding="utf-8")
     assert "living_cost_release_authorized = False" in content
+    assert "candidate_calculation_authorized = False" in content
 
 
 def test_transition_state_has_no_headline():

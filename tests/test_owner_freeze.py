@@ -386,13 +386,18 @@ def test_od013_connecticut_year_specific_join():
 
 
 def test_owner_freeze_does_not_authorize_headline():
+    from foundation.living_cost.freshness import candidate_calculation_authorized
+
     assert living_cost_release_authorized() is False
+    assert candidate_calculation_authorized() is False
     assert public_states_modeled() == 0
     assert definitions()["living_cost"]["release_authorized"] is False
+    assert definitions()["living_cost"]["candidate_calculation_authorized"] is False
     assert definitions()["living_cost"]["states_modeled"] == 0
     payload = write_owner_decision_packet(METADATA)
     assert payload["headline_calculated"] is False
     assert payload["living_cost_release_authorized"] is False
+    assert payload["candidate_calculation_authorized"] is False
     assert payload["states_modeled"] == 0
     assert payload["decisions_frozen"] is True
     assert payload["methodology_frozen_is_not_source_validated"] is True
@@ -445,15 +450,17 @@ def test_freshness_gate_exists_and_does_not_authorize_headline():
     ):
         assert family in required
     assert set(REQUIRED_FRESHNESS_FAMILIES) == set(required)
+    assert "vehicle_replacement" in required
+    assert "bea_rpp" in required
     assert gate["headline_authorized_by_this_gate"] is False
     assert gate["calculates_mslc"] is False
-    with pytest.raises(FreshnessGateError, match="living_cost_release_authorized"):
+    with pytest.raises(FreshnessGateError, match="candidate_calculation_authorized"):
         assert_candidate_freshness_ready({}, project_cost_year=2026)
     with pytest.raises(FreshnessGateError, match="not performed"):
         assert_candidate_freshness_ready(
             {},
             project_cost_year=2026,
-            living_cost_release_authorized=True,
+            candidate_calculation_authorized=True,
             translation_index_bound=True,
         )
     checks = {
@@ -472,16 +479,86 @@ def test_freshness_gate_exists_and_does_not_authorize_headline():
         assert_candidate_freshness_ready(
             checks,
             project_cost_year=2026,
-            living_cost_release_authorized=True,
+            candidate_calculation_authorized=True,
             translation_index_bound=True,
         )
+
+
+def test_candidate_authorization_is_separate_from_public_release(tmp_path: Path):
+    from foundation.living_cost.freshness import (
+        REQUIRED_FRESHNESS_FAMILIES,
+        FreshnessCheck,
+        FreshnessGateError,
+        assert_candidate_freshness_ready,
+        assert_public_release_authorized,
+        candidate_calculation_authorized,
+        living_cost_release_authorized,
+        write_candidate_freshness_report,
+    )
+
+    assert candidate_calculation_authorized() is False
+    assert living_cost_release_authorized() is False
+    assert candidate_calculation_authorized() is not True
+    ready = {
+        family: FreshnessCheck(
+            source_id=family,
+            latest_checked_at="2026-08-15T00:00:00Z",
+            latest_authoritative_vintage_found="2026",
+            selected_vintage="2026",
+            selected_artifact="synthetic_test_only",
+            newer_data_exists=False,
+            retrieval_validation_status="VALIDATED",
+        )
+        for family in REQUIRED_FRESHNESS_FAMILIES
+    }
+    # Methodology freeze + candidate auth false cannot calculate.
+    with pytest.raises(FreshnessGateError, match="candidate_calculation_authorized"):
+        assert_candidate_freshness_ready(
+            ready,
+            project_cost_year=2026,
+            candidate_calculation_authorized=False,
+            translation_index_bound=True,
+        )
+    # Candidate true + freshness ready may allow a future PRIVATE candidate.
+    assert_candidate_freshness_ready(
+        ready,
+        project_cost_year=2026,
+        candidate_calculation_authorized=True,
+        living_cost_release_authorized=False,
+        translation_index_bound=True,
+    )
+    # Public publication still blocked.
+    with pytest.raises(FreshnessGateError, match="living_cost_release_authorized"):
+        assert_public_release_authorized(living_cost_release_authorized=False)
+    report = write_candidate_freshness_report(tmp_path)
+    assert report["ready_for_private_candidate"] is False
+    assert report["candidate_calculation_authorized"] is False
+    assert report["living_cost_release_authorized"] is False
+    assert report["calculates_mslc"] is False
+    assert report["blocker_count"] > 0
+    assert "vehicle_replacement" in report["checks"]
+    assert "bea_rpp" in report["checks"]
+    assert report["checks"]["vehicle_replacement"]["retrieval_validation_status"] == (
+        "FORMULA_FROZEN_INPUTS_PENDING"
+    )
+    assert report["checks"]["meps_full_year_consolidated"]["retrieval_validation_status"] == (
+        "RETRIEVED_UNVALIDATED"
+    )
+    assert report["checks"]["epa_vehicle"]["retrieval_validation_status"] == (
+        "RETRIEVED_UNVALIDATED"
+    )
 
 
 def test_production_coverage_keeps_evidence_separate_from_frozen_methodology():
     coverage = json.loads((METADATA / "living_cost_source_coverage.json").read_text())
     assert coverage["headline_calculated"] is False
     assert coverage["living_cost_release_authorized"] is False
+    assert coverage["candidate_calculation_authorized"] is False
     assert coverage["decisions_frozen"] is True
+    assert coverage["coverage_by_year"]["2024"]["health_oop"] == "RETRIEVED_UNVALIDATED"
+    assert coverage["coverage_by_year"]["2024"]["mpg"] == "RETRIEVED_UNVALIDATED"
+    assert "MEPS HEALTH OOP DERIVATION" in coverage["blocker_notes"]["health_oop"]
+    assert "RETRIEVED_UNVALIDATED" in coverage["blocker_notes"]["mpg"]
     blob = json.dumps(coverage)
     assert "unfrozen" not in blob.lower()
     assert "OD-004 not frozen" not in blob
@@ -540,4 +617,5 @@ def test_nhts_parser_uses_median_as_canonical(tmp_path: Path):
 def test_pipeline_still_refuses_headline_after_freeze():
     src = (ROOT / "src" / "foundation" / "pipeline.py").read_text(encoding="utf-8")
     assert "living_cost_release_authorized = False" in src
+    assert "candidate_calculation_authorized = False" in src
     assert run_full_pipeline  # importable; do not flip the gate
