@@ -431,7 +431,6 @@ def test_food_health_housing_additional_freezes():
 def test_freshness_gate_exists_and_does_not_authorize_headline():
     from foundation.living_cost.freshness import (
         REQUIRED_FRESHNESS_FAMILIES,
-        FreshnessCheck,
         FreshnessGateError,
         assert_candidate_freshness_ready,
     )
@@ -455,21 +454,9 @@ def test_freshness_gate_exists_and_does_not_authorize_headline():
     assert gate["headline_authorized_by_this_gate"] is False
     assert gate["calculates_mslc"] is False
     with pytest.raises(FreshnessGateError, match="candidate_calculation_authorized"):
-        assert_candidate_freshness_ready({})
-    checks = {
-        family: FreshnessCheck(
-            source_id=family,
-            latest_checked_at="2026-08-15T00:00:00Z",
-            latest_authoritative_vintage_found="2024",
-            selected_vintage="2024",
-            selected_artifact=None,
-            newer_data_exists=False,
-            retrieval_validation_status="SOURCE_GAP",
-        )
-        for family in REQUIRED_FRESHNESS_FAMILIES
-    }
+        assert_candidate_freshness_ready()
     with pytest.raises(FreshnessGateError, match="candidate_calculation_authorized"):
-        assert_candidate_freshness_ready(checks)
+        assert_candidate_freshness_ready()
 
 
 def test_candidate_authorization_is_separate_from_public_release(
@@ -515,7 +502,7 @@ def test_candidate_authorization_is_separate_from_public_release(
     }
     # Methodology freeze + candidate auth false cannot calculate.
     with pytest.raises(FreshnessGateError, match="candidate_calculation_authorized"):
-        assert_candidate_freshness_ready(ready)
+        assert_candidate_freshness_ready()
     from foundation.config import definitions as real_defs
 
     base = real_defs()
@@ -533,12 +520,26 @@ def test_candidate_authorization_is_separate_from_public_release(
             "2024": {"covered": True},
             "2026": {"covered": True},
         }
+        payload["listing_freshness_status"] = "VERIFIED_CURRENT"
+        payload["artifact_currentness_status"] = "VERIFIED_CURRENT"
+        payload["selected_artifact_matches_latest"] = True
         ready_with_years[family] = FreshnessCheck(**payload)
-    assert_candidate_freshness_ready(ready_with_years)
+    monkeypatch.setattr(
+        "foundation.living_cost.freshness.current_family_truth",
+        lambda: ready_with_years,
+    )
+    snapshot = assert_candidate_freshness_ready()
+    assert snapshot["freshness_run_id"]
     # Public publication still blocked.
     with pytest.raises(FreshnessGateError, match="living_cost_release_authorized"):
         assert_public_release_authorized()
     monkeypatch.undo()
+    from tests.test_qa_readiness_gate_independent import _checks_from_committed_artifact
+
+    monkeypatch.setattr(
+        "foundation.living_cost.freshness.current_family_truth",
+        _checks_from_committed_artifact,
+    )
     report = write_candidate_freshness_report(tmp_path)
     assert report["ready_for_private_candidate"] is False
     assert report["candidate_calculation_authorized"] is False

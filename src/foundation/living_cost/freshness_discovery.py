@@ -1523,14 +1523,10 @@ def discover_replacement() -> FreshnessCheck:
 
 
 def discover_od010() -> FreshnessCheck:
+    from foundation.living_cost.candidate_bindings import od010_translation_is_bound
+
     table = METADATA_DIR / "living_cost_od010_translation_table.json"
-    bound = False
-    if table.exists():
-        try:
-            payload = json.loads(table.read_text(encoding="utf-8"))
-            bound = bool(payload.get("bound") is True and payload.get("series"))
-        except (OSError, json.JSONDecodeError):
-            bound = False
+    bound = od010_translation_is_bound(table)
     return FreshnessCheck(
         source_id="od010_price_index",
         latest_checked_at=_now_iso(),

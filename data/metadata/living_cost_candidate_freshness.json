@@ -1,8 +1,9 @@
 {
   "report_type": "living_cost_candidate_freshness",
-  "generated_at": "2026-08-15T15:42:53Z",
-  "schema_version": "2.1",
+  "generated_at": "2026-08-15T17:15:46Z",
+  "schema_version": "2.2",
   "calculates_mslc": false,
+  "freshness_run_id": "da4d93960acab8d976f1926223449f2b20840fbc183426a5a4e2257765b18a8a",
   "required_families": [
     "acs_population_weights",
     "hud_fmr",
@@ -27,7 +28,7 @@
   "checks": {
     "acs_population_weights": {
       "source_id": "acs_population_weights",
-      "latest_checked_at": "2026-08-15T15:42:49Z",
+      "latest_checked_at": "2026-08-15T17:15:43Z",
       "latest_authoritative_vintage_found": "2024",
       "selected_vintage": "2024 ACS 5-Year B01001",
       "selected_artifact": "acsdt5y2024-b01001.dat",
@@ -96,7 +97,7 @@
     },
     "hud_fmr": {
       "source_id": "hud_fmr",
-      "latest_checked_at": "2026-08-15T15:42:50Z",
+      "latest_checked_at": "2026-08-15T17:15:44Z",
       "latest_authoritative_vintage_found": "FY2024 / FY2026",
       "selected_vintage": "FY2024 / FY2026",
       "selected_artifact": "FMR2024_final_revised.xlsx / FY26_FMRs_revised.xlsx",
@@ -150,7 +151,7 @@
     },
     "usda_food": {
       "source_id": "usda_food",
-      "latest_checked_at": "2026-08-15T15:42:50Z",
+      "latest_checked_at": "2026-08-15T17:15:44Z",
       "latest_authoritative_vintage_found": "USDA official monthly archives (2024 historical; official latest (2026, 5))",
       "selected_vintage": "USDA Low-Cost official monthly archive; 2026 uses official YTD months",
       "selected_artifact": "usda-lowcostplan-sept2007-present.xlsx",
@@ -507,7 +508,7 @@
     },
     "cms_marketplace_sbe": {
       "source_id": "cms_marketplace_sbe",
-      "latest_checked_at": "2026-08-15T15:42:50Z",
+      "latest_checked_at": "2026-08-15T17:15:44Z",
       "latest_authoritative_vintage_found": "PY2024 / PY2026 Exchange PUF + standalone SBE",
       "selected_vintage": "PY2024 / PY2026 federal Exchange PUF + year-specific standalone SBE",
       "selected_artifact": "cms_rate_puf / plan_puf / service_area_puf + SBE archives",
@@ -961,7 +962,7 @@
         "federal_exchange": {
           "kind": "federal_exchange",
           "landing_url": "https://www.cms.gov/marketplace/resources/data/public-use-files",
-          "checked_at": "2026-08-15T15:42:50Z",
+          "checked_at": "2026-08-15T17:15:44Z",
           "status": "VERIFIED_CURRENT",
           "plan_years_found": [
             2020,
@@ -980,7 +981,7 @@
         "sbe": {
           "kind": "sbe",
           "landing_url": "https://www.cms.gov/marketplace/resources/data/state-based-public-use-files",
-          "checked_at": "2026-08-15T15:42:50Z",
+          "checked_at": "2026-08-15T17:15:44Z",
           "status": "VERIFIED_CURRENT",
           "plan_years_found": [
             2020,
@@ -1001,7 +1002,7 @@
     },
     "meps_full_year_consolidated": {
       "source_id": "meps_full_year_consolidated",
-      "latest_checked_at": "2026-08-15T15:42:50Z",
+      "latest_checked_at": "2026-08-15T17:15:44Z",
       "latest_authoritative_vintage_found": "HC-251 / 2023",
       "selected_vintage": "HC-251 / 2023",
       "selected_artifact": "h251dat.zip",
@@ -1055,7 +1056,7 @@
     },
     "nhts_mileage": {
       "source_id": "nhts_mileage",
-      "latest_checked_at": "2026-08-15T15:42:50Z",
+      "latest_checked_at": "2026-08-15T17:15:44Z",
       "latest_authoritative_vintage_found": "2022 NHTS V2.1",
       "selected_vintage": "2022 NHTS V2.1",
       "selected_artifact": "nhts_2022_csv.zip",
@@ -1090,7 +1091,7 @@
     },
     "epa_vehicle": {
       "source_id": "epa_vehicle",
-      "latest_checked_at": "2026-08-15T15:42:50Z",
+      "latest_checked_at": "2026-08-15T17:15:44Z",
       "latest_authoritative_vintage_found": "EPA/DOE fueleconomy.gov vehicles.csv.zip",
       "selected_vintage": "EPA/DOE fueleconomy.gov vehicles.csv.zip",
       "selected_artifact": "epa_fueleconomy_vehicles.csv.zip",
@@ -1134,7 +1135,7 @@
     },
     "eia_gasoline": {
       "source_id": "eia_gasoline",
-      "latest_checked_at": "2026-08-15T15:42:50Z",
+      "latest_checked_at": "2026-08-15T17:15:44Z",
       "latest_authoritative_vintage_found": "EIA weekly retail gasoline through 2026-08-10",
       "selected_vintage": "EIA weekly retail gasoline through 2026-08-10",
       "selected_artifact": "pswrgvwall.xls",
@@ -1184,7 +1185,7 @@
     },
     "naic_auto_insurance": {
       "source_id": "naic_auto_insurance",
-      "latest_checked_at": "2026-08-15T15:42:50Z",
+      "latest_checked_at": "2026-08-15T17:15:44Z",
       "latest_authoritative_vintage_found": "AUT-PB 2022-2023",
       "selected_vintage": null,
       "selected_artifact": "publication-aut-pb-auto-insurance-database.pdf",
@@ -1237,7 +1238,7 @@
     },
     "bls_ce": {
       "source_id": "bls_ce",
-      "latest_checked_at": "2026-08-15T15:42:50Z",
+      "latest_checked_at": "2026-08-15T17:15:44Z",
       "latest_authoritative_vintage_found": "2024 Interview PUMD",
       "selected_vintage": "2024 Interview PUMD",
       "selected_artifact": "intrvw24.zip",
@@ -1272,7 +1273,7 @@
     },
     "fcc_broadband": {
       "source_id": "fcc_broadband",
-      "latest_checked_at": "2026-08-15T15:42:50Z",
+      "latest_checked_at": "2026-08-15T17:15:44Z",
       "latest_authoritative_vintage_found": null,
       "selected_vintage": null,
       "selected_artifact": null,
@@ -1298,7 +1299,7 @@
     },
     "mobile_price": {
       "source_id": "mobile_price",
-      "latest_checked_at": "2026-08-15T15:42:50Z",
+      "latest_checked_at": "2026-08-15T17:15:44Z",
       "latest_authoritative_vintage_found": null,
       "selected_vintage": null,
       "selected_artifact": null,
@@ -1333,14 +1334,14 @@
     },
     "bea_rpp": {
       "source_id": "bea_rpp",
-      "latest_checked_at": "2026-08-15T15:42:50Z",
-      "latest_authoritative_vintage_found": "BEA SARPP All-items",
-      "selected_vintage": "BEA SARPP All-items",
+      "latest_checked_at": "2026-08-15T17:15:45Z",
+      "latest_authoritative_vintage_found": "BEA SARPP All-items 2024 / current release February 19, 2026",
+      "selected_vintage": "BEA SARPP All-items 2024 / current release February 19, 2026",
       "selected_artifact": "SARPP.zip",
-      "newer_data_exists": null,
+      "newer_data_exists": false,
       "retrieval_validation_status": "VALIDATED",
-      "reason_if_not_refreshed": "BEA RPP landing page could not be retrieved: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))",
-      "freshness_check_status": "CHECK_FAILED",
+      "reason_if_not_refreshed": "Official BEA RPP landing checked. Current release='February 19, 2026'; Next release=None. SARPP.zip is a mutable URL. Listing is current and selected local bytes match the official artifact. 2026 cost year reuses 2024 as LATEST_AVAILABLE and does not relabel the source year.",
+      "freshness_check_status": "VERIFIED_CURRENT",
       "publisher": "U.S. Bureau of Economic Analysis",
       "landing_url": "https://www.bea.gov/data/prices-inflation/regional-price-parities-state-and-metro-area",
       "selected_artifacts": [
@@ -1353,22 +1354,34 @@
           "validation_status": "VALIDATED"
         }
       ],
-      "retrieved_at": null,
-      "transformation_method": null,
+      "retrieved_at": "2026-08-14T20:18:54+00:00",
+      "transformation_method": "LATEST_AVAILABLE All-items state RPP; source year not relabeled",
       "input_evidence_status": "VALIDATED",
       "months_included": null,
       "month_count": null,
       "first_month": null,
       "last_month": null,
-      "listing_freshness_status": "CHECK_FAILED",
-      "artifact_currentness_status": "CHECK_FAILED",
-      "selected_artifact_matches_latest": null,
-      "year_coverage": null,
-      "extra": null
+      "listing_freshness_status": "VERIFIED_CURRENT",
+      "artifact_currentness_status": "VERIFIED_CURRENT",
+      "selected_artifact_matches_latest": true,
+      "year_coverage": {
+        "2024": {
+          "covered": true,
+          "note": "BEA 2024 All-items RPP"
+        },
+        "2026": {
+          "covered": true,
+          "note": "2026 reuses 2024 as LATEST_AVAILABLE; source year not relabeled"
+        }
+      },
+      "extra": {
+        "current_release": "February 19, 2026",
+        "next_release": null
+      }
     },
     "federal_tax_law": {
       "source_id": "federal_tax_law",
-      "latest_checked_at": "2026-08-15T15:42:50Z",
+      "latest_checked_at": "2026-08-15T17:15:44Z",
       "latest_authoritative_vintage_found": "code tables [2024, 2026]",
       "selected_vintage": "2024 and 2026 statutory tables in code",
       "selected_artifact": null,
@@ -1408,7 +1421,7 @@
     },
     "state_tax_law": {
       "source_id": "state_tax_law",
-      "latest_checked_at": "2026-08-15T15:42:50Z",
+      "latest_checked_at": "2026-08-15T17:15:44Z",
       "latest_authoritative_vintage_found": "2024 and 2026 schedules in code",
       "selected_vintage": "2024 and 2026 schedules in code",
       "selected_artifact": null,
@@ -1443,7 +1456,7 @@
     },
     "local_tax_law": {
       "source_id": "local_tax_law",
-      "latest_checked_at": "2026-08-15T15:42:50Z",
+      "latest_checked_at": "2026-08-15T17:15:44Z",
       "latest_authoritative_vintage_found": "MD county / NYC / Philadelphia verified; Harris County TX verified no local EIT",
       "selected_vintage": "partial verified inventory",
       "selected_artifact": null,
@@ -1478,7 +1491,7 @@
     },
     "vehicle_registration": {
       "source_id": "vehicle_registration",
-      "latest_checked_at": "2026-08-15T15:42:50Z",
+      "latest_checked_at": "2026-08-15T17:15:44Z",
       "latest_authoritative_vintage_found": null,
       "selected_vintage": null,
       "selected_artifact": null,
@@ -1513,7 +1526,7 @@
     },
     "vehicle_replacement": {
       "source_id": "vehicle_replacement",
-      "latest_checked_at": "2026-08-15T15:42:50Z",
+      "latest_checked_at": "2026-08-15T17:15:44Z",
       "latest_authoritative_vintage_found": null,
       "selected_vintage": null,
       "selected_artifact": null,
@@ -1539,7 +1552,7 @@
     },
     "od010_price_index": {
       "source_id": "od010_price_index",
-      "latest_checked_at": "2026-08-15T15:42:50Z",
+      "latest_checked_at": "2026-08-15T17:15:44Z",
       "latest_authoritative_vintage_found": null,
       "selected_vintage": null,
       "selected_artifact": null,
@@ -1575,6 +1588,25 @@
       }
     }
   },
+  "od010_binding_identity": {
+    "path": "D:\\Foundation\\data\\metadata\\living_cost_od010_translation_table.json",
+    "exists": false,
+    "bound": false,
+    "missing": [
+      "ABSENT"
+    ],
+    "required": [],
+    "sha256": null
+  },
+  "candidate_input_binding_identity": {
+    "path": "D:\\Foundation\\data\\metadata\\living_cost_candidate_input_bindings.json",
+    "exists": false,
+    "bound": false,
+    "missing": [
+      "ABSENT"
+    ],
+    "sha256": null
+  },
   "ready_for_private_candidate": false,
   "candidate_calculation_authorized": false,
   "living_cost_release_authorized": false,
@@ -1585,8 +1617,8 @@
     2024,
     2026
   ],
-  "blocker_count": 38,
-  "gate_blocker_reason_count": 38,
+  "blocker_count": 35,
+  "gate_blocker_reason_count": 35,
   "empirical_blocker_family_count": 12,
   "empirical_blocker_families": [
     "bls_ce",
@@ -1623,9 +1655,6 @@
     "fcc_broadband:MISSING_YEAR_2024",
     "fcc_broadband:MISSING_YEAR_2026",
     "mobile_price:SOURCE_GAP",
-    "bea_rpp:CHECK_FAILED",
-    "bea_rpp:MISSING_YEAR_2024",
-    "bea_rpp:MISSING_YEAR_2026",
     "federal_tax_law:MANUAL_VERIFICATION_REQUIRED",
     "federal_tax_law:INVENTORY_NOT_VALIDATED",
     "state_tax_law:MANUAL_VERIFICATION_REQUIRED",
@@ -1650,7 +1679,8 @@
       "hud_fmr",
       "usda_food",
       "meps_full_year_consolidated",
-      "eia_gasoline"
+      "eia_gasoline",
+      "bea_rpp"
     ],
     "manual_verification_required": [
       "federal_tax_law",
@@ -1664,8 +1694,7 @@
       "epa_vehicle",
       "naic_auto_insurance",
       "bls_ce",
-      "fcc_broadband",
-      "bea_rpp"
+      "fcc_broadband"
     ],
     "source_gap": [
       "mobile_price",
@@ -1687,7 +1716,7 @@
     "bls_ce": "CHECK_FAILED",
     "fcc_broadband": "CHECK_FAILED",
     "mobile_price": "SOURCE_GAP",
-    "bea_rpp": "CHECK_FAILED",
+    "bea_rpp": "VERIFIED_CURRENT",
     "federal_tax_law": "MANUAL_VERIFICATION_REQUIRED",
     "state_tax_law": "MANUAL_VERIFICATION_REQUIRED",
     "local_tax_law": "MANUAL_VERIFICATION_REQUIRED",

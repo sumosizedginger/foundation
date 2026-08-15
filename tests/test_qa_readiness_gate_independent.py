@@ -19,8 +19,6 @@ SRC = ROOT / "src"
 
 def test_authorization_functions_are_separate_and_false():
     from foundation.living_cost.freshness import (
-        REQUIRED_FRESHNESS_FAMILIES,
-        FreshnessCheck,
         FreshnessGateError,
         assert_candidate_freshness_ready,
         assert_public_release_authorized,
@@ -32,28 +30,10 @@ def test_authorization_functions_are_separate_and_false():
     assert living_cost_release_authorized() is False
     assert candidate_calculation_authorized is not living_cost_release_authorized
 
-    ready = {
-        family: FreshnessCheck(
-            source_id=family,
-            latest_checked_at="2026-08-15T00:00:00Z",
-            latest_authoritative_vintage_found="2026",
-            selected_vintage="2026",
-            selected_artifact="qa_synthetic_only",
-            newer_data_exists=False,
-            retrieval_validation_status="VALIDATED",
-            freshness_check_status="VERIFIED_CURRENT",
-            publisher="synthetic",
-            landing_url="https://example.test/qa",
-            selected_artifacts=({"artifact_id": "qa_synthetic_only", "sha256": "abc"},),
-            transformation_method="test",
-            input_evidence_status="VALIDATED",
-        )
-        for family in REQUIRED_FRESHNESS_FAMILIES
-    }
-
     # Private candidate gate must refuse when config candidate auth is false.
+    # Public gate accepts no caller-supplied checks.
     with pytest.raises(FreshnessGateError, match="candidate_calculation_authorized"):
-        assert_candidate_freshness_ready(ready)
+        assert_candidate_freshness_ready()
 
     # Public release is a later, separate gate and also reads config only.
     with pytest.raises(FreshnessGateError, match="living_cost_release_authorized"):
@@ -71,13 +51,38 @@ def test_required_families_include_vehicle_replacement_and_bea_rpp():
     assert "bea_rpp" in families
 
 
-def test_live_freshness_writer_is_fail_closed(tmp_path: Path):
+def _checks_from_committed_artifact():
+    """Rebuild FreshnessCheck objects from the committed artifact (no network)."""
+    from dataclasses import fields
+
+    from foundation.living_cost.freshness import FreshnessCheck
+
+    payload = json.loads((METADATA / "living_cost_candidate_freshness.json").read_text())
+    allowed = {item.name for item in fields(FreshnessCheck)}
+    checks = {}
+    for family, raw in payload["checks"].items():
+        rec = {key: value for key, value in raw.items() if key in allowed}
+        if rec.get("selected_artifacts") is not None:
+            rec["selected_artifacts"] = tuple(rec["selected_artifacts"])
+        if rec.get("months_included") is not None:
+            rec["months_included"] = tuple(rec["months_included"])
+        checks[family] = FreshnessCheck(**rec)
+    return checks
+
+
+def test_live_freshness_writer_is_fail_closed(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     from foundation.living_cost.freshness import write_candidate_freshness_report
 
+    monkeypatch.setattr(
+        "foundation.living_cost.freshness.current_family_truth",
+        _checks_from_committed_artifact,
+    )
     payload = write_candidate_freshness_report(tmp_path)
     on_disk = json.loads((tmp_path / "living_cost_candidate_freshness.json").read_text())
     assert payload == on_disk
     assert payload["calculates_mslc"] is False
+    assert payload["freshness_run_id"]
+    assert len(payload["freshness_run_id"]) == 64
     assert payload["headline_calculated"] is False
     assert payload["ready_for_private_candidate"] is False
     assert payload["candidate_calculation_authorized"] is False
@@ -261,23 +266,22 @@ def test_config_and_pipeline_keep_both_flags_false():
 
 def test_bea_rpp_freshness_record_is_not_a_placeholder():
     """A VALIDATED family must name a real vintage, not a tautology."""
-    from foundation.living_cost.freshness import current_family_truth
-
-    check = current_family_truth()["bea_rpp"]
-    vintage = check.latest_authoritative_vintage_found or ""
-    artifact = check.selected_artifact or ""
+    payload = json.loads((METADATA / "living_cost_candidate_freshness.json").read_text())
+    check = payload["checks"]["bea_rpp"]
+    vintage = check.get("latest_authoritative_vintage_found") or ""
+    artifact = check.get("selected_artifact") or ""
     placeholder_vintages = {
         "latest retrieved BEA RPP",
         "bea rpp artifact",
         "latest retrieved",
     }
-    assert check.retrieval_validation_status == "VALIDATED"
+    assert check["retrieval_validation_status"] == "VALIDATED"
     assert vintage.lower() not in {p.lower() for p in placeholder_vintages}
     assert artifact.lower() not in {p.lower() for p in placeholder_vintages}
     assert vintage != "latest retrieved BEA RPP"
     assert artifact != "bea rpp artifact"
     assert artifact == "SARPP.zip"
-    assert check.freshness_check_status in {
+    assert check["freshness_check_status"] in {
         "VERIFIED_CURRENT",
         "CHECK_FAILED",
         "NEWER_AVAILABLE",
