@@ -182,18 +182,36 @@ def test_od007_mean_including_zero_primary():
         {
             "maintenance_repairs_tires_combined": {
                 "mean_incl_zero": 781.22,
-                "median_incl_zero": 100.0,
-                "positive_p25": 200.0,
-                "positive_p50": 400.0,
-                "positive_mean": 1728.47,
+                "median_incl_zero": 0.0,
+                "p25_positive": 276.0,
+                "p50_positive": 560.0,
+                "positive_spender_mean": 1728.47,
             }
         }
     )
     assert spec["canonical"] == "weighted_mean_including_zeros"
     assert spec["canonical_value"] == 781.22
+    assert spec["sensitivities"]["median_including_zeros"] == 0.0
+    assert spec["sensitivities"]["positive_spender_p25"] == 276.0
+    assert spec["sensitivities"]["positive_spender_p50"] == 560.0
+    assert spec["sensitivities"]["positive_spender_mean"] == 1728.47
     assert spec["evidence_status"] == "INCOMPLETE_PROVENANCE"
     assert spec["methodology_status"] == "FROZEN"
     assert spec["do_not_promote_to_validated_because_methodology_is_frozen"] is True
+
+
+def test_od007_production_artifact_schema():
+    artifact = json.loads(
+        (METADATA / "living_cost_maintenance_candidates.json").read_text(encoding="utf-8")
+    )
+    spec = select_maintenance_statistic(artifact)
+    assert spec["canonical_value"] == 781.22
+    assert spec["sensitivities"]["median_including_zeros"] == 0.0
+    assert spec["sensitivities"]["positive_spender_p25"] == 276.0
+    assert spec["sensitivities"]["positive_spender_p50"] == 560.0
+    assert spec["sensitivities"]["positive_spender_mean"] == 1728.47
+    assert spec["evidence_status"] == "INCOMPLETE_PROVENANCE"
+    assert spec["evidence_status"] != "VALIDATED"
 
 
 def test_od008_recreation_floors_never_undercut():
@@ -223,6 +241,30 @@ def test_od009_canonical_connectivity_requires_mobile_and_broadband():
     assert bundle["mobile_price_evidence_status"] == "SOURCE_GAP"
     assert bundle["broadband_standard_mbps"]["downstream"] == 100
     assert bundle["broadband_standard_mbps"]["upstream"] == 20
+
+
+def test_od010_unsupported_tax_year_fail_closed():
+    from foundation.living_cost.taxes import (
+        UnsupportedTaxYearError,
+        calculate_federal_income_tax,
+        calculate_fica_taxes,
+        calculate_state_income_tax,
+    )
+
+    assert calculate_federal_income_tax(30000.0, year=2024) != calculate_federal_income_tax(
+        30000.0, year=2026
+    )
+    assert calculate_state_income_tax(40000.0, "CA", year=2024) >= 0
+    assert calculate_state_income_tax(40000.0, "CA", year=2026) >= 0
+    for year in (2025, 2027, 2019):
+        with pytest.raises(UnsupportedTaxYearError):
+            calculate_federal_income_tax(30000.0, year=year)
+        with pytest.raises(UnsupportedTaxYearError):
+            calculate_fica_taxes(30000.0, year=year)
+        with pytest.raises(UnsupportedTaxYearError):
+            calculate_state_income_tax(40000.0, "CA", year=year)
+        with pytest.raises(UnsupportedTaxYearError):
+            calculate_state_income_tax(40000.0, "FL", year=year)
 
 
 def test_od010_lagged_nominal_cannot_use_silent_latest_available():
@@ -283,12 +325,54 @@ def test_od011_partial_city_tax_cannot_apply_countywide():
     assert rule_c["apply"] is False
     assert rule_c["status"] == "SOURCE_GAP"
     assert "entire county" in rule_c["reason"]
-    # NYC borough / Philadelphia / Maryland county remain direct-apply A/B.
-    assert calculate_local_income_tax(10000.0, "36061") > 0
-    assert calculate_local_income_tax(10000.0, "42101") > 0
-    assert calculate_local_income_tax(10000.0, "24005") > 0
-    # Unresolved county does not invent a rate.
-    assert calculate_local_income_tax(10000.0, "06075") == 0.0
+    from foundation.living_cost.taxes import (
+        LOCAL_TAX_PARTIAL_CITY,
+        LOCAL_TAX_UNRESOLVED,
+        LOCAL_TAX_VERIFIED_NO_TAX,
+        LOCAL_TAX_VERIFIED_RATE,
+        LocalTaxUnresolvedError,
+        evaluate_taxes_for_gross,
+        solve_gross_required_income,
+    )
+
+    nyc = calculate_local_income_tax(10000.0, "36061")
+    phl = calculate_local_income_tax(10000.0, "42101")
+    md = calculate_local_income_tax(10000.0, "24005")
+    assert nyc.amount is not None and nyc.amount > 0
+    assert nyc.evidence_status == LOCAL_TAX_VERIFIED_RATE
+    assert phl.amount is not None and phl.amount > 0
+    assert md.geography_class == "B"
+    none = calculate_local_income_tax(10000.0, "48201")
+    assert none.amount == 0.0
+    assert none.evidence_status == LOCAL_TAX_VERIFIED_NO_TAX
+    unresolved = calculate_local_income_tax(10000.0, "06075")
+    assert unresolved.amount is None
+    assert unresolved.evidence_status == LOCAL_TAX_UNRESOLVED
+    partial = calculate_local_income_tax(10000.0, "39049", geography_class="C")
+    assert partial.evidence_status == LOCAL_TAX_PARTIAL_CITY
+    assert partial.amount is None
+    with pytest.raises(LocalTaxUnresolvedError):
+        evaluate_taxes_for_gross(40000.0, "CA", "06075", 2024)
+    with pytest.raises(LocalTaxUnresolvedError):
+        solve_gross_required_income(30000.0, state="CA", fips_code="06075", year=2024)
+    from foundation.living_cost.local import compute_local_living_cost
+
+    with pytest.raises(LocalTaxUnresolvedError):
+        compute_local_living_cost(
+            geography_id="06075",
+            geography_name="San Francisco County, CA",
+            state="CA",
+            reference_year=2024,
+            adult_population=700000,
+            housing_annual=28000.0,
+            food_annual=4800.0,
+            transportation_annual=8000.0,
+            healthcare_annual=7000.0,
+            connectivity_annual=1440.0,
+            essentials_annual=2400.0,
+            social_recreation_annual=2800.0,
+            resilience_annual=0.0,
+        )
 
 
 def test_od012_generic_resilience_reserve_is_zero():
@@ -340,14 +424,57 @@ def test_food_health_housing_additional_freezes():
 
 
 def test_freshness_gate_exists_and_does_not_authorize_headline():
+    from foundation.living_cost.freshness import (
+        REQUIRED_FRESHNESS_FAMILIES,
+        FreshnessCheck,
+        FreshnessGateError,
+        assert_candidate_freshness_ready,
+    )
+
     gate = freshness_gate_checklist()
-    assert "meps_full_year_consolidated" in gate["required_before_candidate_calculation"]
-    assert "usda_current_year_months" in gate["required_before_candidate_calculation"]
-    assert "cms_marketplace_sbe" in gate["required_before_candidate_calculation"]
-    assert "eia_gasoline" in gate["required_before_candidate_calculation"]
-    assert "current_tax_law" in gate["required_before_candidate_calculation"]
+    required = gate["required_before_candidate_calculation"]
+    for family in (
+        "meps_full_year_consolidated",
+        "usda_food",
+        "cms_marketplace_sbe",
+        "eia_gasoline",
+        "federal_tax_law",
+        "mobile_price",
+        "bls_ce",
+        "od010_price_index",
+    ):
+        assert family in required
+    assert set(REQUIRED_FRESHNESS_FAMILIES) == set(required)
     assert gate["headline_authorized_by_this_gate"] is False
-    assert gate["do_not_recalculate_historical_2024_with_2026_prices"] is True
+    assert gate["calculates_mslc"] is False
+    with pytest.raises(FreshnessGateError, match="living_cost_release_authorized"):
+        assert_candidate_freshness_ready({}, project_cost_year=2026)
+    with pytest.raises(FreshnessGateError, match="not performed"):
+        assert_candidate_freshness_ready(
+            {},
+            project_cost_year=2026,
+            living_cost_release_authorized=True,
+            translation_index_bound=True,
+        )
+    checks = {
+        family: FreshnessCheck(
+            source_id=family,
+            latest_checked_at="2026-08-15T00:00:00Z",
+            latest_authoritative_vintage_found="2024",
+            selected_vintage="2024",
+            selected_artifact=None,
+            newer_data_exists=False,
+            retrieval_validation_status="SOURCE_GAP",
+        )
+        for family in REQUIRED_FRESHNESS_FAMILIES
+    }
+    with pytest.raises(FreshnessGateError, match="SOURCE_GAP"):
+        assert_candidate_freshness_ready(
+            checks,
+            project_cost_year=2026,
+            living_cost_release_authorized=True,
+            translation_index_bound=True,
+        )
 
 
 def test_production_coverage_keeps_evidence_separate_from_frozen_methodology():

@@ -218,22 +218,59 @@ def select_naic_insurance_measure() -> dict[str, Any]:
     }
 
 
+PRODUCTION_MAINTENANCE_STAT_KEYS = (
+    "mean_incl_zero",
+    "median_incl_zero",
+    "p25_positive",
+    "p50_positive",
+    "positive_spender_mean",
+)
+
+
+def _combined_maintenance_payload(candidates: dict[str, Any] | None) -> dict[str, Any]:
+    """Accept the production artifact, a candidates wrapper, or a combined row."""
+    payload = candidates or {}
+    nested = payload.get("candidates")
+    if isinstance(nested, dict) and "maintenance_repairs_tires_combined" in nested:
+        combined = nested["maintenance_repairs_tires_combined"]
+        if isinstance(combined, dict):
+            return combined
+    direct = payload.get("maintenance_repairs_tires_combined")
+    if isinstance(direct, dict):
+        return direct
+    if any(key in payload for key in PRODUCTION_MAINTENANCE_STAT_KEYS):
+        return payload
+    return {}
+
+
 def select_maintenance_statistic(candidates: dict[str, Any] | None = None) -> dict[str, Any]:
-    """OD-007: weighted mean including zeros is canonical."""
-    combined = (candidates or {}).get("maintenance_repairs_tires_combined", {})
+    """OD-007: weighted mean including zeros is canonical.
+
+    Consumes the production parser/artifact schema:
+    mean_incl_zero, median_incl_zero, p25_positive, p50_positive,
+    positive_spender_mean.
+    """
+    combined = _combined_maintenance_payload(candidates)
+    evidence = "INCOMPLETE_PROVENANCE"
+    if isinstance(candidates, dict) and candidates.get("status"):
+        evidence = str(candidates["status"])
+    if evidence == "VALIDATED":
+        # Methodology freeze does not convert incomplete retrieve into VALIDATED.
+        evidence = "INCOMPLETE_PROVENANCE"
     return {
         "canonical": "weighted_mean_including_zeros",
         "canonical_value": combined.get("mean_incl_zero"),
         "sensitivities": {
             "median_including_zeros": combined.get("median_incl_zero"),
-            "positive_spender_p25": combined.get("positive_p25"),
-            "positive_spender_p50": combined.get("positive_p50"),
-            "positive_spender_mean": combined.get("positive_mean"),
+            "positive_spender_p25": combined.get("p25_positive"),
+            "positive_spender_p50": combined.get("p50_positive"),
+            "positive_spender_mean": combined.get("positive_spender_mean"),
         },
+        "schema_keys": list(PRODUCTION_MAINTENANCE_STAT_KEYS),
         "multi_year_pool_preferred_when_available": True,
         "do_not_wait_indefinitely_for_multiple_years": True,
         "methodology_status": METHODOLOGY_STATUS_FROZEN,
-        "evidence_status": "INCOMPLETE_PROVENANCE",
+        "evidence_status": evidence if evidence else "INCOMPLETE_PROVENANCE",
         "do_not_promote_to_validated_because_methodology_is_frozen": True,
     }
 
@@ -452,28 +489,18 @@ def housing_standard() -> dict[str, Any]:
     }
 
 
-FRESHNESS_GATE_SOURCES: tuple[str, ...] = (
-    "meps_full_year_consolidated",
-    "usda_current_year_months",
-    "cms_marketplace_sbe",
-    "eia_gasoline",
-    "current_tax_law",
-)
-
-
 def freshness_gate_checklist() -> dict[str, Any]:
     """Must re-check volatile sources before any future candidate MSLC calculation."""
-    return {
-        "required_before_candidate_calculation": list(FRESHNESS_GATE_SOURCES),
-        "if_newer_authoritative_data_exist": [
-            "retrieve",
-            "hash",
-            "validate",
-            "use",
-        ],
-        "do_not_recalculate_historical_2024_with_2026_prices": True,
-        "headline_authorized_by_this_gate": False,
-    }
+    from foundation.living_cost.freshness import (
+        REQUIRED_FRESHNESS_FAMILIES,
+    )
+    from foundation.living_cost.freshness import (
+        freshness_gate_checklist as _enforceable_checklist,
+    )
+
+    payload = _enforceable_checklist()
+    payload["legacy_named_families"] = list(REQUIRED_FRESHNESS_FAMILIES[:5])
+    return payload
 
 
 def living_cost_release_authorized() -> bool:

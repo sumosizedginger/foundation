@@ -1,123 +1,80 @@
-# THE FOUNDATION — OWNER FREEZE STATUS
+# THE FOUNDATION — POST-OWNER-FREEZE AUDIT CORRECTIONS STATUS
 
-OD-001 through OD-013
+Audited freeze SHA: `8a4157f62e41d54f58eb361f9188990ffb69c7b7`
 
-This file is the current work-order / history document after the owner-freeze
-implementation. Anything not done is listed under NOT COMPLETED.
-
-NO MINIMUM SUSTAINABLE LIVING COST HEADLINE WAS CALCULATED OR PUBLISHED.
+OD-001 through OD-013 remain **ACCEPTED / FROZEN**. Owner choices were not reopened.
 
 `living_cost_release_authorized = false`. `states_modeled = 0`.
 
-METHODOLOGY FROZEN is not SOURCE VALIDATED.
+NO MINIMUM SUSTAINABLE LIVING COST HEADLINE WAS CALCULATED OR PUBLISHED.
 
 ---
 
-## What this pass was
+## Completed this pass
 
-Implement the owner's freeze of OD-001 through OD-013 into methodology,
-decision records, configuration, source-selection logic, owner-decision
-metadata, validation/release gates, tests, and project documentation.
+1. **OD-007 schema mismatch fixed.**
+   `select_maintenance_statistic()` now reads the production keys
+   `mean_incl_zero`, `median_incl_zero`, `p25_positive`, `p50_positive`,
+   `positive_spender_mean`. It accepts the live
+   `living_cost_maintenance_candidates.json` artifact.
+   Recovered values: 781.22 / 0.0 / 276.0 / 560.0 / 1728.47.
+   Evidence remains `INCOMPLETE_PROVENANCE`, not VALIDATED.
 
-Stop before any candidate economic calculation. Push. Report actual GitHub
-Actions. Then stop for independent audit.
+2. **Local tax fail-closed (OD-011).**
+   `calculate_local_income_tax()` returns a typed `LocalTaxResult`.
+   Unresolved FIPS (e.g. 06075) is `UNRESOLVED_SOURCE_GAP`, amount `None`.
+   Partial-city without overlay is `PARTIAL_CITY_NEEDS_OVERLAY`.
+   Only verified-no-tax or verified-rate (or no-geography request) may
+   contribute 0 / a computed amount.
+   `evaluate_taxes_for_gross()` and `solve_gross_required_income()` raise
+   `LocalTaxUnresolvedError` instead of silently omitting local tax.
 
----
+3. **Unsupported tax years fail closed (OD-010 RULE_YEAR).**
+   Federal, FICA, and state functions no longer fall back to 2024 law.
+   2024 uses 2024 tables. 2026 uses 2026 tables. 2025 / 2027 / 2019 raise
+   `UnsupportedTaxYearError`. No 2027 tables were invented.
 
-## Completed
+4. **Freshness gate is now enforceable.**
+   `assert_candidate_freshness_ready()` requires a machine-readable check
+   for every required family (ACS, HUD, USDA, CMS, MEPS, NHTS, EPA, EIA,
+   NAIC, BLS CE, FCC, mobile, federal/state/local tax, registration,
+   OD-010 index). It refuses if a check is missing, newer data is unused,
+   a required source is SOURCE_GAP / incomplete, the translation index is
+   unbound, source year is silently relabeled, or release is not authorized.
+   The guard does **not** calculate an MSLC.
 
-- OD-001 through OD-013 recorded as **ACCEPTED / FROZEN** in
-  `src/foundation/living_cost/owner_freeze.py` and
-  `data/metadata/living_cost_owner_decisions_frozen.md`.
-- Machine-readable freeze record includes decision, effective date, rationale,
-  implementation rule, source-selection rule, required sensitivity, known
-  evidence gaps, and whether a numeric value is currently available.
-- Historical pending packet archived at
-  `data/metadata/historical/living_cost_owner_decisions_pending.md`
-  with SUPERSEDED / NOT CURRENT PROJECT STATUS header.
-- D-043 added to `DECISIONS.md`. Methodology, validation, data-model, and
-  project-status docs updated. Evolution of prior pending packets was not
-  rewritten in place.
-- Config: `config/definitions.yml` living_cost owner-freeze block.
-- OD-001: `select_acs_weight_vintage` — current uses newest available ACS
-  5-Year county vintage (today 2024); historical 2024 locked to 2024 ACS;
-  fixed-2024-weight sensitivity retained.
-- OD-002: weighted mean primary; median / P75 required sensitivities;
-  HC-251 / 2023 until a later Full Year Consolidated file is actually listed.
-- OD-003: NHTS parser canonical value is now the weighted median, labeled
-  FOUNDATION MOBILITY STANDARD. Mean / P25 / P75 remain sensitivities.
-- OD-004: used-car compact+midsize gasoline cohort; median MPG; 8–12 year
-  window; 24/28/32 forbidden as hardcoded model.
-- OD-005: formula `(acquisition − residual) / remaining years` exists.
-  No $1,600 / $10,000 / $2,000 / 5-year defaults. Numeric result pending.
-- OD-006: combined average premium is canonical.
-- OD-007: weighted mean including zeros is canonical. Evidence remains
-  `INCOMPLETE_PROVENANCE`. Freeze does not promote it to VALIDATED.
-- OD-008: canonical recreation can never fall below $1,200/year.
-  Preferred modest-life can never fall below $2,400/year.
-- OD-009: canonical connectivity requires mobile AND broadband (100/20).
-  Mobile price evidence remains SOURCE_GAP.
-- OD-010: hybrid translation methods encoded. Lagged nominal dollars cannot
-  use silent LATEST_AVAILABLE carry-forward.
-- OD-011: A/B/C/D classification. Partial-city tax cannot be applied
-  automatically to an entire county.
-- OD-012: canonical extra resilience reserve is $0.
-- OD-013: 2024 CT reconstruction; 2026 direct planning-region join.
-- Additional freezes encoded: USDA Low-Cost canonical / Thrifty sensitivity;
-  age-40 single nonsmoker unsubsidized Silver; independent 1-bedroom HUD FMR.
-- Freshness gate checklist exists and does not authorize a headline.
-- Release gate still hard-coded `living_cost_release_authorized = False`.
-- Tests added in `tests/test_owner_freeze.py` (21 tests). Existing pending
-  / unfrozen assertions updated.
-- Local pytest: 123 collected, all passed, 1 warning (same
-  `load_module` deprecation as before). This is LOCAL, not GitHub CI.
-- Dual verifiers for harness `1a8e040d9593` required before goal close.
+5. **Release lock preserved.**
+   Pipeline flag remains false. Public state lists remain empty.
+   National living-cost distributions remain unpublished.
 
-## Preserved prior-pass facts (not reopened)
+6. **Tests** cover production OD-007 keys, local-tax statuses, solver
+   refusal on 06075, year fail-closed, and freshness refusal.
 
-- CPS 2025 ASEC canonical SHA
-  `318845a2b5e0034eb2973898de1738f4df0025727de38499e7669cb9c0deef0b`
-- 2024 ACS raw county-equivalent count 3144 vs join geography 3143
-- 100% modeled 50-state+DC housing coverage on the 2024 join
-- Oklahoma 2024 is HealthCare.gov FFM, not SBE-FP
-- Arkansas and Oregon 2024 are SBE-FP from year-specific CMS evidence
-- Oregon SBE archive is SHOP-only
-- VQB combined mean-including-zeros candidate $781.22
-- BLS CE cache `INCOMPLETE_PROVENANCE` (official retrieve 403)
+## NOT COMPLETED / still blocking a future candidate
 
-## NOT COMPLETED
+These were **not** solved by this audit pass and must stay truthful:
 
-- **Candidate MSLC calculation** for 2024 or 2026. Not authorized by this pass.
-- **Gap, Adequacy Ratio, state rankings, national median MSLC, Composite.**
-- **`living_cost_release_authorized` remains false.**
-- **BLS CE official retrieve** still HTTP 403 / INCOMPLETE_PROVENANCE.
-  Do not fabricate `retrieved_at`. Do not promote to VALIDATED.
-- **FCC URS / broadband price retrieve** historically 403 → connectivity
-  evidence SOURCE_GAP.
-- **Mobile price** SOURCE_GAP. Methodology frozen; no invented price.
-- **Vehicle registration** SOURCE_GAP.
-- **Vehicle replacement numeric inputs** (acquisition, residual, usable years)
-  not yet bound. Formula only.
-- **NAIC state-table extraction** not yet a validated numeric series.
-- **MEPS 2024 Full Year Consolidated** not claimed unless the official PUF
-  listing actually has it. HC-251 / 2023 remains the listed file at freeze.
-- **Federal tax tables** INVENTORY_NOT_VALIDATED.
-- **State/local tax inventory** incomplete. Place-level municipal calculation
-  is not generally supported.
-- **Multi-year CE vintage pool** for lumpy repairs — preferred later, not
-  required before a first later candidate.
-- **Independent audit** after this push — next human task before any
-  candidate economic calculation.
-- **GitHub Actions exact results** for this freeze commit will be reported
-  after push. Do not treat local 123-passed as GitHub CI.
-- Leftover “36 tests” wording in PROJECT_STATUS.md (pre-existing nit).
-- Untracked local `tmp_inspect_*.py` (intentionally not committed).
+- BLS CE official retrieve: HTTP 403 / `INCOMPLETE_PROVENANCE`
+- Mobile phone price: `SOURCE_GAP`
+- FCC broadband price evidence: `SOURCE_GAP` / incomplete retrieval
+- Vehicle registration: `SOURCE_GAP`
+- Vehicle replacement numeric inputs: `FORMULA_FROZEN_INPUTS_PENDING`
+- NAIC state-table extraction: `RETRIEVED_UNVALIDATED`
+- Federal tax tables: `INVENTORY_NOT_VALIDATED`
+- State tax inventory: incomplete / unvalidated as applicable
+- Local tax: `SOURCE_GAP` for any FIPS not in the verified-rate or
+  verified-no-tax inventory (almost the entire county universe)
+- MEPS 2024 Full Year Consolidated: use only if officially listed
+- OD-010 component-specific CPI series: not yet bound into a live
+  translation table (`translation_index_bound` is false)
+- Place-level municipal overlay (OD-011 class C) is not generally
+  implemented
+- Independent audit of this correction SHA
+- Any 2024/2026 MSLC, Gap, Adequacy, rankings, national median, Composite
 
 ## Next human task
 
-Independent audit of this owner-freeze implementation.
+Independent review of this correction. Then, only with a later owner
+authorization **and** a passing freshness gate: candidate calculation.
 
-Then, only if authorized by a later owner work order: freshness-gate
-re-check of volatile sources and a candidate economic calculation pass.
-
-Until that authorization: do not calculate or publish a living-cost headline.
+Until then: do not calculate or publish a living-cost headline.

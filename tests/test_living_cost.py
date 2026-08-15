@@ -106,9 +106,9 @@ def test_federal_tax_brackets_boundary_tests():
 
 def test_local_living_cost_and_aggregation():
     loc1 = compute_local_living_cost(
-        geography_id="06075",
-        geography_name="San Francisco County, CA",
-        state="CA",
+        geography_id="24005",
+        geography_name="Baltimore County, MD",
+        state="MD",
         reference_year=2024,
         adult_population=700000,
         housing_annual=28000.0,
@@ -121,9 +121,9 @@ def test_local_living_cost_and_aggregation():
         resilience_annual=1200.0,
     )
     loc2 = compute_local_living_cost(
-        geography_id="06019",
-        geography_name="Fresno County, CA",
-        state="CA",
+        geography_id="24003",
+        geography_name="Anne Arundel County, MD",
+        state="MD",
         reference_year=2024,
         adult_population=800000,
         housing_annual=14000.0,
@@ -139,7 +139,7 @@ def test_local_living_cost_and_aggregation():
     anomalies1 = validate_local_living_cost(loc1)
     assert len(anomalies1) == 0
 
-    state_dist = aggregate_state_living_cost("CA", "California", [loc1, loc2], reference_year=2024)
+    state_dist = aggregate_state_living_cost("MD", "Maryland", [loc1, loc2], reference_year=2024)
     assert state_dist.locality_count == 2
     assert state_dist.represented_adult_population == 1500000
     assert (
@@ -153,4 +153,4 @@ def test_local_living_cost_and_aggregation():
 
     nat_dist = aggregate_national_living_cost([loc1, loc2], [state_dist], reference_year=2024)
     assert nat_dist.locality_count == 2
-    assert nat_dist.lowest_state_median["state"] == "CA"
+    assert nat_dist.lowest_state_median["state"] == "MD"

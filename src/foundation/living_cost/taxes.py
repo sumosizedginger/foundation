@@ -701,6 +701,22 @@ LOCAL_TAX_GEOGRAPHY: dict[str, str] = {
     "42101": "A",
 }
 
+# Explicit inventory of geographies verified to have no personal local
+# earned-income tax. Absence from this set is NOT proof of zero tax.
+# Do not treat an unlisted FIPS as verified no-tax.
+VERIFIED_NO_LOCAL_EARNED_INCOME_TAX_FIPS: frozenset[str] = frozenset(
+    {
+        # Harris County, TX — Texas has no local personal earned-income tax.
+        "48201",
+    }
+)
+
+LOCAL_TAX_VERIFIED_NO_TAX = "VERIFIED_NO_LOCAL_EARNED_INCOME_TAX"
+LOCAL_TAX_VERIFIED_RATE = "VERIFIED_LOCAL_TAX_AND_RATE"
+LOCAL_TAX_PARTIAL_CITY = "PARTIAL_CITY_NEEDS_OVERLAY"
+LOCAL_TAX_UNRESOLVED = "UNRESOLVED_SOURCE_GAP"
+LOCAL_TAX_NO_GEOGRAPHY = "NOT_APPLICABLE_NO_GEOGRAPHY"
+
 # Specific county/city local income tax rates by 5-digit FIPS code
 # Only attached to explicit geographies where statutory authority mandates county/city income tax
 LOCAL_TAX_RATES_BY_FIPS: dict[str, float] = {
@@ -741,6 +757,36 @@ LOCAL_TAX_RATES_BY_FIPS: dict[str, float] = {
 
 
 @dataclass(frozen=True)
+class LocalTaxResult:
+    """OD-011 fail-closed local-tax assessment. Unknown is not zero."""
+
+    amount: float | None
+    evidence_status: str
+    geography_class: str | None
+    calculation_method: str
+
+    @property
+    def may_enter_canonical_gross(self) -> bool:
+        return (
+            self.evidence_status
+            in {
+                LOCAL_TAX_VERIFIED_NO_TAX,
+                LOCAL_TAX_VERIFIED_RATE,
+                LOCAL_TAX_NO_GEOGRAPHY,
+            }
+            and self.amount is not None
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "amount": None if self.amount is None else round(self.amount, 2),
+            "evidence_status": self.evidence_status,
+            "geography_class": self.geography_class,
+            "calculation_method": self.calculation_method,
+        }
+
+
+@dataclass(frozen=True)
 class TaxCalculationResult:
     gross_income: float
     net_income: float
@@ -750,8 +796,9 @@ class TaxCalculationResult:
     state_income_tax: float
     local_income_tax: float
     total_tax: float
+    local_tax_status: str = LOCAL_TAX_NO_GEOGRAPHY
 
-    def to_dict(self) -> dict[str, float]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "gross_income": round(self.gross_income, 2),
             "net_income": round(self.net_income, 2),
@@ -761,12 +808,39 @@ class TaxCalculationResult:
             "state_income_tax": round(self.state_income_tax, 2),
             "local_income_tax": round(self.local_income_tax, 2),
             "total_tax": round(self.total_tax, 2),
+            "local_tax_status": self.local_tax_status,
         }
+
+
+class UnsupportedTaxYearError(ValueError):
+    """Raised when no authorized tax-rule table exists for the requested year."""
+
+
+class LocalTaxUnresolvedError(ValueError):
+    """Raised when local tax is SOURCE_GAP / overlay-required and cannot be zeroed."""
+
+
+def _federal_rules_for_year(year: int) -> dict[str, Any]:
+    """OD-010 RULE_YEAR: never silently fall back to another year's law."""
+    if year not in FEDERAL_TAX_RULES:
+        raise UnsupportedTaxYearError(
+            f"Federal tax rules UNAVAILABLE for year {year}; no silent fallback"
+        )
+    return FEDERAL_TAX_RULES[year]
+
+
+def _state_schedules_for_year(year: int) -> dict[str, dict[str, Any]]:
+    """OD-010 RULE_YEAR: never silently fall back to another year's law."""
+    if year not in STATE_STATUTORY_SCHEDULES:
+        raise UnsupportedTaxYearError(
+            f"State tax schedules UNAVAILABLE for year {year}; no silent fallback"
+        )
+    return STATE_STATUTORY_SCHEDULES[year]
 
 
 def calculate_federal_income_tax(gross: float, year: int = 2024) -> float:
     """Calculate statutory single federal income tax with standard deduction."""
-    rules = FEDERAL_TAX_RULES.get(year, FEDERAL_TAX_RULES[2024])
+    rules = _federal_rules_for_year(year)
     taxable = max(0.0, gross - rules["standard_deduction"])
     if taxable <= 0:
         return 0.0
@@ -785,7 +859,7 @@ def calculate_federal_income_tax(gross: float, year: int = 2024) -> float:
 
 def calculate_fica_taxes(gross: float, year: int = 2024) -> tuple[float, float]:
     """Calculate employee Social Security and Medicare FICA taxes."""
-    rules = FEDERAL_TAX_RULES.get(year, FEDERAL_TAX_RULES[2024])
+    rules = _federal_rules_for_year(year)
     ss_taxable = min(gross, rules["ss_wage_cap"])
     ss_tax = ss_taxable * rules["ss_tax_rate"]
     medicare_tax = gross * rules["medicare_rate"]
@@ -794,11 +868,11 @@ def calculate_fica_taxes(gross: float, year: int = 2024) -> tuple[float, float]:
 
 def calculate_state_income_tax(gross: float, state: str, year: int = 2024) -> float:
     """Calculate statutory single state income tax for given state and year."""
+    year_schedules = _state_schedules_for_year(year)
     st = state.upper()
     if st in NO_INCOME_TAX_STATES or st == "US":
         return 0.0
 
-    year_schedules = STATE_STATUTORY_SCHEDULES.get(year, STATE_STATUTORY_SCHEDULES[2024])
     sched = year_schedules.get(st)
     if not sched:
         raise ValueError(f"State income tax schedule UNAVAILABLE for state {st} in {year}")
@@ -820,26 +894,88 @@ def calculate_state_income_tax(gross: float, state: str, year: int = 2024) -> fl
     return tax
 
 
-def calculate_local_income_tax(gross: float, fips_code: str = "") -> float:
-    """Calculate statutory local income tax attached to specific county FIPS.
+def calculate_local_income_tax(
+    gross: float,
+    fips_code: str = "",
+    *,
+    geography_class: str | None = None,
+    overlay_applied: bool = False,
+    overlay_amount: float | None = None,
+) -> LocalTaxResult:
+    """Assess local earned-income tax. Unknown / unresolved is not zero.
 
-    OD-011: class C (partial-city) taxes cannot be applied automatically to an
-    entire county. Unclassified / class D geographies do not silently invent a rate.
+    Only VERIFIED_NO_LOCAL_EARNED_INCOME_TAX and VERIFIED_LOCAL_TAX_AND_RATE
+    (plus no-geography / not a locality request) may enter a canonical gross.
     """
     from foundation.living_cost.owner_freeze import local_tax_application_rule
 
     if not fips_code:
-        return 0.0
-    classification = LOCAL_TAX_GEOGRAPHY.get(fips_code, "D")
-    rule = local_tax_application_rule(classification)  # type: ignore[arg-type]
-    if classification == "C":
-        raise ValueError(
-            f"partial-city tax cannot be applied automatically to entire county {fips_code}"
+        return LocalTaxResult(
+            amount=0.0,
+            evidence_status=LOCAL_TAX_NO_GEOGRAPHY,
+            geography_class=None,
+            calculation_method="no_locality_requested",
         )
-    if not rule["apply"]:
-        return 0.0
-    rate = LOCAL_TAX_RATES_BY_FIPS.get(fips_code, 0.0)
-    return gross * rate
+
+    classification = geography_class or LOCAL_TAX_GEOGRAPHY.get(fips_code)
+    if classification is None and fips_code in VERIFIED_NO_LOCAL_EARNED_INCOME_TAX_FIPS:
+        return LocalTaxResult(
+            amount=0.0,
+            evidence_status=LOCAL_TAX_VERIFIED_NO_TAX,
+            geography_class="B",
+            calculation_method="verified_inventory_no_local_eit",
+        )
+    if classification is None:
+        return LocalTaxResult(
+            amount=None,
+            evidence_status=LOCAL_TAX_UNRESOLVED,
+            geography_class="D",
+            calculation_method="unresolved_not_zero",
+        )
+
+    rule = local_tax_application_rule(
+        classification,  # type: ignore[arg-type]
+        place_level_supported=overlay_applied,
+        population_weighted_exposure_defensible=overlay_applied,
+    )
+    if classification == "C" or rule["status"] == "SOURCE_GAP":
+        if overlay_applied and overlay_amount is not None:
+            return LocalTaxResult(
+                amount=float(overlay_amount),
+                evidence_status=LOCAL_TAX_VERIFIED_RATE,
+                geography_class="C",
+                calculation_method="approved_od011_overlay",
+            )
+        return LocalTaxResult(
+            amount=None,
+            evidence_status=LOCAL_TAX_PARTIAL_CITY
+            if classification == "C"
+            else LOCAL_TAX_UNRESOLVED,
+            geography_class=classification,
+            calculation_method="blocked_until_overlay",
+        )
+    if classification == "D" or not rule["apply"]:
+        return LocalTaxResult(
+            amount=None,
+            evidence_status=LOCAL_TAX_UNRESOLVED,
+            geography_class=classification,
+            calculation_method="unresolved_not_zero",
+        )
+
+    if fips_code not in LOCAL_TAX_RATES_BY_FIPS:
+        return LocalTaxResult(
+            amount=None,
+            evidence_status=LOCAL_TAX_UNRESOLVED,
+            geography_class=classification,
+            calculation_method="class_known_rate_missing",
+        )
+    rate = LOCAL_TAX_RATES_BY_FIPS[fips_code]
+    return LocalTaxResult(
+        amount=gross * rate,
+        evidence_status=LOCAL_TAX_VERIFIED_RATE,
+        geography_class=classification,
+        calculation_method="direct",
+    )
 
 
 def evaluate_taxes_for_gross(
@@ -848,11 +984,20 @@ def evaluate_taxes_for_gross(
     fips_code: str = "",
     year: int = 2024,
 ) -> TaxCalculationResult:
-    """Compute all mandatory statutory taxes for a given gross income."""
+    """Compute all mandatory statutory taxes for a given gross income.
+
+    Unresolved local tax is not converted to zero.
+    """
     ss_tax, med_tax = calculate_fica_taxes(gross, year)
     fed_tax = calculate_federal_income_tax(gross, year)
     state_tax = calculate_state_income_tax(gross, state, year)
-    local_tax = calculate_local_income_tax(gross, fips_code)
+    local = calculate_local_income_tax(gross, fips_code)
+    if not local.may_enter_canonical_gross:
+        raise LocalTaxUnresolvedError(
+            f"local tax {local.evidence_status} for FIPS {fips_code or '(none)'}; "
+            "UNKNOWN/UNRESOLVED local tax is not zero"
+        )
+    local_tax = float(local.amount)
     total_tax = ss_tax + med_tax + fed_tax + state_tax + local_tax
     net = gross - total_tax
 
@@ -865,6 +1010,7 @@ def evaluate_taxes_for_gross(
         state_income_tax=state_tax,
         local_income_tax=local_tax,
         total_tax=total_tax,
+        local_tax_status=local.evidence_status,
     )
 
 

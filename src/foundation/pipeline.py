@@ -55,8 +55,16 @@ def run_full_pipeline(project_root: Path | None = None) -> dict[str, Any]:
 
     # 2. Axis 2 remains unpublished. The engine writes transition-state files only.
     # Do not flip this flag. Headline living-cost aggregation is not authorized.
+    # Even if later flipped, assert_candidate_freshness_ready must pass first.
     living_cost_release_authorized = False
     if living_cost_release_authorized:
+        from foundation.living_cost.freshness import assert_candidate_freshness_ready
+
+        assert_candidate_freshness_ready(
+            {},
+            project_cost_year=2026,
+            living_cost_release_authorized=True,
+        )
         raise RuntimeError("Living-cost publication is not authorized.")
 
     living_cost_res = run_living_cost_pipeline(project_root)

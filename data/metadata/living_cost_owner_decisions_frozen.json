@@ -1,6 +1,6 @@
 {
   "report_type": "living_cost_owner_decisions_frozen",
-  "generated_at": "2026-08-15T01:09:21+00:00",
+  "generated_at": "2026-08-15T02:07:33+00:00",
   "effective_date": "2026-08-15",
   "status": "ACCEPTED",
   "methodology_status": "FROZEN",
@@ -56,11 +56,23 @@
   },
   "freshness_gate": {
     "required_before_candidate_calculation": [
-      "meps_full_year_consolidated",
-      "usda_current_year_months",
+      "acs_population_weights",
+      "hud_fmr",
+      "usda_food",
       "cms_marketplace_sbe",
+      "meps_full_year_consolidated",
+      "nhts_mileage",
+      "epa_vehicle",
       "eia_gasoline",
-      "current_tax_law"
+      "naic_auto_insurance",
+      "bls_ce",
+      "fcc_broadband",
+      "mobile_price",
+      "federal_tax_law",
+      "state_tax_law",
+      "local_tax_law",
+      "vehicle_registration",
+      "od010_price_index"
     ],
     "if_newer_authoritative_data_exist": [
       "retrieve",
@@ -69,7 +81,15 @@
       "use"
     ],
     "do_not_recalculate_historical_2024_with_2026_prices": true,
-    "headline_authorized_by_this_gate": false
+    "headline_authorized_by_this_gate": false,
+    "calculates_mslc": false,
+    "legacy_named_families": [
+      "acs_population_weights",
+      "hud_fmr",
+      "usda_food",
+      "cms_marketplace_sbe",
+      "meps_full_year_consolidated"
+    ]
   },
   "decisions": [
     {
