@@ -534,11 +534,32 @@ def test_candidate_authorization_is_separate_from_public_release(
     with pytest.raises(FreshnessGateError, match="living_cost_release_authorized"):
         assert_public_release_authorized()
     monkeypatch.undo()
-    from tests.test_qa_readiness_gate_independent import _checks_from_committed_artifact
+
+    def _committed_checks() -> dict[str, FreshnessCheck]:
+        from dataclasses import fields
+
+        payload = json.loads(
+            (
+                Path(__file__).resolve().parents[1]
+                / "data"
+                / "metadata"
+                / "living_cost_candidate_freshness.json"
+            ).read_text(encoding="utf-8")
+        )
+        allowed = {item.name for item in fields(FreshnessCheck)}
+        checks: dict[str, FreshnessCheck] = {}
+        for family, raw in payload["checks"].items():
+            rec = {key: value for key, value in raw.items() if key in allowed}
+            if rec.get("selected_artifacts") is not None:
+                rec["selected_artifacts"] = tuple(rec["selected_artifacts"])
+            if rec.get("months_included") is not None:
+                rec["months_included"] = tuple(rec["months_included"])
+            checks[family] = FreshnessCheck(**rec)
+        return checks
 
     monkeypatch.setattr(
         "foundation.living_cost.freshness.current_family_truth",
-        _checks_from_committed_artifact,
+        _committed_checks,
     )
     report = write_candidate_freshness_report(tmp_path)
     assert report["ready_for_private_candidate"] is False

@@ -20,6 +20,7 @@ from foundation.living_cost.candidate_bindings import (
 )
 from foundation.living_cost.freshness import (
     MUTABLE_SOURCE_FAMILIES,
+    REQUIRED_FRESHNESS_FAMILIES,
     FreshnessCheck,
     FreshnessGateError,
     _validate_candidate_checks,
@@ -32,10 +33,57 @@ from foundation.living_cost.freshness import (
     required_project_cost_years,
     run_candidate_readiness_gate,
 )
-from tests.test_freshness_control import _all_ready, _patch_living_auth, _ready_family
 
 ROOT = Path(__file__).resolve().parents[1]
 METADATA = ROOT / "data" / "metadata"
+
+
+def _ready_family(family: str, **overrides: object) -> FreshnessCheck:
+    payload = {
+        "source_id": family,
+        "latest_checked_at": "2026-08-15T00:00:00Z",
+        "latest_authoritative_vintage_found": "2024 official",
+        "selected_vintage": "2024 official",
+        "selected_artifact": f"{family}.bin",
+        "newer_data_exists": False,
+        "retrieval_validation_status": "VALIDATED",
+        "freshness_check_status": "VERIFIED_CURRENT",
+        "publisher": "official",
+        "landing_url": f"https://example.test/{family}",
+        "selected_artifacts": (
+            {
+                "artifact_id": f"{family}.bin",
+                "sha256": "abc",
+                "url": f"https://example.test/{family}",
+            },
+        ),
+        "transformation_method": "none",
+        "input_evidence_status": "VALIDATED",
+        "listing_freshness_status": "VERIFIED_CURRENT",
+        "artifact_currentness_status": "VERIFIED_CURRENT",
+        "selected_artifact_matches_latest": True,
+        "year_coverage": {
+            "2024": {"covered": True, "note": "synthetic"},
+            "2026": {"covered": True, "note": "synthetic"},
+        },
+    }
+    payload.update(overrides)
+    return FreshnessCheck(**payload)  # type: ignore[arg-type]
+
+
+def _all_ready() -> dict[str, FreshnessCheck]:
+    return {family: _ready_family(family) for family in REQUIRED_FRESHNESS_FAMILIES}
+
+
+def _patch_living_auth(monkeypatch: pytest.MonkeyPatch, *, candidate: bool, release: bool) -> None:
+    from foundation.config import definitions as real_defs
+
+    base = real_defs()
+    living = dict(base["living_cost"])
+    living["candidate_calculation_authorized"] = candidate
+    living["release_authorized"] = release
+    patched = {**base, "living_cost": living}
+    monkeypatch.setattr("foundation.config.definitions", lambda: patched)
 
 
 def _complete_binding(component: str, year: int) -> dict[str, object]:
