@@ -1,229 +1,257 @@
-THE FOUNDATION — FINAL PRE-OWNER-FREEZE CLEANUP
+# THE FOUNDATION — STATUS WRITE-UP
+## Pre-owner-freeze work is implemented. Owner freeze is NOT COMPLETED.
 
-Current audited HEAD:
-94362d8bcd7f4e9ef08a44cb436619c9b9647a6c
+Repository: https://github.com/sumosizedginger/foundation
 
-The substantive pre-owner-freeze correction pass is accepted.
+**This file is current status, not a new work order.**
+Anything still open is marked **NOT COMPLETED**.
 
-Do NOT recalculate MSLC.
+---
 
-Do NOT alter OD choices.
+## Verdict
 
-Do NOT mark any OD ACCEPTED.
+Two successive passes on top of audited HEAD `e497d451088a054d43fda9921aa699531077888a`
+are implemented, dual-verified, pushed, and CI-green.
 
-Fix only the remaining factual/metadata inconsistencies below, push, and verify CI.
+| Pass | SHA | What it was |
+|---|---|---|
+| Audited start | `e497d451088a054d43fda9921aa699531077888a` | Post-correction-pass audit baseline |
+| Evidence correction | `94362d8bcd7f4e9ef08a44cb436619c9b9647a6c` | Provenance, CMS map, CPS SHA, VQB maintenance |
+| **Current HEAD** | `77edf3f3ae032e85b338ba4b6398486ff767d97d` | OK 2024 not SBE-FP; coverage semantics; 2A archive; OD labels |
 
-==================================================
-1. FIX OKLAHOMA 2024 CMS GOVERNANCE CLASSIFICATION
-==================================================
+**NO MINIMUM SUSTAINABLE LIVING COST HEADLINE WAS CALCULATED OR PUBLISHED.**
 
-Current:
+Not calculated, not published:
 
-src/foundation/sources/cms_platform.py
+- 2024 MSLC
+- 2026 MSLC
+- Gap
+- Adequacy Ratio
+- state living-cost rankings
+- national living-cost median
+- Composite
 
-contains:
+`living_cost_release_authorized = false`  
+`states_modeled = 0`
 
-SBE_FP_STATES[2024] = {"AR", "OK", "OR"}
+**Owner freeze is NOT COMPLETED.** OD-001 through OD-013 remain pending. None ACCEPTED.
 
-This is factually wrong for Oklahoma.
+Current living-cost closeout:
+`data/metadata/living_cost_pre_owner_freeze_closeout.md`
 
-Official CMS says Oklahoma's SBE-FP status is effective May 1, 2026.
+---
 
-For Plan Year 2024 Oklahoma used HealthCare.gov and must not be labeled SBE-FP.
+## GitHub CI on current HEAD `77edf3f` (not local)
 
-Correct 2024 Oklahoma classification to the appropriate federal/HealthCare.gov category.
+| Workflow | Result | Run |
+|---|---|---|
+| Tests & Code Quality | **success — 97 passed, 5 skipped, 1 warning** | https://github.com/sumosizedginger/foundation/actions/runs/31851900912 |
+| Validate Living Cost Sources | **success** | https://github.com/sumosizedginger/foundation/actions/runs/31851900879 |
+| Deploy Pages | **success** | https://github.com/sumosizedginger/foundation/actions/runs/31851900877 |
 
-IMPORTANT:
+Pre-cleanup GitHub baseline was 94 passed / 5 skipped / 1 warning.
 
-Its individual-market data source remains:
+LOCAL pytest (cached artifacts; **not** GitHub CI): 102 passed, 1 warning.
 
-federal_exchange_puf
+Dual verifiers on `77edf3f` (harness `9dbd0dbca1ef`): both PASS, nits only.
 
-so this is a governance/platform metadata correction, not a reason to change its federal PUF premium data.
+---
 
-Audit Arkansas and Oregon 2024 governance labels against actual year-specific CMS evidence as well.
+## COMPLETED — cleanup pass (`77edf3f`)
 
-Do not infer SBE-FP governance merely because a state uses HealthCare.gov.
+### 1. Oklahoma 2024 CMS governance — COMPLETED
 
-Use exact historical CMS evidence where available.
+Official CMS State-based Exchanges page (updated 2026-08-13): PY2026 SBE-FPs are
+Arkansas, Oregon, and **Oklahoma (Effective May 1, 2026)**.
 
-Add a test proving:
+| Year | OK platform | OK individual-market source |
+|---|---|---|
+| 2024 | `healthcare_gov_ffm` (not SBE-FP) | `federal_exchange_puf` |
+| 2026 | `sbe_fp` | `federal_exchange_puf` |
 
-OK 2024 != sbe_fp
-OK 2026 == sbe_fp
+2024 SBE-FP set is **AR, OR only**. Premium data path did not change.
 
-and preserve:
+Arkansas and Oregon 2024 remain SBE-FP from year-specific continuity
+(AR SBE-FP since 2017; OR SBE-FP since 2015; both still listed for PY2026),
+not from HealthCare.gov use alone. Oklahoma uses HealthCare.gov in 2024
+and is correctly **not** labeled SBE-FP.
 
-OK individual_market_source = federal_exchange_puf
+Tests: `OK 2024 != sbe_fp`, `OK 2026 == sbe_fp`, federal PUF both years.
 
-for both years as applicable.
+Regenerated:
 
-Regenerate:
+- `data/metadata/cms_individual_market_platform_map.json`
+- `data/metadata/living_cost_cms_coverage.json`
+- `data/metadata/living_cost_cms_sbe_lowest_silver.json`
 
-data/metadata/cms_individual_market_platform_map.json
-data/metadata/living_cost_cms_coverage.json
-data/metadata/living_cost_cms_sbe_lowest_silver.json
+### 2. Source coverage regenerated — COMPLETED
 
-if classification metadata are embedded in them.
+`data/metadata/living_cost_source_coverage.json`
+`generated_at` = `2026-08-14T23:48:58+00:00`
 
-==================================================
-2. REGENERATE SOURCE COVERAGE FROM CURRENT STATE
-==================================================
+Maintenance is no longer conflated as `ESTIMATED_OWNER_REVIEW`:
 
-Current:
+- `coverage_by_year[*].maintenance` = `INCOMPLETE_PROVENANCE`
+- `status_dimensions.by_year[*].maintenance.evidence_status` = `INCOMPLETE_PROVENANCE`
+- `status_dimensions.by_year[*].maintenance.methodology_status` = `OWNER_REVIEW_PENDING`
 
-data/metadata/living_cost_source_coverage.json
+The VQB candidate is not a guessed estimate. It is not VALIDATED.
 
-has an old generated_at timestamp predating later CMS and BLS corrections.
+Same evidence / methodology split is recorded for other components that
+had both dimensions (mpg, insurance, replacement, health_oop, etc.).
 
-Regenerate it from current HEAD.
+### 3. Stale Deliverable 2A archived — COMPLETED
 
-Do not manually preserve a stale generated_at.
+Removed from appearing as current status.
 
-Also resolve the maintenance status semantics.
+Archived at:
+`data/metadata/historical/living_cost_deliverable_2a_report.md`
 
-Current maintenance candidate report correctly says:
+Header:
 
-INCOMPLETE_PROVENANCE
-
-because the cached official BLS CE artifact parses successfully but reproducible official re-retrieval still returns HTTP 403.
-
-The source coverage currently says:
-
-ESTIMATED_OWNER_REVIEW
-
-Those represent two different dimensions.
-
-Prefer separating them, e.g.:
-
-evidence_status = INCOMPLETE_PROVENANCE
-methodology_status = OWNER_REVIEW_PENDING
-
-or an equivalent clean schema.
-
-Do NOT imply the empirical maintenance candidate itself is merely a guessed estimate.
-
-Do NOT promote it to VALIDATED while retrieval provenance remains incomplete.
-
-Apply the same principle wherever source evidence state and owner-decision state are currently conflated.
-
-==================================================
-3. REMOVE OR CLEARLY ARCHIVE THE STALE DELIVERABLE 2A REPORT
-==================================================
-
-Current repo still contains:
-
-data/metadata/living_cost_deliverable_2a_report.md
-
-with obsolete claims including:
-
-- exact SHA b2a30ef...
-- checkout@v5 / setup-python@v6 / setup-node@v5
-- 73 tests
-- Connecticut unmatched
-- outdated CMS SBE status
-- outdated health_premium state
-
-This file can no longer appear to describe current repository state.
-
-Choose one:
-
-A. Replace it with the current accurate closeout;
-
-or
-
-B. move/rename it into an explicitly historical/superseded location and put a prominent header:
-
+```
 SUPERSEDED HISTORICAL DELIVERABLE 2A SNAPSHOT
 NOT CURRENT PROJECT STATUS
+```
 
-Prefer preserving historical auditability rather than deleting history.
+Obsolete claims in that snapshot (SHA `b2a30ef…`, checkout@v5 / setup-python@v6 /
+setup-node@v5, 73 tests, Connecticut unmatched, outdated CMS / health_premium)
+are historical only.
 
-Current project-status documentation must point to the new current closeout.
+`PROJECT_STATUS.md` points at the current closeout.
 
-==================================================
-4. FIX CLOSEOUT OD LABELS
-==================================================
+### 4. Closeout OD labels — COMPLETED
 
-The latest closeout recap contains incorrect shorthand labels for:
+Canonical labels (definitions unchanged; none ACCEPTED):
 
-OD-011
-OD-012
+- OD-001 — ACS adult-population vintage for 2024 and 2026 weights
+- OD-002 — MEPS OOP statistic
+- OD-003 — NHTS observed vs minimum-necessary mileage
+- OD-004 — EPA MPG cohort
+- OD-005 — vehicle replacement
+- OD-006 — NAIC auto insurance measure
+- OD-007 — vehicle maintenance/repairs/tires annualization
+- OD-008 — recreation percentile
+- OD-009 — connectivity / mobile price
+- OD-010 — lag / CPI translation method
+- OD-011 — municipal earned-income tax geography/overlay
+- OD-012 — additional resilience reserve
+- OD-013 — Connecticut HUD/ACS geography treatment
 
-The canonical current owner packet is authoritative.
+---
 
-Correct the closeout recap so it matches:
+## COMPLETED — earlier correction pass (`94362d8` and predecessors)
 
-OD-011 — municipal earned-income tax geography/overlay
+These remain in force. Do not regress them.
 
-OD-012 — additional resilience reserve
+- CPS 2025 ASEC official re-retrieve SHA
+  `318845a2b5e0034eb2973898de1738f4df0025727de38499e7669cb9c0deef0b`
+  is the active artifact in `historical.py`, `history.json`, `latest.json`,
+  `population.json`. Legacy `…ea6497284` is ledger-only.
+- 2024 HUD/ACS geo-join hashes recorded:
+  ACS `1637b18a…13718f0e`, HUD FY2024 `0a6634d5…ecfbf98`
+- Raw Census county-equivalents **3144** vs FY2024 join universe **3143**
+  (CT 9 planning regions → 8 reconstructed legacy counties)
+- 100% 50-state+DC 2024 housing population coverage
+  (85 unmatched HUD rows = 84 territories + 1 special/non-county; 0 actual
+  50-state+DC counties)
+- Oregon individual-market source = federal Exchange PUF (2024 and 2026)
+- Oregon SBE archives retained as SHOP-only; not used for individual Silver
+- 19 standalone SBE individual markets (2024); 21 (2026)
+- Real SBE lowest-Silver joins on every true standalone SBE state/year
+- BLS CE maintenance from official VQB (`vqb24.csv`) + MTBI UCC map
+  Combined mean incl. zeros **$781.22** (not the $1 UCC 470212 fuel residual)
+  470212 excluded. Absent TIRECQ / 470211 / 470220 is not measured zero.
+- CE evidence remains `INCOMPLETE_PROVENANCE` (official retrieve HTTP 403)
+- GitHub Actions majors: `checkout@v7`, `setup-python@v7`, `setup-node@v6`, Node 24
 
-OD-013 — Connecticut HUD/ACS geography treatment
+---
 
-Do not change the actual OD definitions.
+## NOT COMPLETED
 
-==================================================
-5. CURRENT CI REPORTING
-==================================================
+These are open. Do not treat them as done.
 
-After push, report the actual GitHub CI result.
+### Owner freeze — NOT COMPLETED
 
-Current pre-fix CI baseline is:
+OD-001 through OD-013 are pending. None ACCEPTED.
+The next task is owner freeze of those thirteen decisions.
 
-94 passed
-5 skipped
-1 warning
+### Living-cost headline — NOT COMPLETED (forbidden until owner freeze)
 
-The prior:
+No 2024/2026 MSLC, Gap, Adequacy, rankings, national median, or Composite.
 
-99 passed
+### Source / evidence gaps — NOT COMPLETED
 
-was a local run and may remain documented specifically as LOCAL if useful.
+| Item | Honest status |
+|---|---|
+| BLS CE official retrieve | HTTP 403; cache `INCOMPLETE_PROVENANCE` |
+| BLS Interview/Diary Dictionary xlsx + stubs.zip | HTTP 403 from this client |
+| FCC URS / mobile price | `SOURCE_GAP` |
+| Vehicle registration | `SOURCE_GAP` |
+| Vehicle replacement | `ESTIMATED_OWNER_REVIEW` (OD-005) |
+| MEPS 2024 full-year file | **NOT COMPLETED** — do not claim HC-251 is 2024. Latest listed FY file is HC-251 (2023), `RETRIEVED_UNVALIDATED` |
+| Federal tax tables | `INVENTORY_NOT_VALIDATED` |
+| State tax | `SOURCE_GAP` |
+| Local tax / municipal EIT overlay | `SOURCE_GAP` + OD-011 pending |
+| NAIC redistribution rights | `FREE_DOWNLOAD_REDISTRIBUTION_UNCONFIRMED` |
+| Multi-year CE maintenance vintages | **NOT COMPLETED** (2024 Interview only) |
+| HUD unmatched classifier fourth bucket | **NOT COMPLETED** (nit: `unmatched_50_state_dc_county` is unreachable; coverage is 100% this vintage) |
+| `census_county_universe_count` rename | **NOT COMPLETED** (still 3143, now qualified as the join count) |
 
-Do not present local results as GitHub CI results.
+### Housekeeping — NOT COMPLETED
 
-==================================================
-6. PRESERVE ALL ACCEPTED WORK
-==================================================
+- Untracked local inspect scripts `tmp_inspect_vqb.py` and `tmp_inspect_expname.py` were never committed and never deleted.
+- `PROJECT_STATUS.md` still contains leftover early-project text “36 tests passing” (nit; not GitHub CI).
+- Definition lock and never-do list were not changed. They were not supposed to be.
 
-Do not regress:
+---
 
-- canonical CPS SHA reconciliation;
-- 2024 HUD/ACS source hashes;
-- raw ACS 3144 vs transformed join 3143 distinction;
-- 100% 50-state+DC 2024 housing population coverage;
-- Oregon federal individual-market source;
-- 19 standalone SBE individual markets for 2024;
-- 21 standalone SBE individual markets for 2026;
-- real SBE lowest-Silver joins;
-- BLS VQB/MTBI maintenance candidates;
-- CE INCOMPLETE_PROVENANCE truthfulness;
-- living_cost_release_authorized = false;
-- states_modeled = 0;
-- all owner decisions pending.
+## Current component honesty (not a headline)
 
-==================================================
-7. STOP CONDITION
-==================================================
+From `data/metadata/living_cost_source_coverage.json` (both years unless noted):
 
-Do NOT calculate or publish:
+| Component | Coverage status | Notes |
+|---|---|---|
+| housing | VALIDATED | |
+| population_weights | VALIDATED | OD-001 pending |
+| food | MODELED_FROM_MEASURED_INPUTS | |
+| health_premium | MODELED_FROM_MEASURED_INPUTS | joins exist; no healthcare headline |
+| health_oop | RETRIEVED_UNVALIDATED | OD-002 pending |
+| mileage | VALIDATED | observed NHTS, not minimum-necessary; OD-003 pending |
+| mpg | RETRIEVED_UNVALIDATED | OD-004 not frozen |
+| gas | VALIDATED | PADD/regional is not state-measured |
+| insurance | RETRIEVED_UNVALIDATED | OD-006 pending |
+| maintenance | INCOMPLETE_PROVENANCE | evidence; OD-007 methodology pending |
+| registration | SOURCE_GAP | |
+| replacement | ESTIMATED_OWNER_REVIEW | OD-005 pending |
+| connectivity | SOURCE_GAP | OD-009 pending |
+| essentials | INCOMPLETE_PROVENANCE | same CE retrieve 403 |
+| recreation | INCOMPLETE_PROVENANCE | OD-008 pending |
+| rpp | VALIDATED | |
+| federal_tax | INVENTORY_NOT_VALIDATED | |
+| state_tax | SOURCE_GAP | |
+| local_tax | SOURCE_GAP | OD-011 pending |
 
-MSLC
-Gap
-Adequacy
-state rankings
-national median
-Composite
+---
 
-After this cleanup:
+## Definition lock (unchanged)
 
-push;
-verify Tests & Code Quality;
-verify Validate Living Cost Sources;
-verify Deploy Pages.
+```
+household money income / number of people in the household
+```
 
-Return final SHA and exact CI result.
+Every person in that household receives that value. Rank persons using official
+person survey weights. The weighted 30th percentile is the cutoff.
 
-Then STOP.
+This work did not change that definition, did not introduce an equivalence
+scale, and did not change pillar or metric weights.
 
-The next task is OWNER FREEZE of OD-001 through OD-013.
+---
+
+## Next action that requires the owner
+
+**OWNER FREEZE of OD-001 through OD-013.**
+
+Until that happens, do not calculate or publish a Minimum Sustainable Living Cost.
+
+A truthful gap is acceptable. A guessed headline is not.
