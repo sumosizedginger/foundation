@@ -11,9 +11,21 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 from dataclasses import dataclass
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any
+
+# CPI_UPDATED factor is always target/base. Do not silently change this
+# arithmetic; a different transformation needs a new frozen method.
+CPI_UPDATED_FACTOR_OPERATION = "target_index_value / base_index_value"
+# Index observations: exact after Decimal(str(value)) normalize.
+# Factors: same exact compare, then a documented 1e-12 relative fallback
+# for stored-precision rounding only.
+INDEX_COMPARE_POLICY = "exact Decimal(str) normalize"
+FACTOR_ABS_TOLERANCE = Decimal("1e-12")
+FACTOR_REL_TOLERANCE = Decimal("1e-12")
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 METADATA_DIR = PROJECT_ROOT / "data" / "metadata"
@@ -711,6 +723,8 @@ def unbound_od010_series_coverage(
             "selected_artifact": None,
             "api_identity": None,
             "sha256": None,
+            "base_index_value": None,
+            "target_index_value": None,
             "note": "series not inventoried; do not invent official series identifiers",
         }
     return coverage
@@ -734,6 +748,8 @@ def od010_series_inventory_is_specific(
             return False
         if not _nonempty_str(slot.get("official_series_identifier")):
             return False
+        if not _nonempty_str(slot.get("publisher")):
+            return False
         period = (
             slot.get("latest_observation_period")
             or slot.get("target_observation_period")
@@ -745,6 +761,12 @@ def od010_series_inventory_is_specific(
         if not _nonempty_str(artifact):
             return False
         if _year_int(slot.get("source_data_year")) is None:
+            return False
+        if not _nonempty_str(slot.get("base_observation_period")):
+            return False
+        if not _positive_finite_index(slot.get("base_index_value")):
+            return False
+        if not _positive_finite_index(slot.get("target_index_value")):
             return False
     return True
 
@@ -770,6 +792,7 @@ def _od010_record_artifact(rec: dict[str, Any]) -> str | None:
 
 
 def _od010_record_sha(rec: dict[str, Any]) -> str | None:
+    """Table-level identity only. Do not fall back to calculation_inputs SHA."""
     for key in ("sha256", "source_artifact_sha256", "response_identity"):
         value = rec.get(key)
         if _nonempty_str(value):
@@ -777,10 +800,67 @@ def _od010_record_sha(rec: dict[str, Any]) -> str | None:
     artifact = rec.get("source_artifact")
     if isinstance(artifact, dict) and _nonempty_str(artifact.get("sha256")):
         return str(artifact["sha256"])
-    calc = rec.get("calculation_inputs")
-    if isinstance(calc, dict) and _nonempty_str(calc.get("sha256")):
-        return str(calc["sha256"])
     return None
+
+
+def _calc_identity_sha(calc: dict[str, Any]) -> str | None:
+    for key in ("sha256", "response_identity"):
+        value = calc.get(key)
+        if _nonempty_str(value):
+            return str(value)
+    return None
+
+
+def _as_decimal(value: Any) -> Decimal | None:
+    """Parse an observation/factor. None if missing, non-numeric, NaN, or Inf."""
+    if value is None or isinstance(value, bool):
+        return None
+    if isinstance(value, float) and not math.isfinite(value):
+        return None
+    if isinstance(value, Decimal):
+        return value if value.is_finite() else None
+    try:
+        parsed = Decimal(str(value).strip())
+    except (InvalidOperation, ValueError, AttributeError):
+        return None
+    return parsed if parsed.is_finite() else None
+
+
+def _positive_finite_index(value: Any) -> bool:
+    parsed = _as_decimal(value)
+    return parsed is not None and parsed > 0
+
+
+def index_values_equal(left: Any, right: Any) -> bool:
+    """Exact Decimal(str) equality after normalize. No loose float tolerance."""
+    a = _as_decimal(left)
+    b = _as_decimal(right)
+    if a is None or b is None:
+        return False
+    return a == b or a.normalize() == b.normalize()
+
+
+def factors_equal(left: Any, right: Any) -> bool:
+    """Exact Decimal compare, then 1e-12 relative fallback for stored precision."""
+    a = _as_decimal(left)
+    b = _as_decimal(right)
+    if a is None or b is None:
+        return False
+    if a == b or a.normalize() == b.normalize():
+        return True
+    scale = max(abs(a), abs(b), Decimal(1))
+    return abs(a - b) <= max(FACTOR_ABS_TOLERANCE, FACTOR_REL_TOLERANCE * scale)
+
+
+def recompute_cpi_updated_factor(base_index_value: Any, target_index_value: Any) -> Decimal | None:
+    """CPI_UPDATED operation: target / base. None if either value is invalid."""
+    base = _as_decimal(base_index_value)
+    target = _as_decimal(target_index_value)
+    if base is None or target is None:
+        return None
+    if base <= 0 or target <= 0:
+        return None
+    return target / base
 
 
 def _live_series_period(slot: dict[str, Any]) -> str | None:
@@ -819,6 +899,11 @@ def _normalized_od010_cross_pair(
     cross_bound: bool,
 ) -> dict[str, Any]:
     calc = _calculation_inputs(rec or {})
+    live_base = None if slot is None else slot.get("base_index_value")
+    live_target = None if slot is None else slot.get("target_index_value")
+    table_base = calc.get("base_index_value")
+    table_target = calc.get("target_index_value")
+    recomputed = recompute_cpi_updated_factor(live_base, live_target)
     return {
         "component": component,
         "project_cost_year": year,
@@ -836,8 +921,15 @@ def _normalized_od010_cross_pair(
         "live_sha256": None if slot is None else _live_series_sha(slot),
         "base_observation_period": calc.get("base_observation_period"),
         "target_observation_period": calc.get("target_observation_period"),
-        "base_index_value": calc.get("base_index_value"),
-        "target_index_value": calc.get("target_index_value"),
+        "live_base_index_value": live_base,
+        "table_base_index_value": table_base,
+        "live_target_index_value": live_target,
+        "table_target_index_value": table_target,
+        "claimed_translation_factor": None if rec is None else rec.get("translation_factor"),
+        "calculation_input_translation_factor": calc.get("translation_factor"),
+        "recomputed_translation_factor": (None if recomputed is None else format(recomputed, "f")),
+        "base_index_value": table_base,
+        "target_index_value": table_target,
         "translation_factor": None if rec is None else rec.get("translation_factor"),
         "cross_bound": cross_bound,
     }
@@ -973,8 +1065,45 @@ def validate_od010_bindings_against_snapshot(
                     or (_nonempty_str(live_api) and str(calc_artifact) == str(live_api))
                 ):
                     pair_issues.append(f"{component}:{year}:CALC_ARTIFACT_MISMATCH")
-                if calc.get("base_index_value") is None or calc.get("target_index_value") is None:
-                    pair_issues.append(f"{component}:{year}:CALC_INDEX_VALUES_MISSING")
+                calc_sha = _calc_identity_sha(calc)
+                if _nonempty_str(calc_sha) and (
+                    (live_sha and calc_sha != live_sha) or (table_sha and calc_sha != table_sha)
+                ):
+                    pair_issues.append(f"{component}:{year}:CALC_ARTIFACT_HASH_MISMATCH")
+                live_base_value = slot.get("base_index_value")
+                live_target_value = slot.get("target_index_value")
+                if not _positive_finite_index(live_base_value):
+                    pair_issues.append(f"{component}:{year}:INVALID_BASE_INDEX_VALUE")
+                if not _positive_finite_index(live_target_value):
+                    pair_issues.append(f"{component}:{year}:INVALID_TARGET_INDEX_VALUE")
+                calc_base_value = calc.get("base_index_value")
+                calc_target_value = calc.get("target_index_value")
+                if not _positive_finite_index(calc_base_value):
+                    pair_issues.append(f"{component}:{year}:INVALID_BASE_INDEX_VALUE")
+                elif _positive_finite_index(live_base_value) and not index_values_equal(
+                    calc_base_value, live_base_value
+                ):
+                    pair_issues.append(f"{component}:{year}:CALC_BASE_VALUE_MISMATCH")
+                if not _positive_finite_index(calc_target_value):
+                    pair_issues.append(f"{component}:{year}:INVALID_TARGET_INDEX_VALUE")
+                elif _positive_finite_index(live_target_value) and not index_values_equal(
+                    calc_target_value, live_target_value
+                ):
+                    pair_issues.append(f"{component}:{year}:CALC_TARGET_VALUE_MISMATCH")
+                expected = recompute_cpi_updated_factor(live_base_value, live_target_value)
+                record_factor = rec.get("translation_factor")
+                calc_factor = calc.get("translation_factor")
+                if expected is None:
+                    pair_issues.append(f"{component}:{year}:TRANSLATION_FACTOR_MISMATCH")
+                else:
+                    if not factors_equal(record_factor, expected):
+                        pair_issues.append(f"{component}:{year}:TRANSLATION_FACTOR_MISMATCH")
+                    if (
+                        calc_factor is None
+                        or not factors_equal(calc_factor, expected)
+                        or not factors_equal(calc_factor, record_factor)
+                    ):
+                        pair_issues.append(f"{component}:{year}:TRANSLATION_FACTOR_MISMATCH")
         issues.extend(pair_issues)
         normalized.append(
             _normalized_od010_cross_pair(component, year, rec, slot, cross_bound=not pair_issues)
