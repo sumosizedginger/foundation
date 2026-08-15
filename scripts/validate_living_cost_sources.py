@@ -644,7 +644,7 @@ def write_coverage(artifacts: list[RetrievedSourceArtifact]) -> dict:
             "maintenance": {
                 "project_cost_year": {"2024": 2024, "2026": 2026},
                 "source_data_year": {"2024": 2024, "2026": 2024},
-                "translation_method": {"2024": "NONE_ALREADY_LOCAL", "2026": "CPI_UPDATED"},
+                "translation_method": {"2024": "NONE", "2026": "CPI_UPDATED"},
                 "price_index_series": {
                     "2024": None,
                     "2026": "CPI-U motor vehicle maintenance and repair (OD-007/OD-010 FROZEN)",
@@ -791,6 +791,13 @@ def write_coverage(artifacts: list[RetrievedSourceArtifact]) -> dict:
         "methodology_frozen_is_not_source_validated": True,
         "blocker_notes": dict(BLOCKER_NOTES),
     }
+    from foundation.living_cost.candidate_bindings import (
+        assert_canonical_component_universe,
+        assert_source_lag_preserves_frozen_od010,
+    )
+
+    assert_canonical_component_universe(coverage)
+    assert_source_lag_preserves_frozen_od010(coverage["source_lag"])
     coverage_path = METADATA_DIR / "living_cost_source_coverage.json"
     coverage_path.parent.mkdir(parents=True, exist_ok=True)
     coverage_path.write_text(json.dumps(coverage, indent=2), encoding="utf-8")

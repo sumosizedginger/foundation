@@ -326,6 +326,16 @@ def test_readiness_validates_the_exact_captured_context(monkeypatch: pytest.Monk
     assert ctx["candidate_input_binding_identity"]["bound"] is False
 
 
+def test_official_coverage_writer_source_lag_matches_frozen_policy():
+    writer = (ROOT / "scripts" / "validate_living_cost_sources.py").read_text(encoding="utf-8")
+    assert "NONE_ALREADY_LOCAL" not in writer
+    assert '"2024": "NONE", "2026": "CPI_UPDATED"' in writer
+    assert expected_translation_method("maintenance", 2024) == "NONE"
+    committed = json.loads((METADATA / "living_cost_source_coverage.json").read_text())
+    assert_source_lag_preserves_frozen_od010(committed["source_lag"], years=(2024, 2026))
+    assert_canonical_component_universe(committed)
+
+
 def test_canonical_component_count_and_cpi_pairs():
     assert len(required_candidate_components()) == 19
     assert len(required_cpi_updated_bindings(years=(2024, 2026))) == 7
