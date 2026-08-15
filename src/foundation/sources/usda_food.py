@@ -26,10 +26,7 @@ from foundation.sources.xlsx_xml import rows_as_dicts
 
 logger = logging.getLogger(__name__)
 
-USDA_FOOD_PLANS_URL = (
-    "https://www.fna.usda.gov/research/cnpp/usda-food-plans/cost-food-monthly-reports"
-)
-USDA_FILE_BASE = "https://www.fna.usda.gov/sites/default/files/resource-files"
+USDA_FOOD_PLANS_URL = "https://www.fns.usda.gov/cnpp/usda-food-plans-cost-food-monthly-reports"
 
 # Official one-person household adjustment printed in CNPP archive notes.
 ONE_PERSON_HOUSEHOLD_FACTOR = 1.20
@@ -59,8 +56,23 @@ USDA_ARCHIVES: dict[str, dict[str, str]] = {
 }
 
 
-def _official_url(filename: str) -> str:
-    return f"{USDA_FILE_BASE}/{filename}"
+def resolve_usda_workbook_urls() -> dict[str, str]:
+    """Parse official FNS Cost of Food hrefs. Never construct a guessed hostname."""
+    import requests
+
+    from foundation.living_cost.freshness_discovery import fetch_text, parse_usda_official_hrefs
+
+    try:
+        html, _checked = fetch_text(USDA_FOOD_PLANS_URL)
+    except (OSError, RuntimeError, ValueError, requests.RequestException) as exc:
+        raise RuntimeError(f"USDA official landing fetch failed: {exc}") from exc
+    return parse_usda_official_hrefs(html, page_url=USDA_FOOD_PLANS_URL)
+
+
+def _official_url(filename: str, hrefs: dict[str, str] | None = None) -> str:
+    if hrefs and filename in hrefs:
+        return hrefs[filename]
+    return USDA_FOOD_PLANS_URL
 
 
 def download_usda_food_artifact(year: int, cache_dir: Path, force_download: bool = False):
@@ -69,11 +81,31 @@ def download_usda_food_artifact(year: int, cache_dir: Path, force_download: bool
         raise ValueError(f"Unsupported USDA Food Plan reference year: {year}")
 
     cache_dir.mkdir(parents=True, exist_ok=True)
+    try:
+        hrefs = resolve_usda_workbook_urls()
+    except (OSError, RuntimeError, ValueError, TypeError) as exc:
+        logger.warning("USDA official workbook hrefs could not be parsed: %s", exc)
+        hrefs = {}
     artifacts = []
     for key, spec in USDA_ARCHIVES.items():
+        official = hrefs.get(spec["filename"])
+        if not official:
+            artifacts.append(
+                record_unretrieved(
+                    f"{spec['source_id_prefix']}_{year}",
+                    status="SOURCE_GAP",
+                    resolved_url=USDA_FOOD_PLANS_URL,
+                    notes=(
+                        f"Official USDA {spec['plan_label']} workbook href for "
+                        f"{spec['filename']} was not parsed from {USDA_FOOD_PLANS_URL}. "
+                        "No guessed hostname/URL was constructed."
+                    ),
+                )
+            )
+            continue
         artifact = acquire_source(
             source_id=f"{spec['source_id_prefix']}_{year}",
-            url=_official_url(spec["filename"]),
+            url=official,
             cache_dir=cache_dir,
             expected_filename=spec["filename"],
             force_download=force_download,
@@ -84,7 +116,7 @@ def download_usda_food_artifact(year: int, cache_dir: Path, force_download: bool
                 record_unretrieved(
                     f"{spec['source_id_prefix']}_{year}",
                     status="SOURCE_GAP",
-                    resolved_url=_official_url(spec["filename"]),
+                    resolved_url=official,
                     notes=(
                         f"Official USDA {spec['plan_label']} archive "
                         f"{spec['filename']} was not retrieved from {USDA_FOOD_PLANS_URL}."

@@ -70,12 +70,34 @@ def test_authorization_reads_definitions_yml():
     assert "definitions.yml" in src
 
 
+def _patch_living_auth(monkeypatch: pytest.MonkeyPatch, *, candidate: bool, release: bool) -> None:
+    from foundation.config import definitions as real_defs
+
+    base = real_defs()
+    living = dict(base["living_cost"])
+    living["candidate_calculation_authorized"] = candidate
+    living["release_authorized"] = release
+    patched = {**base, "living_cost": living}
+    monkeypatch.setattr("foundation.config.definitions", lambda: patched)
+
+
+def test_public_gates_have_no_authorization_override():
+    import inspect
+
+    cand = inspect.signature(assert_candidate_freshness_ready)
+    rel = inspect.signature(assert_public_release_authorized)
+    assert "candidate_calculation_authorized" not in cand.parameters
+    assert "living_cost_release_authorized" not in cand.parameters
+    assert "living_cost_release_authorized" not in rel.parameters
+
+
 def test_config_candidate_false_blocks_private_gate():
     with pytest.raises(FreshnessGateError, match="candidate_calculation_authorized"):
         assert_candidate_freshness_ready(_all_ready(), project_cost_year=2026)
 
 
-def test_explicit_candidate_true_plus_freshness_fail_is_blocked():
+def test_config_candidate_true_plus_freshness_fail_is_blocked(monkeypatch: pytest.MonkeyPatch):
+    _patch_living_auth(monkeypatch, candidate=True, release=False)
     checks = _all_ready()
     checks["mobile_price"] = _ready_family(
         "mobile_price",
@@ -90,16 +112,15 @@ def test_explicit_candidate_true_plus_freshness_fail_is_blocked():
         assert_candidate_freshness_ready(
             checks,
             project_cost_year=2026,
-            candidate_calculation_authorized=True,
             translation_index_bound=True,
         )
 
 
-def test_explicit_candidate_true_plus_freshness_pass_may_proceed():
+def test_config_candidate_true_plus_freshness_pass_may_proceed(monkeypatch: pytest.MonkeyPatch):
+    _patch_living_auth(monkeypatch, candidate=True, release=False)
     assert_candidate_freshness_ready(
         _all_ready(),
         project_cost_year=2026,
-        candidate_calculation_authorized=True,
         translation_index_bound=True,
     )
 
@@ -107,10 +128,19 @@ def test_explicit_candidate_true_plus_freshness_pass_may_proceed():
 def test_release_false_blocks_publication_regardless_of_candidate():
     with pytest.raises(FreshnessGateError, match="living_cost_release_authorized"):
         assert_public_release_authorized()
-    assert_public_release_authorized(living_cost_release_authorized=True)
 
 
-def test_translation_index_bound_false_blocks_even_if_od010_validated():
+def test_config_release_true_passes_release_gate_only(monkeypatch: pytest.MonkeyPatch):
+    _patch_living_auth(monkeypatch, candidate=False, release=True)
+    assert_public_release_authorized()
+    with pytest.raises(FreshnessGateError, match="candidate_calculation_authorized"):
+        assert_candidate_freshness_ready(_all_ready(), project_cost_year=2026)
+
+
+def test_translation_index_bound_false_blocks_even_if_od010_validated(
+    monkeypatch: pytest.MonkeyPatch,
+):
+    _patch_living_auth(monkeypatch, candidate=True, release=False)
     checks = _all_ready()
     checks["od010_price_index"] = _ready_family(
         "od010_price_index",
@@ -125,7 +155,6 @@ def test_translation_index_bound_false_blocks_even_if_od010_validated():
         assert_candidate_freshness_ready(
             checks,
             project_cost_year=2026,
-            candidate_calculation_authorized=True,
             translation_index_bound=False,
         )
 
@@ -144,7 +173,8 @@ def test_not_checked_is_not_encoded_as_newer_data_false():
     assert check.freshness_check_status == "SOURCE_GAP"
 
 
-def test_modeled_evidence_requires_concrete_provenance():
+def test_modeled_evidence_requires_concrete_provenance(monkeypatch: pytest.MonkeyPatch):
+    _patch_living_auth(monkeypatch, candidate=True, release=False)
     checks = _all_ready()
     checks["usda_food"] = _ready_family(
         "usda_food",
@@ -158,7 +188,6 @@ def test_modeled_evidence_requires_concrete_provenance():
         assert_candidate_freshness_ready(
             checks,
             project_cost_year=2026,
-            candidate_calculation_authorized=True,
             translation_index_bound=True,
         )
 
@@ -169,6 +198,9 @@ def test_pipeline_reads_canonical_authorization():
     assert "candidate_calculation_authorized()" in pipeline
     assert "living_cost_release_authorized()" in pipeline
     assert "candidate_calculation_authorized = False" not in pipeline
+    assert "Public living-cost release engine is not implemented/approved." in pipeline
+    assert "Living-cost publication is not authorized." not in pipeline
+    assert "assert_candidate_freshness_ready({}," not in pipeline.replace(" ", "")
 
 
 def test_production_artifact_still_fails_and_uses_discovery_fields():
@@ -182,7 +214,13 @@ def test_production_artifact_still_fails_and_uses_discovery_fields():
     usda = payload["checks"]["usda_food"]
     assert usda["retrieval_validation_status"] == "MODELED_FROM_MEASURED_INPUTS"
     assert isinstance(usda.get("selected_artifacts"), list)
-    assert usda.get("months_included")
+    extra = usda.get("extra") or {}
+    assert "historical_2024" in extra
+    assert "current_2026" in extra
+    if extra["historical_2024"].get("month_count") == 12:
+        assert extra["current_2026"].get("months_included") != extra["historical_2024"].get(
+            "months_included"
+        )
     cms = payload["checks"]["cms_marketplace_sbe"]
     assert isinstance(cms.get("selected_artifacts"), list)
     for family, check in payload["checks"].items():
@@ -224,3 +262,122 @@ def test_meps_scheduled_is_not_released_on_synthetic_listing():
     result = check_meps_2024_full_year_listing(listing_html=html)
     assert result["released"] is False
     assert result["listed_puf_id"] is None
+
+
+def test_usda_2024_full_year_cannot_overwrite_2026_ytd():
+    from foundation.living_cost.freshness_discovery import usda_year_month_records
+
+    artifacts = [
+        {
+            "source_id": "usda_food_low_cost_2024",
+            "notes": "months_included=['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']",
+            "sha256": "aaaa",
+        },
+        {
+            "source_id": "usda_food_low_cost_2026",
+            "notes": "months_included=['January', 'February', 'March', 'April', 'May']",
+            "sha256": "bbbb",
+        },
+    ]
+    years = usda_year_month_records(artifacts)
+    assert years[2024]["month_count"] == 12
+    assert years[2026]["month_count"] == 5
+    assert years[2026]["months_included"] != years[2024]["months_included"]
+    assert years[2026]["last_month"] == "May"
+    assert years[2024]["last_month"] == "December"
+
+
+def test_usda_hrefs_are_parsed_not_constructed_fna():
+    from foundation.living_cost.freshness_discovery import parse_usda_official_hrefs
+
+    html = """
+    <a href="/sites/default/files/resource-files/usda-lowcostplan-sept2007-present.xlsx">Low-Cost</a>
+    <a href="https://www.fns.usda.gov/sites/default/files/resource-files/usda-thriftyplan-june2021-present.xlsx">Thrifty</a>
+    """
+    found = parse_usda_official_hrefs(
+        html, page_url="https://www.fns.usda.gov/cnpp/usda-food-plans-cost-food-monthly-reports"
+    )
+    assert "usda-lowcostplan-sept2007-present.xlsx" in found
+    assert found["usda-lowcostplan-sept2007-present.xlsx"].startswith("https://www.fns.usda.gov/")
+    assert "fna.usda.gov" not in found["usda-lowcostplan-sept2007-present.xlsx"]
+    assert "fna.usda.gov" not in found["usda-thriftyplan-june2021-present.xlsx"]
+    src = (SRC / "foundation" / "living_cost" / "freshness_discovery.py").read_text(
+        encoding="utf-8"
+    )
+    assert "https://www.fna.usda.gov/sites/default/files/resource-files/" not in src
+    usda_src = (SRC / "foundation" / "sources" / "usda_food.py").read_text(encoding="utf-8")
+    manifest_src = (SRC / "foundation" / "living_cost" / "manifest.py").read_text(encoding="utf-8")
+    assert "fna.usda.gov" not in usda_src
+    assert "fna.usda.gov" not in manifest_src
+    assert "research-actuarial-services/auto-insurance-database-report" not in manifest_src
+
+
+def test_cms_federal_success_sbe_failure_is_not_verified(monkeypatch: pytest.MonkeyPatch):
+    from foundation.living_cost import freshness_discovery as disc
+    from foundation.sources.cms_marketplace import CMS_SBE_PUF_LANDING
+
+    def fake_fetch(url: str, **_kwargs: object):
+        if url == CMS_SBE_PUF_LANDING:
+            raise RuntimeError("sbe listing unavailable")
+        return (
+            "<html>Health Insurance Exchange Public Use Files 2024 2026 rate-puf</html>",
+            "2026-08-15T00:00:00Z",
+        )
+
+    monkeypatch.setattr(disc, "fetch_text", fake_fetch)
+    check = disc.discover_cms()
+    assert check.freshness_check_status != "VERIFIED_CURRENT"
+    extra = check.extra or {}
+    assert extra["federal_exchange"]["status"] == "VERIFIED_CURRENT"
+    assert extra["sbe"]["status"] == "CHECK_FAILED"
+
+
+def test_cms_federal_and_sbe_success_may_be_verified(monkeypatch: pytest.MonkeyPatch):
+    from foundation.living_cost import freshness_discovery as disc
+
+    def fake_fetch(url: str, **_kwargs: object):
+        return (
+            "<html>Health Insurance Exchange Public Use Files 2024 2026 PUF</html>",
+            "2026-08-15T00:00:00Z",
+        )
+
+    monkeypatch.setattr(disc, "fetch_text", fake_fetch)
+    check = disc.discover_cms()
+    assert check.freshness_check_status == "VERIFIED_CURRENT"
+    extra = check.extra or {}
+    assert extra["federal_exchange"]["status"] == "VERIFIED_CURRENT"
+    assert extra["sbe"]["status"] == "VERIFIED_CURRENT"
+
+
+def test_naic_does_not_use_obsolete_404_landing():
+    from foundation.living_cost.freshness_discovery import NAIC_PUBLICATIONS_LANDING
+
+    src = (SRC / "foundation" / "living_cost" / "freshness_discovery.py").read_text(
+        encoding="utf-8"
+    )
+    assert "research-actuarial-services/auto-insurance-database-report" not in src
+    assert "content.naic.org/publications" in NAIC_PUBLICATIONS_LANDING
+
+
+def test_status_summary_cannot_label_bea_verified_when_artifact_says_failed():
+    from foundation.living_cost.freshness import freshness_status_summary
+
+    payload = {
+        "ready_for_private_candidate": False,
+        "empirical_blocker_family_count": 12,
+        "gate_blocker_reason_count": 20,
+        "checks": {
+            "bea_rpp": {"freshness_check_status": "CHECK_FAILED"},
+        },
+    }
+    text = freshness_status_summary(payload)
+    assert "bea_rpp: CHECK_FAILED" in text
+    assert "bea_rpp: VERIFIED_CURRENT" not in text
+
+
+def test_blocker_counts_are_separated():
+    readiness = evaluate_freshness_readiness(_all_ready(), translation_index_bound=False)
+    assert "empirical_blocker_family_count" in readiness
+    assert "gate_blocker_reason_count" in readiness
+    assert readiness["gate_blocker_reason_count"] == readiness["blocker_count"]
+    assert readiness["empirical_blocker_family_count"] == 0

@@ -231,22 +231,14 @@ def assert_candidate_freshness_ready(
     required_families: Iterable[str] = REQUIRED_FRESHNESS_FAMILIES,
     translation_index_bound: bool | None = None,
     silent_source_year_relabel: bool = False,
-    candidate_calculation_authorized: bool | None = None,
-    living_cost_release_authorized: bool | None = None,
 ) -> None:
     """Refuse a future PRIVATE candidate when freshness or candidate auth is incomplete.
 
     Does not compute MSLC, Gap, Adequacy, rankings, or a national median.
-    Does not require living_cost_release_authorized (publication is a later gate).
-    Authorization defaults to the canonical config record when the flag is omitted.
+    Authorization is read only from config/definitions.yml.
     """
-    del living_cost_release_authorized  # publication is a separate owner permission
     del project_cost_year
-    authorized = (
-        candidate_calculation_authorized
-        if candidate_calculation_authorized is not None
-        else globals()["candidate_calculation_authorized"]()
-    )
+    authorized = candidate_calculation_authorized()
     if not authorized:
         raise FreshnessGateError(
             "candidate_calculation_authorized is false; private candidate refused"
@@ -299,14 +291,9 @@ def assert_candidate_freshness_ready(
             raise FreshnessGateError(f"{family}: passing evidence state lacks concrete provenance")
 
 
-def assert_public_release_authorized(*, living_cost_release_authorized: bool | None = None) -> None:
+def assert_public_release_authorized() -> None:
     """Public headline publication requires the separate release authorization."""
-    authorized = (
-        living_cost_release_authorized
-        if living_cost_release_authorized is not None
-        else globals()["living_cost_release_authorized"]()
-    )
-    if not authorized:
+    if not living_cost_release_authorized():
         raise FreshnessGateError(
             "living_cost_release_authorized is false; public headline publication refused"
         )
@@ -361,6 +348,13 @@ def evaluate_freshness_readiness(
         and candidate_inputs_bound
         and not blocking
     )
+    empirical_families = sorted(
+        {
+            family
+            for family, check in checks.items()
+            if check.retrieval_validation_status in BLOCKING_EVIDENCE
+        }
+    )
     return {
         "ready_for_private_candidate": ready,
         "candidate_calculation_authorized": authorized,
@@ -369,6 +363,9 @@ def evaluate_freshness_readiness(
         "silent_source_year_relabel": silent_source_year_relabel,
         "candidate_inputs_bound": candidate_inputs_bound,
         "blocker_count": len(blocking),
+        "gate_blocker_reason_count": len(blocking),
+        "empirical_blocker_family_count": len(empirical_families),
+        "empirical_blocker_families": empirical_families,
         "blockers": blocking,
         "headline_calculated": False,
         "authorization_source": "config/definitions.yml",
@@ -409,6 +406,9 @@ def write_candidate_freshness_report(metadata_dir: Path) -> dict[str, Any]:
             "source_gap": gaps,
             "timestamps_from_hardcoded_snapshot": False,
         },
+        "status_by_family": {
+            family: check.freshness_check_status for family, check in checks.items()
+        },
         "notes": {
             "health_oop": (
                 "MEPS HEALTH OOP DERIVATION: RETRIEVED_UNVALIDATED. "
@@ -427,6 +427,21 @@ def write_candidate_freshness_report(metadata_dir: Path) -> dict[str, Any]:
     dest = metadata_dir / "living_cost_candidate_freshness.json"
     dest.write_text(json.dumps(payload, indent=2), encoding="utf-8")
     return payload
+
+
+def freshness_status_summary(payload: dict[str, Any]) -> str:
+    """Build status text from the actual freshness artifact. Do not invent statuses."""
+    checks = payload.get("checks") or {}
+    lines = [
+        f"ready_for_private_candidate={payload.get('ready_for_private_candidate')}",
+        f"empirical_blocker_family_count={payload.get('empirical_blocker_family_count')}",
+        f"gate_blocker_reason_count={payload.get('gate_blocker_reason_count', payload.get('blocker_count'))}",
+    ]
+    for family in REQUIRED_FRESHNESS_FAMILIES:
+        check = checks.get(family) or {}
+        status = check.get("freshness_check_status", "CHECK_NOT_PERFORMED")
+        lines.append(f"{family}: {status}")
+    return "\n".join(lines)
 
 
 BLOCKER_NOTES: dict[str, str] = {

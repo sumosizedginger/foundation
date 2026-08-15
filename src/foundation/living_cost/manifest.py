@@ -56,7 +56,7 @@ BLS_CE_LANDING = "https://www.bls.gov/cex/pumd_data.htm"
 BEA_RPP_LANDING = (
     "https://www.bea.gov/data/prices-inflation/regional-price-parities-state-and-metro-area"
 )
-NAIC_LANDING = "https://content.naic.org/research-actuarial-services/auto-insurance-database-report"
+NAIC_LANDING = "https://content.naic.org/publications"
 
 
 STATIC_SOURCES: list[StaticSourceDef] = [
@@ -159,9 +159,9 @@ STATIC_SOURCES: list[StaticSourceDef] = [
         dataset="USDA Food Plans: Monthly Cost of Food Reports (Low-Cost Plan)",
         reference_year=2024,
         release="USDA/CNPP monthly Cost of Food reports",
-        url="https://www.fna.usda.gov/sites/default/files/resource-files/usda-lowcostplan-sept2007-present.xlsx",
+        url="https://www.fns.usda.gov/sites/default/files/resource-files/usda-lowcostplan-sept2007-present.xlsx",
         licensing_notes="U.S. Government Work (Public Domain)",
-        landing_page="https://www.fna.usda.gov/research/cnpp/usda-food-plans/cost-food-monthly-reports",
+        landing_page=USDA_FOOD_LANDING,
         parser_identifier="foundation.sources.usda_food.parse_usda_official_xlsx",
         source_vintage_note="Official CNPP Low-Cost archive usda-lowcostplan-sept2007-present.xlsx.",
     ),

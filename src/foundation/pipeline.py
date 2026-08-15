@@ -61,11 +61,8 @@ def run_full_pipeline(project_root: Path | None = None) -> dict[str, Any]:
     )
 
     if living_cost_release_authorized():
-        raise RuntimeError("Living-cost publication is not authorized.")
+        raise RuntimeError("Public living-cost release engine is not implemented/approved.")
     if candidate_calculation_authorized():
-        from foundation.living_cost.freshness import assert_candidate_freshness_ready
-
-        assert_candidate_freshness_ready({}, project_cost_year=2026)
         raise RuntimeError("Private candidate assembler is not built.")
 
     living_cost_res = run_living_cost_pipeline(project_root)

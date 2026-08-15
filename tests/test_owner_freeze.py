@@ -456,13 +456,6 @@ def test_freshness_gate_exists_and_does_not_authorize_headline():
     assert gate["calculates_mslc"] is False
     with pytest.raises(FreshnessGateError, match="candidate_calculation_authorized"):
         assert_candidate_freshness_ready({}, project_cost_year=2026)
-    with pytest.raises(FreshnessGateError, match="not performed"):
-        assert_candidate_freshness_ready(
-            {},
-            project_cost_year=2026,
-            candidate_calculation_authorized=True,
-            translation_index_bound=True,
-        )
     checks = {
         family: FreshnessCheck(
             source_id=family,
@@ -475,16 +468,17 @@ def test_freshness_gate_exists_and_does_not_authorize_headline():
         )
         for family in REQUIRED_FRESHNESS_FAMILIES
     }
-    with pytest.raises(FreshnessGateError, match="CHECK_FAILED|SOURCE_GAP"):
+    with pytest.raises(FreshnessGateError, match="candidate_calculation_authorized"):
         assert_candidate_freshness_ready(
             checks,
             project_cost_year=2026,
-            candidate_calculation_authorized=True,
             translation_index_bound=True,
         )
 
 
-def test_candidate_authorization_is_separate_from_public_release(tmp_path: Path):
+def test_candidate_authorization_is_separate_from_public_release(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
     from foundation.living_cost.freshness import (
         REQUIRED_FRESHNESS_FAMILIES,
         FreshnessCheck,
@@ -528,20 +522,25 @@ def test_candidate_authorization_is_separate_from_public_release(tmp_path: Path)
         assert_candidate_freshness_ready(
             ready,
             project_cost_year=2026,
-            candidate_calculation_authorized=False,
             translation_index_bound=True,
         )
+    from foundation.config import definitions as real_defs
+
+    base = real_defs()
+    living = dict(base["living_cost"])
+    living["candidate_calculation_authorized"] = True
+    living["release_authorized"] = False
+    monkeypatch.setattr("foundation.config.definitions", lambda: {**base, "living_cost": living})
     # Candidate true + freshness ready may allow a future PRIVATE candidate.
     assert_candidate_freshness_ready(
         ready,
         project_cost_year=2026,
-        candidate_calculation_authorized=True,
-        living_cost_release_authorized=False,
         translation_index_bound=True,
     )
     # Public publication still blocked.
     with pytest.raises(FreshnessGateError, match="living_cost_release_authorized"):
-        assert_public_release_authorized(living_cost_release_authorized=False)
+        assert_public_release_authorized()
+    monkeypatch.undo()
     report = write_candidate_freshness_report(tmp_path)
     assert report["ready_for_private_candidate"] is False
     assert report["candidate_calculation_authorized"] is False

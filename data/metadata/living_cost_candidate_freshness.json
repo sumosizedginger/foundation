@@ -1,6 +1,6 @@
 {
   "report_type": "living_cost_candidate_freshness",
-  "generated_at": "2026-08-15T04:18:29Z",
+  "generated_at": "2026-08-15T05:03:24Z",
   "schema_version": "2.0",
   "calculates_mslc": false,
   "required_families": [
@@ -27,7 +27,7 @@
   "checks": {
     "acs_population_weights": {
       "source_id": "acs_population_weights",
-      "latest_checked_at": "2026-08-15T04:18:28Z",
+      "latest_checked_at": "2026-08-15T05:03:23Z",
       "latest_authoritative_vintage_found": "2024",
       "selected_vintage": "2024 ACS 5-Year B01001",
       "selected_artifact": "acsdt5y2024-b01001.dat",
@@ -81,7 +81,7 @@
     },
     "hud_fmr": {
       "source_id": "hud_fmr",
-      "latest_checked_at": "2026-08-15T04:18:29Z",
+      "latest_checked_at": "2026-08-15T05:03:24Z",
       "latest_authoritative_vintage_found": "FY2024 / FY2026",
       "selected_vintage": "FY2024 / FY2026",
       "selected_artifact": "FMR2024_final_revised.xlsx / FY26_FMRs_revised.xlsx",
@@ -120,13 +120,13 @@
     },
     "usda_food": {
       "source_id": "usda_food",
-      "latest_checked_at": "2026-08-15T04:18:29Z",
-      "latest_authoritative_vintage_found": "USDA Low-Cost / Thrifty monthly archives",
-      "selected_vintage": "USDA official monthly archives (2024 full year; 2026 YTD if incomplete)",
-      "selected_artifact": "usda-lowcostplan-sept2007-present.xlsx / usda-thriftyplan-june2021-present.xlsx",
+      "latest_checked_at": "2026-08-15T05:03:24Z",
+      "latest_authoritative_vintage_found": "USDA official monthly archives (2024 historical; 2026 YTD)",
+      "selected_vintage": "USDA Low-Cost official monthly archive; 2026 uses official YTD months",
+      "selected_artifact": "usda-lowcostplan-sept2007-present.xlsx",
       "newer_data_exists": false,
       "retrieval_validation_status": "MODELED_FROM_MEASURED_INPUTS",
-      "reason_if_not_refreshed": "Official USDA Cost of Food archive page checked. Canonical plan is Low-Cost; Thrifty is sensitivity. Months below are from parsed official workbook rows, not a label.",
+      "reason_if_not_refreshed": "Official FNS Cost of Food archive page checked. Workbook URLs are parsed hrefs, not constructed hostnames. 2024 historical months and 2026 YTD months are stored separately. 2024 full-year months are not used as 2026 months.",
       "freshness_check_status": "VERIFIED_CURRENT",
       "publisher": "USDA Center for Nutrition Policy and Promotion",
       "landing_url": "https://www.fns.usda.gov/cnpp/usda-food-plans-cost-food-monthly-reports",
@@ -134,7 +134,7 @@
         {
           "artifact_id": "usda-lowcostplan-sept2007-present.xlsx",
           "filename": "usda-lowcostplan-sept2007-present.xlsx",
-          "url": "https://www.fna.usda.gov/sites/default/files/resource-files/usda-lowcostplan-sept2007-present.xlsx",
+          "url": "https://www.fns.usda.gov/sites/default/files/resource-files/usda-lowcostplan-sept2007-present.xlsx",
           "sha256": "3944b5dea8cb966fe85acbfd795bb4ec79c0f63a63141abd63913712e0698e86",
           "retrieved_at": "2026-08-14T17:30:05+00:00",
           "validation_status": "VALIDATED"
@@ -142,7 +142,7 @@
         {
           "artifact_id": "usda-thriftyplan-june2021-present.xlsx",
           "filename": "usda-thriftyplan-june2021-present.xlsx",
-          "url": "https://www.fna.usda.gov/sites/default/files/resource-files/usda-thriftyplan-june2021-present.xlsx",
+          "url": "https://www.fns.usda.gov/sites/default/files/resource-files/usda-thriftyplan-june2021-present.xlsx",
           "sha256": "ca4a32b7001f50f5a73ac32a8d07badd2937ec3d801e018f7ac7b5300b1fc164",
           "retrieved_at": "2026-08-14T20:18:57+00:00",
           "validation_status": "VALIDATED"
@@ -150,7 +150,7 @@
         {
           "artifact_id": "usda-alaska-june2023-present.xlsx",
           "filename": "usda-alaska-june2023-present.xlsx",
-          "url": "https://www.fna.usda.gov/sites/default/files/resource-files/usda-alaska-june2023-present.xlsx",
+          "url": "https://www.fns.usda.gov/sites/default/files/resource-files/usda-alaska-june2023-present.xlsx",
           "sha256": "67c1f7ad894b44b84f8a57b8971b16d093fa9d673be689a3c0056174dc0ddd13",
           "retrieved_at": "2026-08-14T20:18:58+00:00",
           "validation_status": "VALIDATED"
@@ -158,7 +158,7 @@
         {
           "artifact_id": "usda-hawaii-june2023-present.xlsx",
           "filename": "usda-hawaii-june2023-present.xlsx",
-          "url": "https://www.fna.usda.gov/sites/default/files/resource-files/usda-hawaii-june2023-present.xlsx",
+          "url": "https://www.fns.usda.gov/sites/default/files/resource-files/usda-hawaii-june2023-present.xlsx",
           "sha256": "9043d9da254c237dab20710f8f37b57682a9800da0d3adddce70a7fe0d39096d",
           "retrieved_at": "2026-08-14T20:18:59+00:00",
           "validation_status": "VALIDATED"
@@ -172,120 +172,215 @@
         "February",
         "March",
         "April",
-        "May",
-        "June",
-        "July",
-        "August",
-        "September",
-        "October",
-        "November",
-        "December"
+        "May"
       ],
-      "month_count": 12,
+      "month_count": 5,
       "first_month": "January",
-      "last_month": "December",
+      "last_month": "May",
       "extra": {
-        "plans": {
-          "low_cost": {
-            "filename": "usda-lowcostplan-sept2007-present.xlsx",
-            "sha256": "3944b5dea8cb966fe85acbfd795bb4ec79c0f63a63141abd63913712e0698e86",
-            "retrieved_at": "2026-08-14T17:30:05+00:00",
-            "months_included": [
-              "January",
-              "February",
-              "March",
-              "April",
-              "May",
-              "June",
-              "July",
-              "August",
-              "September",
-              "October",
-              "November",
-              "December"
-            ],
-            "month_count": 12,
-            "first_month": "January",
-            "last_month": "December"
-          },
-          "thrifty": {
-            "filename": "usda-thriftyplan-june2021-present.xlsx",
-            "sha256": "ca4a32b7001f50f5a73ac32a8d07badd2937ec3d801e018f7ac7b5300b1fc164",
-            "retrieved_at": "2026-08-14T20:18:57+00:00",
-            "months_included": [
-              "January",
-              "February",
-              "March",
-              "April",
-              "May",
-              "June",
-              "July",
-              "August",
-              "September",
-              "October",
-              "November",
-              "December"
-            ],
-            "month_count": 12,
-            "first_month": "January",
-            "last_month": "December"
-          },
-          "alaska": {
-            "filename": "usda-alaska-june2023-present.xlsx",
-            "sha256": "67c1f7ad894b44b84f8a57b8971b16d093fa9d673be689a3c0056174dc0ddd13",
-            "retrieved_at": "2026-08-14T20:18:58+00:00",
-            "months_included": [
-              "January",
-              "February",
-              "March",
-              "April",
-              "May",
-              "June",
-              "July",
-              "August",
-              "September",
-              "October",
-              "November",
-              "December"
-            ],
-            "month_count": 12,
-            "first_month": "January",
-            "last_month": "December"
-          },
-          "hawaii": {
-            "filename": "usda-hawaii-june2023-present.xlsx",
-            "sha256": "9043d9da254c237dab20710f8f37b57682a9800da0d3adddce70a7fe0d39096d",
-            "retrieved_at": "2026-08-14T20:18:59+00:00",
-            "months_included": [
-              "January",
-              "February",
-              "March",
-              "April",
-              "May",
-              "June",
-              "July",
-              "August",
-              "September",
-              "October",
-              "November",
-              "December"
-            ],
-            "month_count": 12,
-            "first_month": "January",
-            "last_month": "December"
+        "historical_2024": {
+          "source_year": 2024,
+          "months_included": [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December"
+          ],
+          "month_count": 12,
+          "first_month": "January",
+          "last_month": "December",
+          "plans": {
+            "low_cost": {
+              "filename": "usda-lowcostplan-sept2007-present.xlsx",
+              "sha256": "3944b5dea8cb966fe85acbfd795bb4ec79c0f63a63141abd63913712e0698e86",
+              "retrieved_at": "2026-08-14T17:30:05+00:00",
+              "months_included": [
+                "January",
+                "February",
+                "March",
+                "April",
+                "May",
+                "June",
+                "July",
+                "August",
+                "September",
+                "October",
+                "November",
+                "December"
+              ],
+              "month_count": 12,
+              "first_month": "January",
+              "last_month": "December"
+            },
+            "thrifty": {
+              "filename": "usda-thriftyplan-june2021-present.xlsx",
+              "sha256": "ca4a32b7001f50f5a73ac32a8d07badd2937ec3d801e018f7ac7b5300b1fc164",
+              "retrieved_at": "2026-08-14T20:18:57+00:00",
+              "months_included": [
+                "January",
+                "February",
+                "March",
+                "April",
+                "May",
+                "June",
+                "July",
+                "August",
+                "September",
+                "October",
+                "November",
+                "December"
+              ],
+              "month_count": 12,
+              "first_month": "January",
+              "last_month": "December"
+            },
+            "alaska": {
+              "filename": "usda-alaska-june2023-present.xlsx",
+              "sha256": "67c1f7ad894b44b84f8a57b8971b16d093fa9d673be689a3c0056174dc0ddd13",
+              "retrieved_at": "2026-08-14T20:18:58+00:00",
+              "months_included": [
+                "January",
+                "February",
+                "March",
+                "April",
+                "May",
+                "June",
+                "July",
+                "August",
+                "September",
+                "October",
+                "November",
+                "December"
+              ],
+              "month_count": 12,
+              "first_month": "January",
+              "last_month": "December"
+            },
+            "hawaii": {
+              "filename": "usda-hawaii-june2023-present.xlsx",
+              "sha256": "9043d9da254c237dab20710f8f37b57682a9800da0d3adddce70a7fe0d39096d",
+              "retrieved_at": "2026-08-14T20:18:59+00:00",
+              "months_included": [
+                "January",
+                "February",
+                "March",
+                "April",
+                "May",
+                "June",
+                "July",
+                "August",
+                "September",
+                "October",
+                "November",
+                "December"
+              ],
+              "month_count": 12,
+              "first_month": "January",
+              "last_month": "December"
+            }
           }
-        }
+        },
+        "current_2026": {
+          "source_year": 2026,
+          "months_included": [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May"
+          ],
+          "month_count": 5,
+          "first_month": "January",
+          "last_month": "May",
+          "plans": {
+            "low_cost": {
+              "filename": "usda-lowcostplan-sept2007-present.xlsx",
+              "sha256": "3944b5dea8cb966fe85acbfd795bb4ec79c0f63a63141abd63913712e0698e86",
+              "retrieved_at": "2026-08-14T17:30:05+00:00",
+              "months_included": [
+                "January",
+                "February",
+                "March",
+                "April",
+                "May"
+              ],
+              "month_count": 5,
+              "first_month": "January",
+              "last_month": "May"
+            },
+            "thrifty": {
+              "filename": "usda-thriftyplan-june2021-present.xlsx",
+              "sha256": "ca4a32b7001f50f5a73ac32a8d07badd2937ec3d801e018f7ac7b5300b1fc164",
+              "retrieved_at": "2026-08-14T20:18:57+00:00",
+              "months_included": [
+                "January",
+                "February",
+                "March",
+                "April",
+                "May"
+              ],
+              "month_count": 5,
+              "first_month": "January",
+              "last_month": "May"
+            },
+            "alaska": {
+              "filename": "usda-alaska-june2023-present.xlsx",
+              "sha256": "67c1f7ad894b44b84f8a57b8971b16d093fa9d673be689a3c0056174dc0ddd13",
+              "retrieved_at": "2026-08-14T20:18:58+00:00",
+              "months_included": [
+                "January",
+                "February",
+                "March",
+                "April",
+                "May"
+              ],
+              "month_count": 5,
+              "first_month": "January",
+              "last_month": "May"
+            },
+            "hawaii": {
+              "filename": "usda-hawaii-june2023-present.xlsx",
+              "sha256": "9043d9da254c237dab20710f8f37b57682a9800da0d3adddce70a7fe0d39096d",
+              "retrieved_at": "2026-08-14T20:18:59+00:00",
+              "months_included": [
+                "January",
+                "February",
+                "March",
+                "April",
+                "May"
+              ],
+              "month_count": 5,
+              "first_month": "January",
+              "last_month": "May"
+            }
+          }
+        },
+        "official_hrefs": {
+          "usda-thriftyplan-june2021-present.xlsx": "https://www.fns.usda.gov/sites/default/files/resource-files/usda-thriftyplan-june2021-present.xlsx",
+          "usda-alaska-june2023-present.xlsx": "https://www.fns.usda.gov/sites/default/files/resource-files/usda-alaska-june2023-present.xlsx",
+          "usda-hawaii-june2023-present.xlsx": "https://www.fns.usda.gov/sites/default/files/resource-files/usda-hawaii-june2023-present.xlsx",
+          "usda-lowcostplan-sept2007-present.xlsx": "https://www.fns.usda.gov/sites/default/files/resource-files/usda-lowcostplan-sept2007-present.xlsx"
+        },
+        "substituted_2024_for_2026": false
       }
     },
     "cms_marketplace_sbe": {
       "source_id": "cms_marketplace_sbe",
-      "latest_checked_at": "2026-08-15T04:18:28Z",
-      "latest_authoritative_vintage_found": "PY2024 / PY2026",
-      "selected_vintage": "PY2024 / PY2026 Exchange PUF + year-specific SBE",
+      "latest_checked_at": "2026-08-15T05:03:24Z",
+      "latest_authoritative_vintage_found": "PY2024 / PY2026 Exchange PUF + standalone SBE",
+      "selected_vintage": "PY2024 / PY2026 federal Exchange PUF + year-specific standalone SBE",
       "selected_artifact": "cms_rate_puf / plan_puf / service_area_puf + SBE archives",
       "newer_data_exists": false,
       "retrieval_validation_status": "MODELED_FROM_MEASURED_INPUTS",
-      "reason_if_not_refreshed": "Official CMS Marketplace PUF page checked (https://www.cms.gov/marketplace/resources/data/public-use-files). SBE listing: https://www.cms.gov/marketplace/resources/data/state-based-public-use-files. Selected artifacts listed with hashes from the current coverage retrieve record. Not a published healthcare headline.",
+      "reason_if_not_refreshed": "Combined CMS family requires BOTH the federal Exchange PUF listing and the standalone SBE QHP PUF listing. SBE-FP states use the federal Exchange PUF and are not treated as standalone SBE archives. federal=VERIFIED_CURRENT; sbe=VERIFIED_CURRENT.",
       "freshness_check_status": "VERIFIED_CURRENT",
       "publisher": "Centers for Medicare & Medicaid Services",
       "landing_url": "https://www.cms.gov/marketplace/resources/data/public-use-files",
@@ -715,14 +810,49 @@
       "first_month": null,
       "last_month": null,
       "extra": {
-        "sbe_landing": "https://www.cms.gov/marketplace/resources/data/state-based-public-use-files",
-        "has_2024": true,
-        "has_2026": true
+        "federal_exchange": {
+          "kind": "federal_exchange",
+          "landing_url": "https://www.cms.gov/marketplace/resources/data/public-use-files",
+          "checked_at": "2026-08-15T05:03:23Z",
+          "status": "VERIFIED_CURRENT",
+          "plan_years_found": [
+            2020,
+            2021,
+            2022,
+            2023,
+            2024,
+            2025,
+            2026
+          ],
+          "has_2024": true,
+          "has_2026": true,
+          "has_2027": false,
+          "error": null
+        },
+        "sbe": {
+          "kind": "sbe",
+          "landing_url": "https://www.cms.gov/marketplace/resources/data/state-based-public-use-files",
+          "checked_at": "2026-08-15T05:03:24Z",
+          "status": "VERIFIED_CURRENT",
+          "plan_years_found": [
+            2020,
+            2021,
+            2022,
+            2023,
+            2024,
+            2025,
+            2026
+          ],
+          "has_2024": true,
+          "has_2026": true,
+          "has_2027": false,
+          "error": null
+        }
       }
     },
     "meps_full_year_consolidated": {
       "source_id": "meps_full_year_consolidated",
-      "latest_checked_at": "2026-08-15T04:18:29Z",
+      "latest_checked_at": "2026-08-15T05:03:24Z",
       "latest_authoritative_vintage_found": "HC-251 / 2023",
       "selected_vintage": "HC-251 / 2023",
       "selected_artifact": "h251dat.zip",
@@ -763,13 +893,13 @@
     },
     "nhts_mileage": {
       "source_id": "nhts_mileage",
-      "latest_checked_at": "2026-08-15T04:18:29Z",
+      "latest_checked_at": "2026-08-15T05:03:24Z",
       "latest_authoritative_vintage_found": "2022 NHTS V2.1",
       "selected_vintage": "2022 NHTS V2.1",
       "selected_artifact": "nhts_2022_csv.zip",
       "newer_data_exists": null,
       "retrieval_validation_status": "VALIDATED",
-      "reason_if_not_refreshed": "NHTS page retrieved but 2022 survey vintage was not found.",
+      "reason_if_not_refreshed": "Official NHTS page(s) retrieved but 2022 survey vintage was not found. Primary error=None.",
       "freshness_check_status": "CHECK_FAILED",
       "publisher": "FHWA / ORNL NHTS",
       "landing_url": "https://nhts.ornl.gov/downloads",
@@ -794,7 +924,7 @@
     },
     "epa_vehicle": {
       "source_id": "epa_vehicle",
-      "latest_checked_at": "2026-08-15T04:18:28Z",
+      "latest_checked_at": "2026-08-15T05:03:24Z",
       "latest_authoritative_vintage_found": "EPA/DOE fueleconomy.gov vehicles.csv.zip",
       "selected_vintage": "EPA/DOE fueleconomy.gov vehicles.csv.zip",
       "selected_artifact": "epa_fueleconomy_vehicles.csv.zip",
@@ -825,7 +955,7 @@
     },
     "eia_gasoline": {
       "source_id": "eia_gasoline",
-      "latest_checked_at": "2026-08-15T04:18:28Z",
+      "latest_checked_at": "2026-08-15T05:03:24Z",
       "latest_authoritative_vintage_found": "EIA weekly retail gasoline pswrgvwall.xls",
       "selected_vintage": "EIA weekly retail gasoline",
       "selected_artifact": "pswrgvwall.xls",
@@ -856,28 +986,28 @@
     },
     "naic_auto_insurance": {
       "source_id": "naic_auto_insurance",
-      "latest_checked_at": "2026-08-15T04:18:28Z",
-      "latest_authoritative_vintage_found": "2022/2023 Auto Insurance Database Report",
-      "selected_vintage": "2022/2023 Auto Insurance Database Report",
+      "latest_checked_at": "2026-08-15T05:03:24Z",
+      "latest_authoritative_vintage_found": "Auto Insurance Database Report",
+      "selected_vintage": "Auto Insurance Database Report",
       "selected_artifact": "publication-aut-pb-auto-insurance-database.pdf",
-      "newer_data_exists": null,
+      "newer_data_exists": false,
       "retrieval_validation_status": "RETRIEVED_UNVALIDATED",
-      "reason_if_not_refreshed": "NAIC Auto Insurance Database Report page could not be retrieved: 404 Client Error: Not Found for url: https://content.naic.org/research-actuarial-services/auto-insurance-database-report",
-      "freshness_check_status": "CHECK_FAILED",
-      "publisher": "NAIC",
-      "landing_url": "https://content.naic.org/research-actuarial-services/auto-insurance-database-report",
+      "reason_if_not_refreshed": "Official NAIC Publications listing checked. Latest report identifier parsed from the page (not hard-coded). PDF retrieve exists. State-table extraction is not a validated numeric series.",
+      "freshness_check_status": "VERIFIED_CURRENT",
+      "publisher": "National Association of Insurance Commissioners",
+      "landing_url": "https://content.naic.org/publications",
       "selected_artifacts": [
         {
           "artifact_id": "publication-aut-pb-auto-insurance-database.pdf",
           "filename": "publication-aut-pb-auto-insurance-database.pdf",
-          "url": "https://content.naic.org/research-actuarial-services/auto-insurance-database-report",
+          "url": "https://content.naic.org/publications",
           "sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
           "retrieved_at": "2026-08-14T20:19:04+00:00",
           "validation_status": "RETRIEVED_UNVALIDATED"
         }
       ],
-      "retrieved_at": null,
-      "transformation_method": null,
+      "retrieved_at": "2026-08-14T20:19:04+00:00",
+      "transformation_method": "state-table extraction pending validation",
       "input_evidence_status": "RETRIEVED_UNVALIDATED",
       "months_included": null,
       "month_count": null,
@@ -887,7 +1017,7 @@
     },
     "bls_ce": {
       "source_id": "bls_ce",
-      "latest_checked_at": "2026-08-15T04:18:29Z",
+      "latest_checked_at": "2026-08-15T05:03:24Z",
       "latest_authoritative_vintage_found": "2024 Interview PUMD",
       "selected_vintage": "2024 Interview PUMD",
       "selected_artifact": "intrvw24.zip",
@@ -918,7 +1048,7 @@
     },
     "fcc_broadband": {
       "source_id": "fcc_broadband",
-      "latest_checked_at": "2026-08-15T04:18:29Z",
+      "latest_checked_at": "2026-08-15T05:03:24Z",
       "latest_authoritative_vintage_found": null,
       "selected_vintage": null,
       "selected_artifact": null,
@@ -940,7 +1070,7 @@
     },
     "mobile_price": {
       "source_id": "mobile_price",
-      "latest_checked_at": "2026-08-15T04:18:28Z",
+      "latest_checked_at": "2026-08-15T05:03:24Z",
       "latest_authoritative_vintage_found": null,
       "selected_vintage": null,
       "selected_artifact": null,
@@ -962,14 +1092,14 @@
     },
     "bea_rpp": {
       "source_id": "bea_rpp",
-      "latest_checked_at": "2026-08-15T04:18:29Z",
-      "latest_authoritative_vintage_found": "BEA SARPP All-items",
-      "selected_vintage": "BEA SARPP All-items",
+      "latest_checked_at": "2026-08-15T05:03:24Z",
+      "latest_authoritative_vintage_found": "BEA SARPP All-items 2024 / current release February 19, 2026",
+      "selected_vintage": "BEA SARPP All-items 2024 / current release February 19, 2026",
       "selected_artifact": "SARPP.zip",
-      "newer_data_exists": null,
+      "newer_data_exists": false,
       "retrieval_validation_status": "VALIDATED",
-      "reason_if_not_refreshed": "BEA RPP landing page could not be retrieved: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))",
-      "freshness_check_status": "CHECK_FAILED",
+      "reason_if_not_refreshed": "Official BEA RPP landing checked. Current release='February 19, 2026'; Next release=None. Selected artifact SARPP.zip. 2026 cost year reuses 2024 as LATEST_AVAILABLE and does not relabel the source year.",
+      "freshness_check_status": "VERIFIED_CURRENT",
       "publisher": "U.S. Bureau of Economic Analysis",
       "landing_url": "https://www.bea.gov/data/prices-inflation/regional-price-parities-state-and-metro-area",
       "selected_artifacts": [
@@ -982,18 +1112,21 @@
           "validation_status": "VALIDATED"
         }
       ],
-      "retrieved_at": null,
-      "transformation_method": null,
+      "retrieved_at": "2026-08-14T20:18:54+00:00",
+      "transformation_method": "LATEST_AVAILABLE All-items state RPP; source year not relabeled",
       "input_evidence_status": "VALIDATED",
       "months_included": null,
       "month_count": null,
       "first_month": null,
       "last_month": null,
-      "extra": null
+      "extra": {
+        "current_release": "February 19, 2026",
+        "next_release": null
+      }
     },
     "federal_tax_law": {
       "source_id": "federal_tax_law",
-      "latest_checked_at": "2026-08-15T04:18:29Z",
+      "latest_checked_at": "2026-08-15T05:03:24Z",
       "latest_authoritative_vintage_found": "code tables [2024, 2026]",
       "selected_vintage": "2024 and 2026 statutory tables in code",
       "selected_artifact": null,
@@ -1020,7 +1153,7 @@
     },
     "state_tax_law": {
       "source_id": "state_tax_law",
-      "latest_checked_at": "2026-08-15T04:18:29Z",
+      "latest_checked_at": "2026-08-15T05:03:24Z",
       "latest_authoritative_vintage_found": "2024 and 2026 schedules in code",
       "selected_vintage": "2024 and 2026 schedules in code",
       "selected_artifact": null,
@@ -1042,7 +1175,7 @@
     },
     "local_tax_law": {
       "source_id": "local_tax_law",
-      "latest_checked_at": "2026-08-15T04:18:29Z",
+      "latest_checked_at": "2026-08-15T05:03:24Z",
       "latest_authoritative_vintage_found": "MD county / NYC / Philadelphia verified; Harris County TX verified no local EIT",
       "selected_vintage": "partial verified inventory",
       "selected_artifact": null,
@@ -1064,7 +1197,7 @@
     },
     "vehicle_registration": {
       "source_id": "vehicle_registration",
-      "latest_checked_at": "2026-08-15T04:18:29Z",
+      "latest_checked_at": "2026-08-15T05:03:24Z",
       "latest_authoritative_vintage_found": null,
       "selected_vintage": null,
       "selected_artifact": null,
@@ -1086,7 +1219,7 @@
     },
     "vehicle_replacement": {
       "source_id": "vehicle_replacement",
-      "latest_checked_at": "2026-08-15T04:18:29Z",
+      "latest_checked_at": "2026-08-15T05:03:24Z",
       "latest_authoritative_vintage_found": null,
       "selected_vintage": null,
       "selected_artifact": null,
@@ -1108,7 +1241,7 @@
     },
     "od010_price_index": {
       "source_id": "od010_price_index",
-      "latest_checked_at": "2026-08-15T04:18:29Z",
+      "latest_checked_at": "2026-08-15T05:03:24Z",
       "latest_authoritative_vintage_found": null,
       "selected_vintage": null,
       "selected_artifact": null,
@@ -1137,14 +1270,29 @@
   "translation_index_bound": false,
   "silent_source_year_relabel": false,
   "candidate_inputs_bound": false,
-  "blocker_count": 26,
+  "blocker_count": 24,
+  "gate_blocker_reason_count": 24,
+  "empirical_blocker_family_count": 12,
+  "empirical_blocker_families": [
+    "bls_ce",
+    "epa_vehicle",
+    "fcc_broadband",
+    "federal_tax_law",
+    "local_tax_law",
+    "meps_full_year_consolidated",
+    "mobile_price",
+    "naic_auto_insurance",
+    "od010_price_index",
+    "state_tax_law",
+    "vehicle_registration",
+    "vehicle_replacement"
+  ],
   "blockers": [
     "OD010_TRANSLATION_INDEX_NOT_BOUND",
     "REQUIRED_CANDIDATE_INPUTS_NOT_BOUND",
     "meps_full_year_consolidated:RETRIEVED_UNVALIDATED",
     "nhts_mileage:CHECK_FAILED",
     "epa_vehicle:RETRIEVED_UNVALIDATED",
-    "naic_auto_insurance:CHECK_FAILED",
     "naic_auto_insurance:RETRIEVED_UNVALIDATED",
     "bls_ce:CHECK_FAILED",
     "bls_ce:INCOMPLETE_PROVENANCE",
@@ -1152,7 +1300,6 @@
     "fcc_broadband:SOURCE_GAP",
     "mobile_price:SOURCE_GAP",
     "mobile_price:SOURCE_GAP",
-    "bea_rpp:CHECK_FAILED",
     "federal_tax_law:MANUAL_VERIFICATION_REQUIRED",
     "federal_tax_law:INVENTORY_NOT_VALIDATED",
     "state_tax_law:MANUAL_VERIFICATION_REQUIRED",
@@ -1176,7 +1323,9 @@
       "cms_marketplace_sbe",
       "meps_full_year_consolidated",
       "epa_vehicle",
-      "eia_gasoline"
+      "eia_gasoline",
+      "naic_auto_insurance",
+      "bea_rpp"
     ],
     "manual_verification_required": [
       "federal_tax_law",
@@ -1186,10 +1335,8 @@
     ],
     "check_failed": [
       "nhts_mileage",
-      "naic_auto_insurance",
       "bls_ce",
-      "fcc_broadband",
-      "bea_rpp"
+      "fcc_broadband"
     ],
     "source_gap": [
       "mobile_price",
@@ -1197,6 +1344,27 @@
       "vehicle_replacement"
     ],
     "timestamps_from_hardcoded_snapshot": false
+  },
+  "status_by_family": {
+    "acs_population_weights": "VERIFIED_CURRENT",
+    "hud_fmr": "VERIFIED_CURRENT",
+    "usda_food": "VERIFIED_CURRENT",
+    "cms_marketplace_sbe": "VERIFIED_CURRENT",
+    "meps_full_year_consolidated": "VERIFIED_CURRENT",
+    "nhts_mileage": "CHECK_FAILED",
+    "epa_vehicle": "VERIFIED_CURRENT",
+    "eia_gasoline": "VERIFIED_CURRENT",
+    "naic_auto_insurance": "VERIFIED_CURRENT",
+    "bls_ce": "CHECK_FAILED",
+    "fcc_broadband": "CHECK_FAILED",
+    "mobile_price": "SOURCE_GAP",
+    "bea_rpp": "VERIFIED_CURRENT",
+    "federal_tax_law": "MANUAL_VERIFICATION_REQUIRED",
+    "state_tax_law": "MANUAL_VERIFICATION_REQUIRED",
+    "local_tax_law": "MANUAL_VERIFICATION_REQUIRED",
+    "vehicle_registration": "SOURCE_GAP",
+    "vehicle_replacement": "SOURCE_GAP",
+    "od010_price_index": "MANUAL_VERIFICATION_REQUIRED"
   },
   "notes": {
     "health_oop": "MEPS HEALTH OOP DERIVATION: RETRIEVED_UNVALIDATED. Do not claim healthcare OOP ready merely because HC-251 was downloaded.",

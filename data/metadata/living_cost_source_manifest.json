@@ -150,8 +150,8 @@
       "dataset": "USDA Food Plans: Monthly Cost of Food Reports (Low-Cost Plan)",
       "reference_year": 2024,
       "release": "USDA/CNPP monthly Cost of Food reports",
-      "url": "https://www.fna.usda.gov/sites/default/files/resource-files/usda-lowcostplan-sept2007-present.xlsx",
-      "landing_page": "https://www.fna.usda.gov/research/cnpp/usda-food-plans/cost-food-monthly-reports",
+      "url": "https://www.fns.usda.gov/sites/default/files/resource-files/usda-lowcostplan-sept2007-present.xlsx",
+      "landing_page": "https://www.fns.usda.gov/research/cnpp/usda-food-plans/cost-food-monthly-reports",
       "licensing_notes": "U.S. Government Work (Public Domain)",
       "parser_identifier": "foundation.sources.usda_food.parse_usda_official_xlsx",
       "source_vintage_note": "Official CNPP Low-Cost archive usda-lowcostplan-sept2007-present.xlsx.",
@@ -161,7 +161,7 @@
       "byte_size": 271131,
       "local_cache_filename": "usda-lowcostplan-sept2007-present.xlsx",
       "validation_status": "VALIDATED",
-      "resolved_url": "https://www.fna.usda.gov/sites/default/files/resource-files/usda-lowcostplan-sept2007-present.xlsx",
+      "resolved_url": "https://www.fns.usda.gov/sites/default/files/resource-files/usda-lowcostplan-sept2007-present.xlsx",
       "retrieval_notes": "Parsed 180 official Low-Cost monthly rows for 2024. months_included=['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'] month_count=12 first_month=January last_month=December."
     },
     {
@@ -551,7 +551,7 @@
       "byte_size": 80443,
       "local_cache_filename": "usda-thriftyplan-june2021-present.xlsx",
       "validation_status": "VALIDATED",
-      "resolved_url": "https://www.fna.usda.gov/sites/default/files/resource-files/usda-thriftyplan-june2021-present.xlsx",
+      "resolved_url": "https://www.fns.usda.gov/sites/default/files/resource-files/usda-thriftyplan-june2021-present.xlsx",
       "retrieval_notes": "Parsed 192 official Thrifty monthly rows for 2024. months_included=['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'] month_count=12 first_month=January last_month=December."
     },
     {
@@ -561,7 +561,7 @@
       "byte_size": 22129,
       "local_cache_filename": "usda-alaska-june2023-present.xlsx",
       "validation_status": "VALIDATED",
-      "resolved_url": "https://www.fna.usda.gov/sites/default/files/resource-files/usda-alaska-june2023-present.xlsx",
+      "resolved_url": "https://www.fns.usda.gov/sites/default/files/resource-files/usda-alaska-june2023-present.xlsx",
       "retrieval_notes": "Parsed 12 official monthly rows for 2024 usda_food_alaska_2024. months_included=['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'] month_count=12 first_month=January last_month=December."
     },
     {
@@ -571,7 +571,7 @@
       "byte_size": 21365,
       "local_cache_filename": "usda-hawaii-june2023-present.xlsx",
       "validation_status": "VALIDATED",
-      "resolved_url": "https://www.fna.usda.gov/sites/default/files/resource-files/usda-hawaii-june2023-present.xlsx",
+      "resolved_url": "https://www.fns.usda.gov/sites/default/files/resource-files/usda-hawaii-june2023-present.xlsx",
       "retrieval_notes": "Parsed 12 official monthly rows for 2024 usda_food_hawaii_2024. months_included=['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'] month_count=12 first_month=January last_month=December."
     },
     {
@@ -911,7 +911,7 @@
       "byte_size": 271131,
       "local_cache_filename": "usda-lowcostplan-sept2007-present.xlsx",
       "validation_status": "VALIDATED",
-      "resolved_url": "https://www.fna.usda.gov/sites/default/files/resource-files/usda-lowcostplan-sept2007-present.xlsx",
+      "resolved_url": "https://www.fns.usda.gov/sites/default/files/resource-files/usda-lowcostplan-sept2007-present.xlsx",
       "retrieval_notes": "Parsed 75 official Low-Cost monthly rows for 2026. months_included=['January', 'February', 'March', 'April', 'May'] month_count=5 first_month=January last_month=May."
     },
     {
@@ -921,7 +921,7 @@
       "byte_size": 80443,
       "local_cache_filename": "usda-thriftyplan-june2021-present.xlsx",
       "validation_status": "VALIDATED",
-      "resolved_url": "https://www.fna.usda.gov/sites/default/files/resource-files/usda-thriftyplan-june2021-present.xlsx",
+      "resolved_url": "https://www.fns.usda.gov/sites/default/files/resource-files/usda-thriftyplan-june2021-present.xlsx",
       "retrieval_notes": "Parsed 80 official Thrifty monthly rows for 2026. months_included=['January', 'February', 'March', 'April', 'May'] month_count=5 first_month=January last_month=May."
     },
     {
@@ -931,7 +931,7 @@
       "byte_size": 22129,
       "local_cache_filename": "usda-alaska-june2023-present.xlsx",
       "validation_status": "VALIDATED",
-      "resolved_url": "https://www.fna.usda.gov/sites/default/files/resource-files/usda-alaska-june2023-present.xlsx",
+      "resolved_url": "https://www.fns.usda.gov/sites/default/files/resource-files/usda-alaska-june2023-present.xlsx",
       "retrieval_notes": "Parsed 5 official monthly rows for 2026 usda_food_alaska_2026. months_included=['January', 'February', 'March', 'April', 'May'] month_count=5 first_month=January last_month=May."
     },
     {
@@ -941,7 +941,7 @@
       "byte_size": 21365,
       "local_cache_filename": "usda-hawaii-june2023-present.xlsx",
       "validation_status": "VALIDATED",
-      "resolved_url": "https://www.fna.usda.gov/sites/default/files/resource-files/usda-hawaii-june2023-present.xlsx",
+      "resolved_url": "https://www.fns.usda.gov/sites/default/files/resource-files/usda-hawaii-june2023-present.xlsx",
       "retrieval_notes": "Parsed 5 official monthly rows for 2026 usda_food_hawaii_2026. months_included=['January', 'February', 'March', 'April', 'May'] month_count=5 first_month=January last_month=May."
     },
     {

@@ -51,30 +51,17 @@ def test_authorization_functions_are_separate_and_false():
         for family in REQUIRED_FRESHNESS_FAMILIES
     }
 
-    # Private candidate gate must refuse when candidate auth is false,
-    # even if every family is VALIDATED and public release is true.
+    # Private candidate gate must refuse when config candidate auth is false.
     with pytest.raises(FreshnessGateError, match="candidate_calculation_authorized"):
         assert_candidate_freshness_ready(
             ready,
             project_cost_year=2026,
-            candidate_calculation_authorized=False,
-            living_cost_release_authorized=True,
             translation_index_bound=True,
         )
 
-    # Private candidate may proceed without public-release authorization.
-    assert_candidate_freshness_ready(
-        ready,
-        project_cost_year=2026,
-        candidate_calculation_authorized=True,
-        living_cost_release_authorized=False,
-        translation_index_bound=True,
-    )
-
-    # Public release is a later, separate gate.
+    # Public release is a later, separate gate and also reads config only.
     with pytest.raises(FreshnessGateError, match="living_cost_release_authorized"):
-        assert_public_release_authorized(living_cost_release_authorized=False)
-    assert_public_release_authorized(living_cost_release_authorized=True)
+        assert_public_release_authorized()
 
 
 def test_required_families_include_vehicle_replacement_and_bea_rpp():

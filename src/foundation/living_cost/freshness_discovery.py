@@ -23,10 +23,10 @@ from foundation.living_cost.manifest import (
     CMS_PUF_LANDING,
     EIA_GAS_LANDING,
     HUD_FMR_LANDING,
-    NAIC_LANDING,
     NHTS_LANDING,
     USDA_FOOD_LANDING,
 )
+from foundation.sources.cms_marketplace import CMS_SBE_PUF_LANDING
 from foundation.sources.epa_mpg import EPA_FUELEconomy_LANDING
 from foundation.sources.fcc_urs import FCC_URS_LANDING
 from foundation.sources.meps import (
@@ -299,12 +299,49 @@ def discover_hud() -> FreshnessCheck:
     )
 
 
-def _usda_months_from_coverage() -> dict[str, Any]:
-    by_plan: dict[str, Any] = {}
-    for art in _coverage_artifacts():
+USDA_WORKBOOK_FILENAMES: dict[str, str] = {
+    "low_cost": "usda-lowcostplan-sept2007-present.xlsx",
+    "thrifty": "usda-thriftyplan-june2021-present.xlsx",
+    "alaska": "usda-alaska-june2023-present.xlsx",
+    "hawaii": "usda-hawaii-june2023-present.xlsx",
+}
+
+NAIC_PUBLICATIONS_LANDING = "https://content.naic.org/publications"
+NHTS_FHWA_LANDING = "https://www.fhwa.dot.gov/policyinformation/nhts.cfm"
+
+
+def parse_usda_official_hrefs(html: str, *, page_url: str) -> dict[str, str]:
+    """Map official workbook filenames to hrefs found on the Cost of Food page.
+
+    Does not construct guessed hostnames from filenames.
+    """
+    from urllib.parse import urljoin
+
+    found: dict[str, str] = {}
+    for href in re.findall(r"""href=["']([^"']+)["']""", html, re.IGNORECASE):
+        for filename in USDA_WORKBOOK_FILENAMES.values():
+            if filename in href and filename not in found:
+                found[filename] = urljoin(page_url, href)
+    return found
+
+
+def usda_year_month_records(
+    artifacts: list[dict[str, Any]] | None = None,
+) -> dict[int, dict[str, Any]]:
+    """Separate historical 2024 months from current 2026 YTD months.
+
+    A complete 2024 series must never overwrite or stand in for 2026 YTD.
+    """
+    by_year: dict[int, dict[str, Any]] = {}
+    rows = artifacts if artifacts is not None else _coverage_artifacts()
+    for art in rows:
         source_id = str(art.get("source_id") or "")
         if not source_id.startswith("usda_food_"):
             continue
+        year_token = source_id.rsplit("_", 1)[-1]
+        if not year_token.isdigit():
+            continue
+        year = int(year_token)
         notes = str(art.get("notes") or "")
         match = re.search(r"months_included=(\[[^\]]+\])", notes)
         months: list[str] = []
@@ -314,18 +351,25 @@ def _usda_months_from_coverage() -> dict[str, Any]:
             except (ValueError, SyntaxError, TypeError):
                 months = []
         key = source_id.replace("usda_food_", "").rsplit("_", 1)[0]
-        year_token = source_id.rsplit("_", 1)[-1]
-        filename = {
-            "low_cost": "usda-lowcostplan-sept2007-present.xlsx",
-            "thrifty": "usda-thriftyplan-june2021-present.xlsx",
-            "alaska": "usda-alaska-june2023-present.xlsx",
-            "hawaii": "usda-hawaii-june2023-present.xlsx",
-        }.get(key, source_id)
+        filename = USDA_WORKBOOK_FILENAMES.get(key, source_id)
         sidecar = _sidecar(filename)
-        # Prefer a complete 2024 year over a later YTD overwrite.
-        if key in by_plan and year_token != "2024" and by_plan[key].get("month_count", 0) >= 12:
-            continue
-        by_plan[key] = {
+        year_rec = by_year.setdefault(
+            year,
+            {
+                "source_year": year,
+                "months_included": [],
+                "month_count": 0,
+                "first_month": None,
+                "last_month": None,
+                "plans": {},
+            },
+        )
+        if key == "low_cost" and months:
+            year_rec["months_included"] = list(months)
+            year_rec["month_count"] = len(months)
+            year_rec["first_month"] = months[0] if months else None
+            year_rec["last_month"] = months[-1] if months else None
+        year_rec["plans"][key] = {
             "filename": filename,
             "sha256": art.get("sha256") or (sidecar or {}).get("sha256"),
             "retrieved_at": art.get("retrieved_at") or (sidecar or {}).get("retrieved_at"),
@@ -333,38 +377,8 @@ def _usda_months_from_coverage() -> dict[str, Any]:
             "month_count": len(months),
             "first_month": months[0] if months else None,
             "last_month": months[-1] if months else None,
-            "url": f"https://www.fna.usda.gov/sites/default/files/resource-files/{filename}",
         }
-    return by_plan
-
-
-def _usda_months_from_cache() -> dict[str, Any]:
-    from_coverage = _usda_months_from_coverage()
-    try:
-        from foundation.sources.usda_food import USDA_ARCHIVES
-    except ImportError:
-        return from_coverage
-    for key, spec in USDA_ARCHIVES.items():
-        path = CACHE_DIR / spec["filename"]
-        sidecar = _sidecar(spec["filename"])
-        existing = from_coverage.get(key, {})
-        if key not in from_coverage:
-            from_coverage[key] = {
-                "filename": spec["filename"],
-                "sha256": (sidecar or {}).get("sha256"),
-                "retrieved_at": (sidecar or {}).get("retrieved_at"),
-                "months_included": [],
-                "month_count": 0,
-                "first_month": None,
-                "last_month": None,
-                "url": f"https://www.fna.usda.gov/sites/default/files/resource-files/{spec['filename']}",
-            }
-        elif sidecar:
-            existing["sha256"] = existing.get("sha256") or sidecar.get("sha256")
-            existing["retrieved_at"] = existing.get("retrieved_at") or sidecar.get("retrieved_at")
-        if path.exists() and not from_coverage[key].get("months_included"):
-            from_coverage[key]["filename"] = spec["filename"]
-    return from_coverage
+    return by_year
 
 
 def ast_literal_list(raw: str) -> list[Any]:
@@ -378,32 +392,41 @@ def ast_literal_list(raw: str) -> list[Any]:
 
 def discover_usda() -> FreshnessCheck:
     landing = USDA_FOOD_LANDING
-    alt = "https://www.fna.usda.gov/research/cnpp/usda-food-plans/cost-food-monthly-reports"
-    plans = _usda_months_from_cache()
-    arts = [
-        _artifact_record(
-            artifact_id=spec["filename"],
-            url=spec.get("url"),
-            sha256=spec.get("sha256"),
-            retrieved_at=spec.get("retrieved_at"),
-            validation_status="VALIDATED",
-        )
-        for spec in plans.values()
-    ]
-    low = plans.get("low_cost") or {}
-    months = list(low.get("months_included") or [])
+    years = usda_year_month_records()
+    hist = years.get(2024) or {}
+    current = years.get(2026) or {}
+    current_months = list(current.get("months_included") or [])
     html = ""
     checked = ""
-    err: str | None = None
-    for url in (landing, alt):
-        try:
-            html, checked = fetch_text(url)
-            landing = url
-            err = None
-            break
-        except (OSError, RuntimeError, ValueError, requests.RequestException) as exc:
-            err = str(exc)
-    if err and not html:
+    hrefs: dict[str, str] = {}
+    try:
+        html, checked = fetch_text(landing)
+        hrefs = parse_usda_official_hrefs(html, page_url=landing)
+    except (OSError, RuntimeError, ValueError, requests.RequestException) as exc:
+        return _failed(
+            "usda_food",
+            publisher="USDA CNPP",
+            landing_url=landing,
+            evidence="MODELED_FROM_MEASURED_INPUTS",
+            vintage="USDA Low-Cost / Thrifty official archives",
+            artifact="usda-lowcostplan-sept2007-present.xlsx",
+            reason=f"USDA Cost of Food archive page could not be retrieved: {exc}",
+            extra={"historical_2024": hist, "current_2026": current},
+        )
+    arts = []
+    for filename in USDA_WORKBOOK_FILENAMES.values():
+        sidecar = _sidecar(filename)
+        official_url = hrefs.get(filename)
+        arts.append(
+            _artifact_record(
+                artifact_id=filename,
+                url=official_url,
+                sha256=(sidecar or {}).get("sha256"),
+                retrieved_at=(sidecar or {}).get("retrieved_at"),
+                validation_status="VALIDATED" if official_url else "RETRIEVED_UNVALIDATED",
+            )
+        )
+    if not hrefs:
         return _failed(
             "usda_food",
             publisher="USDA CNPP",
@@ -412,62 +435,87 @@ def discover_usda() -> FreshnessCheck:
             vintage="USDA Low-Cost / Thrifty official archives",
             artifact="usda-lowcostplan-sept2007-present.xlsx",
             artifacts=arts,
-            reason=f"USDA Cost of Food archive page could not be retrieved: {err}",
-            extra={"months_included": months, "month_count": len(months)},
+            reason="USDA page retrieved but official workbook hrefs were not parsed. No guessed URLs.",
+            extra={"historical_2024": hist, "current_2026": current},
         )
-    listed = any(
-        name in html
-        for name in (
-            "usda-lowcostplan",
-            "lowcostplan",
-            "cost-food-monthly",
-            "Cost of Food",
-        )
-    )
-    if not listed:
-        return _failed(
-            "usda_food",
-            publisher="USDA CNPP",
-            landing_url=landing,
-            evidence="MODELED_FROM_MEASURED_INPUTS",
-            vintage="USDA Low-Cost / Thrifty official archives",
-            artifact="usda-lowcostplan-sept2007-present.xlsx",
-            artifacts=arts,
-            reason="USDA page retrieved but official food-plan archive identifiers were not found.",
-            extra={"months_included": months},
-        )
+    # VERIFIED_CURRENT for 2026 only if selected 2026 months come from official rows
+    # and are not a 2024 twelve-month substitution.
+    hist_months = list(hist.get("months_included") or [])
+    substituted = bool(current_months) and current_months == hist_months and len(hist_months) == 12
+    current_ok = bool(current_months) and not substituted
+    status = "VERIFIED_CURRENT" if current_ok else "CHECK_FAILED"
     return FreshnessCheck(
         source_id="usda_food",
         latest_checked_at=checked,
-        latest_authoritative_vintage_found="USDA Low-Cost / Thrifty monthly archives",
-        selected_vintage="USDA official monthly archives (2024 full year; 2026 YTD if incomplete)",
-        selected_artifact="usda-lowcostplan-sept2007-present.xlsx / usda-thriftyplan-june2021-present.xlsx",
-        newer_data_exists=False,
+        latest_authoritative_vintage_found="USDA official monthly archives (2024 historical; 2026 YTD)",
+        selected_vintage="USDA Low-Cost official monthly archive; 2026 uses official YTD months",
+        selected_artifact=USDA_WORKBOOK_FILENAMES["low_cost"],
+        newer_data_exists=False if current_ok else None,
         retrieval_validation_status="MODELED_FROM_MEASURED_INPUTS",
         reason_if_not_refreshed=(
-            "Official USDA Cost of Food archive page checked. "
-            "Canonical plan is Low-Cost; Thrifty is sensitivity. "
-            "Months below are from parsed official workbook rows, not a label."
+            "Official FNS Cost of Food archive page checked. "
+            "Workbook URLs are parsed hrefs, not constructed hostnames. "
+            "2024 historical months and 2026 YTD months are stored separately. "
+            "2024 full-year months are not used as 2026 months."
         ),
-        freshness_check_status="VERIFIED_CURRENT",
+        freshness_check_status=status,
         publisher="USDA Center for Nutrition Policy and Promotion",
         landing_url=landing,
         selected_artifacts=tuple(arts),
         transformation_method="adult 19-50 midpoint × official 1.20 one-person factor",
         input_evidence_status="MODELED_FROM_MEASURED_INPUTS",
-        months_included=tuple(months),
-        month_count=len(months) or None,
-        first_month=months[0] if months else None,
-        last_month=months[-1] if months else None,
+        months_included=tuple(current_months),
+        month_count=len(current_months) or None,
+        first_month=current_months[0] if current_months else None,
+        last_month=current_months[-1] if current_months else None,
         extra={
-            "plans": {k: {kk: vv for kk, vv in v.items() if kk != "url"} for k, v in plans.items()}
+            "historical_2024": hist,
+            "current_2026": current,
+            "official_hrefs": hrefs,
+            "substituted_2024_for_2026": substituted,
         },
     )
 
 
+def _cms_page_check(url: str, *, kind: str) -> dict[str, Any]:
+    try:
+        html, checked = fetch_text(url)
+    except (OSError, RuntimeError, ValueError, requests.RequestException) as exc:
+        return {
+            "kind": kind,
+            "landing_url": url,
+            "checked_at": _now_iso(),
+            "status": "CHECK_FAILED",
+            "plan_years_found": [],
+            "error": str(exc),
+        }
+    years = sorted({int(y) for y in re.findall(r"\b(202[0-9])\b", html)})
+    looks_official = (
+        "public use" in html.lower() or "puf" in html.lower() or "exchange" in html.lower()
+    )
+    if not looks_official or not years:
+        return {
+            "kind": kind,
+            "landing_url": url,
+            "checked_at": checked,
+            "status": "CHECK_FAILED",
+            "plan_years_found": years,
+            "error": f"{kind} page retrieved but official PUF/year markers were not found.",
+        }
+    return {
+        "kind": kind,
+        "landing_url": url,
+        "checked_at": checked,
+        "status": "VERIFIED_CURRENT",
+        "plan_years_found": years,
+        "has_2024": 2024 in years,
+        "has_2026": 2026 in years,
+        "has_2027": 2027 in years,
+        "error": None,
+    }
+
+
 def discover_cms() -> FreshnessCheck:
-    landing = CMS_PUF_LANDING
-    sbe_landing = "https://www.cms.gov/marketplace/resources/data/state-based-public-use-files"
     coverage_arts = [
         a
         for a in _coverage_artifacts()
@@ -482,53 +530,39 @@ def discover_cms() -> FreshnessCheck:
         )
         for a in coverage_arts
     ]
-    try:
-        html, checked = fetch_text(landing)
-    except (OSError, RuntimeError, ValueError, requests.RequestException) as exc:
-        return _failed(
-            "cms_marketplace_sbe",
-            publisher="Centers for Medicare & Medicaid Services",
-            landing_url=landing,
-            evidence="MODELED_FROM_MEASURED_INPUTS",
-            vintage="PY2024 / PY2026 Exchange PUF + SBE",
-            artifact="cms rate/plan/service-area PUF zips",
-            artifacts=arts,
-            reason=f"CMS Marketplace PUF landing could not be retrieved: {exc}",
-        )
-    has_2024 = "2024" in html and ("rate-puf" in html.lower() or "public-use-files" in html.lower())
-    has_2026 = "2026" in html
-    has_2027 = bool(re.search(r"2027\s*(rate|plan|puf)", html, re.IGNORECASE))
-    if not (has_2024 or has_2026):
-        return _failed(
-            "cms_marketplace_sbe",
-            publisher="Centers for Medicare & Medicaid Services",
-            landing_url=landing,
-            evidence="MODELED_FROM_MEASURED_INPUTS",
-            vintage="PY2024 / PY2026 Exchange PUF + SBE",
-            artifact="federal Exchange PUF + SBE QHP archives",
-            artifacts=arts,
-            reason="CMS PUF landing retrieved but plan-year 2024/2026 markers were not found.",
-        )
+    federal = _cms_page_check(CMS_PUF_LANDING, kind="federal_exchange")
+    sbe = _cms_page_check(CMS_SBE_PUF_LANDING, kind="sbe")
+    both_ok = federal["status"] == "VERIFIED_CURRENT" and sbe["status"] == "VERIFIED_CURRENT"
+    newer = bool(federal.get("has_2027") or sbe.get("has_2027"))
+    if both_ok and newer:
+        family_status = "NEWER_AVAILABLE"
+    elif both_ok:
+        family_status = "VERIFIED_CURRENT"
+    else:
+        family_status = "CHECK_FAILED"
+    checked = sbe.get("checked_at") or federal.get("checked_at") or _now_iso()
+    reason = (
+        "Combined CMS family requires BOTH the federal Exchange PUF listing and the "
+        "standalone SBE QHP PUF listing. SBE-FP states use the federal Exchange PUF "
+        "and are not treated as standalone SBE archives. "
+        f"federal={federal['status']}; sbe={sbe['status']}."
+    )
     return FreshnessCheck(
         source_id="cms_marketplace_sbe",
         latest_checked_at=checked,
-        latest_authoritative_vintage_found="PY2027" if has_2027 else "PY2024 / PY2026",
-        selected_vintage="PY2024 / PY2026 Exchange PUF + year-specific SBE",
+        latest_authoritative_vintage_found="PY2024 / PY2026 Exchange PUF + standalone SBE",
+        selected_vintage="PY2024 / PY2026 federal Exchange PUF + year-specific standalone SBE",
         selected_artifact="cms_rate_puf / plan_puf / service_area_puf + SBE archives",
-        newer_data_exists=has_2027,
+        newer_data_exists=newer if both_ok else None,
         retrieval_validation_status="MODELED_FROM_MEASURED_INPUTS",
-        reason_if_not_refreshed=(
-            f"Official CMS Marketplace PUF page checked ({landing}). "
-            f"SBE listing: {sbe_landing}. Selected artifacts listed with hashes "
-            "from the current coverage retrieve record. Not a published healthcare headline."
-        ),
-        freshness_check_status="NEWER_AVAILABLE" if has_2027 else "VERIFIED_CURRENT",
+        reason_if_not_refreshed=reason,
+        freshness_check_status=family_status,
         publisher="Centers for Medicare & Medicaid Services",
-        landing_url=landing,
+        landing_url=CMS_PUF_LANDING,
         selected_artifacts=tuple(arts),
         transformation_method="lowest Silver age-40 join of federal PUF + year-specific SBE",
         input_evidence_status="MODELED_FROM_MEASURED_INPUTS",
-        extra={"sbe_landing": sbe_landing, "has_2024": has_2024, "has_2026": has_2026},
+        extra={"federal_exchange": federal, "sbe": sbe},
     )
 
 
@@ -581,6 +615,12 @@ def discover_meps() -> FreshnessCheck:
     )
 
 
+def _nhts_page_has_2022(html: str) -> tuple[bool, bool]:
+    has_2022 = "2022" in html and ("nhts" in html.lower() or "household travel" in html.lower())
+    has_newer = bool(re.search(r"2024 NHTS|NHTS 2024|2024 NextGen", html, re.IGNORECASE))
+    return has_2022, has_newer
+
+
 def discover_nhts() -> FreshnessCheck:
     sidecar = _sidecar("nhts_2022_csv.zip")
     art = _artifact_record(
@@ -590,31 +630,44 @@ def discover_nhts() -> FreshnessCheck:
         retrieved_at=(sidecar or {}).get("retrieved_at"),
         validation_status="VALIDATED",
     )
+    html = ""
+    checked = ""
+    used_url = NHTS_LANDING
+    primary_err: str | None = None
     try:
         html, checked = fetch_text(NHTS_LANDING)
     except (OSError, RuntimeError, ValueError, requests.RequestException) as exc:
-        return _failed(
-            "nhts_mileage",
-            publisher="FHWA / ORNL NHTS",
-            landing_url=NHTS_LANDING,
-            evidence="VALIDATED",
-            vintage="2022 NHTS V2.1",
-            artifact="nhts_2022_csv.zip",
-            artifacts=[art],
-            reason=f"NHTS downloads page could not be retrieved: {exc}",
-        )
-    has_2022 = "2022" in html
-    has_newer = bool(re.search(r"2024 NHTS|NHTS 2024|2024 NextGen", html, re.IGNORECASE))
+        primary_err = str(exc)
+        try:
+            html, checked = fetch_text(NHTS_FHWA_LANDING)
+            used_url = NHTS_FHWA_LANDING
+        except (OSError, RuntimeError, ValueError, requests.RequestException) as exc2:
+            return _failed(
+                "nhts_mileage",
+                publisher="FHWA / ORNL NHTS",
+                landing_url=NHTS_LANDING,
+                evidence="VALIDATED",
+                vintage="2022 NHTS V2.1",
+                artifact="nhts_2022_csv.zip",
+                artifacts=[art],
+                reason=(
+                    f"NHTS downloads page failed ({exc}); FHWA corroboration page failed ({exc2})."
+                ),
+            )
+    has_2022, has_newer = _nhts_page_has_2022(html)
     if not has_2022:
         return _failed(
             "nhts_mileage",
             publisher="FHWA / ORNL NHTS",
-            landing_url=NHTS_LANDING,
+            landing_url=used_url,
             evidence="VALIDATED",
             vintage="2022 NHTS V2.1",
             artifact="nhts_2022_csv.zip",
             artifacts=[art],
-            reason="NHTS page retrieved but 2022 survey vintage was not found.",
+            reason=(
+                "Official NHTS page(s) retrieved but 2022 survey vintage was not found. "
+                f"Primary error={primary_err!r}."
+            ),
         )
     return FreshnessCheck(
         source_id="nhts_mileage",
@@ -630,11 +683,12 @@ def discover_nhts() -> FreshnessCheck:
         ),
         freshness_check_status="NEWER_AVAILABLE" if has_newer else "VERIFIED_CURRENT",
         publisher="FHWA / Oak Ridge National Laboratory",
-        landing_url=NHTS_LANDING,
+        landing_url=used_url,
         selected_artifacts=(art,),
         retrieved_at=(sidecar or {}).get("retrieved_at"),
         transformation_method="weighted median of filtered one-person one-worker licensed households",
         input_evidence_status="VALIDATED",
+        extra={"primary_error": primary_err, "used_url": used_url},
     )
 
 
@@ -751,57 +805,79 @@ def discover_eia() -> FreshnessCheck:
     )
 
 
+def parse_naic_report_identifier(html: str) -> str | None:
+    """Discover the latest Auto Insurance Database Report identifier from official HTML."""
+    match = re.search(
+        r"(20\d{2}\s*/\s*20\d{2}\s+Auto Insurance Database Report)",
+        html,
+        re.IGNORECASE,
+    )
+    if match:
+        return re.sub(r"\s+", " ", match.group(1)).strip()
+    match = re.search(r"(Auto Insurance Database Report[^.<]{0,40})", html, re.IGNORECASE)
+    if match:
+        return re.sub(r"\s+", " ", match.group(1)).strip()
+    if "auto insurance database" in html.lower():
+        years = re.findall(r"20\d{2}", html)
+        if years:
+            return (
+                f"Auto Insurance Database Report (years mentioned: {', '.join(sorted(set(years)))})"
+            )
+        return "Auto Insurance Database Report"
+    return None
+
+
 def discover_naic() -> FreshnessCheck:
     sidecar = _sidecar("publication-aut-pb-auto-insurance-database.pdf")
+    landing = NAIC_PUBLICATIONS_LANDING
     art = _artifact_record(
         artifact_id="publication-aut-pb-auto-insurance-database.pdf",
-        url=NAIC_LANDING,
+        url=landing,
         sha256=(sidecar or {}).get("sha256"),
         retrieved_at=(sidecar or {}).get("retrieved_at"),
         validation_status="RETRIEVED_UNVALIDATED",
     )
     try:
-        html, checked = fetch_text(NAIC_LANDING)
+        html, checked = fetch_text(landing)
     except (OSError, RuntimeError, ValueError, requests.RequestException) as exc:
         return _failed(
             "naic_auto_insurance",
             publisher="NAIC",
-            landing_url=NAIC_LANDING,
-            evidence="RETRIEVED_UNVALIDATED",
-            vintage="2022/2023 Auto Insurance Database Report",
-            artifact="publication-aut-pb-auto-insurance-database.pdf",
-            artifacts=[art],
-            reason=f"NAIC Auto Insurance Database Report page could not be retrieved: {exc}",
-        )
-    has_report = (
-        "auto insurance database" in html.lower() or "auto-insurance-database" in html.lower()
-    )
-    if not has_report:
-        return _failed(
-            "naic_auto_insurance",
-            publisher="NAIC",
-            landing_url=NAIC_LANDING,
+            landing_url=landing,
             evidence="RETRIEVED_UNVALIDATED",
             vintage="NAIC Auto Insurance Database Report",
             artifact="publication-aut-pb-auto-insurance-database.pdf",
             artifacts=[art],
-            reason="NAIC page retrieved but Auto Insurance Database Report was not identified.",
+            reason=f"NAIC Publications listing could not be retrieved: {exc}",
+        )
+    identifier = parse_naic_report_identifier(html)
+    if identifier is None:
+        return _failed(
+            "naic_auto_insurance",
+            publisher="NAIC",
+            landing_url=landing,
+            evidence="RETRIEVED_UNVALIDATED",
+            vintage="NAIC Auto Insurance Database Report",
+            artifact="publication-aut-pb-auto-insurance-database.pdf",
+            artifacts=[art],
+            reason="NAIC Publications page retrieved but Auto Insurance Database Report was not identified.",
         )
     return FreshnessCheck(
         source_id="naic_auto_insurance",
         latest_checked_at=checked,
-        latest_authoritative_vintage_found="NAIC Auto Insurance Database Report (data through 2023)",
-        selected_vintage="2022/2023 Auto Insurance Database Report / data through 2023",
+        latest_authoritative_vintage_found=identifier,
+        selected_vintage=identifier,
         selected_artifact="publication-aut-pb-auto-insurance-database.pdf",
         newer_data_exists=False,
         retrieval_validation_status="RETRIEVED_UNVALIDATED",
         reason_if_not_refreshed=(
-            "Official NAIC report page checked. PDF retrieved. "
+            "Official NAIC Publications listing checked. Latest report identifier parsed "
+            "from the page (not hard-coded). PDF retrieve exists. "
             "State-table extraction is not a validated numeric series."
         ),
         freshness_check_status="VERIFIED_CURRENT",
         publisher="National Association of Insurance Commissioners",
-        landing_url=NAIC_LANDING,
+        landing_url=landing,
         selected_artifacts=(art,),
         retrieved_at=(sidecar or {}).get("retrieved_at"),
         transformation_method="state-table extraction pending validation",
