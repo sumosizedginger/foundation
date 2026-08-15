@@ -1,7 +1,7 @@
 {
   "report_type": "living_cost_candidate_freshness",
-  "generated_at": "2026-08-15T05:03:24Z",
-  "schema_version": "2.0",
+  "generated_at": "2026-08-15T15:42:53Z",
+  "schema_version": "2.1",
   "calculates_mslc": false,
   "required_families": [
     "acs_population_weights",
@@ -27,7 +27,7 @@
   "checks": {
     "acs_population_weights": {
       "source_id": "acs_population_weights",
-      "latest_checked_at": "2026-08-15T05:03:23Z",
+      "latest_checked_at": "2026-08-15T15:42:49Z",
       "latest_authoritative_vintage_found": "2024",
       "selected_vintage": "2024 ACS 5-Year B01001",
       "selected_artifact": "acsdt5y2024-b01001.dat",
@@ -54,6 +54,21 @@
       "month_count": null,
       "first_month": null,
       "last_month": null,
+      "listing_freshness_status": "VERIFIED_CURRENT",
+      "artifact_currentness_status": "VERIFIED_CURRENT",
+      "selected_artifact_matches_latest": true,
+      "year_coverage": {
+        "2024": {
+          "covered": true,
+          "artifact": "acsdt5y2024-b01001.dat",
+          "note": "2024 ACS 5-Year B01001"
+        },
+        "2026": {
+          "covered": true,
+          "artifact": "acsdt5y2024-b01001.dat",
+          "note": "newest appropriate ACS; currently 2024; do not relabel as 2026"
+        }
+      },
       "extra": {
         "listed_years": [
           2005,
@@ -81,7 +96,7 @@
     },
     "hud_fmr": {
       "source_id": "hud_fmr",
-      "latest_checked_at": "2026-08-15T05:03:24Z",
+      "latest_checked_at": "2026-08-15T15:42:50Z",
       "latest_authoritative_vintage_found": "FY2024 / FY2026",
       "selected_vintage": "FY2024 / FY2026",
       "selected_artifact": "FMR2024_final_revised.xlsx / FY26_FMRs_revised.xlsx",
@@ -116,17 +131,32 @@
       "month_count": null,
       "first_month": null,
       "last_month": null,
+      "listing_freshness_status": "VERIFIED_CURRENT",
+      "artifact_currentness_status": "VERIFIED_CURRENT",
+      "selected_artifact_matches_latest": true,
+      "year_coverage": {
+        "2024": {
+          "covered": true,
+          "artifact": "FMR2024_final_revised.xlsx",
+          "note": "FY2024"
+        },
+        "2026": {
+          "covered": true,
+          "artifact": "FY26_FMRs_revised.xlsx",
+          "note": "FY2026"
+        }
+      },
       "extra": null
     },
     "usda_food": {
       "source_id": "usda_food",
-      "latest_checked_at": "2026-08-15T05:03:24Z",
-      "latest_authoritative_vintage_found": "USDA official monthly archives (2024 historical; 2026 YTD)",
+      "latest_checked_at": "2026-08-15T15:42:50Z",
+      "latest_authoritative_vintage_found": "USDA official monthly archives (2024 historical; official latest (2026, 5))",
       "selected_vintage": "USDA Low-Cost official monthly archive; 2026 uses official YTD months",
       "selected_artifact": "usda-lowcostplan-sept2007-present.xlsx",
       "newer_data_exists": false,
       "retrieval_validation_status": "MODELED_FROM_MEASURED_INPUTS",
-      "reason_if_not_refreshed": "Official FNS Cost of Food archive page checked. Workbook URLs are parsed hrefs, not constructed hostnames. 2024 historical months and 2026 YTD months are stored separately. 2024 full-year months are not used as 2026 months.",
+      "reason_if_not_refreshed": "Official FNS Cost of Food archive page checked. Workbook URLs are parsed hrefs, not constructed hostnames. 2024 historical months and 2026 YTD months are stored separately. Official latest USDA month (2026, 5) matches selected workbook month and official bytes match the selected hash.",
       "freshness_check_status": "VERIFIED_CURRENT",
       "publisher": "USDA Center for Nutrition Policy and Promotion",
       "landing_url": "https://www.fns.usda.gov/cnpp/usda-food-plans-cost-food-monthly-reports",
@@ -165,7 +195,7 @@
         }
       ],
       "retrieved_at": null,
-      "transformation_method": "adult 19-50 midpoint \u00d7 official 1.20 one-person factor",
+      "transformation_method": "adult 19-50 midpoint x official 1.20 one-person factor",
       "input_evidence_status": "MODELED_FROM_MEASURED_INPUTS",
       "months_included": [
         "January",
@@ -177,6 +207,48 @@
       "month_count": 5,
       "first_month": "January",
       "last_month": "May",
+      "listing_freshness_status": "VERIFIED_CURRENT",
+      "artifact_currentness_status": "VERIFIED_CURRENT",
+      "selected_artifact_matches_latest": true,
+      "year_coverage": {
+        "2024": {
+          "covered": true,
+          "months_included": [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December"
+          ],
+          "note": "full official 2024 months"
+        },
+        "2026": {
+          "covered": true,
+          "months_included": [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May"
+          ],
+          "official_latest": [
+            2026,
+            5
+          ],
+          "selected_latest": [
+            2026,
+            5
+          ],
+          "note": "2026 official YTD; not a 2024 substitution"
+        }
+      },
       "extra": {
         "historical_2024": {
           "source_year": 2024,
@@ -369,19 +441,80 @@
           "usda-hawaii-june2023-present.xlsx": "https://www.fns.usda.gov/sites/default/files/resource-files/usda-hawaii-june2023-present.xlsx",
           "usda-lowcostplan-sept2007-present.xlsx": "https://www.fns.usda.gov/sites/default/files/resource-files/usda-lowcostplan-sept2007-present.xlsx"
         },
-        "substituted_2024_for_2026": false
+        "substituted_2024_for_2026": false,
+        "official_latest_month": [
+          2026,
+          5
+        ],
+        "selected_latest_month": [
+          2026,
+          5
+        ],
+        "official_inspect": {
+          "sha256": "3944b5dea8cb966fe85acbfd795bb4ec79c0f63a63141abd63913712e0698e86",
+          "months_2026": [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May"
+          ],
+          "latest_2026": [
+            2026,
+            5
+          ]
+        },
+        "year_coverage": {
+          "2024": {
+            "covered": true,
+            "months_included": [
+              "January",
+              "February",
+              "March",
+              "April",
+              "May",
+              "June",
+              "July",
+              "August",
+              "September",
+              "October",
+              "November",
+              "December"
+            ],
+            "note": "full official 2024 months"
+          },
+          "2026": {
+            "covered": true,
+            "months_included": [
+              "January",
+              "February",
+              "March",
+              "April",
+              "May"
+            ],
+            "official_latest": [
+              2026,
+              5
+            ],
+            "selected_latest": [
+              2026,
+              5
+            ],
+            "note": "2026 official YTD; not a 2024 substitution"
+          }
+        }
       }
     },
     "cms_marketplace_sbe": {
       "source_id": "cms_marketplace_sbe",
-      "latest_checked_at": "2026-08-15T05:03:24Z",
+      "latest_checked_at": "2026-08-15T15:42:50Z",
       "latest_authoritative_vintage_found": "PY2024 / PY2026 Exchange PUF + standalone SBE",
       "selected_vintage": "PY2024 / PY2026 federal Exchange PUF + year-specific standalone SBE",
       "selected_artifact": "cms_rate_puf / plan_puf / service_area_puf + SBE archives",
-      "newer_data_exists": false,
+      "newer_data_exists": null,
       "retrieval_validation_status": "MODELED_FROM_MEASURED_INPUTS",
-      "reason_if_not_refreshed": "Combined CMS family requires BOTH the federal Exchange PUF listing and the standalone SBE QHP PUF listing. SBE-FP states use the federal Exchange PUF and are not treated as standalone SBE archives. federal=VERIFIED_CURRENT; sbe=VERIFIED_CURRENT.",
-      "freshness_check_status": "VERIFIED_CURRENT",
+      "reason_if_not_refreshed": "Combined CMS family requires BOTH the federal Exchange PUF listing and the standalone SBE QHP PUF listing. SBE-FP states use the federal Exchange PUF and are not treated as standalone SBE archives. federal=VERIFIED_CURRENT; sbe=VERIFIED_CURRENT. Current plan-year PUF archives can change behind stable year labels; listing success is not artifact-byte currentness.",
+      "freshness_check_status": "CHECK_FAILED",
       "publisher": "Centers for Medicare & Medicaid Services",
       "landing_url": "https://www.cms.gov/marketplace/resources/data/public-use-files",
       "selected_artifacts": [
@@ -809,11 +942,26 @@
       "month_count": null,
       "first_month": null,
       "last_month": null,
+      "listing_freshness_status": "VERIFIED_CURRENT",
+      "artifact_currentness_status": "CHECK_FAILED",
+      "selected_artifact_matches_latest": null,
+      "year_coverage": {
+        "2024": {
+          "covered": true,
+          "plan_year": 2024,
+          "note": "PY2024 federal Exchange PUF + standalone SBE"
+        },
+        "2026": {
+          "covered": true,
+          "plan_year": 2026,
+          "note": "PY2026 current-year PUF archives are mutable; listing is not byte proof"
+        }
+      },
       "extra": {
         "federal_exchange": {
           "kind": "federal_exchange",
           "landing_url": "https://www.cms.gov/marketplace/resources/data/public-use-files",
-          "checked_at": "2026-08-15T05:03:23Z",
+          "checked_at": "2026-08-15T15:42:50Z",
           "status": "VERIFIED_CURRENT",
           "plan_years_found": [
             2020,
@@ -832,7 +980,7 @@
         "sbe": {
           "kind": "sbe",
           "landing_url": "https://www.cms.gov/marketplace/resources/data/state-based-public-use-files",
-          "checked_at": "2026-08-15T05:03:24Z",
+          "checked_at": "2026-08-15T15:42:50Z",
           "status": "VERIFIED_CURRENT",
           "plan_years_found": [
             2020,
@@ -847,12 +995,13 @@
           "has_2026": true,
           "has_2027": false,
           "error": null
-        }
+        },
+        "hashed_artifact_count": 50
       }
     },
     "meps_full_year_consolidated": {
       "source_id": "meps_full_year_consolidated",
-      "latest_checked_at": "2026-08-15T05:03:24Z",
+      "latest_checked_at": "2026-08-15T15:42:50Z",
       "latest_authoritative_vintage_found": "HC-251 / 2023",
       "selected_vintage": "HC-251 / 2023",
       "selected_artifact": "h251dat.zip",
@@ -879,6 +1028,19 @@
       "month_count": null,
       "first_month": null,
       "last_month": null,
+      "listing_freshness_status": null,
+      "artifact_currentness_status": null,
+      "selected_artifact_matches_latest": null,
+      "year_coverage": {
+        "2024": {
+          "covered": true,
+          "note": "MEPS source year 2023; 2024 uses OD-010 translation"
+        },
+        "2026": {
+          "covered": true,
+          "note": "MEPS source year 2023; 2026 uses OD-010 translation"
+        }
+      },
       "extra": {
         "listing": {
           "checked_at_source": "https://meps.ahrq.gov/mepsweb/data_stats/download_data_files.jsp",
@@ -893,7 +1055,7 @@
     },
     "nhts_mileage": {
       "source_id": "nhts_mileage",
-      "latest_checked_at": "2026-08-15T05:03:24Z",
+      "latest_checked_at": "2026-08-15T15:42:50Z",
       "latest_authoritative_vintage_found": "2022 NHTS V2.1",
       "selected_vintage": "2022 NHTS V2.1",
       "selected_artifact": "nhts_2022_csv.zip",
@@ -920,18 +1082,22 @@
       "month_count": null,
       "first_month": null,
       "last_month": null,
+      "listing_freshness_status": "CHECK_FAILED",
+      "artifact_currentness_status": "CHECK_FAILED",
+      "selected_artifact_matches_latest": null,
+      "year_coverage": null,
       "extra": null
     },
     "epa_vehicle": {
       "source_id": "epa_vehicle",
-      "latest_checked_at": "2026-08-15T05:03:24Z",
+      "latest_checked_at": "2026-08-15T15:42:50Z",
       "latest_authoritative_vintage_found": "EPA/DOE fueleconomy.gov vehicles.csv.zip",
       "selected_vintage": "EPA/DOE fueleconomy.gov vehicles.csv.zip",
       "selected_artifact": "epa_fueleconomy_vehicles.csv.zip",
-      "newer_data_exists": false,
+      "newer_data_exists": null,
       "retrieval_validation_status": "RETRIEVED_UNVALIDATED",
-      "reason_if_not_refreshed": "OD-004 methodology is FROZEN; EPA MPG evidence is RETRIEVED_UNVALIDATED. Official fueleconomy.gov download page still lists vehicles.csv. Frozen methodology is not VALIDATED cohort extraction.",
-      "freshness_check_status": "VERIFIED_CURRENT",
+      "reason_if_not_refreshed": "OD-004 methodology is FROZEN; EPA MPG evidence is RETRIEVED_UNVALIDATED. Official fueleconomy.gov download page still lists vehicles.csv. The URL is mutable. Listing the filename is not byte currentness. Listing is current but selected artifact bytes were not proven to match the currently advertised official release.",
+      "freshness_check_status": "CHECK_FAILED",
       "publisher": "EPA / DOE",
       "landing_url": "https://www.fueleconomy.gov/feg/download.shtml",
       "selected_artifacts": [
@@ -951,17 +1117,30 @@
       "month_count": null,
       "first_month": null,
       "last_month": null,
+      "listing_freshness_status": "VERIFIED_CURRENT",
+      "artifact_currentness_status": "CHECK_FAILED",
+      "selected_artifact_matches_latest": null,
+      "year_coverage": {
+        "2024": {
+          "covered": true,
+          "note": "rolling EPA/DOE cohort applies to 2024 window"
+        },
+        "2026": {
+          "covered": true,
+          "note": "rolling EPA/DOE cohort applies to 2026 window"
+        }
+      },
       "extra": null
     },
     "eia_gasoline": {
       "source_id": "eia_gasoline",
-      "latest_checked_at": "2026-08-15T05:03:24Z",
-      "latest_authoritative_vintage_found": "EIA weekly retail gasoline pswrgvwall.xls",
-      "selected_vintage": "EIA weekly retail gasoline",
+      "latest_checked_at": "2026-08-15T15:42:50Z",
+      "latest_authoritative_vintage_found": "EIA weekly retail gasoline through 2026-08-10",
+      "selected_vintage": "EIA weekly retail gasoline through 2026-08-10",
       "selected_artifact": "pswrgvwall.xls",
       "newer_data_exists": false,
       "retrieval_validation_status": "VALIDATED",
-      "reason_if_not_refreshed": "Official EIA gasoline/diesel page checked. Selected workbook is still pswrgvwall.xls. Use target-year observations / YTD. Do not relabel source year.",
+      "reason_if_not_refreshed": "Official EIA gasoline/diesel page checked. pswrgvwall.xls is a mutable URL. Official EIA latest observation 2026-08-10 matches the selected artifact and hashes match.",
       "freshness_check_status": "VERIFIED_CURRENT",
       "publisher": "U.S. Energy Information Administration",
       "landing_url": "https://www.eia.gov/petroleum/gasdiesel/",
@@ -982,18 +1161,37 @@
       "month_count": null,
       "first_month": null,
       "last_month": null,
-      "extra": null
+      "listing_freshness_status": "VERIFIED_CURRENT",
+      "artifact_currentness_status": "VERIFIED_CURRENT",
+      "selected_artifact_matches_latest": true,
+      "year_coverage": {
+        "2024": {
+          "covered": true,
+          "selected_max_date": "2026-08-10",
+          "note": "2024 weekly observations"
+        },
+        "2026": {
+          "covered": true,
+          "selected_max_date": "2026-08-10",
+          "official_max_date": "2026-08-10",
+          "note": "2026 YTD weekly observations"
+        }
+      },
+      "extra": {
+        "official_max_date": "2026-08-10",
+        "selected_max_date": "2026-08-10"
+      }
     },
     "naic_auto_insurance": {
       "source_id": "naic_auto_insurance",
-      "latest_checked_at": "2026-08-15T05:03:24Z",
-      "latest_authoritative_vintage_found": "Auto Insurance Database Report",
-      "selected_vintage": "Auto Insurance Database Report",
+      "latest_checked_at": "2026-08-15T15:42:50Z",
+      "latest_authoritative_vintage_found": "AUT-PB 2022-2023",
+      "selected_vintage": null,
       "selected_artifact": "publication-aut-pb-auto-insurance-database.pdf",
-      "newer_data_exists": false,
+      "newer_data_exists": null,
       "retrieval_validation_status": "RETRIEVED_UNVALIDATED",
-      "reason_if_not_refreshed": "Official NAIC Publications listing checked. Latest report identifier parsed from the page (not hard-coded). PDF retrieve exists. State-table extraction is not a validated numeric series.",
-      "freshness_check_status": "VERIFIED_CURRENT",
+      "reason_if_not_refreshed": "Official NAIC Publications listing checked. Latest report identifier is AUT-PB 2022-2023. Latest listing is AUT-PB 2022-2023 but the local PDF was not proven to be that report. State-table extraction is not a validated numeric series.",
+      "freshness_check_status": "CHECK_FAILED",
       "publisher": "National Association of Insurance Commissioners",
       "landing_url": "https://content.naic.org/publications",
       "selected_artifacts": [
@@ -1013,11 +1211,33 @@
       "month_count": null,
       "first_month": null,
       "last_month": null,
-      "extra": null
+      "listing_freshness_status": "VERIFIED_CURRENT",
+      "artifact_currentness_status": "CHECK_FAILED",
+      "selected_artifact_matches_latest": null,
+      "year_coverage": {
+        "2024": {
+          "covered": true,
+          "note": "lagged NAIC report AUT-PB 2022-2023 applies to 2024"
+        },
+        "2026": {
+          "covered": true,
+          "note": "lagged NAIC report AUT-PB 2022-2023 applies to 2026"
+        }
+      },
+      "extra": {
+        "publication_code": "AUT-PB",
+        "start_year": 2022,
+        "end_year": 2023,
+        "display_identifier": "AUT-PB 2022-2023",
+        "identifiers_found": [
+          "AUT-PB 2022-2023"
+        ],
+        "local_pdf_bound": null
+      }
     },
     "bls_ce": {
       "source_id": "bls_ce",
-      "latest_checked_at": "2026-08-15T05:03:24Z",
+      "latest_checked_at": "2026-08-15T15:42:50Z",
       "latest_authoritative_vintage_found": "2024 Interview PUMD",
       "selected_vintage": "2024 Interview PUMD",
       "selected_artifact": "intrvw24.zip",
@@ -1044,11 +1264,15 @@
       "month_count": null,
       "first_month": null,
       "last_month": null,
+      "listing_freshness_status": "CHECK_FAILED",
+      "artifact_currentness_status": "CHECK_FAILED",
+      "selected_artifact_matches_latest": null,
+      "year_coverage": null,
       "extra": null
     },
     "fcc_broadband": {
       "source_id": "fcc_broadband",
-      "latest_checked_at": "2026-08-15T05:03:24Z",
+      "latest_checked_at": "2026-08-15T15:42:50Z",
       "latest_authoritative_vintage_found": null,
       "selected_vintage": null,
       "selected_artifact": null,
@@ -1066,11 +1290,15 @@
       "month_count": null,
       "first_month": null,
       "last_month": null,
+      "listing_freshness_status": "CHECK_FAILED",
+      "artifact_currentness_status": "CHECK_FAILED",
+      "selected_artifact_matches_latest": null,
+      "year_coverage": null,
       "extra": null
     },
     "mobile_price": {
       "source_id": "mobile_price",
-      "latest_checked_at": "2026-08-15T05:03:24Z",
+      "latest_checked_at": "2026-08-15T15:42:50Z",
       "latest_authoritative_vintage_found": null,
       "selected_vintage": null,
       "selected_artifact": null,
@@ -1088,18 +1316,31 @@
       "month_count": null,
       "first_month": null,
       "last_month": null,
+      "listing_freshness_status": "SOURCE_GAP",
+      "artifact_currentness_status": "SOURCE_GAP",
+      "selected_artifact_matches_latest": null,
+      "year_coverage": {
+        "2024": {
+          "covered": false,
+          "reason": "SOURCE_GAP"
+        },
+        "2026": {
+          "covered": false,
+          "reason": "SOURCE_GAP"
+        }
+      },
       "extra": null
     },
     "bea_rpp": {
       "source_id": "bea_rpp",
-      "latest_checked_at": "2026-08-15T05:03:24Z",
-      "latest_authoritative_vintage_found": "BEA SARPP All-items 2024 / current release February 19, 2026",
-      "selected_vintage": "BEA SARPP All-items 2024 / current release February 19, 2026",
+      "latest_checked_at": "2026-08-15T15:42:50Z",
+      "latest_authoritative_vintage_found": "BEA SARPP All-items",
+      "selected_vintage": "BEA SARPP All-items",
       "selected_artifact": "SARPP.zip",
-      "newer_data_exists": false,
+      "newer_data_exists": null,
       "retrieval_validation_status": "VALIDATED",
-      "reason_if_not_refreshed": "Official BEA RPP landing checked. Current release='February 19, 2026'; Next release=None. Selected artifact SARPP.zip. 2026 cost year reuses 2024 as LATEST_AVAILABLE and does not relabel the source year.",
-      "freshness_check_status": "VERIFIED_CURRENT",
+      "reason_if_not_refreshed": "BEA RPP landing page could not be retrieved: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))",
+      "freshness_check_status": "CHECK_FAILED",
       "publisher": "U.S. Bureau of Economic Analysis",
       "landing_url": "https://www.bea.gov/data/prices-inflation/regional-price-parities-state-and-metro-area",
       "selected_artifacts": [
@@ -1112,21 +1353,22 @@
           "validation_status": "VALIDATED"
         }
       ],
-      "retrieved_at": "2026-08-14T20:18:54+00:00",
-      "transformation_method": "LATEST_AVAILABLE All-items state RPP; source year not relabeled",
+      "retrieved_at": null,
+      "transformation_method": null,
       "input_evidence_status": "VALIDATED",
       "months_included": null,
       "month_count": null,
       "first_month": null,
       "last_month": null,
-      "extra": {
-        "current_release": "February 19, 2026",
-        "next_release": null
-      }
+      "listing_freshness_status": "CHECK_FAILED",
+      "artifact_currentness_status": "CHECK_FAILED",
+      "selected_artifact_matches_latest": null,
+      "year_coverage": null,
+      "extra": null
     },
     "federal_tax_law": {
       "source_id": "federal_tax_law",
-      "latest_checked_at": "2026-08-15T05:03:24Z",
+      "latest_checked_at": "2026-08-15T15:42:50Z",
       "latest_authoritative_vintage_found": "code tables [2024, 2026]",
       "selected_vintage": "2024 and 2026 statutory tables in code",
       "selected_artifact": null,
@@ -1144,6 +1386,19 @@
       "month_count": null,
       "first_month": null,
       "last_month": null,
+      "listing_freshness_status": null,
+      "artifact_currentness_status": null,
+      "selected_artifact_matches_latest": null,
+      "year_coverage": {
+        "2024": {
+          "covered": true,
+          "note": "federal tables present in code"
+        },
+        "2026": {
+          "covered": true,
+          "note": "federal tables present in code"
+        }
+      },
       "extra": {
         "rule_years_present": [
           2024,
@@ -1153,7 +1408,7 @@
     },
     "state_tax_law": {
       "source_id": "state_tax_law",
-      "latest_checked_at": "2026-08-15T05:03:24Z",
+      "latest_checked_at": "2026-08-15T15:42:50Z",
       "latest_authoritative_vintage_found": "2024 and 2026 schedules in code",
       "selected_vintage": "2024 and 2026 schedules in code",
       "selected_artifact": null,
@@ -1171,11 +1426,24 @@
       "month_count": null,
       "first_month": null,
       "last_month": null,
+      "listing_freshness_status": null,
+      "artifact_currentness_status": null,
+      "selected_artifact_matches_latest": null,
+      "year_coverage": {
+        "2024": {
+          "covered": false,
+          "note": "state inventory incomplete"
+        },
+        "2026": {
+          "covered": false,
+          "note": "state inventory incomplete"
+        }
+      },
       "extra": null
     },
     "local_tax_law": {
       "source_id": "local_tax_law",
-      "latest_checked_at": "2026-08-15T05:03:24Z",
+      "latest_checked_at": "2026-08-15T15:42:50Z",
       "latest_authoritative_vintage_found": "MD county / NYC / Philadelphia verified; Harris County TX verified no local EIT",
       "selected_vintage": "partial verified inventory",
       "selected_artifact": null,
@@ -1193,11 +1461,24 @@
       "month_count": null,
       "first_month": null,
       "last_month": null,
+      "listing_freshness_status": null,
+      "artifact_currentness_status": null,
+      "selected_artifact_matches_latest": null,
+      "year_coverage": {
+        "2024": {
+          "covered": false,
+          "note": "most FIPS unresolved"
+        },
+        "2026": {
+          "covered": false,
+          "note": "most FIPS unresolved"
+        }
+      },
       "extra": null
     },
     "vehicle_registration": {
       "source_id": "vehicle_registration",
-      "latest_checked_at": "2026-08-15T05:03:24Z",
+      "latest_checked_at": "2026-08-15T15:42:50Z",
       "latest_authoritative_vintage_found": null,
       "selected_vintage": null,
       "selected_artifact": null,
@@ -1215,11 +1496,24 @@
       "month_count": null,
       "first_month": null,
       "last_month": null,
+      "listing_freshness_status": "SOURCE_GAP",
+      "artifact_currentness_status": "SOURCE_GAP",
+      "selected_artifact_matches_latest": null,
+      "year_coverage": {
+        "2024": {
+          "covered": false,
+          "reason": "SOURCE_GAP"
+        },
+        "2026": {
+          "covered": false,
+          "reason": "SOURCE_GAP"
+        }
+      },
       "extra": null
     },
     "vehicle_replacement": {
       "source_id": "vehicle_replacement",
-      "latest_checked_at": "2026-08-15T05:03:24Z",
+      "latest_checked_at": "2026-08-15T15:42:50Z",
       "latest_authoritative_vintage_found": null,
       "selected_vintage": null,
       "selected_artifact": null,
@@ -1237,11 +1531,15 @@
       "month_count": null,
       "first_month": null,
       "last_month": null,
+      "listing_freshness_status": null,
+      "artifact_currentness_status": null,
+      "selected_artifact_matches_latest": null,
+      "year_coverage": null,
       "extra": null
     },
     "od010_price_index": {
       "source_id": "od010_price_index",
-      "latest_checked_at": "2026-08-15T05:03:24Z",
+      "latest_checked_at": "2026-08-15T15:42:50Z",
       "latest_authoritative_vintage_found": null,
       "selected_vintage": null,
       "selected_artifact": null,
@@ -1259,6 +1557,19 @@
       "month_count": null,
       "first_month": null,
       "last_month": null,
+      "listing_freshness_status": null,
+      "artifact_currentness_status": null,
+      "selected_artifact_matches_latest": null,
+      "year_coverage": {
+        "2024": {
+          "covered": false,
+          "note": "OD-010 translation table"
+        },
+        "2026": {
+          "covered": false,
+          "note": "OD-010 translation table"
+        }
+      },
       "extra": {
         "translation_table_bound": false
       }
@@ -1270,8 +1581,12 @@
   "translation_index_bound": false,
   "silent_source_year_relabel": false,
   "candidate_inputs_bound": false,
-  "blocker_count": 24,
-  "gate_blocker_reason_count": 24,
+  "required_project_cost_years": [
+    2024,
+    2026
+  ],
+  "blocker_count": 38,
+  "gate_blocker_reason_count": 38,
   "empirical_blocker_family_count": 12,
   "empirical_blocker_families": [
     "bls_ce",
@@ -1290,16 +1605,27 @@
   "blockers": [
     "OD010_TRANSLATION_INDEX_NOT_BOUND",
     "REQUIRED_CANDIDATE_INPUTS_NOT_BOUND",
+    "cms_marketplace_sbe:CHECK_FAILED",
     "meps_full_year_consolidated:RETRIEVED_UNVALIDATED",
     "nhts_mileage:CHECK_FAILED",
+    "nhts_mileage:MISSING_YEAR_2024",
+    "nhts_mileage:MISSING_YEAR_2026",
+    "epa_vehicle:CHECK_FAILED",
     "epa_vehicle:RETRIEVED_UNVALIDATED",
+    "naic_auto_insurance:CHECK_FAILED",
     "naic_auto_insurance:RETRIEVED_UNVALIDATED",
     "bls_ce:CHECK_FAILED",
     "bls_ce:INCOMPLETE_PROVENANCE",
+    "bls_ce:MISSING_YEAR_2024",
+    "bls_ce:MISSING_YEAR_2026",
     "fcc_broadband:CHECK_FAILED",
     "fcc_broadband:SOURCE_GAP",
+    "fcc_broadband:MISSING_YEAR_2024",
+    "fcc_broadband:MISSING_YEAR_2026",
     "mobile_price:SOURCE_GAP",
-    "mobile_price:SOURCE_GAP",
+    "bea_rpp:CHECK_FAILED",
+    "bea_rpp:MISSING_YEAR_2024",
+    "bea_rpp:MISSING_YEAR_2026",
     "federal_tax_law:MANUAL_VERIFICATION_REQUIRED",
     "federal_tax_law:INVENTORY_NOT_VALIDATED",
     "state_tax_law:MANUAL_VERIFICATION_REQUIRED",
@@ -1307,11 +1633,14 @@
     "local_tax_law:MANUAL_VERIFICATION_REQUIRED",
     "local_tax_law:SOURCE_GAP",
     "vehicle_registration:SOURCE_GAP",
-    "vehicle_registration:SOURCE_GAP",
     "vehicle_replacement:SOURCE_GAP",
     "vehicle_replacement:FORMULA_FROZEN_INPUTS_PENDING",
+    "vehicle_replacement:MISSING_YEAR_2024",
+    "vehicle_replacement:MISSING_YEAR_2026",
     "od010_price_index:MANUAL_VERIFICATION_REQUIRED",
-    "od010_price_index:INVENTORY_NOT_VALIDATED"
+    "od010_price_index:INVENTORY_NOT_VALIDATED",
+    "od010_price_index:MISSING_YEAR_2024",
+    "od010_price_index:MISSING_YEAR_2026"
   ],
   "headline_calculated": false,
   "authorization_source": "config/definitions.yml",
@@ -1320,12 +1649,8 @@
       "acs_population_weights",
       "hud_fmr",
       "usda_food",
-      "cms_marketplace_sbe",
       "meps_full_year_consolidated",
-      "epa_vehicle",
-      "eia_gasoline",
-      "naic_auto_insurance",
-      "bea_rpp"
+      "eia_gasoline"
     ],
     "manual_verification_required": [
       "federal_tax_law",
@@ -1334,9 +1659,13 @@
       "od010_price_index"
     ],
     "check_failed": [
+      "cms_marketplace_sbe",
       "nhts_mileage",
+      "epa_vehicle",
+      "naic_auto_insurance",
       "bls_ce",
-      "fcc_broadband"
+      "fcc_broadband",
+      "bea_rpp"
     ],
     "source_gap": [
       "mobile_price",
@@ -1349,16 +1678,16 @@
     "acs_population_weights": "VERIFIED_CURRENT",
     "hud_fmr": "VERIFIED_CURRENT",
     "usda_food": "VERIFIED_CURRENT",
-    "cms_marketplace_sbe": "VERIFIED_CURRENT",
+    "cms_marketplace_sbe": "CHECK_FAILED",
     "meps_full_year_consolidated": "VERIFIED_CURRENT",
     "nhts_mileage": "CHECK_FAILED",
-    "epa_vehicle": "VERIFIED_CURRENT",
+    "epa_vehicle": "CHECK_FAILED",
     "eia_gasoline": "VERIFIED_CURRENT",
-    "naic_auto_insurance": "VERIFIED_CURRENT",
+    "naic_auto_insurance": "CHECK_FAILED",
     "bls_ce": "CHECK_FAILED",
     "fcc_broadband": "CHECK_FAILED",
     "mobile_price": "SOURCE_GAP",
-    "bea_rpp": "VERIFIED_CURRENT",
+    "bea_rpp": "CHECK_FAILED",
     "federal_tax_law": "MANUAL_VERIFICATION_REQUIRED",
     "state_tax_law": "MANUAL_VERIFICATION_REQUIRED",
     "local_tax_law": "MANUAL_VERIFICATION_REQUIRED",

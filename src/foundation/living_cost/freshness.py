@@ -69,6 +69,9 @@ BLOCKING_CHECK_STATUSES = FRESHNESS_CHECK_STATUSES - {"VERIFIED_CURRENT"}
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 OD010_TABLE = PROJECT_ROOT / "data" / "metadata" / "living_cost_od010_translation_table.json"
+CANDIDATE_INPUT_BINDINGS = (
+    PROJECT_ROOT / "data" / "metadata" / "living_cost_candidate_input_bindings.json"
+)
 
 
 class FreshnessGateError(RuntimeError):
@@ -100,6 +103,10 @@ class FreshnessCheck:
     month_count: int | None = None
     first_month: str | None = None
     last_month: str | None = None
+    listing_freshness_status: str | None = None
+    artifact_currentness_status: str | None = None
+    selected_artifact_matches_latest: bool | None = None
+    year_coverage: dict[str, Any] | None = None
     extra: dict[str, Any] | None = field(default=None)
 
     def to_dict(self) -> dict[str, Any]:
@@ -179,6 +186,102 @@ def is_translation_index_bound() -> bool:
     return payload.get("bound") is True and bool(series)
 
 
+def required_project_cost_years() -> tuple[int, ...]:
+    """Canonical candidate target-year bundle from definitions.yml."""
+    living = _living_cost_config()
+    if "required_project_cost_years" not in living:
+        raise AuthorizationConfigError("living_cost.required_project_cost_years is absent")
+    raw = living["required_project_cost_years"]
+    if not isinstance(raw, list) or not raw:
+        raise AuthorizationConfigError(
+            "living_cost.required_project_cost_years must be a non-empty list"
+        )
+    years: list[int] = []
+    for item in raw:
+        if not isinstance(item, int) or isinstance(item, bool):
+            raise AuthorizationConfigError(
+                f"living_cost.required_project_cost_years entries must be ints, got {type(item)}"
+            )
+        years.append(item)
+    return tuple(years)
+
+
+def are_candidate_inputs_bound() -> bool:
+    """True only when a machine-readable candidate-input binding record exists.
+
+    The candidate assembler is not built. Absence of the binding record is
+    false. Do not accept a caller-supplied override.
+    """
+    if not CANDIDATE_INPUT_BINDINGS.exists():
+        return False
+    try:
+        payload = json.loads(CANDIDATE_INPUT_BINDINGS.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return False
+    if not isinstance(payload, dict):
+        return False
+    return payload.get("bound") is True and bool(payload.get("inputs"))
+
+
+def detect_silent_source_year_relabel(
+    checks: dict[str, FreshnessCheck],
+) -> bool:
+    """Derive silent year-relabel from candidate input metadata, not a caller bool."""
+    for check in checks.values():
+        extra = check.extra or {}
+        if extra.get("substituted_2024_for_2026") is True:
+            return True
+        if extra.get("silent_source_year_relabel") is True:
+            return True
+        coverage = check.year_coverage or extra.get("year_coverage") or {}
+        if not isinstance(coverage, dict):
+            continue
+        for rec in coverage.values():
+            if isinstance(rec, dict) and rec.get("silent_relabel") is True:
+                return True
+    return False
+
+
+def _year_coverage_map(check: FreshnessCheck) -> dict[Any, Any]:
+    if isinstance(check.year_coverage, dict):
+        return check.year_coverage
+    extra = check.extra or {}
+    coverage = extra.get("year_coverage")
+    return coverage if isinstance(coverage, dict) else {}
+
+
+def missing_project_cost_years(
+    check: FreshnessCheck,
+    years: Iterable[int],
+) -> list[int]:
+    coverage = _year_coverage_map(check)
+    missing: list[int] = []
+    for year in years:
+        rec = coverage.get(year)
+        if rec is None:
+            rec = coverage.get(str(year))
+        if rec is None:
+            missing.append(int(year))
+            continue
+        if rec is False:
+            missing.append(int(year))
+            continue
+        if isinstance(rec, dict) and rec.get("covered") is False:
+            missing.append(int(year))
+    return missing
+
+
+def _unique_reasons(reasons: Iterable[str]) -> list[str]:
+    seen: set[str] = set()
+    out: list[str] = []
+    for reason in reasons:
+        if reason in seen:
+            continue
+        seen.add(reason)
+        out.append(reason)
+    return out
+
+
 def freshness_gate_checklist() -> dict[str, Any]:
     return {
         "required_before_candidate_calculation": list(REQUIRED_FRESHNESS_FAMILIES),
@@ -196,6 +299,8 @@ def freshness_gate_checklist() -> dict[str, Any]:
         "private_candidate_never_implies_publication": True,
         "authorization_source": "config/definitions.yml",
         "translation_index_bound": is_translation_index_bound(),
+        "candidate_inputs_bound": are_candidate_inputs_bound(),
+        "required_project_cost_years": list(required_project_cost_years()),
     }
 
 
@@ -226,46 +331,47 @@ def _has_concrete_provenance(check: FreshnessCheck) -> bool:
 
 def assert_candidate_freshness_ready(
     checks: Iterable[FreshnessCheck] | dict[str, FreshnessCheck],
-    *,
-    project_cost_year: int,
-    required_families: Iterable[str] = REQUIRED_FRESHNESS_FAMILIES,
-    translation_index_bound: bool | None = None,
-    silent_source_year_relabel: bool = False,
 ) -> None:
     """Refuse a future PRIVATE candidate when freshness or candidate auth is incomplete.
 
     Does not compute MSLC, Gap, Adequacy, rankings, or a national median.
     Authorization is read only from config/definitions.yml.
+    Public callers cannot override required families, translation binding,
+    candidate-input binding, silent-relabel detection, or target years.
     """
-    del project_cost_year
     authorized = candidate_calculation_authorized()
     if not authorized:
         raise FreshnessGateError(
             "candidate_calculation_authorized is false; private candidate refused"
         )
-    if translation_index_bound is None:
-        translation_index_bound = is_translation_index_bound()
+    translation_index_bound = is_translation_index_bound()
+    candidate_inputs_bound = are_candidate_inputs_bound()
+    target_years = required_project_cost_years()
     by_id: dict[str, FreshnessCheck]
     if isinstance(checks, dict):
         by_id = dict(checks)
     else:
         by_id = {item.source_id: item for item in checks}
 
-    missing = [family for family in required_families if family not in by_id]
+    missing = [family for family in REQUIRED_FRESHNESS_FAMILIES if family not in by_id]
     if missing:
         raise FreshnessGateError(
             f"required freshness check was not performed: {', '.join(missing)}"
         )
 
-    if silent_source_year_relabel:
+    if detect_silent_source_year_relabel(by_id):
         raise FreshnessGateError("source year is being silently relabeled")
 
     if not translation_index_bound:
         raise FreshnessGateError(
             "OD010_TRANSLATION_INDEX_NOT_BOUND: required OD-010 translation index is not bound"
         )
+    if not candidate_inputs_bound:
+        raise FreshnessGateError(
+            "REQUIRED_CANDIDATE_INPUTS_NOT_BOUND: required candidate inputs are not bound"
+        )
 
-    for family in required_families:
+    for family in REQUIRED_FRESHNESS_FAMILIES:
         check = by_id[family]
         if not check.latest_checked_at:
             raise FreshnessGateError(f"{family}: freshness check has no latest_checked_at")
@@ -289,6 +395,11 @@ def assert_candidate_freshness_ready(
             check
         ):
             raise FreshnessGateError(f"{family}: passing evidence state lacks concrete provenance")
+        missing_years = missing_project_cost_years(check, target_years)
+        if missing_years:
+            raise FreshnessGateError(
+                f"{family}: required project cost year(s) not covered: {missing_years}"
+            )
 
 
 def assert_public_release_authorized() -> None:
@@ -308,15 +419,13 @@ def current_family_truth() -> dict[str, FreshnessCheck]:
 
 def evaluate_freshness_readiness(
     checks: dict[str, FreshnessCheck],
-    *,
-    translation_index_bound: bool | None = None,
-    silent_source_year_relabel: bool = False,
-    candidate_inputs_bound: bool = False,
 ) -> dict[str, Any]:
+    """Score readiness from canonical project state. No public override parameters."""
     blocking: list[str] = []
-    bound = (
-        is_translation_index_bound() if translation_index_bound is None else translation_index_bound
-    )
+    bound = is_translation_index_bound()
+    candidate_inputs_bound = are_candidate_inputs_bound()
+    silent_source_year_relabel = detect_silent_source_year_relabel(checks)
+    target_years = required_project_cost_years()
     if not bound:
         blocking.append("OD010_TRANSLATION_INDEX_NOT_BOUND")
     if silent_source_year_relabel:
@@ -340,6 +449,19 @@ def evaluate_freshness_readiness(
             check
         ):
             blocking.append(f"{family}:MISSING_CONCRETE_PROVENANCE")
+        missing_years = missing_project_cost_years(check, target_years)
+        coverage = _year_coverage_map(check)
+        if not coverage:
+            for year in target_years:
+                blocking.append(f"{family}:MISSING_YEAR_{year}")
+        elif missing_years and check.retrieval_validation_status not in {
+            "SOURCE_GAP",
+            "UNAVAILABLE",
+            "FORMULA_FROZEN_INPUTS_PENDING",
+        }:
+            for year in missing_years:
+                blocking.append(f"{family}:MISSING_YEAR_{year}")
+    blocking = _unique_reasons(blocking)
     authorized = candidate_calculation_authorized()
     ready = (
         authorized
@@ -362,6 +484,7 @@ def evaluate_freshness_readiness(
         "translation_index_bound": bound,
         "silent_source_year_relabel": silent_source_year_relabel,
         "candidate_inputs_bound": candidate_inputs_bound,
+        "required_project_cost_years": list(target_years),
         "blocker_count": len(blocking),
         "gate_blocker_reason_count": len(blocking),
         "empirical_blocker_family_count": len(empirical_families),
@@ -394,7 +517,7 @@ def write_candidate_freshness_report(metadata_dir: Path) -> dict[str, Any]:
     payload = {
         "report_type": "living_cost_candidate_freshness",
         "generated_at": _now_iso(),
-        "schema_version": "2.0",
+        "schema_version": "2.1",
         "calculates_mslc": False,
         "required_families": list(REQUIRED_FRESHNESS_FAMILIES),
         "checks": {key: check.to_dict() for key, check in checks.items()},
@@ -426,7 +549,7 @@ def write_candidate_freshness_report(metadata_dir: Path) -> dict[str, Any]:
     metadata_dir.mkdir(parents=True, exist_ok=True)
     dest = metadata_dir / "living_cost_candidate_freshness.json"
     dest.write_text(json.dumps(payload, indent=2), encoding="utf-8")
-    return payload
+    return json.loads(dest.read_text(encoding="utf-8"))
 
 
 def freshness_status_summary(payload: dict[str, Any]) -> str:

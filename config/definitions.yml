@@ -27,6 +27,7 @@ living_cost:
   candidate_calculation_authorized: false
   release_authorized: false
   states_modeled: 0
+  required_project_cost_years: [2024, 2026]
   owner_freeze:
     status: ACCEPTED
     methodology_status: FROZEN

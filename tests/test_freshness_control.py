@@ -14,6 +14,7 @@ from foundation.living_cost.freshness import (
     REQUIRED_FRESHNESS_FAMILIES,
     FreshnessCheck,
     FreshnessGateError,
+    are_candidate_inputs_bound,
     assert_candidate_freshness_ready,
     assert_public_release_authorized,
     candidate_calculation_authorized,
@@ -48,6 +49,10 @@ def _ready_family(family: str, **overrides: object) -> FreshnessCheck:
         ),
         "transformation_method": "none",
         "input_evidence_status": "VALIDATED",
+        "year_coverage": {
+            "2024": {"covered": True, "note": "synthetic"},
+            "2026": {"covered": True, "note": "synthetic"},
+        },
     }
     payload.update(overrides)
     return FreshnessCheck(**payload)  # type: ignore[arg-type]
@@ -93,7 +98,7 @@ def test_public_gates_have_no_authorization_override():
 
 def test_config_candidate_false_blocks_private_gate():
     with pytest.raises(FreshnessGateError, match="candidate_calculation_authorized"):
-        assert_candidate_freshness_ready(_all_ready(), project_cost_year=2026)
+        assert_candidate_freshness_ready(_all_ready())
 
 
 def test_config_candidate_true_plus_freshness_fail_is_blocked(monkeypatch: pytest.MonkeyPatch):
@@ -108,21 +113,17 @@ def test_config_candidate_true_plus_freshness_fail_is_blocked(monkeypatch: pytes
         selected_artifact=None,
         selected_artifacts=(),
     )
+    monkeypatch.setattr("foundation.living_cost.freshness.is_translation_index_bound", lambda: True)
+    monkeypatch.setattr("foundation.living_cost.freshness.are_candidate_inputs_bound", lambda: True)
     with pytest.raises(FreshnessGateError, match="SOURCE_GAP"):
-        assert_candidate_freshness_ready(
-            checks,
-            project_cost_year=2026,
-            translation_index_bound=True,
-        )
+        assert_candidate_freshness_ready(checks)
 
 
 def test_config_candidate_true_plus_freshness_pass_may_proceed(monkeypatch: pytest.MonkeyPatch):
     _patch_living_auth(monkeypatch, candidate=True, release=False)
-    assert_candidate_freshness_ready(
-        _all_ready(),
-        project_cost_year=2026,
-        translation_index_bound=True,
-    )
+    monkeypatch.setattr("foundation.living_cost.freshness.is_translation_index_bound", lambda: True)
+    monkeypatch.setattr("foundation.living_cost.freshness.are_candidate_inputs_bound", lambda: True)
+    assert_candidate_freshness_ready(_all_ready())
 
 
 def test_release_false_blocks_publication_regardless_of_candidate():
@@ -134,7 +135,7 @@ def test_config_release_true_passes_release_gate_only(monkeypatch: pytest.Monkey
     _patch_living_auth(monkeypatch, candidate=False, release=True)
     assert_public_release_authorized()
     with pytest.raises(FreshnessGateError, match="candidate_calculation_authorized"):
-        assert_candidate_freshness_ready(_all_ready(), project_cost_year=2026)
+        assert_candidate_freshness_ready(_all_ready())
 
 
 def test_translation_index_bound_false_blocks_even_if_od010_validated(
@@ -147,16 +148,13 @@ def test_translation_index_bound_false_blocks_even_if_od010_validated(
         retrieval_validation_status="VALIDATED",
         freshness_check_status="VERIFIED_CURRENT",
     )
-    readiness = evaluate_freshness_readiness(checks, translation_index_bound=False)
+    readiness = evaluate_freshness_readiness(checks)
     assert readiness["translation_index_bound"] is False
     assert "OD010_TRANSLATION_INDEX_NOT_BOUND" in readiness["blockers"]
     assert readiness["ready_for_private_candidate"] is False
+    monkeypatch.setattr("foundation.living_cost.freshness.are_candidate_inputs_bound", lambda: True)
     with pytest.raises(FreshnessGateError, match="OD010_TRANSLATION_INDEX_NOT_BOUND"):
-        assert_candidate_freshness_ready(
-            checks,
-            project_cost_year=2026,
-            translation_index_bound=False,
-        )
+        assert_candidate_freshness_ready(checks)
 
 
 def test_not_checked_is_not_encoded_as_newer_data_false():
@@ -184,12 +182,10 @@ def test_modeled_evidence_requires_concrete_provenance(monkeypatch: pytest.Monke
         selected_artifacts=(),
         freshness_check_status="VERIFIED_CURRENT",
     )
+    monkeypatch.setattr("foundation.living_cost.freshness.is_translation_index_bound", lambda: True)
+    monkeypatch.setattr("foundation.living_cost.freshness.are_candidate_inputs_bound", lambda: True)
     with pytest.raises(FreshnessGateError, match="concrete provenance"):
-        assert_candidate_freshness_ready(
-            checks,
-            project_cost_year=2026,
-            translation_index_bound=True,
-        )
+        assert_candidate_freshness_ready(checks)
 
 
 def test_pipeline_reads_canonical_authorization():
@@ -343,10 +339,18 @@ def test_cms_federal_and_sbe_success_may_be_verified(monkeypatch: pytest.MonkeyP
 
     monkeypatch.setattr(disc, "fetch_text", fake_fetch)
     check = disc.discover_cms()
-    assert check.freshness_check_status == "VERIFIED_CURRENT"
     extra = check.extra or {}
     assert extra["federal_exchange"]["status"] == "VERIFIED_CURRENT"
     assert extra["sbe"]["status"] == "VERIFIED_CURRENT"
+    assert check.listing_freshness_status == "VERIFIED_CURRENT"
+    assert check.freshness_check_status != "VERIFIED_CURRENT" or (
+        check.artifact_currentness_status == "VERIFIED_CURRENT"
+    )
+    assert check.artifact_currentness_status in {
+        "CHECK_FAILED",
+        "VERIFIED_CURRENT",
+        "NEWER_AVAILABLE",
+    }
 
 
 def test_naic_does_not_use_obsolete_404_landing():
@@ -376,8 +380,165 @@ def test_status_summary_cannot_label_bea_verified_when_artifact_says_failed():
 
 
 def test_blocker_counts_are_separated():
-    readiness = evaluate_freshness_readiness(_all_ready(), translation_index_bound=False)
+    readiness = evaluate_freshness_readiness(_all_ready())
     assert "empirical_blocker_family_count" in readiness
     assert "gate_blocker_reason_count" in readiness
     assert readiness["gate_blocker_reason_count"] == readiness["blocker_count"]
     assert readiness["empirical_blocker_family_count"] == 0
+
+
+def test_public_gate_cannot_override_required_families_or_translation():
+    import inspect
+
+    params = inspect.signature(assert_candidate_freshness_ready).parameters
+    assert "required_families" not in params
+    assert "translation_index_bound" not in params
+    assert "silent_source_year_relabel" not in params
+    assert "candidate_inputs_bound" not in params
+    assert "project_cost_year" not in params
+    eval_params = inspect.signature(evaluate_freshness_readiness).parameters
+    assert "translation_index_bound" not in eval_params
+    assert "candidate_inputs_bound" not in eval_params
+    src = (SRC / "foundation" / "living_cost" / "freshness.py").read_text(encoding="utf-8")
+    assert "del project_cost_year" not in src
+    assert (
+        "REQUIRED_FRESHNESS_FAMILIES" in src.split("def assert_candidate_freshness_ready")[1][:2500]
+    )
+
+
+def test_empty_required_family_bypass_is_impossible(monkeypatch: pytest.MonkeyPatch):
+    _patch_living_auth(monkeypatch, candidate=True, release=False)
+    monkeypatch.setattr("foundation.living_cost.freshness.is_translation_index_bound", lambda: True)
+    monkeypatch.setattr("foundation.living_cost.freshness.are_candidate_inputs_bound", lambda: True)
+    with pytest.raises(FreshnessGateError, match="required freshness check was not performed"):
+        assert_candidate_freshness_ready({})
+
+
+def test_candidate_inputs_bound_false_blocks_assertion_gate(
+    monkeypatch: pytest.MonkeyPatch,
+):
+    _patch_living_auth(monkeypatch, candidate=True, release=False)
+    monkeypatch.setattr("foundation.living_cost.freshness.is_translation_index_bound", lambda: True)
+    assert are_candidate_inputs_bound() is False
+    with pytest.raises(FreshnessGateError, match="REQUIRED_CANDIDATE_INPUTS_NOT_BOUND"):
+        assert_candidate_freshness_ready(_all_ready())
+
+
+def test_project_year_bundle_is_validated_not_ignored(monkeypatch: pytest.MonkeyPatch):
+    from foundation.living_cost.freshness import required_project_cost_years
+
+    assert list(required_project_cost_years()) == [2024, 2026]
+    _patch_living_auth(monkeypatch, candidate=True, release=False)
+    monkeypatch.setattr("foundation.living_cost.freshness.is_translation_index_bound", lambda: True)
+    monkeypatch.setattr("foundation.living_cost.freshness.are_candidate_inputs_bound", lambda: True)
+    checks = _all_ready()
+    checks["usda_food"] = _ready_family(
+        "usda_food",
+        year_coverage={"2024": {"covered": True}, "2026": {"covered": False}},
+    )
+    with pytest.raises(FreshnessGateError, match="required project cost year"):
+        assert_candidate_freshness_ready(checks)
+
+
+def test_cached_usda_may_plus_official_june_is_newer_available():
+    from foundation.living_cost.freshness_currentness import usda_currentness_status
+
+    result = usda_currentness_status(
+        official_latest=(2026, 6),
+        selected_latest=(2026, 5),
+        official_sha="aaa",
+        selected_sha="aaa",
+    )
+    assert result["freshness_check_status"] == "NEWER_AVAILABLE"
+    assert result["selected_artifact_matches_latest"] is False
+
+
+def test_stable_usda_url_changed_bytes_cannot_stay_verified():
+    from foundation.living_cost.freshness_currentness import usda_currentness_status
+
+    result = usda_currentness_status(
+        official_latest=(2026, 5),
+        selected_latest=(2026, 5),
+        official_sha="new-bytes",
+        selected_sha="old-bytes",
+    )
+    assert result["freshness_check_status"] != "VERIFIED_CURRENT"
+    assert result["freshness_check_status"] == "NEWER_AVAILABLE"
+
+
+def test_stable_eia_url_newer_observation_cannot_stay_verified():
+    from datetime import date
+
+    from foundation.living_cost.freshness_currentness import eia_currentness_status
+
+    result = eia_currentness_status(
+        official_max_date=date(2026, 8, 10),
+        selected_max_date=date(2026, 5, 1),
+        official_sha="aaa",
+        selected_sha="aaa",
+    )
+    assert result["freshness_check_status"] == "NEWER_AVAILABLE"
+    assert result["freshness_check_status"] != "VERIFIED_CURRENT"
+
+
+def test_generic_naic_title_without_year_cannot_be_verified_current(
+    monkeypatch: pytest.MonkeyPatch,
+):
+    from foundation.living_cost import freshness_discovery as disc
+    from foundation.living_cost.freshness_currentness import parse_naic_report_identifier
+
+    ident = parse_naic_report_identifier("<html>Auto Insurance Database Report</html>")
+    assert ident is None
+
+    def fake_fetch(url: str, **_kwargs: object):
+        return ("<html>Auto Insurance Database Report</html>", "2026-08-15T00:00:00Z")
+
+    monkeypatch.setattr(disc, "fetch_text", fake_fetch)
+    check = disc.discover_naic()
+    assert check.freshness_check_status != "VERIFIED_CURRENT"
+    assert check.freshness_check_status == "CHECK_FAILED"
+    assert check.latest_authoritative_vintage_found in {
+        None,
+        "NAIC Auto Insurance Database Report",
+    }
+
+
+def test_naic_listing_selects_highest_ending_year():
+    from foundation.living_cost.freshness_currentness import (
+        parse_naic_report_identifiers,
+        select_latest_naic_report,
+    )
+
+    html = """
+    Auto Insurance Database Report 2021-2022
+    AUT-PB 2022-2023
+    2020/2021 Auto Insurance Database Report
+    """
+    reports = parse_naic_report_identifiers(html)
+    latest = select_latest_naic_report(reports)
+    assert latest is not None
+    assert latest.end_year == 2023
+    assert latest.start_year == 2022
+    assert latest.display_identifier == "AUT-PB 2022-2023"
+
+
+def test_duplicate_gate_reasons_are_counted_once():
+    checks = _all_ready()
+    checks["mobile_price"] = _ready_family(
+        "mobile_price",
+        freshness_check_status="SOURCE_GAP",
+        retrieval_validation_status="SOURCE_GAP",
+        newer_data_exists=None,
+        selected_vintage=None,
+        selected_artifact=None,
+        selected_artifacts=(),
+        year_coverage={
+            "2024": {"covered": False},
+            "2026": {"covered": False},
+        },
+    )
+    readiness = evaluate_freshness_readiness(checks)
+    reasons = [r for r in readiness["blockers"] if r == "mobile_price:SOURCE_GAP"]
+    assert reasons == ["mobile_price:SOURCE_GAP"]
+    assert readiness["gate_blocker_reason_count"] == len(set(readiness["blockers"]))
+    assert readiness["blocker_count"] == len(readiness["blockers"])

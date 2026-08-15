@@ -16,6 +16,17 @@ from typing import Any
 import requests
 
 from foundation.living_cost.freshness import FreshnessCheck
+from foundation.living_cost.freshness_currentness import (
+    download_temp_bytes,
+    eia_currentness_status,
+    latest_month_from_names,
+    local_pdf_matches_naic,
+    mutable_artifact_status,
+    parse_naic_report_identifiers,
+    parse_usda_latest_report_month,
+    select_latest_naic_report,
+    usda_currentness_status,
+)
 from foundation.living_cost.manifest import (
     ACS_LANDING,
     BEA_RPP_LANDING,
@@ -139,6 +150,9 @@ def _failed(
         transformation_method=None,
         input_evidence_status=evidence,
         extra=extra,
+        listing_freshness_status="CHECK_FAILED",
+        artifact_currentness_status="CHECK_FAILED",
+        selected_artifact_matches_latest=None,
     )
 
 
@@ -165,6 +179,13 @@ def _gap(
         selected_artifacts=(),
         transformation_method=None,
         input_evidence_status=evidence,
+        listing_freshness_status="SOURCE_GAP",
+        artifact_currentness_status="SOURCE_GAP",
+        selected_artifact_matches_latest=None,
+        year_coverage={
+            "2024": {"covered": False, "reason": "SOURCE_GAP"},
+            "2026": {"covered": False, "reason": "SOURCE_GAP"},
+        },
     )
 
 
@@ -229,6 +250,21 @@ def discover_acs() -> FreshnessCheck:
         retrieved_at=(sidecar or {}).get("retrieved_at"),
         transformation_method="LATEST_AVAILABLE county adult 18+ weights; historical 2024 fixed",
         input_evidence_status="VALIDATED",
+        listing_freshness_status=status,
+        artifact_currentness_status="VERIFIED_CURRENT" if has_2024 else "CHECK_FAILED",
+        selected_artifact_matches_latest=has_2024,
+        year_coverage=_year_coverage(
+            {
+                "covered": has_2024,
+                "artifact": "acsdt5y2024-b01001.dat",
+                "note": "2024 ACS 5-Year B01001",
+            },
+            {
+                "covered": has_2024,
+                "artifact": "acsdt5y2024-b01001.dat",
+                "note": "newest appropriate ACS; currently 2024; do not relabel as 2026",
+            },
+        ),
         extra={"listed_years": sorted(years)},
     )
 
@@ -296,6 +332,23 @@ def discover_hud() -> FreshnessCheck:
         selected_artifacts=tuple(arts),
         transformation_method="NONE (year-specific FMR workbooks)",
         input_evidence_status="VALIDATED",
+        listing_freshness_status="NEWER_AVAILABLE" if newer else "VERIFIED_CURRENT",
+        artifact_currentness_status="VERIFIED_CURRENT"
+        if (has_2024 and has_2026)
+        else "CHECK_FAILED",
+        selected_artifact_matches_latest=bool(has_2024 and has_2026),
+        year_coverage=_year_coverage(
+            {
+                "covered": has_2024,
+                "artifact": "FMR2024_final_revised.xlsx",
+                "note": "FY2024",
+            },
+            {
+                "covered": has_2026,
+                "artifact": "FY26_FMRs_revised.xlsx",
+                "note": "FY2026",
+            },
+        ),
     )
 
 
@@ -305,6 +358,53 @@ USDA_WORKBOOK_FILENAMES: dict[str, str] = {
     "alaska": "usda-alaska-june2023-present.xlsx",
     "hawaii": "usda-hawaii-june2023-present.xlsx",
 }
+
+
+def _year_coverage(y2024: dict[str, Any], y2026: dict[str, Any]) -> dict[str, Any]:
+    return {"2024": y2024, "2026": y2026}
+
+
+def inspect_usda_official_workbook(url: str) -> dict[str, Any]:
+    """Retrieve official USDA workbook bytes to a temp file. Do not write cache."""
+    from foundation.sources.usda_food import canonicalize_month_label, parse_usda_official_xlsx
+
+    path, digest = download_temp_bytes(
+        url,
+        headers=_BROWSER_HEADERS,
+        suffix=".xlsx",
+    )
+    try:
+        months_2026: list[str] = []
+        for row in parse_usda_official_xlsx(path, reference_year=2026, plan_key="low_cost"):
+            name = canonicalize_month_label(row.get("month"))
+            if name and name not in months_2026:
+                months_2026.append(name)
+        return {
+            "sha256": digest,
+            "months_2026": months_2026,
+            "latest_2026": latest_month_from_names(2026, months_2026),
+        }
+    finally:
+        path.unlink(missing_ok=True)
+
+
+def inspect_eia_official_workbook(url: str) -> dict[str, Any]:
+    """Retrieve official EIA workbook bytes to a temp file. Do not write cache."""
+    from foundation.sources.eia import max_eia_observation_date
+
+    path, digest = download_temp_bytes(
+        url,
+        headers=_BROWSER_HEADERS,
+        suffix=".xls",
+    )
+    try:
+        return {
+            "sha256": digest,
+            "max_date": max_eia_observation_date(path),
+        }
+    finally:
+        path.unlink(missing_ok=True)
+
 
 NAIC_PUBLICATIONS_LANDING = "https://content.naic.org/publications"
 NHTS_FHWA_LANDING = "https://www.fhwa.dot.gov/policyinformation/nhts.cfm"
@@ -396,8 +496,6 @@ def discover_usda() -> FreshnessCheck:
     hist = years.get(2024) or {}
     current = years.get(2026) or {}
     current_months = list(current.get("months_included") or [])
-    html = ""
-    checked = ""
     hrefs: dict[str, str] = {}
     try:
         html, checked = fetch_text(landing)
@@ -438,42 +536,93 @@ def discover_usda() -> FreshnessCheck:
             reason="USDA page retrieved but official workbook hrefs were not parsed. No guessed URLs.",
             extra={"historical_2024": hist, "current_2026": current},
         )
-    # VERIFIED_CURRENT for 2026 only if selected 2026 months come from official rows
-    # and are not a 2024 twelve-month substitution.
     hist_months = list(hist.get("months_included") or [])
     substituted = bool(current_months) and current_months == hist_months and len(hist_months) == 12
-    current_ok = bool(current_months) and not substituted
-    status = "VERIFIED_CURRENT" if current_ok else "CHECK_FAILED"
+    official_latest = parse_usda_latest_report_month(html)
+    selected_latest = latest_month_from_names(2026, current_months)
+    low_cost_url = hrefs.get(USDA_WORKBOOK_FILENAMES["low_cost"])
+    selected_sha = (_sidecar(USDA_WORKBOOK_FILENAMES["low_cost"]) or {}).get("sha256")
+    official_sha = None
+    official_inspect: dict[str, object] | None = None
+    if low_cost_url:
+        try:
+            official_inspect = inspect_usda_official_workbook(low_cost_url)
+            official_sha = official_inspect.get("sha256")
+            if official_inspect.get("latest_2026"):
+                official_latest = official_inspect["latest_2026"] or official_latest
+        except (OSError, RuntimeError, ValueError, requests.RequestException):
+            official_inspect = None
+            official_sha = None
+    currentness = usda_currentness_status(
+        official_latest=official_latest,
+        selected_latest=selected_latest,
+        official_sha=official_sha,
+        selected_sha=selected_sha,
+    )
+    if substituted:
+        currentness = {
+            "listing_freshness_status": "CHECK_FAILED",
+            "artifact_currentness_status": "CHECK_FAILED",
+            "selected_artifact_matches_latest": False,
+            "freshness_check_status": "CHECK_FAILED",
+            "newer_data_exists": None,
+            "reason": "2024 full-year months cannot stand in for 2026 YTD.",
+        }
+    year_coverage = _year_coverage(
+        {
+            "covered": len(hist_months) == 12,
+            "months_included": hist_months,
+            "note": "full official 2024 months",
+        },
+        {
+            "covered": bool(current_months) and not substituted,
+            "months_included": current_months,
+            "official_latest": official_latest,
+            "selected_latest": selected_latest,
+            "note": "2026 official YTD; not a 2024 substitution",
+        },
+    )
+    extra = {
+        "historical_2024": hist,
+        "current_2026": current,
+        "official_hrefs": hrefs,
+        "substituted_2024_for_2026": substituted,
+        "official_latest_month": official_latest,
+        "selected_latest_month": selected_latest,
+        "official_inspect": official_inspect,
+        "year_coverage": year_coverage,
+    }
     return FreshnessCheck(
         source_id="usda_food",
         latest_checked_at=checked,
-        latest_authoritative_vintage_found="USDA official monthly archives (2024 historical; 2026 YTD)",
+        latest_authoritative_vintage_found=(
+            f"USDA official monthly archives (2024 historical; official latest {official_latest})"
+        ),
         selected_vintage="USDA Low-Cost official monthly archive; 2026 uses official YTD months",
         selected_artifact=USDA_WORKBOOK_FILENAMES["low_cost"],
-        newer_data_exists=False if current_ok else None,
+        newer_data_exists=currentness["newer_data_exists"],
         retrieval_validation_status="MODELED_FROM_MEASURED_INPUTS",
         reason_if_not_refreshed=(
             "Official FNS Cost of Food archive page checked. "
             "Workbook URLs are parsed hrefs, not constructed hostnames. "
             "2024 historical months and 2026 YTD months are stored separately. "
-            "2024 full-year months are not used as 2026 months."
+            f"{currentness['reason']}"
         ),
-        freshness_check_status=status,
+        freshness_check_status=str(currentness["freshness_check_status"]),
         publisher="USDA Center for Nutrition Policy and Promotion",
         landing_url=landing,
         selected_artifacts=tuple(arts),
-        transformation_method="adult 19-50 midpoint × official 1.20 one-person factor",
+        transformation_method="adult 19-50 midpoint x official 1.20 one-person factor",
         input_evidence_status="MODELED_FROM_MEASURED_INPUTS",
         months_included=tuple(current_months),
         month_count=len(current_months) or None,
         first_month=current_months[0] if current_months else None,
         last_month=current_months[-1] if current_months else None,
-        extra={
-            "historical_2024": hist,
-            "current_2026": current,
-            "official_hrefs": hrefs,
-            "substituted_2024_for_2026": substituted,
-        },
+        listing_freshness_status=currentness["listing_freshness_status"],
+        artifact_currentness_status=currentness["artifact_currentness_status"],
+        selected_artifact_matches_latest=currentness["selected_artifact_matches_latest"],
+        year_coverage=year_coverage,
+        extra=extra,
     )
 
 
@@ -534,18 +683,44 @@ def discover_cms() -> FreshnessCheck:
     sbe = _cms_page_check(CMS_SBE_PUF_LANDING, kind="sbe")
     both_ok = federal["status"] == "VERIFIED_CURRENT" and sbe["status"] == "VERIFIED_CURRENT"
     newer = bool(federal.get("has_2027") or sbe.get("has_2027"))
+    hashed = [a for a in arts if a.get("sha256")]
+    # PY2024 filenames are version-addressed. Current PY2026 archives are mutable
+    # and cannot be VERIFIED_CURRENT from a landing-page filename alone.
+    artifact_status = "VERIFIED_CURRENT" if hashed else "CHECK_FAILED"
     if both_ok and newer:
         family_status = "NEWER_AVAILABLE"
+        listing_status = "NEWER_AVAILABLE"
+        matches = False
     elif both_ok:
-        family_status = "VERIFIED_CURRENT"
-    else:
+        listing_status = "VERIFIED_CURRENT"
         family_status = "CHECK_FAILED"
+        artifact_status = "CHECK_FAILED"
+        matches = None
+    else:
+        listing_status = "CHECK_FAILED"
+        family_status = "CHECK_FAILED"
+        artifact_status = "CHECK_FAILED"
+        matches = None
     checked = sbe.get("checked_at") or federal.get("checked_at") or _now_iso()
+    year_coverage = _year_coverage(
+        {
+            "covered": bool(federal.get("has_2024") and hashed),
+            "plan_year": 2024,
+            "note": "PY2024 federal Exchange PUF + standalone SBE",
+        },
+        {
+            "covered": bool(federal.get("has_2026") and hashed),
+            "plan_year": 2026,
+            "note": "PY2026 current-year PUF archives are mutable; listing is not byte proof",
+        },
+    )
     reason = (
         "Combined CMS family requires BOTH the federal Exchange PUF listing and the "
         "standalone SBE QHP PUF listing. SBE-FP states use the federal Exchange PUF "
         "and are not treated as standalone SBE archives. "
-        f"federal={federal['status']}; sbe={sbe['status']}."
+        f"federal={federal['status']}; sbe={sbe['status']}. "
+        "Current plan-year PUF archives can change behind stable year labels; "
+        "listing success is not artifact-byte currentness."
     )
     return FreshnessCheck(
         source_id="cms_marketplace_sbe",
@@ -553,7 +728,7 @@ def discover_cms() -> FreshnessCheck:
         latest_authoritative_vintage_found="PY2024 / PY2026 Exchange PUF + standalone SBE",
         selected_vintage="PY2024 / PY2026 federal Exchange PUF + year-specific standalone SBE",
         selected_artifact="cms_rate_puf / plan_puf / service_area_puf + SBE archives",
-        newer_data_exists=newer if both_ok else None,
+        newer_data_exists=True if family_status == "NEWER_AVAILABLE" else None,
         retrieval_validation_status="MODELED_FROM_MEASURED_INPUTS",
         reason_if_not_refreshed=reason,
         freshness_check_status=family_status,
@@ -562,7 +737,11 @@ def discover_cms() -> FreshnessCheck:
         selected_artifacts=tuple(arts),
         transformation_method="lowest Silver age-40 join of federal PUF + year-specific SBE",
         input_evidence_status="MODELED_FROM_MEASURED_INPUTS",
-        extra={"federal_exchange": federal, "sbe": sbe},
+        listing_freshness_status=listing_status,
+        artifact_currentness_status=artifact_status,
+        selected_artifact_matches_latest=matches,
+        year_coverage=year_coverage,
+        extra={"federal_exchange": federal, "sbe": sbe, "hashed_artifact_count": len(hashed)},
     )
 
 
@@ -611,6 +790,10 @@ def discover_meps() -> FreshnessCheck:
         retrieved_at=(sidecar or {}).get("retrieved_at"),
         transformation_method="weighted-mean OOP pending; not yet derived",
         input_evidence_status="RETRIEVED_UNVALIDATED",
+        year_coverage=_year_coverage(
+            {"covered": True, "note": "MEPS source year 2023; 2024 uses OD-010 translation"},
+            {"covered": True, "note": "MEPS source year 2023; 2026 uses OD-010 translation"},
+        ),
         extra={"listing": refresh},
     )
 
@@ -688,6 +871,10 @@ def discover_nhts() -> FreshnessCheck:
         retrieved_at=(sidecar or {}).get("retrieved_at"),
         transformation_method="weighted median of filtered one-person one-worker licensed households",
         input_evidence_status="VALIDATED",
+        year_coverage=_year_coverage(
+            {"covered": has_2022, "note": "2022 NHTS structural survey applies to 2024"},
+            {"covered": has_2022, "note": "2022 NHTS structural survey applies to 2026"},
+        ),
         extra={"primary_error": primary_err, "used_url": used_url},
     )
 
@@ -726,35 +913,55 @@ def discover_epa() -> FreshnessCheck:
             artifacts=[art],
             reason="fueleconomy.gov download page retrieved but vehicles.csv was not listed.",
         )
+    currentness = mutable_artifact_status(
+        listing_ok=True,
+        official_sha=None,
+        selected_sha=(sidecar or {}).get("sha256"),
+        official_identifier="vehicles.csv.zip",
+        selected_identifier="vehicles.csv.zip",
+    )
     return FreshnessCheck(
         source_id="epa_vehicle",
         latest_checked_at=checked,
         latest_authoritative_vintage_found="EPA/DOE fueleconomy.gov vehicles.csv.zip",
         selected_vintage="EPA/DOE fueleconomy.gov vehicles.csv.zip",
         selected_artifact="epa_fueleconomy_vehicles.csv.zip",
-        newer_data_exists=False,
+        newer_data_exists=currentness["newer_data_exists"],
         retrieval_validation_status="RETRIEVED_UNVALIDATED",
         reason_if_not_refreshed=(
             "OD-004 methodology is FROZEN; EPA MPG evidence is RETRIEVED_UNVALIDATED. "
             "Official fueleconomy.gov download page still lists vehicles.csv. "
-            "Frozen methodology is not VALIDATED cohort extraction."
+            "The URL is mutable. Listing the filename is not byte currentness. "
+            f"{currentness['reason']}"
         ),
-        freshness_check_status="VERIFIED_CURRENT",
+        freshness_check_status=str(currentness["freshness_check_status"]),
         publisher="EPA / DOE",
         landing_url=EPA_FUELEconomy_LANDING,
         selected_artifacts=(art,),
         retrieved_at=(sidecar or {}).get("retrieved_at"),
         transformation_method="median combined MPG cohort pending validation",
         input_evidence_status="RETRIEVED_UNVALIDATED",
+        listing_freshness_status=currentness["listing_freshness_status"],
+        artifact_currentness_status=currentness["artifact_currentness_status"],
+        selected_artifact_matches_latest=currentness["selected_artifact_matches_latest"],
+        year_coverage=_year_coverage(
+            {"covered": True, "note": "rolling EPA/DOE cohort applies to 2024 window"},
+            {"covered": True, "note": "rolling EPA/DOE cohort applies to 2026 window"},
+        ),
     )
 
 
 def discover_eia() -> FreshnessCheck:
+    from foundation.sources.eia import EIA_GAS_XLS_URL, max_eia_observation_date
+
     sidecar = _sidecar("pswrgvwall.xls")
+    local_path = CACHE_DIR / "pswrgvwall.xls"
+    selected_max = max_eia_observation_date(local_path) if local_path.exists() else None
+    selected_sha = (sidecar or {}).get("sha256")
     art = _artifact_record(
         artifact_id="pswrgvwall.xls",
-        url="https://www.eia.gov/petroleum/gasdiesel/xls/pswrgvwall.xls",
-        sha256=(sidecar or {}).get("sha256"),
+        url=EIA_GAS_XLS_URL,
+        sha256=selected_sha,
         retrieved_at=(sidecar or {}).get("retrieved_at"),
         validation_status="VALIDATED",
     )
@@ -783,53 +990,76 @@ def discover_eia() -> FreshnessCheck:
             artifacts=[art],
             reason="EIA page retrieved but pswrgvwall.xls / weekly gasoline workbook was not found.",
         )
+    official_max = None
+    official_sha = None
+    try:
+        inspected = inspect_eia_official_workbook(EIA_GAS_XLS_URL)
+        official_max = inspected.get("max_date")
+        official_sha = inspected.get("sha256")
+    except (OSError, RuntimeError, ValueError, requests.RequestException):
+        official_max = None
+        official_sha = None
+    currentness = eia_currentness_status(
+        official_max_date=official_max,
+        selected_max_date=selected_max,
+        official_sha=official_sha,
+        selected_sha=selected_sha,
+    )
+    year_coverage = _year_coverage(
+        {
+            "covered": selected_max is not None and selected_max.year >= 2024,
+            "selected_max_date": None if selected_max is None else selected_max.isoformat(),
+            "note": "2024 weekly observations",
+        },
+        {
+            "covered": selected_max is not None and selected_max.year >= 2026,
+            "selected_max_date": None if selected_max is None else selected_max.isoformat(),
+            "official_max_date": None if official_max is None else official_max.isoformat(),
+            "note": "2026 YTD weekly observations",
+        },
+    )
     return FreshnessCheck(
         source_id="eia_gasoline",
         latest_checked_at=checked,
-        latest_authoritative_vintage_found="EIA weekly retail gasoline pswrgvwall.xls",
-        selected_vintage="EIA weekly retail gasoline",
+        latest_authoritative_vintage_found=(
+            None
+            if official_max is None
+            else f"EIA weekly retail gasoline through {official_max.isoformat()}"
+        ),
+        selected_vintage=(
+            None
+            if selected_max is None
+            else f"EIA weekly retail gasoline through {selected_max.isoformat()}"
+        ),
         selected_artifact="pswrgvwall.xls",
-        newer_data_exists=False,
+        newer_data_exists=currentness["newer_data_exists"],
         retrieval_validation_status="VALIDATED",
         reason_if_not_refreshed=(
-            "Official EIA gasoline/diesel page checked. Selected workbook is still pswrgvwall.xls. "
-            "Use target-year observations / YTD. Do not relabel source year."
+            "Official EIA gasoline/diesel page checked. pswrgvwall.xls is a mutable URL. "
+            f"{currentness['reason']}"
         ),
-        freshness_check_status="VERIFIED_CURRENT",
+        freshness_check_status=str(currentness["freshness_check_status"]),
         publisher="U.S. Energy Information Administration",
         landing_url=EIA_GAS_LANDING,
         selected_artifacts=(art,),
         retrieved_at=(sidecar or {}).get("retrieved_at"),
         transformation_method="target-year / YTD weekly retail regular gasoline",
         input_evidence_status="VALIDATED",
+        listing_freshness_status=currentness["listing_freshness_status"],
+        artifact_currentness_status=currentness["artifact_currentness_status"],
+        selected_artifact_matches_latest=currentness["selected_artifact_matches_latest"],
+        year_coverage=year_coverage,
+        extra={
+            "official_max_date": None if official_max is None else official_max.isoformat(),
+            "selected_max_date": None if selected_max is None else selected_max.isoformat(),
+        },
     )
-
-
-def parse_naic_report_identifier(html: str) -> str | None:
-    """Discover the latest Auto Insurance Database Report identifier from official HTML."""
-    match = re.search(
-        r"(20\d{2}\s*/\s*20\d{2}\s+Auto Insurance Database Report)",
-        html,
-        re.IGNORECASE,
-    )
-    if match:
-        return re.sub(r"\s+", " ", match.group(1)).strip()
-    match = re.search(r"(Auto Insurance Database Report[^.<]{0,40})", html, re.IGNORECASE)
-    if match:
-        return re.sub(r"\s+", " ", match.group(1)).strip()
-    if "auto insurance database" in html.lower():
-        years = re.findall(r"20\d{2}", html)
-        if years:
-            return (
-                f"Auto Insurance Database Report (years mentioned: {', '.join(sorted(set(years)))})"
-            )
-        return "Auto Insurance Database Report"
-    return None
 
 
 def discover_naic() -> FreshnessCheck:
     sidecar = _sidecar("publication-aut-pb-auto-insurance-database.pdf")
     landing = NAIC_PUBLICATIONS_LANDING
+    local_pdf = CACHE_DIR / "publication-aut-pb-auto-insurance-database.pdf"
     art = _artifact_record(
         artifact_id="publication-aut-pb-auto-insurance-database.pdf",
         url=landing,
@@ -850,8 +1080,9 @@ def discover_naic() -> FreshnessCheck:
             artifacts=[art],
             reason=f"NAIC Publications listing could not be retrieved: {exc}",
         )
-    identifier = parse_naic_report_identifier(html)
-    if identifier is None:
+    reports = parse_naic_report_identifiers(html)
+    latest = select_latest_naic_report(reports)
+    if latest is None:
         return _failed(
             "naic_auto_insurance",
             publisher="NAIC",
@@ -860,28 +1091,72 @@ def discover_naic() -> FreshnessCheck:
             vintage="NAIC Auto Insurance Database Report",
             artifact="publication-aut-pb-auto-insurance-database.pdf",
             artifacts=[art],
-            reason="NAIC Publications page retrieved but Auto Insurance Database Report was not identified.",
+            reason=(
+                "NAIC Publications page retrieved but no Auto Insurance Database "
+                "Report year range (for example AUT-PB 2022-2023) was identified."
+            ),
         )
+    bound = local_pdf_matches_naic(local_pdf, latest)
+    currentness = mutable_artifact_status(
+        listing_ok=True,
+        official_sha=None,
+        selected_sha=(sidecar or {}).get("sha256") if bound is True else None,
+        official_identifier=latest.display_identifier,
+        selected_identifier=latest.display_identifier if bound is True else None,
+    )
+    if bound is not True:
+        currentness = {
+            "listing_freshness_status": "VERIFIED_CURRENT",
+            "artifact_currentness_status": "CHECK_FAILED",
+            "selected_artifact_matches_latest": False if bound is False else None,
+            "freshness_check_status": "CHECK_FAILED",
+            "newer_data_exists": None,
+            "reason": (
+                f"Latest listing is {latest.display_identifier} but the local PDF "
+                "was not proven to be that report."
+            ),
+        }
     return FreshnessCheck(
         source_id="naic_auto_insurance",
         latest_checked_at=checked,
-        latest_authoritative_vintage_found=identifier,
-        selected_vintage=identifier,
+        latest_authoritative_vintage_found=latest.display_identifier,
+        selected_vintage=latest.display_identifier if bound is True else None,
         selected_artifact="publication-aut-pb-auto-insurance-database.pdf",
-        newer_data_exists=False,
+        newer_data_exists=currentness["newer_data_exists"],
         retrieval_validation_status="RETRIEVED_UNVALIDATED",
         reason_if_not_refreshed=(
-            "Official NAIC Publications listing checked. Latest report identifier parsed "
-            "from the page (not hard-coded). PDF retrieve exists. "
+            "Official NAIC Publications listing checked. Latest report identifier "
+            f"is {latest.display_identifier}. {currentness['reason']} "
             "State-table extraction is not a validated numeric series."
         ),
-        freshness_check_status="VERIFIED_CURRENT",
+        freshness_check_status=str(currentness["freshness_check_status"]),
         publisher="National Association of Insurance Commissioners",
         landing_url=landing,
         selected_artifacts=(art,),
         retrieved_at=(sidecar or {}).get("retrieved_at"),
         transformation_method="state-table extraction pending validation",
         input_evidence_status="RETRIEVED_UNVALIDATED",
+        listing_freshness_status=currentness["listing_freshness_status"],
+        artifact_currentness_status=currentness["artifact_currentness_status"],
+        selected_artifact_matches_latest=currentness["selected_artifact_matches_latest"],
+        year_coverage=_year_coverage(
+            {
+                "covered": True,
+                "note": f"lagged NAIC report {latest.display_identifier} applies to 2024",
+            },
+            {
+                "covered": True,
+                "note": f"lagged NAIC report {latest.display_identifier} applies to 2026",
+            },
+        ),
+        extra={
+            "publication_code": latest.publication_code,
+            "start_year": latest.start_year,
+            "end_year": latest.end_year,
+            "display_identifier": latest.display_identifier,
+            "identifiers_found": [item.display_identifier for item in reports],
+            "local_pdf_bound": bound,
+        },
     )
 
 
@@ -943,6 +1218,10 @@ def discover_bls_ce() -> FreshnessCheck:
         retrieved_at=(sidecar or {}).get("retrieved_at"),
         transformation_method="Interview FMLI / MTBI / VQB parse from cache",
         input_evidence_status="INCOMPLETE_PROVENANCE",
+        year_coverage=_year_coverage(
+            {"covered": has_24, "artifact": "intrvw24.zip", "note": "2024 Interview PUMD"},
+            {"covered": False, "note": "2026 Interview PUMD not bound"},
+        ),
         extra={"listing_has_intrvw24": has_24, "listing_has_intrvw25": has_25},
     )
 
@@ -1034,26 +1313,56 @@ def discover_bea() -> FreshnessCheck:
         if current_rel
         else "BEA SARPP All-items 2024"
     )
+    official_sha = None
+    try:
+        remote = download_temp_bytes(
+            "https://apps.bea.gov/regional/zip/SARPP.zip",
+            headers=_BROWSER_HEADERS,
+            suffix=".zip",
+            max_bytes=30_000_000,
+        )
+        official_sha = remote[1]
+        remote[0].unlink(missing_ok=True)
+    except (OSError, RuntimeError, ValueError, requests.RequestException):
+        official_sha = None
+    currentness = mutable_artifact_status(
+        listing_ok=bool(current_rel or has_2024),
+        official_sha=official_sha,
+        selected_sha=(sidecar or {}).get("sha256"),
+        official_identifier=current_rel,
+        selected_identifier=current_rel,
+    )
     return FreshnessCheck(
         source_id="bea_rpp",
         latest_checked_at=checked,
         latest_authoritative_vintage_found=vintage,
         selected_vintage=vintage,
         selected_artifact="SARPP.zip",
-        newer_data_exists=False,
+        newer_data_exists=currentness["newer_data_exists"],
         retrieval_validation_status="VALIDATED",
         reason_if_not_refreshed=(
             f"Official BEA RPP landing checked. Current release={current_rel!r}; "
-            f"Next release={next_rel!r}. Selected artifact SARPP.zip. "
+            f"Next release={next_rel!r}. SARPP.zip is a mutable URL. "
+            f"{currentness['reason']} "
             "2026 cost year reuses 2024 as LATEST_AVAILABLE and does not relabel the source year."
         ),
-        freshness_check_status="VERIFIED_CURRENT",
+        freshness_check_status=str(currentness["freshness_check_status"]),
         publisher="U.S. Bureau of Economic Analysis",
         landing_url=BEA_RPP_LANDING,
         selected_artifacts=(art,),
         retrieved_at=(sidecar or {}).get("retrieved_at"),
         transformation_method="LATEST_AVAILABLE All-items state RPP; source year not relabeled",
         input_evidence_status="VALIDATED",
+        listing_freshness_status=currentness["listing_freshness_status"],
+        artifact_currentness_status=currentness["artifact_currentness_status"],
+        selected_artifact_matches_latest=currentness["selected_artifact_matches_latest"],
+        year_coverage=_year_coverage(
+            {"covered": True, "note": "BEA 2024 All-items RPP"},
+            {
+                "covered": True,
+                "note": "2026 reuses 2024 as LATEST_AVAILABLE; source year not relabeled",
+            },
+        ),
         extra={"current_release": current_rel, "next_release": next_rel},
     )
 
@@ -1106,6 +1415,10 @@ def discover_federal_tax() -> FreshnessCheck:
         selected_artifacts=(),
         transformation_method="RULE_YEAR; no silent fallback to another year",
         input_evidence_status="INVENTORY_NOT_VALIDATED",
+        year_coverage=_year_coverage(
+            {"covered": 2024 in years, "note": "federal tables present in code"},
+            {"covered": 2026 in years, "note": "federal tables present in code"},
+        ),
         extra={"rule_years_present": years},
     )
 
@@ -1130,6 +1443,10 @@ def discover_state_tax() -> FreshnessCheck:
         selected_artifacts=(),
         transformation_method="RULE_YEAR",
         input_evidence_status="SOURCE_GAP",
+        year_coverage=_year_coverage(
+            {"covered": False, "note": "state inventory incomplete"},
+            {"covered": False, "note": "state inventory incomplete"},
+        ),
     )
 
 
@@ -1155,6 +1472,10 @@ def discover_local_tax() -> FreshnessCheck:
         selected_artifacts=(),
         transformation_method="typed LocalTaxResult; unresolved ≠ 0",
         input_evidence_status="SOURCE_GAP",
+        year_coverage=_year_coverage(
+            {"covered": False, "note": "most FIPS unresolved"},
+            {"covered": False, "note": "most FIPS unresolved"},
+        ),
     )
 
 
@@ -1229,6 +1550,10 @@ def discover_od010() -> FreshnessCheck:
         selected_artifacts=(),
         transformation_method="CPI_UPDATED pending binding",
         input_evidence_status="INVENTORY_NOT_VALIDATED",
+        year_coverage=_year_coverage(
+            {"covered": bound, "note": "OD-010 translation table"},
+            {"covered": bound, "note": "OD-010 translation table"},
+        ),
         extra={"translation_table_bound": bound},
     )
 

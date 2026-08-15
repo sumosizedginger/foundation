@@ -53,11 +53,7 @@ def test_authorization_functions_are_separate_and_false():
 
     # Private candidate gate must refuse when config candidate auth is false.
     with pytest.raises(FreshnessGateError, match="candidate_calculation_authorized"):
-        assert_candidate_freshness_ready(
-            ready,
-            project_cost_year=2026,
-            translation_index_bound=True,
-        )
+        assert_candidate_freshness_ready(ready)
 
     # Public release is a later, separate gate and also reads config only.
     with pytest.raises(FreshnessGateError, match="living_cost_release_authorized"):

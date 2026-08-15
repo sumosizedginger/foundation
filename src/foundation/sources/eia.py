@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import csv
 import logging
+from datetime import date
 from pathlib import Path
 
 from foundation.living_cost.models import ComponentStatus, LivingCostComponentObservation
@@ -233,6 +234,32 @@ def parse_eia_gas_prices_xls(
             )
         )
     return observations
+
+
+def max_eia_observation_date(file_path: Path) -> date | None:
+    """Newest calendar date present in the official weekly gasoline workbook."""
+    try:
+        import xlrd
+    except ImportError:
+        return None
+    try:
+        book = xlrd.open_workbook(file_path)
+    except (OSError, xlrd.XLRDError, ValueError):
+        return None
+    latest: date | None = None
+    for sheet in book.sheets():
+        for row_idx in range(min(sheet.nrows, 4000)):
+            raw = sheet.cell_value(row_idx, 0)
+            if not isinstance(raw, (int, float)) or raw <= 200:
+                continue
+            try:
+                parts = xlrd.xldate_as_tuple(float(raw), book.datemode)
+                observed = date(int(parts[0]), int(parts[1]), int(parts[2]))
+            except (ValueError, TypeError, OverflowError):
+                continue
+            if latest is None or observed > latest:
+                latest = observed
+    return latest
 
 
 def _eia_cell_year(raw_date: object, datemode: int) -> int | None:

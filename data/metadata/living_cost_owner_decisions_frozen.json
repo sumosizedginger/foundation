@@ -1,6 +1,6 @@
 {
   "report_type": "living_cost_owner_decisions_frozen",
-  "generated_at": "2026-08-15T05:15:35+00:00",
+  "generated_at": "2026-08-15T15:55:47+00:00",
   "effective_date": "2026-08-15",
   "status": "ACCEPTED",
   "methodology_status": "FROZEN",
@@ -91,6 +91,11 @@
     "private_candidate_never_implies_publication": true,
     "authorization_source": "config/definitions.yml",
     "translation_index_bound": false,
+    "candidate_inputs_bound": false,
+    "required_project_cost_years": [
+      2024,
+      2026
+    ],
     "legacy_named_families": [
       "acs_population_weights",
       "hud_fmr",
