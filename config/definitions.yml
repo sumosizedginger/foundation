@@ -22,3 +22,31 @@ display:
   money_rounding: 100
   composite_precision: 0
   show_fake_precision: false
+
+living_cost:
+  release_authorized: false
+  states_modeled: 0
+  owner_freeze:
+    status: ACCEPTED
+    methodology_status: FROZEN
+    effective_date: "2026-08-15"
+    decisions: ["OD-001", "OD-002", "OD-003", "OD-004", "OD-005", "OD-006", "OD-007", "OD-008", "OD-009", "OD-010", "OD-011", "OD-012", "OD-013"]
+  social_recreation:
+    minimum_annual: 1200
+    preferred_annual: 2400
+  resilience:
+    extra_reserve_annual: 0
+  connectivity:
+    canonical: ["mobile", "broadband"]
+    broadband_down_mbps: 100
+    broadband_up_mbps: 20
+  food:
+    canonical: usda_low_cost_food_plan
+    sensitivity: usda_thrifty_food_plan
+  health_premium:
+    age: 40
+    metal: Silver
+    subsidy: false
+  housing:
+    unit: independent_1_bedroom
+    roommate: false

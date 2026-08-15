@@ -8,6 +8,7 @@ depreciation, or MEPS out-of-pocket medical baselines.
 from __future__ import annotations
 
 from foundation.living_cost.models import ComponentStatus, LivingCostComponentObservation
+from foundation.living_cost.owner_freeze import canonical_resilience_reserve
 
 
 def calculate_resilience_reserve(
@@ -23,6 +24,10 @@ def calculate_resilience_reserve(
     if annual_reserve < 0:
         raise ValueError("Resilience reserve cannot be negative")
 
+    # OD-012: the generic extra reserve is $0. A caller-supplied positive
+    # amount is not an identified uncovered necessity and is not applied.
+    applied = canonical_resilience_reserve()
+
     return LivingCostComponentObservation(
         component_id="resilience",
         category="resilience",
@@ -31,8 +36,8 @@ def calculate_resilience_reserve(
         geography_name=geography_name,
         state=state,
         reference_year=reference_year,
-        value_annual=round(annual_reserve, 2),
-        value_monthly=round(annual_reserve / 12.0, 2),
+        value_annual=round(applied, 2),
+        value_monthly=round(applied / 12.0, 2),
         unit="USD",
         status=ComponentStatus.ESTIMATED,
         source_id=f"resilience_model_{reference_year}",
@@ -43,5 +48,10 @@ def calculate_resilience_reserve(
         retrieved_at=retrieved_at,
         source_artifact_sha256=source_sha256,
         methodology_version="0.2.0-draft",
-        notes="Unavoidable emergency irregular expense buffer (minor household replacements, unexpected non-auto emergencies).",
+        notes=(
+            "OD-012 FROZEN: canonical extra resilience reserve is $0. "
+            f"Generic emergency/savings buffers are forbidden. "
+            f"canonical_resilience_reserve={canonical_resilience_reserve():.2f}. "
+            "Predictable irregular costs must be annualized inside their component."
+        ),
     )

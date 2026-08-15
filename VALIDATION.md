@@ -189,7 +189,24 @@ Before deploy:
 - no secrets are present;
 - no frontend calculation mutates official values.
 
-## 14. Release gate checklist
+## 14. Living-cost owner freeze (OD-001–OD-013)
+
+Methodology freeze is not a publication authorization.
+
+Before any future candidate MSLC calculation:
+
+- [ ] OD-001–OD-013 remain ACCEPTED / FROZEN
+- [ ] Freshness gate re-checks MEPS Full Year Consolidated, USDA current-year months, CMS Marketplace/SBE, EIA gasoline, and current tax-law sources
+- [ ] Historical 2024 costs are not recalculated with later-year price observations
+- [ ] Recreation output shows both the $100/month minimum and the $200/month preferred modest-life standard
+- [ ] Generic resilience reserve is $0
+- [ ] Evidence status is still reported separately from methodology status
+- [ ] `living_cost_release_authorized` is still false until an explicit later owner authorization
+- [ ] Public `states_modeled` remains 0 until modeled states are actually produced
+
+A source gap after methodology freeze is acceptable. A fabricated number is not.
+
+## 15. Release gate checklist
 
 The composite Foundation score may not be labeled official until all are true:
 

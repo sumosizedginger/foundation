@@ -286,7 +286,7 @@ def parse_bls_ce_microdata(
                 "APPARCQ+PERSCACQ+HOUSEQCQ (not a frozen UCC list). "
                 f"P20=${p20_essentials:,.2f}; P25=${p25_essentials:,.2f}; "
                 f"P30=${p30_essentials:,.2f}/yr among single-person positive spenders "
-                f"(n={len(essentials_vals):,}). P25 stored as the candidate only; not frozen."
+                f"(n={len(essentials_vals):,}). P25 stored as the empirical candidate."
             ),
         )
         observations.append(obs_ess)
@@ -686,10 +686,12 @@ def parse_bls_ce_maintenance_candidates(
         "status": _maintenance_status(retrieved_at, file_sha256, parsed_ok),
         "source_data_year": data_year,
         "project_cost_year": reference_year,
-        "translation_method": "NONE" if reference_year == data_year else "CPI_UPDATED_CANDIDATE",
+        "translation_method": (
+            "NONE_ALREADY_LOCAL" if reference_year == data_year else "CPI_UPDATED"
+        ),
         "price_index_series": None
         if reference_year == data_year
-        else "CPI-U motor vehicle maintenance and repair (not applied)",
+        else "CPI-U motor vehicle maintenance and repair (OD-010 FROZEN)",
         "architecture": (
             "FMLI characteristics + VQB detailed vehicle operating expenses "
             "(VQBCODE/VQBEXPX); MTBI UCC map for official classification "

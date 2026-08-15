@@ -1,3 +1,9 @@
+# SUPERSEDED HISTORICAL OWNER-DECISION PACKET
+
+# NOT CURRENT PROJECT STATUS
+
+# Replaced by living_cost_owner_decisions_frozen.md after D-043 owner freeze.
+
 # Living-cost owner decisions pending
 
 No Minimum Sustainable Living Cost headline was calculated or published.

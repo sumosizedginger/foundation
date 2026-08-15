@@ -224,14 +224,16 @@ def test_geo_join_cannot_claim_full_coverage_with_blank_hashes():
     assert report["coverage_claim_allowed"] is False
 
 
-def test_owner_packet_writes_unresolved_decisions_only(tmp_path: Path):
+def test_owner_packet_writes_frozen_decisions(tmp_path: Path):
     from foundation.living_cost.owner_packet import write_owner_decision_packet
 
     payload = write_owner_decision_packet(tmp_path)
     assert payload["headline_calculated"] is False
-    assert (tmp_path / "living_cost_owner_decisions_pending.json").exists()
-    assert (tmp_path / "living_cost_owner_decisions_pending.md").exists()
+    assert payload["decisions_frozen"] is True
+    assert (tmp_path / "living_cost_owner_decisions_frozen.json").exists()
+    assert (tmp_path / "living_cost_owner_decisions_frozen.md").exists()
     assert any(d["id"] == "OD-003" for d in payload["decisions"])
+    assert all(d["status"] == "ACCEPTED" for d in payload["decisions"])
 
 
 def test_validation_cli_is_callable():

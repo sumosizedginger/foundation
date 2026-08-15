@@ -58,7 +58,7 @@ def download_epa_mpg_artifact(year: int, cache_dir: Path, force_download: bool =
             notes=(
                 "Official EPA/DOE fueleconomy.gov vehicles.csv.zip was not retrieved. "
                 f"Automotive Trends landing: {EPA_TRENDS_LANDING}. "
-                "24/28/32 MPG constants remain unfrozen and unused."
+                "24/28/32 MPG constants are forbidden (OD-004). Cohort MPG is data-derived."
             ),
         )
     return artifact
@@ -117,7 +117,7 @@ def _model_year(row: dict[str, str]) -> int | None:
 
 
 def build_mpg_candidates(rows: list[dict[str, str]], cost_year: int) -> list[dict[str, Any]]:
-    """Candidate reference-vehicle cohorts. Not frozen."""
+    """Candidate reference-vehicle cohorts. OD-004 canonical = used compact+midsize median."""
     used_lo = cost_year - 12
     used_hi = cost_year - 8
     new_year = 2024
@@ -197,7 +197,7 @@ def parse_epa_mpg_candidates(
     retrieved_at: str = "",
     file_sha256: str = "",
 ) -> list[LivingCostComponentObservation]:
-    """Parse official EPA vehicle file into unfrozen MPG candidates."""
+    """Parse official EPA vehicle file into OD-004 MPG candidates."""
     zip_path = cache_dir if cache_dir.is_file() else cache_dir / EPA_EXPECTED_FILENAME
     if not zip_path.exists():
         return [
@@ -243,13 +243,20 @@ def parse_epa_mpg_candidates(
     candidates = build_mpg_candidates(rows, reference_year)
     observations: list[LivingCostComponentObservation] = []
     for cand in candidates:
+        from foundation.living_cost.owner_freeze import CANONICAL_MPG_COHORT_ID
+
+        role = (
+            "CANONICAL used-car compact+midsize gasoline median (OD-004 FROZEN)"
+            if cand["id"] == CANONICAL_MPG_COHORT_ID
+            else "sensitivity cohort (OD-004 FROZEN)"
+        )
         notes = (
-            f"EPA reference-vehicle candidate '{cand['label']}' (OD-004, not frozen). "
+            f"EPA reference-vehicle {role}: '{cand['label']}'. "
             f"Filter: gasoline non-BEV/non-PHEV; class tokens compact/midsize as specified; "
             f"combined real-world MPG = comb08. n={cand['n']}; "
             f"median={cand['median_mpg']}; mean={cand['mean_mpg']}; "
             f"P25={cand['p25_mpg']}; P75={cand['p75_mpg']}. "
-            "Used-car vs new-car is an owner decision. 24/28/32 are not the empirical model."
+            "24/28/32 are not the empirical model."
         )
         observations.append(
             LivingCostComponentObservation(

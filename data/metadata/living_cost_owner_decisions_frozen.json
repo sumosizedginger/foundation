@@ -1,0 +1,367 @@
+{
+  "report_type": "living_cost_owner_decisions_frozen",
+  "generated_at": "2026-08-15T01:09:21+00:00",
+  "effective_date": "2026-08-15",
+  "status": "ACCEPTED",
+  "methodology_status": "FROZEN",
+  "headline_calculated": false,
+  "gap_calculated": false,
+  "adequacy_calculated": false,
+  "living_cost_release_authorized": false,
+  "states_modeled": 0,
+  "decisions_frozen": true,
+  "all_ods_frozen": true,
+  "methodology_frozen_is_not_source_validated": true,
+  "global_rules": {
+    "freshest_authoritative_data": true,
+    "minimum_sustainable_not_deprivation": true,
+    "social_recreation_floors": {
+      "minimum_annual": 1200.0,
+      "preferred_annual": 2400.0
+    },
+    "no_generic_savings_reserve": true,
+    "canonical_resilience_reserve_annual": 0.0
+  },
+  "additional_freezes": {
+    "food": {
+      "canonical": "usda_low_cost_food_plan",
+      "sensitivity": "usda_thrifty_food_plan",
+      "incomplete_year": "YTD"
+    },
+    "health_premium": {
+      "age": 40,
+      "household": "single",
+      "smoker": false,
+      "dependents": 0,
+      "subsidy": false,
+      "medicaid": false,
+      "employer_contribution": false,
+      "market": "aca_compliant_individual_major_medical",
+      "metal": "Silver",
+      "selection": "deterministic_lowest_qualifying_silver_in_actual_geography",
+      "fake_deductible_or_rating_area_fallback": false
+    },
+    "housing": {
+      "unit": "independent_1_bedroom",
+      "source": "HUD_FMR",
+      "roommate": false,
+      "room_rental": false,
+      "homeownership": false,
+      "cheapest_theoretical": false,
+      "double_count_hud_tenant_utilities": false
+    },
+    "global_freshest_authoritative_data": true,
+    "minimum_sustainable_definition": "independent adult can pay rent, ordinary bills, adequate food, necessary transportation, auto insurance where a car is required, healthcare premiums and expected OOP, mobile+broadband, replace ordinary necessities, pay applicable taxes, and participate modestly in ordinary human/social life",
+    "no_generic_savings_reserve": true
+  },
+  "freshness_gate": {
+    "required_before_candidate_calculation": [
+      "meps_full_year_consolidated",
+      "usda_current_year_months",
+      "cms_marketplace_sbe",
+      "eia_gasoline",
+      "current_tax_law"
+    ],
+    "if_newer_authoritative_data_exist": [
+      "retrieve",
+      "hash",
+      "validate",
+      "use"
+    ],
+    "do_not_recalculate_historical_2024_with_2026_prices": true,
+    "headline_authorized_by_this_gate": false
+  },
+  "decisions": [
+    {
+      "id": "OD-001",
+      "title": "ACS geographic population weights",
+      "status": "ACCEPTED",
+      "methodology_status": "FROZEN",
+      "effective_date": "2026-08-15",
+      "decision": "Use the newest authoritative ACS 5-Year county/county-equivalent adult 18+ vintage actually available and appropriate at calculation time. Do not permanently freeze an obsolete ACS vintage. Historical 2024 costs use 2024 ACS 5-Year weights and must not be rewritten with later population vintages. Current/2026 costs use the newest available ACS 5-Year county vintage (today: 2024). Retain a fixed-2024-weight sensitivity for longitudinal comparison.",
+      "owner_rationale": "Freshest appropriate weights answer the current question. A fixed-2024 sensitivity answers how costs changed holding geographic mix constant.",
+      "implementation_rule": "select_acs_weight_vintage(cost_year, available, mode=canonical|fixed_2024_sensitivity)",
+      "source_selection_rule": "Newest ACS 5-Year county adult-population vintage that exists at run time; historical 2024 locked to 2024 ACS 5-Year.",
+      "required_sensitivity": [
+        "fixed_2024_weight"
+      ],
+      "known_evidence_gaps": [],
+      "numeric_value_currently_available": true,
+      "evidence_status": "VALIDATED",
+      "current_vintage_as_of_freeze": 2024
+    },
+    {
+      "id": "OD-002",
+      "title": "MEPS out-of-pocket healthcare",
+      "status": "ACCEPTED",
+      "methodology_status": "FROZEN",
+      "effective_date": "2026-08-15",
+      "decision": "Canonical statistic is the weighted mean annual OOP among adults 18\u201364 who are privately insured in the independent-adult reference population. Required sensitivities: weighted median and weighted P75. Use the newest Full Year Consolidated MEPS file actually released when the candidate calculation runs. At freeze time that file is HC-251 / 2023.",
+      "owner_rationale": "Medical spending is skewed and episodic. A median underfunds expected long-run healthcare. The budget should represent expected annual burden.",
+      "implementation_rule": "canonical=weighted_mean; sensitivities=weighted_median,weighted_p75",
+      "source_selection_rule": "If 2024 Full Year Consolidated is listed on the official MEPS PUF page, retrieve/hash/validate/use it. Otherwise HC-251 with true source year 2023.",
+      "required_sensitivity": [
+        "weighted_median",
+        "weighted_p75"
+      ],
+      "known_evidence_gaps": [
+        "2024 Full Year Consolidated not listed as of owner freeze; scheduled August 2026"
+      ],
+      "numeric_value_currently_available": false,
+      "evidence_status": "RETRIEVED_UNVALIDATED",
+      "newest_listed_puf": "HC-251",
+      "source_data_year": 2023
+    },
+    {
+      "id": "OD-003",
+      "title": "Necessary annual vehicle mileage",
+      "status": "ACCEPTED",
+      "methodology_status": "FROZEN",
+      "effective_date": "2026-08-15",
+      "decision": "Canonical mobility requirement is the NHTS weighted median observed annual mileage for one-person, one-worker, age 18\u201364 licensed-driver households with valid annual vehicle mileage. Label: FOUNDATION MOBILITY STANDARD derived from observed NHTS median. Do not use the mean (~19,000) as minimum necessary. Do not use P25 as canonical.",
+      "owner_rationale": "The mean is pulled by high-mileage households. P25 risks unusually constrained mobility. The median is the modest observed standard.",
+      "implementation_rule": "canonical=weighted_median; sensitivities=P25,mean,P75",
+      "source_selection_rule": "Latest available NHTS microdata (structural quantity; do not inflate miles).",
+      "required_sensitivity": [
+        "weighted_p25",
+        "weighted_mean",
+        "weighted_p75"
+      ],
+      "known_evidence_gaps": [],
+      "numeric_value_currently_available": true,
+      "evidence_status": "MEASURED",
+      "approximate_canonical_value": 10000.0,
+      "label": "FOUNDATION MOBILITY STANDARD"
+    },
+    {
+      "id": "OD-004",
+      "title": "Reference vehicle / MPG",
+      "status": "ACCEPTED",
+      "methodology_status": "FROZEN",
+      "effective_date": "2026-08-15",
+      "decision": "Used-car cohort: gasoline non-BEV/non-PHEV compact + midsize passenger cars, model years approximately 8\u201312 years before the project cost year. Canonical MPG is the cohort median estimated real-world combined MPG. Do not freeze 24 / 28 / 32.",
+      "owner_rationale": "A modest reliable used car, not a new car, luxury car, cherry-picked efficient model, or $1,500 beater.",
+      "implementation_rule": "canonical cohort=used_compact_midsize_gasoline; statistic=median_mpg; window=cost_year-12 .. cost_year-8",
+      "source_selection_rule": "Newest final authoritative EPA/DOE fueleconomy.gov vehicle file when extracting those historical model-year cohorts.",
+      "required_sensitivity": [
+        "compact_only",
+        "midsize_only",
+        "median",
+        "weighted_mean"
+      ],
+      "known_evidence_gaps": [
+        "Production/sales weights not always available on the vehicle file"
+      ],
+      "numeric_value_currently_available": true,
+      "evidence_status": "MODELED_FROM_MEASURED_INPUTS",
+      "hardcoded_mpg_forbidden": [
+        24,
+        28,
+        32
+      ]
+    },
+    {
+      "id": "OD-005",
+      "title": "Vehicle replacement reserve",
+      "status": "ACCEPTED",
+      "methodology_status": "FROZEN",
+      "effective_date": "2026-08-15",
+      "decision": "ANNUAL REPLACEMENT RESERVE = (reference used-car acquisition cost - expected residual/salvage value) / expected remaining usable years. Formula is frozen. Numeric constants are not. Retired $10,000 / $2,000 / 5 years / $1,600 must not be defaults.",
+      "owner_rationale": "Pretending the existing vehicle lasts forever understates sustainable transportation. The model is explicit and is not MEASURED.",
+      "implementation_rule": "vehicle_replacement_reserve(acquisition, residual, years)",
+      "source_selection_rule": "Newest reproducible authoritative/defensible used-vehicle price source; defensible vehicle-age/survival evidence; documented residual.",
+      "required_sensitivity": [
+        "acquisition_price",
+        "usable_years",
+        "residual_value"
+      ],
+      "known_evidence_gaps": [
+        "Authoritative used-vehicle acquisition price not yet bound",
+        "Usable remaining life evidence not yet bound",
+        "Residual/salvage value not yet bound"
+      ],
+      "numeric_value_currently_available": false,
+      "evidence_status": "FORMULA_FROZEN_INPUTS_PENDING",
+      "formula_frozen": true
+    },
+    {
+      "id": "OD-006",
+      "title": "Automobile insurance",
+      "status": "ACCEPTED",
+      "methodology_status": "FROZEN",
+      "effective_date": "2026-08-15",
+      "decision": "Canonical insurance cost is the NAIC combined average premium where the relevant state statistic is available. Sensitivities: average expenditure and mandatory/liability-only where reproducible. Newest NAIC Auto Insurance Database as of freeze: 2022/2023 report, data through 2023. Translate later project years with OD-010 motor-vehicle-insurance CPI. Do not label 2023 NAIC dollars as 2026 dollars.",
+      "owner_rationale": "Ordinary insurance capable of protecting a modest reliable vehicle, not merely the cheapest statutory liability-only policy.",
+      "implementation_rule": "canonical=combined_average_premium",
+      "source_selection_rule": "Newest NAIC Auto Insurance Database Report actually available.",
+      "required_sensitivity": [
+        "average_expenditure",
+        "mandatory_liability_only_where_reproducible"
+      ],
+      "known_evidence_gaps": [
+        "State table extraction from the PDF is not yet a validated numeric series",
+        "redistribution_status=FREE_DOWNLOAD_REDISTRIBUTION_UNCONFIRMED"
+      ],
+      "numeric_value_currently_available": false,
+      "evidence_status": "RETRIEVED_UNVALIDATED",
+      "source_data_year": 2023
+    },
+    {
+      "id": "OD-007",
+      "title": "Maintenance / repairs / tires",
+      "status": "ACCEPTED",
+      "methodology_status": "FROZEN",
+      "effective_date": "2026-08-15",
+      "decision": "Canonical annual reserve is the weighted mean including zero-spend periods among single-person vehicle-owning consumer units using the documented BLS CE VQB/MTBI architecture. Prefer a multi-year pooled/averaged estimate if multiple reproducible recent CE vintages later become available. Do not wait indefinitely before a first candidate.",
+      "owner_rationale": "Maintenance is lumpy. Positive-spender-only overstates frequency. Median including zeros can underfund expected cost.",
+      "implementation_rule": "canonical=weighted_mean_including_zeros",
+      "source_selection_rule": "Official Interview VQB (VQBCODE/VQBEXPX) joined to FMLI single-person vehicle-owning CUs; official MTBI VQBEXPX\u2192UCC map. UCC 470212 excluded.",
+      "required_sensitivity": [
+        "median_including_zeros",
+        "positive_spender_p25",
+        "positive_spender_p50",
+        "positive_spender_mean"
+      ],
+      "known_evidence_gaps": [
+        "Official BLS CE re-retrieve remains HTTP 403; cache INCOMPLETE_PROVENANCE"
+      ],
+      "numeric_value_currently_available": true,
+      "evidence_status": "INCOMPLETE_PROVENANCE",
+      "do_not_convert_incomplete_provenance_to_validated": true,
+      "current_2024_candidate_mean_incl_zero": 781.22
+    },
+    {
+      "id": "OD-008",
+      "title": "Social & recreation",
+      "status": "ACCEPTED",
+      "methodology_status": "FROZEN",
+      "effective_date": "2026-08-15",
+      "decision": "Empirical baseline is BLS CE weighted P25 among single-person positive spenders on the approved recreation/social allowlist. Canonical MSLC = MAX(empirical P25, $1,200/year). Preferred modest-life sensitivity = MAX(empirical P25, $2,400/year). Retain empirical P20/P25/P30. The $200/month case is PREFERRED MODEST-LIFE SOCIAL/RECREATION STANDARD, not a luxury case. Floors are consumption/social-participation standards, not emergency savings.",
+      "owner_rationale": "Minimum sustainable life includes modest ordinary human/social participation. Empirical recreation must not fall below $100/month.",
+      "implementation_rule": "canonical=max(ce_p25, 1200); preferred=max(ce_p25, 2400); transparency=P20,P25,P30",
+      "source_selection_rule": "BLS CE Interview recreation/social allowlist; OD-010 if translating.",
+      "required_sensitivity": [
+        "preferred_modest_life_2400",
+        "empirical_p20",
+        "empirical_p25",
+        "empirical_p30"
+      ],
+      "known_evidence_gaps": [
+        "Official BLS CE re-retrieve remains HTTP 403; empirical P25 may be unavailable"
+      ],
+      "numeric_value_currently_available": true,
+      "evidence_status": "INCOMPLETE_PROVENANCE",
+      "minimum_annual_floor": 1200.0,
+      "preferred_annual_floor": 2400.0
+    },
+    {
+      "id": "OD-009",
+      "title": "Connectivity",
+      "status": "ACCEPTED",
+      "methodology_status": "FROZEN",
+      "effective_date": "2026-08-15",
+      "decision": "Canonical minimum includes BOTH one mobile phone/data line AND one residential broadband connection. Mobile-only and broadband-only are sensitivities. Broadband target is the current ordinary FCC fixed-broadband benchmark (working standard 100/20 Mbps). Mobile is one ordinary low-cost unlimited or high-data smartphone line. ACS is not a price source. Do not invent a mobile price if no acceptable authoritative source exists.",
+      "owner_rationale": "Normal functional modern participation, not the cheapest technically connected state and not a premium gigabit tier.",
+      "implementation_rule": "canonical=mobile+broadband; broadband=100/20; mobile=ordinary_unlimited",
+      "source_selection_rule": "Newest authoritative FCC evidence for broadband. Newest authoritative/reproducible mobile PRICE source; else SOURCE_GAP.",
+      "required_sensitivity": [
+        "mobile_only",
+        "broadband_only"
+      ],
+      "known_evidence_gaps": [
+        "FCC Urban Rate Survey retrieve has been HTTP 403",
+        "No accepted authoritative mobile PRICE source (SOURCE_GAP)"
+      ],
+      "numeric_value_currently_available": false,
+      "evidence_status": "SOURCE_GAP",
+      "mobile_price_evidence": "SOURCE_GAP",
+      "broadband_standard_mbps": {
+        "down": 100,
+        "up": 20
+      }
+    },
+    {
+      "id": "OD-010",
+      "title": "Source lag / current-dollar translation",
+      "status": "ACCEPTED",
+      "methodology_status": "FROZEN",
+      "effective_date": "2026-08-15",
+      "decision": "Hybrid component-specific system: structural quantities LATEST_AVAILABLE (do not inflate physical quantities); target-year laws RULE_YEAR; current high-frequency prices use actual target-year observations or YTD; lagged nominal dollar expenditure series CPI_UPDATED with the most component-specific authoritative price index; already-local current prices get no generic CPI on top. Every component stores project_cost_year, source_data_year, translation_method, price_index_series, translation_factor, original_value, translated_value. Never silently relabel old dollars. Lagged nominal dollars cannot use silent LATEST_AVAILABLE carry-forward.",
+      "owner_rationale": "A single blanket LATEST_AVAILABLE rule is too coarse and silently relabels old dollars as current.",
+      "implementation_rule": "translation_method_for_component + translate_lagged_nominal_dollars",
+      "source_selection_rule": "Component-specific official CPI or better index: medical-care for MEPS; motor vehicle insurance for NAIC; motor vehicle maintenance/repair for CE maintenance; recreation CPI where defensible else CPI-U with disclosure.",
+      "required_sensitivity": [
+        "unadjusted_LATEST_AVAILABLE_for_lagged_series"
+      ],
+      "known_evidence_gaps": [
+        "Component-specific index series not yet bound into a live translation table"
+      ],
+      "numeric_value_currently_available": true,
+      "evidence_status": "RULE_FROZEN",
+      "index_examples": {
+        "meps_oop": "CPI-U medical care or better medical expenditure index",
+        "naic_insurance": "CPI-U motor vehicle insurance",
+        "ce_maintenance": "CPI-U motor vehicle maintenance and repair",
+        "recreation": "recreation CPI where defensible, else CPI-U with disclosure",
+        "essentials": "component-specific where practical, else CPI-U with disclosure"
+      }
+    },
+    {
+      "id": "OD-011",
+      "title": "Municipal / local earned-income tax geography/overlay",
+      "status": "ACCEPTED",
+      "methodology_status": "FROZEN",
+      "effective_date": "2026-08-15",
+      "decision": "Never apply a municipal tax to an entire county merely because one city inside the county levies it. Classify A coterminous municipality/county-equivalent; B true county-level tax; C municipality covering only part of modeled county; D unresolved. Apply A and B directly. For C, preferred method is place/subcounty calculation; else a transparent population-weighted municipal exposure only if legally and statistically defensible; else SOURCE_GAP/UNAVAILABLE. Do not silently ignore. Do not apply countywide. Do not construct statewide average local tax rates.",
+      "owner_rationale": "NYC boroughs and Philadelphia are coterminous county-equivalents; a partial city inside a larger county is not.",
+      "implementation_rule": "classify_municipal_tax_geography + local_tax_application_rule",
+      "source_selection_rule": "Statutory geography first. Place/subcounty ACS population only if a reproducible join exists.",
+      "required_sensitivity": [
+        "coterminous_overlay",
+        "place_level",
+        "unresolved_source_gap"
+      ],
+      "known_evidence_gaps": [
+        "Place-level calculation is not yet generally supported",
+        "Many local earned-income taxes remain SOURCE_GAP / unresolved"
+      ],
+      "numeric_value_currently_available": false,
+      "evidence_status": "SOURCE_GAP"
+    },
+    {
+      "id": "OD-012",
+      "title": "Additional resilience reserve",
+      "status": "ACCEPTED",
+      "methodology_status": "FROZEN",
+      "effective_date": "2026-08-15",
+      "decision": "No additional generic resilience reserve. Canonical extra reserve is $0. Do not add 5%, 10%, $1,200, $50/month, $100/month, or emergency savings. Annualize predictable irregular costs inside their actual component.",
+      "owner_rationale": "The Bottom 30% benchmark is not a personal-finance-plan model. Generic savings double-count costs already annualized in components.",
+      "implementation_rule": "canonical_resilience_reserve() == 0",
+      "source_selection_rule": "None. Future uncovered necessities are researched and added to the real category.",
+      "required_sensitivity": [],
+      "known_evidence_gaps": [],
+      "numeric_value_currently_available": true,
+      "evidence_status": "RULE_FROZEN",
+      "canonical_extra_reserve_annual": 0.0
+    },
+    {
+      "id": "OD-013",
+      "title": "Connecticut HUD/ACS geography treatment",
+      "status": "ACCEPTED",
+      "methodology_status": "FROZEN",
+      "effective_date": "2026-08-15",
+      "decision": "FY2024: keep HUD cost geography = legacy county; reconstruct ACS adult population from official town/county-subdivision data using the official Census Connecticut crosswalk; aggregate into the eight legacy counties; join to HUD FY2024 legacy-county FMR. Do not invent planning-region rents. FY2026: HUD publishes planning-region FIPS; join directly to current ACS Connecticut planning-region geography. Preserve raw Census geography count, Foundation join geography count, transformation metadata, source hashes, and population reconciliation.",
+      "owner_rationale": "HUD and Census published different Connecticut geographies in FY2024. The validated reconstruction already exists and must stay year-specific.",
+      "implementation_rule": "2024=legacy_county_reconstructed_from_cousub; 2026=direct_planning_region_join",
+      "source_selection_rule": "Official Census CT county-to-county-subdivision crosswalk; ACS B01001 cousub adults; HUD FMR vintage geography as published.",
+      "required_sensitivity": [
+        "reconcile_reconstructed_2024_legacy_county_adult_pop_to_ACS_CT_total"
+      ],
+      "known_evidence_gaps": [],
+      "numeric_value_currently_available": true,
+      "evidence_status": "VALIDATED",
+      "fy2024_method": "legacy_county_reconstructed_from_cousub",
+      "fy2026_method": "direct_planning_region_join"
+    }
+  ]
+}

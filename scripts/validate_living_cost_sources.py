@@ -19,6 +19,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 from foundation.living_cost.geo_join import execute_geo_join_audit
 from foundation.living_cost.manifest import RetrievedSourceArtifact, generate_source_manifest
+from foundation.living_cost.owner_freeze import methodology_status_for_component
 from foundation.living_cost.owner_packet import write_owner_decision_packet
 from foundation.sources.acquisition import read_retrieval_sidecar, validation_status_after_parse
 from foundation.sources.auto_insurance import download_naic_artifact
@@ -415,7 +416,7 @@ def _upgrade_parsed_artifacts(
                         else "RETRIEVED_UNVALIDATED",
                         notes=(
                             f"EPA MPG candidates parsed ({len(cands)} cohorts). "
-                            "OD-004 not frozen. 24/28/32 are not the empirical model."
+                            "OD-004 FROZEN used-car compact+midsize median. 24/28/32 are not the empirical model."
                         ),
                     )
             elif art.source_id.startswith("fcc_urs_"):
@@ -514,13 +515,13 @@ def write_coverage(artifacts: list[RetrievedSourceArtifact]) -> dict:
                 "RETRIEVED_UNVALIDATED"
                 if _component_status(artifacts, f"epa_mpg_{year}")
                 in {"VALIDATED", "RETRIEVED_UNVALIDATED", "INCOMPLETE_PROVENANCE"}
-                else "ESTIMATED_OWNER_REVIEW"
+                else "SOURCE_GAP"
             ),
             "gas": _component_status(artifacts, f"eia_gas_price_{year}"),
             "insurance": _component_status(artifacts, f"naic_auto_ins_{year}"),
             "maintenance": "INCOMPLETE_PROVENANCE",
             "registration": "SOURCE_GAP",
-            "replacement": "ESTIMATED_OWNER_REVIEW",
+            "replacement": "FORMULA_FROZEN_INPUTS_PENDING",
             "connectivity": (
                 "RETRIEVED_UNVALIDATED"
                 if _component_status(artifacts, f"fcc_urs_broadband_{year}")
@@ -584,7 +585,7 @@ def write_coverage(artifacts: list[RetrievedSourceArtifact]) -> dict:
                 "project_cost_year": {"2024": 2024, "2026": 2026},
                 "source_data_year": {"2024": 2023, "2026": 2023},
                 "translation_method": "CPI_UPDATED",
-                "price_index_series": "CPI-U medical care recommended for lagged MEPS OOP dollars (not applied; OD-010 unfrozen)",
+                "price_index_series": "CPI-U medical care for lagged MEPS OOP dollars (OD-010 FROZEN CPI_UPDATED)",
             },
             "mileage": {
                 "project_cost_year": {"2024": 2024, "2026": 2026},
@@ -602,7 +603,7 @@ def write_coverage(artifacts: list[RetrievedSourceArtifact]) -> dict:
                 "translation_method": {"2024": "NONE", "2026": "CPI_UPDATED"},
                 "price_index_series": {
                     "2024": None,
-                    "2026": "CPI-U recommended for lagged nominal CE dollar series (not applied; OD-010 unfrozen)",
+                    "2026": "CPI-U for lagged nominal CE dollar series (OD-010 FROZEN CPI_UPDATED)",
                 },
             },
             "recreation": {
@@ -611,7 +612,7 @@ def write_coverage(artifacts: list[RetrievedSourceArtifact]) -> dict:
                 "translation_method": {"2024": "NONE", "2026": "CPI_UPDATED"},
                 "price_index_series": {
                     "2024": None,
-                    "2026": "CPI-U recommended for lagged nominal CE dollar series (not applied; OD-010 unfrozen)",
+                    "2026": "recreation CPI where defensible, else CPI-U (OD-010 FROZEN CPI_UPDATED)",
                 },
             },
             "rpp": {
@@ -633,15 +634,15 @@ def write_coverage(artifacts: list[RetrievedSourceArtifact]) -> dict:
                 "project_cost_year": {"2024": 2024, "2026": 2026},
                 "source_data_year": {"2024": 2023, "2026": 2023},
                 "translation_method": "CPI_UPDATED",
-                "price_index_series": "CPI-U motor vehicle insurance recommended for 2023 NAIC dollars (not applied; OD-006/OD-010 unfrozen)",
+                "price_index_series": "CPI-U motor vehicle insurance (OD-006/OD-010 FROZEN; apply before labeling 2023 dollars as later-year dollars)",
             },
             "maintenance": {
                 "project_cost_year": {"2024": 2024, "2026": 2026},
                 "source_data_year": {"2024": 2024, "2026": 2024},
-                "translation_method": {"2024": "NONE", "2026": "CPI_UPDATED"},
+                "translation_method": {"2024": "NONE_ALREADY_LOCAL", "2026": "CPI_UPDATED"},
                 "price_index_series": {
                     "2024": None,
-                    "2026": "CPI-U motor vehicle maintenance and repair recommended (not applied; OD-007/OD-010 unfrozen)",
+                    "2026": "CPI-U motor vehicle maintenance and repair (OD-007/OD-010 FROZEN)",
                 },
             },
             "registration": {
@@ -652,7 +653,7 @@ def write_coverage(artifacts: list[RetrievedSourceArtifact]) -> dict:
             "replacement": {
                 "project_cost_year": {"2024": 2024, "2026": 2026},
                 "source_data_year": {"2024": None, "2026": None},
-                "translation_method": "ESTIMATED_OWNER_REVIEW",
+                "translation_method": "FORMULA_PENDING_INPUTS",
             },
             "connectivity": {
                 "project_cost_year": {"2024": 2024, "2026": 2026},
@@ -685,87 +686,90 @@ def write_coverage(artifacts: list[RetrievedSourceArtifact]) -> dict:
         "status_dimensions": {
             "note": (
                 "evidence_status is source retrieve/parse honesty. "
-                "methodology_status is whether an owner decision is still required. "
-                "They are not synonyms. An official parse with incomplete retrieval "
-                "is INCOMPLETE_PROVENANCE, not a guessed estimate."
+                "methodology_status is whether an owner decision is frozen. "
+                "They are not synonyms. METHODOLOGY FROZEN is not SOURCE VALIDATED. "
+                "An official parse with incomplete retrieval is INCOMPLETE_PROVENANCE, "
+                "not a guessed estimate."
             ),
             "by_year": {
                 year: {
                     "housing": {
                         "evidence_status": coverage_by_year[year]["housing"],
-                        "methodology_status": "READY",
+                        "methodology_status": methodology_status_for_component("housing"),
                     },
                     "population_weights": {
                         "evidence_status": coverage_by_year[year]["population_weights"],
-                        "methodology_status": "OWNER_REVIEW_PENDING",
+                        "methodology_status": methodology_status_for_component(
+                            "population_weights"
+                        ),
                     },
                     "food": {
                         "evidence_status": coverage_by_year[year]["food"],
-                        "methodology_status": "OWNER_REVIEW_PENDING",
+                        "methodology_status": methodology_status_for_component("food"),
                     },
                     "health_premium": {
                         "evidence_status": coverage_by_year[year]["health_premium"],
-                        "methodology_status": "OWNER_REVIEW_PENDING",
+                        "methodology_status": methodology_status_for_component("health_premium"),
                     },
                     "health_oop": {
                         "evidence_status": coverage_by_year[year]["health_oop"],
-                        "methodology_status": "OWNER_REVIEW_PENDING",
+                        "methodology_status": methodology_status_for_component("health_oop"),
                     },
                     "mileage": {
                         "evidence_status": coverage_by_year[year]["mileage"],
-                        "methodology_status": "OWNER_REVIEW_PENDING",
+                        "methodology_status": methodology_status_for_component("mileage"),
                     },
                     "mpg": {
                         "evidence_status": coverage_by_year[year]["mpg"],
-                        "methodology_status": "OWNER_REVIEW_PENDING",
+                        "methodology_status": methodology_status_for_component("mpg"),
                     },
                     "gas": {
                         "evidence_status": coverage_by_year[year]["gas"],
-                        "methodology_status": "READY",
+                        "methodology_status": methodology_status_for_component("gas"),
                     },
                     "insurance": {
                         "evidence_status": coverage_by_year[year]["insurance"],
-                        "methodology_status": "OWNER_REVIEW_PENDING",
+                        "methodology_status": methodology_status_for_component("insurance"),
                     },
                     "maintenance": {
                         "evidence_status": "INCOMPLETE_PROVENANCE",
-                        "methodology_status": "OWNER_REVIEW_PENDING",
+                        "methodology_status": methodology_status_for_component("maintenance"),
                     },
                     "registration": {
                         "evidence_status": "SOURCE_GAP",
-                        "methodology_status": "OWNER_REVIEW_PENDING",
+                        "methodology_status": methodology_status_for_component("registration"),
                     },
                     "replacement": {
-                        "evidence_status": "ESTIMATED_OWNER_REVIEW",
-                        "methodology_status": "OWNER_REVIEW_PENDING",
+                        "evidence_status": "FORMULA_FROZEN_INPUTS_PENDING",
+                        "methodology_status": methodology_status_for_component("replacement"),
                     },
                     "connectivity": {
                         "evidence_status": coverage_by_year[year]["connectivity"],
-                        "methodology_status": "OWNER_REVIEW_PENDING",
+                        "methodology_status": methodology_status_for_component("connectivity"),
                     },
                     "essentials": {
                         "evidence_status": coverage_by_year[year]["essentials"],
-                        "methodology_status": "OWNER_REVIEW_PENDING",
+                        "methodology_status": methodology_status_for_component("essentials"),
                     },
                     "recreation": {
                         "evidence_status": coverage_by_year[year]["recreation"],
-                        "methodology_status": "OWNER_REVIEW_PENDING",
+                        "methodology_status": methodology_status_for_component("recreation"),
                     },
                     "rpp": {
                         "evidence_status": coverage_by_year[year]["rpp"],
-                        "methodology_status": "READY",
+                        "methodology_status": methodology_status_for_component("rpp"),
                     },
                     "federal_tax": {
                         "evidence_status": "INVENTORY_NOT_VALIDATED",
-                        "methodology_status": "OWNER_REVIEW_PENDING",
+                        "methodology_status": methodology_status_for_component("federal_tax"),
                     },
                     "state_tax": {
                         "evidence_status": "SOURCE_GAP",
-                        "methodology_status": "OWNER_REVIEW_PENDING",
+                        "methodology_status": methodology_status_for_component("state_tax"),
                     },
                     "local_tax": {
                         "evidence_status": "SOURCE_GAP",
-                        "methodology_status": "OWNER_REVIEW_PENDING",
+                        "methodology_status": methodology_status_for_component("local_tax"),
                     },
                 }
                 for year in coverage_by_year
@@ -775,6 +779,10 @@ def write_coverage(artifacts: list[RetrievedSourceArtifact]) -> dict:
         "headline_calculated": False,
         "gap_calculated": False,
         "adequacy_calculated": False,
+        "living_cost_release_authorized": False,
+        "states_modeled": 0,
+        "decisions_frozen": True,
+        "methodology_frozen_is_not_source_validated": True,
     }
     coverage_path = METADATA_DIR / "living_cost_source_coverage.json"
     coverage_path.parent.mkdir(parents=True, exist_ok=True)
@@ -992,11 +1000,11 @@ def write_transport_coverage() -> None:
             "mileage": {
                 "status": "MEASURED_TRAVEL_BEHAVIOR",
                 "source": "2022 NHTS V2.1 vehv2pub ANNMILES / hhv2pub WTHHFIN",
-                "note": "Observed, not minimum necessary. Owner decision OD-003.",
+                "note": "FOUNDATION MOBILITY STANDARD = NHTS weighted median. Observed, not MEASURED MINIMUM NECESSARY MILEAGE. OD-003 FROZEN.",
             },
             "mpg": {
                 "status": "RETRIEVED_UNVALIDATED",
-                "note": "EPA fueleconomy.gov vehicle-level candidates built. OD-004 cohort not frozen. 24/28/32 are not the empirical model.",
+                "note": "EPA fueleconomy.gov vehicle-level candidates built. OD-004 FROZEN: used-car compact+midsize gasoline median. 24/28/32 are not the empirical model.",
             },
             "gas": {
                 "status": "VALIDATED",
@@ -1005,30 +1013,33 @@ def write_transport_coverage() -> None:
             },
             "insurance": {
                 "status": "RETRIEVED_UNVALIDATED",
-                "note": "Official free NAIC 2022/2023 Auto Insurance Database Report retrieved. redistribution_status=FREE_DOWNLOAD_REDISTRIBUTION_UNCONFIRMED. OD-006 measure not frozen.",
+                "note": "Official free NAIC 2022/2023 Auto Insurance Database Report retrieved. redistribution_status=FREE_DOWNLOAD_REDISTRIBUTION_UNCONFIRMED. OD-006 FROZEN: combined average premium is canonical.",
             },
             "maintenance": {
                 "evidence_status": "INCOMPLETE_PROVENANCE",
-                "methodology_status": "OWNER_REVIEW_PENDING",
+                "methodology_status": "FROZEN",
                 "status": "INCOMPLETE_PROVENANCE",
                 "note": (
+                    "OD-007 FROZEN: canonical is weighted mean including zeros. "
                     "Official 2024 Interview VQB/UCC candidates among single-person "
                     "vehicle-owning CE units. Cached official artifact parses; official "
                     "re-retrieve remains HTTP 403. Not a guessed estimate. Not VALIDATED. "
                     "TIRECQ / historical UCC 470211 absence is not measured zero. "
-                    "UCC 470212 is excluded as fuel residual. OD-007 not frozen."
+                    "UCC 470212 is excluded as fuel residual. Methodology frozen does "
+                    "not convert INCOMPLETE_PROVENANCE into VALIDATED."
                 ),
             },
             "registration": {
                 "status": "SOURCE_GAP",
                 "evidence_status": "SOURCE_GAP",
-                "methodology_status": "OWNER_REVIEW_PENDING",
+                "methodology_status": "RULE_YEAR_PENDING_SOURCE",
                 "note": "Hand-entered 51-state table is not accepted as validated.",
             },
             "replacement": {
-                "status": "ESTIMATED_OWNER_REVIEW",
-                "evidence_status": "ESTIMATED_OWNER_REVIEW",
-                "methodology_status": "OWNER_REVIEW_PENDING",
+                "status": "FORMULA_FROZEN_INPUTS_PENDING",
+                "evidence_status": "FORMULA_FROZEN_INPUTS_PENDING",
+                "methodology_status": "FROZEN",
+                "note": "OD-005 FROZEN formula (acquisition-residual)/years. No $1,600 default. Numeric result pending evidence.",
             },
         },
         "headline_calculated": False,

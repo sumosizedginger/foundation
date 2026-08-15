@@ -1,6 +1,6 @@
 {
   "report_type": "living_cost_source_coverage",
-  "generated_at": "2026-08-14T23:48:58+00:00",
+  "generated_at": "2026-08-15T01:06:27+00:00",
   "question": "What still prevents the living-cost model from being calculated?",
   "required_components": [
     "housing",
@@ -36,7 +36,7 @@
       "insurance": "RETRIEVED_UNVALIDATED",
       "maintenance": "INCOMPLETE_PROVENANCE",
       "registration": "SOURCE_GAP",
-      "replacement": "ESTIMATED_OWNER_REVIEW",
+      "replacement": "FORMULA_FROZEN_INPUTS_PENDING",
       "connectivity": "SOURCE_GAP",
       "essentials": "INCOMPLETE_PROVENANCE",
       "recreation": "INCOMPLETE_PROVENANCE",
@@ -57,7 +57,7 @@
       "insurance": "RETRIEVED_UNVALIDATED",
       "maintenance": "INCOMPLETE_PROVENANCE",
       "registration": "SOURCE_GAP",
-      "replacement": "ESTIMATED_OWNER_REVIEW",
+      "replacement": "FORMULA_FROZEN_INPUTS_PENDING",
       "connectivity": "SOURCE_GAP",
       "essentials": "INCOMPLETE_PROVENANCE",
       "recreation": "INCOMPLETE_PROVENANCE",
@@ -125,7 +125,7 @@
         "2026": 2023
       },
       "translation_method": "CPI_UPDATED",
-      "price_index_series": "CPI-U medical care recommended for lagged MEPS OOP dollars (not applied; OD-010 unfrozen)"
+      "price_index_series": "CPI-U medical care for lagged MEPS OOP dollars (OD-010 FROZEN CPI_UPDATED)"
     },
     "mileage": {
       "project_cost_year": {
@@ -164,7 +164,7 @@
       },
       "price_index_series": {
         "2024": null,
-        "2026": "CPI-U recommended for lagged nominal CE dollar series (not applied; OD-010 unfrozen)"
+        "2026": "CPI-U for lagged nominal CE dollar series (OD-010 FROZEN CPI_UPDATED)"
       }
     },
     "recreation": {
@@ -182,7 +182,7 @@
       },
       "price_index_series": {
         "2024": null,
-        "2026": "CPI-U recommended for lagged nominal CE dollar series (not applied; OD-010 unfrozen)"
+        "2026": "recreation CPI where defensible, else CPI-U (OD-010 FROZEN CPI_UPDATED)"
       }
     },
     "rpp": {
@@ -228,7 +228,7 @@
         "2026": 2023
       },
       "translation_method": "CPI_UPDATED",
-      "price_index_series": "CPI-U motor vehicle insurance recommended for 2023 NAIC dollars (not applied; OD-006/OD-010 unfrozen)"
+      "price_index_series": "CPI-U motor vehicle insurance (OD-006/OD-010 FROZEN; apply before labeling 2023 dollars as later-year dollars)"
     },
     "maintenance": {
       "project_cost_year": {
@@ -245,7 +245,7 @@
       },
       "price_index_series": {
         "2024": null,
-        "2026": "CPI-U motor vehicle maintenance and repair recommended (not applied; OD-007/OD-010 unfrozen)"
+        "2026": "CPI-U motor vehicle maintenance and repair (OD-007/OD-010 FROZEN)"
       }
     },
     "registration": {
@@ -268,7 +268,7 @@
         "2024": null,
         "2026": null
       },
-      "translation_method": "ESTIMATED_OWNER_REVIEW"
+      "translation_method": "FORMULA_PENDING_INPUTS"
     },
     "connectivity": {
       "project_cost_year": {
@@ -603,7 +603,7 @@
       "sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
       "byte_size": 9807383,
       "retrieved_at": "2026-08-14T20:19:04+00:00",
-      "notes": "Official NAIC 2022/2023 Auto Insurance Database Report retrieved. source_url=https://content.naic.org/sites/default/files/publication-aut-pb-auto-insurance-database.pdf; publication_year=2025 (Adopted December 2025; news release 2026-02-13); data_year=2023; byte_size=9807383; sha256=34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78; retrieved_at=2026-08-14T20:19:04+00:00; redistribution_status=FREE_DOWNLOAD_REDISTRIBUTION_UNCONFIRMED. Free download is not a redistribution license. Derived statistics with attribution are handled separately from raw-artifact redistribution. OD-006 remains unfrozen: choose average expenditure vs combined average premium vs coverage-specific measure."
+      "notes": "Official NAIC 2022/2023 Auto Insurance Database Report retrieved. source_url=https://content.naic.org/sites/default/files/publication-aut-pb-auto-insurance-database.pdf; publication_year=2025 (Adopted December 2025; news release 2026-02-13); data_year=2023; byte_size=9807383; sha256=34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78; retrieved_at=2026-08-14T20:19:04+00:00; redistribution_status=FREE_DOWNLOAD_REDISTRIBUTION_UNCONFIRMED. Free download is not a redistribution license. Derived statistics with attribution are handled separately from raw-artifact redistribution. OD-006 FROZEN: canonical measure is combined average premium; sensitivities are average expenditure and mandatory/liability-only where reproducible."
     },
     {
       "source_id": "epa_mpg_2024",
@@ -611,7 +611,7 @@
       "sha256": "66a2948c425c3cf8ad61a184a12296099ef368217d3012b3f7531dcc9c5e2649",
       "byte_size": 2200745,
       "retrieved_at": "2026-08-14T20:19:07+00:00",
-      "notes": "EPA MPG candidates parsed (4 cohorts). OD-004 not frozen. 24/28/32 are not the empirical model."
+      "notes": "EPA MPG candidates parsed (4 cohorts). OD-004 FROZEN used-car compact+midsize median. 24/28/32 are not the empirical model."
     },
     {
       "source_id": "fcc_urs_broadband_2024",
@@ -627,7 +627,7 @@
       "sha256": "f70c3ce6bac6e1e667ee29c150735224a9fb19d66edbdef17822ddc8006c238a",
       "byte_size": 29159,
       "retrieved_at": "2026-08-14T20:19:07+00:00",
-      "notes": null
+      "notes": ""
     },
     {
       "source_id": "hud_fmr_2026",
@@ -939,7 +939,7 @@
       "sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
       "byte_size": 9807383,
       "retrieved_at": "2026-08-14T20:19:04+00:00",
-      "notes": "Official NAIC 2022/2023 Auto Insurance Database Report retrieved. source_url=https://content.naic.org/sites/default/files/publication-aut-pb-auto-insurance-database.pdf; publication_year=2025 (Adopted December 2025; news release 2026-02-13); data_year=2023; byte_size=9807383; sha256=34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78; retrieved_at=2026-08-14T20:19:04+00:00; redistribution_status=FREE_DOWNLOAD_REDISTRIBUTION_UNCONFIRMED. Free download is not a redistribution license. Derived statistics with attribution are handled separately from raw-artifact redistribution. OD-006 remains unfrozen: choose average expenditure vs combined average premium vs coverage-specific measure."
+      "notes": "Official NAIC 2022/2023 Auto Insurance Database Report retrieved. source_url=https://content.naic.org/sites/default/files/publication-aut-pb-auto-insurance-database.pdf; publication_year=2025 (Adopted December 2025; news release 2026-02-13); data_year=2023; byte_size=9807383; sha256=34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78; retrieved_at=2026-08-14T20:19:04+00:00; redistribution_status=FREE_DOWNLOAD_REDISTRIBUTION_UNCONFIRMED. Free download is not a redistribution license. Derived statistics with attribution are handled separately from raw-artifact redistribution. OD-006 FROZEN: canonical measure is combined average premium; sensitivities are average expenditure and mandatory/liability-only where reproducible."
     },
     {
       "source_id": "epa_mpg_2026",
@@ -947,7 +947,7 @@
       "sha256": "66a2948c425c3cf8ad61a184a12296099ef368217d3012b3f7531dcc9c5e2649",
       "byte_size": 2200745,
       "retrieved_at": "2026-08-14T20:19:07+00:00",
-      "notes": "EPA MPG candidates parsed (4 cohorts). OD-004 not frozen. 24/28/32 are not the empirical model."
+      "notes": "EPA MPG candidates parsed (4 cohorts). OD-004 FROZEN used-car compact+midsize median. 24/28/32 are not the empirical model."
     },
     {
       "source_id": "fcc_urs_broadband_2026",
@@ -959,162 +959,162 @@
     }
   ],
   "status_dimensions": {
-    "note": "evidence_status is source retrieve/parse honesty. methodology_status is whether an owner decision is still required. They are not synonyms. An official parse with incomplete retrieval is INCOMPLETE_PROVENANCE, not a guessed estimate.",
+    "note": "evidence_status is source retrieve/parse honesty. methodology_status is whether an owner decision is frozen. They are not synonyms. METHODOLOGY FROZEN is not SOURCE VALIDATED. An official parse with incomplete retrieval is INCOMPLETE_PROVENANCE, not a guessed estimate.",
     "by_year": {
       "2024": {
         "housing": {
           "evidence_status": "VALIDATED",
-          "methodology_status": "READY"
+          "methodology_status": "FROZEN"
         },
         "population_weights": {
           "evidence_status": "VALIDATED",
-          "methodology_status": "OWNER_REVIEW_PENDING"
+          "methodology_status": "FROZEN"
         },
         "food": {
           "evidence_status": "MODELED_FROM_MEASURED_INPUTS",
-          "methodology_status": "OWNER_REVIEW_PENDING"
+          "methodology_status": "FROZEN"
         },
         "health_premium": {
           "evidence_status": "MODELED_FROM_MEASURED_INPUTS",
-          "methodology_status": "OWNER_REVIEW_PENDING"
+          "methodology_status": "FROZEN"
         },
         "health_oop": {
           "evidence_status": "RETRIEVED_UNVALIDATED",
-          "methodology_status": "OWNER_REVIEW_PENDING"
+          "methodology_status": "FROZEN"
         },
         "mileage": {
           "evidence_status": "VALIDATED",
-          "methodology_status": "OWNER_REVIEW_PENDING"
+          "methodology_status": "FROZEN"
         },
         "mpg": {
           "evidence_status": "RETRIEVED_UNVALIDATED",
-          "methodology_status": "OWNER_REVIEW_PENDING"
+          "methodology_status": "FROZEN"
         },
         "gas": {
           "evidence_status": "VALIDATED",
-          "methodology_status": "READY"
+          "methodology_status": "FROZEN"
         },
         "insurance": {
           "evidence_status": "RETRIEVED_UNVALIDATED",
-          "methodology_status": "OWNER_REVIEW_PENDING"
+          "methodology_status": "FROZEN"
         },
         "maintenance": {
           "evidence_status": "INCOMPLETE_PROVENANCE",
-          "methodology_status": "OWNER_REVIEW_PENDING"
+          "methodology_status": "FROZEN"
         },
         "registration": {
           "evidence_status": "SOURCE_GAP",
-          "methodology_status": "OWNER_REVIEW_PENDING"
+          "methodology_status": "RULE_YEAR_PENDING_SOURCE"
         },
         "replacement": {
-          "evidence_status": "ESTIMATED_OWNER_REVIEW",
-          "methodology_status": "OWNER_REVIEW_PENDING"
+          "evidence_status": "FORMULA_FROZEN_INPUTS_PENDING",
+          "methodology_status": "FROZEN"
         },
         "connectivity": {
           "evidence_status": "SOURCE_GAP",
-          "methodology_status": "OWNER_REVIEW_PENDING"
+          "methodology_status": "FROZEN"
         },
         "essentials": {
           "evidence_status": "INCOMPLETE_PROVENANCE",
-          "methodology_status": "OWNER_REVIEW_PENDING"
+          "methodology_status": "FROZEN"
         },
         "recreation": {
           "evidence_status": "INCOMPLETE_PROVENANCE",
-          "methodology_status": "OWNER_REVIEW_PENDING"
+          "methodology_status": "FROZEN"
         },
         "rpp": {
           "evidence_status": "VALIDATED",
-          "methodology_status": "READY"
+          "methodology_status": "FROZEN"
         },
         "federal_tax": {
           "evidence_status": "INVENTORY_NOT_VALIDATED",
-          "methodology_status": "OWNER_REVIEW_PENDING"
+          "methodology_status": "FROZEN"
         },
         "state_tax": {
           "evidence_status": "SOURCE_GAP",
-          "methodology_status": "OWNER_REVIEW_PENDING"
+          "methodology_status": "FROZEN"
         },
         "local_tax": {
           "evidence_status": "SOURCE_GAP",
-          "methodology_status": "OWNER_REVIEW_PENDING"
+          "methodology_status": "FROZEN"
         }
       },
       "2026": {
         "housing": {
           "evidence_status": "VALIDATED",
-          "methodology_status": "READY"
+          "methodology_status": "FROZEN"
         },
         "population_weights": {
           "evidence_status": "VALIDATED",
-          "methodology_status": "OWNER_REVIEW_PENDING"
+          "methodology_status": "FROZEN"
         },
         "food": {
           "evidence_status": "MODELED_FROM_MEASURED_INPUTS",
-          "methodology_status": "OWNER_REVIEW_PENDING"
+          "methodology_status": "FROZEN"
         },
         "health_premium": {
           "evidence_status": "MODELED_FROM_MEASURED_INPUTS",
-          "methodology_status": "OWNER_REVIEW_PENDING"
+          "methodology_status": "FROZEN"
         },
         "health_oop": {
           "evidence_status": "RETRIEVED_UNVALIDATED",
-          "methodology_status": "OWNER_REVIEW_PENDING"
+          "methodology_status": "FROZEN"
         },
         "mileage": {
           "evidence_status": "VALIDATED",
-          "methodology_status": "OWNER_REVIEW_PENDING"
+          "methodology_status": "FROZEN"
         },
         "mpg": {
           "evidence_status": "RETRIEVED_UNVALIDATED",
-          "methodology_status": "OWNER_REVIEW_PENDING"
+          "methodology_status": "FROZEN"
         },
         "gas": {
           "evidence_status": "VALIDATED",
-          "methodology_status": "READY"
+          "methodology_status": "FROZEN"
         },
         "insurance": {
           "evidence_status": "RETRIEVED_UNVALIDATED",
-          "methodology_status": "OWNER_REVIEW_PENDING"
+          "methodology_status": "FROZEN"
         },
         "maintenance": {
           "evidence_status": "INCOMPLETE_PROVENANCE",
-          "methodology_status": "OWNER_REVIEW_PENDING"
+          "methodology_status": "FROZEN"
         },
         "registration": {
           "evidence_status": "SOURCE_GAP",
-          "methodology_status": "OWNER_REVIEW_PENDING"
+          "methodology_status": "RULE_YEAR_PENDING_SOURCE"
         },
         "replacement": {
-          "evidence_status": "ESTIMATED_OWNER_REVIEW",
-          "methodology_status": "OWNER_REVIEW_PENDING"
+          "evidence_status": "FORMULA_FROZEN_INPUTS_PENDING",
+          "methodology_status": "FROZEN"
         },
         "connectivity": {
           "evidence_status": "SOURCE_GAP",
-          "methodology_status": "OWNER_REVIEW_PENDING"
+          "methodology_status": "FROZEN"
         },
         "essentials": {
           "evidence_status": "INCOMPLETE_PROVENANCE",
-          "methodology_status": "OWNER_REVIEW_PENDING"
+          "methodology_status": "FROZEN"
         },
         "recreation": {
           "evidence_status": "INCOMPLETE_PROVENANCE",
-          "methodology_status": "OWNER_REVIEW_PENDING"
+          "methodology_status": "FROZEN"
         },
         "rpp": {
           "evidence_status": "VALIDATED",
-          "methodology_status": "READY"
+          "methodology_status": "FROZEN"
         },
         "federal_tax": {
           "evidence_status": "INVENTORY_NOT_VALIDATED",
-          "methodology_status": "OWNER_REVIEW_PENDING"
+          "methodology_status": "FROZEN"
         },
         "state_tax": {
           "evidence_status": "SOURCE_GAP",
-          "methodology_status": "OWNER_REVIEW_PENDING"
+          "methodology_status": "FROZEN"
         },
         "local_tax": {
           "evidence_status": "SOURCE_GAP",
-          "methodology_status": "OWNER_REVIEW_PENDING"
+          "methodology_status": "FROZEN"
         }
       }
     }
@@ -1125,7 +1125,7 @@
     "2024:insurance:RETRIEVED_UNVALIDATED",
     "2024:maintenance:INCOMPLETE_PROVENANCE",
     "2024:registration:SOURCE_GAP",
-    "2024:replacement:ESTIMATED_OWNER_REVIEW",
+    "2024:replacement:FORMULA_FROZEN_INPUTS_PENDING",
     "2024:connectivity:SOURCE_GAP",
     "2024:essentials:INCOMPLETE_PROVENANCE",
     "2024:recreation:INCOMPLETE_PROVENANCE",
@@ -1137,7 +1137,7 @@
     "2026:insurance:RETRIEVED_UNVALIDATED",
     "2026:maintenance:INCOMPLETE_PROVENANCE",
     "2026:registration:SOURCE_GAP",
-    "2026:replacement:ESTIMATED_OWNER_REVIEW",
+    "2026:replacement:FORMULA_FROZEN_INPUTS_PENDING",
     "2026:connectivity:SOURCE_GAP",
     "2026:essentials:INCOMPLETE_PROVENANCE",
     "2026:recreation:INCOMPLETE_PROVENANCE",
@@ -1147,5 +1147,9 @@
   ],
   "headline_calculated": false,
   "gap_calculated": false,
-  "adequacy_calculated": false
+  "adequacy_calculated": false,
+  "living_cost_release_authorized": false,
+  "states_modeled": 0,
+  "decisions_frozen": true,
+  "methodology_frozen_is_not_source_validated": true
 }

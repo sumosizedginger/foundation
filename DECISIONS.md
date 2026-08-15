@@ -186,6 +186,41 @@ Registered BLS indicators (U-6, Labor Force Participation, Employment-Population
 
 ---
 
+## D-043 — Owner freeze of living-cost methodology OD-001 through OD-013
+
+**Date:** 2026-08-15  
+**Status:** ACCEPTED (Owner Freeze)
+
+OD-001 through OD-013 are **ACCEPTED / FROZEN**. This freezes methodology only.
+
+It does **not** authorize calculation or publication of Minimum Sustainable Living Cost, Gap, Adequacy Ratio, state rankings, a national living-cost median, or the Composite.
+
+`living_cost_release_authorized` remains `false`. Public `states_modeled` remains `0`.
+
+**METHODOLOGY FROZEN is not SOURCE VALIDATED.** Evidence status remains a separate dimension.
+
+Canonical freeze record: `data/metadata/living_cost_owner_decisions_frozen.md`.
+
+Summary of frozen choices:
+
+1. **OD-001** — Freshest appropriate ACS 5-Year county adult 18+ weights; historical 2024 locked to 2024 ACS; retain fixed-2024-weight sensitivity.
+2. **OD-002** — MEPS weighted mean OOP primary; median and P75 sensitivities; newest actually released Full Year Consolidated file.
+3. **OD-003** — NHTS weighted median is the Foundation Mobility Standard; not “measured minimum necessary mileage.”
+4. **OD-004** — Used-car gasoline compact+midsize cohort, 8–12 model years old; median combined real-world MPG; no hardcoded 24/28/32.
+5. **OD-005** — Replacement reserve formula `(acquisition − residual) / remaining years`; no retired $1,600 default; numeric inputs pending.
+6. **OD-006** — NAIC combined average premium canonical.
+7. **OD-007** — Weighted mean including zeros (VQB/MTBI); evidence remains `INCOMPLETE_PROVENANCE` until official BLS retrieve is reproducible.
+8. **OD-008** — Canonical recreation `MAX(CE P25, $1,200/year)`; preferred modest-life `MAX(CE P25, $2,400/year)`.
+9. **OD-009** — Canonical connectivity is mobile **and** broadband (100/20 working standard). Mobile price remains `SOURCE_GAP` if no authoritative price exists.
+10. **OD-010** — Hybrid translation. Lagged nominal dollars use `CPI_UPDATED`, never silent `LATEST_AVAILABLE` carry-forward.
+11. **OD-011** — Municipal tax classes A/B/C/D. Partial-city tax cannot be applied automatically to an entire county.
+12. **OD-012** — No additional generic resilience reserve. Canonical extra reserve is $0.
+13. **OD-013** — FY2024 Connecticut uses legacy-county reconstruction; FY2026 uses direct planning-region join.
+
+Additional freezes recorded with the same packet: USDA Low-Cost food (Thrifty sensitivity); unsubsidized age-40 single Silver premium; independent 1-bedroom HUD FMR.
+
+---
+
 ## Pending decisions
 
 ### P-001 — Composite normalization

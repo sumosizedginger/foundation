@@ -194,7 +194,7 @@ def test_source_coverage_separates_maintenance_evidence_from_owner_review():
         assert coverage["coverage_by_year"][year]["maintenance"] == "INCOMPLETE_PROVENANCE"
         dims = coverage["status_dimensions"]["by_year"][year]["maintenance"]
         assert dims["evidence_status"] == "INCOMPLETE_PROVENANCE"
-        assert dims["methodology_status"] == "OWNER_REVIEW_PENDING"
+        assert dims["methodology_status"] == "FROZEN"
 
 
 def test_oklahoma_2024_is_not_sbe_fp():

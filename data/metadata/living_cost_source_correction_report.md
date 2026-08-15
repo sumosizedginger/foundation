@@ -13,13 +13,13 @@ NO MINIMUM SUSTAINABLE LIVING COST HEADLINE WAS CALCULATED OR PUBLISHED.
 
 No 2024/2026 MSLC, state ranking, national median, Gap, Adequacy Ratio, or Composite Score was calculated.
 
-Owner decisions were regenerated and **not frozen**. No OD is marked ACCEPTED.
+Historical correction-pass notes. **Superseded for decision status by D-043 / living_cost_owner_decisions_frozen.md.** OD-001 through OD-013 are now ACCEPTED / FROZEN. Evidence gaps below remain.
 
 ## What this pass changed
 
 1. **OD-002 / MEPS** — HC-251 (2023) remains the latest listed full-year file. AHRQ schedule lists 2024 Full Year Consolidated for August 2026. A listing refresh check runs before owner freeze. The 2024 file is not claimed until it appears in the official PUF listing.
 2. **OD-003 / NHTS** — Person file is joined. Age 18-64 and DRIVER=1 are actually executed. Sample labeled observed travel behavior, not minimum-necessary mileage.
-3. **OD-004 / EPA MPG** — Official EPA/DOE fueleconomy.gov vehicle file is retrieved. Candidate used-car and new-car gasoline compact/midsize cohorts are built. 24/28/32 are not the empirical model. Cohort is not frozen.
+3. **OD-004 / EPA MPG** — Official EPA/DOE fueleconomy.gov vehicle file is retrieved. Canonical cohort is now frozen: used-car gasoline compact/midsize, median combined real-world MPG. 24/28/32 are not the empirical model.
 4. **OD-006 / NAIC** — Official free 2022/2023 Auto Insurance Database Report is retrieved. Status is no longer LICENSING_REVIEW merely because a previous agent missed the free file. `redistribution_status = FREE_DOWNLOAD_REDISTRIBUTION_UNCONFIRMED`. The remaining decision is which insurance measure to use.
 5. **OD-007 / maintenance** — Candidate statistics among single-person vehicle-owning CE units include zeros. P25-among-positive-spenders is not automatic.
 6. **OD-009 / connectivity** — ACS removed as a PRICE source. FCC Urban Rate Survey is the broadband price research source. Mobile remains a separate gap.

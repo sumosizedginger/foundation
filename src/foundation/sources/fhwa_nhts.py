@@ -254,10 +254,21 @@ def parse_fhwa_nhts_mileage(
 
     miles = [miles_by_hh[hid] for hid in eligible if hid in miles_by_hh]
     weights = [eligible[hid] for hid in eligible if hid in miles_by_hh]
-    annual_miles = weighted_miles_sum / total_weights
+    annual_miles_mean = weighted_miles_sum / total_weights
     p25 = weighted_percentile(miles, weights, 0.25)
     median = weighted_percentile(miles, weights, 0.50)
     p75 = weighted_percentile(miles, weights, 0.75)
+    from foundation.living_cost.owner_freeze import select_nhts_mileage_statistic
+
+    selected = select_nhts_mileage_statistic(
+        {
+            "weighted_median": median,
+            "weighted_mean": annual_miles_mean,
+            "weighted_p25": p25,
+            "weighted_p75": p75,
+        }
+    )
+    annual_miles = float(selected["canonical_value"])
 
     return LivingCostComponentObservation(
         component_id="fhwa_annual_miles",
@@ -280,12 +291,13 @@ def parse_fhwa_nhts_mileage(
         source_artifact_sha256=file_sha256,
         methodology_version="0.2.0-draft",
         notes=(
+            "FOUNDATION MOBILITY STANDARD derived from observed NHTS median. "
             "OBSERVED TRAVEL BEHAVIOR for one-person, one-worker, age-18-64 licensed-driver "
             "households with valid annual vehicle mileage. Filters actually executed: "
             "hhv2pub HHSIZE=1 and WRKCOUNT=1; perv2pub R_AGE in 18-64 and DRIVER=1; "
             "vehv2pub sum(ANNMILES); weight=WTHHFIN. Missing weights dropped (not defaulted). "
-            f"Weighted mean={annual_miles:,.1f}; median={median:,.1f}; "
+            f"Canonical weighted median={median:,.1f}; mean={annual_miles_mean:,.1f}; "
             f"P25={p25:,.1f}; P75={p75:,.1f}; unweighted n={sample_size:,}. "
-            "This is not MINIMUM NECESSARY MILEAGE (OD-003)."
+            "This is not MEASURED MINIMUM NECESSARY MILEAGE (OD-003)."
         ),
     )

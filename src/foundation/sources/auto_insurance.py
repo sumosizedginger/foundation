@@ -3,10 +3,10 @@
 The 2022/2023 Auto Insurance Database Report is an official FREE download.
 That does not grant raw-report redistribution rights.
 
-METHODOLOGICAL DISTINCTIONS (OD-006 — not frozen):
-- A. average expenditure per insured vehicle
-- B. combined average premium
-- C. coverage-specific / mandatory-coverage measure if tables permit
+METHODOLOGICAL DISTINCTIONS (OD-006 — FROZEN):
+- Canonical: combined average premium
+- Sensitivity A: average expenditure per insured vehicle
+- Sensitivity C: coverage-specific / mandatory-coverage measure if tables permit
 
 Do not treat insurance as LICENSING_REVIEW merely because a previous agent
 failed to discover the free report. Use redistribution_status separately.
@@ -70,8 +70,9 @@ def download_naic_artifact(year: int, cache_dir: Path, force_download: bool = Fa
         f"retrieved_at={artifact.retrieved_at}; "
         f"redistribution_status={NAIC_REDISTRIBUTION_STATUS}. "
         "Free download is not a redistribution license. Derived statistics with attribution "
-        "are handled separately from raw-artifact redistribution. OD-006 remains unfrozen: "
-        "choose average expenditure vs combined average premium vs coverage-specific measure."
+        "are handled separately from raw-artifact redistribution. OD-006 FROZEN: "
+        "canonical measure is combined average premium; sensitivities are average "
+        "expenditure and mandatory/liability-only where reproducible."
     )
     return replace(
         artifact,
@@ -159,7 +160,7 @@ def parse_naic_auto_insurance_csv(
                     notes=(
                         f"NAIC {measure} in {state_alpha} (Source Vintage: {source_vintage}). "
                         f"redistribution_status={NAIC_REDISTRIBUTION_STATUS}. "
-                        "Headline insurance measure is not frozen (OD-006)."
+                        "OD-006 FROZEN: canonical headline is combined average premium."
                     ),
                 )
                 observations.append(obs)

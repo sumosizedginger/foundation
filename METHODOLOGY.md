@@ -132,9 +132,15 @@ _Note: Standard statutory tax deductions (e.g. federal standard deduction) and s
 
 ### 5.2 Vintage Architecture
 
-1. **2024 Time-Comparable Vintage:** Built from 2024 source inputs (or deflated using component-specific CPI/RPP where appropriate) to provide an exact temporal match for the 2024 Population Anchor ($21,800).
-2. **2026 Current Living Cost Vintage:** Built from current 2026 source data (FY2026 FMR, 2026 USDA Food Plans, 2026 CMS Marketplace Rates).
+1. **2024 Time-Comparable Vintage:** Built from 2024 source inputs (or translated using the OD-010 hybrid rules) to provide an exact temporal match for the 2024 Population Anchor ($21,800). Historical 2024 costs are not rewritten with later-year prices or later ACS population vintages.
+2. **2026 Current Living Cost Vintage:** Built from the newest authoritative sources actually available at calculation time (FY2026 FMR, current USDA months / YTD, current CMS Marketplace rates, newest ACS 5-Year county weights).
    _The 2026 Current Living Cost is never subtracted from the 2024 Population Anchor._
+
+**OD-001 (FROZEN):** Geographic weights use the newest appropriate ACS 5-Year county adult 18+ vintage. As of the owner freeze that vintage is 2024, so both years currently share it. Current-cost calculations advance when a newer ACS 5-Year county vintage exists. A fixed-2024-weight sensitivity is retained for longitudinal comparison.
+
+**OD-010 (FROZEN):** Structural quantities use `LATEST_AVAILABLE` and are not inflation-adjusted. Target-year laws use `RULE_YEAR`. High-frequency prices use actual target-year observations or YTD. Lagged nominal dollar series use `CPI_UPDATED` with the most component-specific official index. Already-local current prices receive no extra generic CPI. Every component stores `project_cost_year`, `source_data_year`, `translation_method`, `price_index_series`, `translation_factor`, `original_value`, and `translated_value`. Silent `LATEST_AVAILABLE` nominal carry-forward is forbidden.
+
+**OD-013 (FROZEN):** FY2024 Connecticut keeps HUD legacy-county geography and reconstructs ACS adult weights from the official town/county-subdivision crosswalk. FY2026 joins HUD planning-region FIPS directly to ACS planning-region geography.
 
 ---
 
@@ -154,29 +160,36 @@ _Note: Standard statutory tax deductions (e.g. federal standard deduction) and s
 
 ### 6.3 Transportation Model (Automobile Baseline)
 
-- **Model Structure:** Independent automobile ownership model reflecting annual necessary miles ($M \approx 10,000\text{–}12,000\text{ miles/yr}$):
+- **Model Structure:** Independent automobile ownership model:
   $$\text{AutoCost} = \text{Fuel} + \text{Auto Insurance} + \text{Routine Maintenance/Tires} + \text{Registration/Fees} + \text{Vehicle Replacement Reserve}$$
-- **Sources:** FHWA/NHTS travel surveys, EIA state/regional gasoline prices, NAIC/state insurance commissioner rate data, BLS Consumer Expenditure used-vehicle depreciation baselines.
+- **OD-003 mileage (FROZEN):** Canonical is the NHTS weighted median for one-person, one-worker, age 18–64 licensed-driver households with valid annual miles. Label: **Foundation Mobility Standard** derived from observed NHTS median. Not “measured minimum necessary mileage.” Sensitivities: P25, mean, P75. Current measured median candidate ≈ 10,000 miles/year.
+- **OD-004 MPG (FROZEN):** Modest used gasoline compact+midsize passenger-car cohort, model years approximately 8–12 years before the project cost year. Canonical MPG is the cohort median estimated real-world combined MPG. 24 / 28 / 32 are not hardcoded.
+- **OD-005 replacement (FROZEN formula):** \((\text{acquisition} - \text{residual}) / \text{remaining usable years}\). Numeric inputs are not frozen. Retired $10,000 / $2,000 / 5 years / $1,600 are not defaults.
+- **OD-006 insurance (FROZEN):** NAIC combined average premium where the state statistic is available. Sensitivities: average expenditure; liability-only where reproducible. 2023 NAIC dollars are not labeled as later-year dollars.
+- **OD-007 maintenance (FROZEN methodology):** Weighted mean including zeros among single-person vehicle-owning CE units using the documented VQB/MTBI architecture. Evidence remains `INCOMPLETE_PROVENANCE` until the official BLS retrieve is reproducible.
 
 ### 6.4 Healthcare Model
 
 - **Profile:** Unsubsidized adult (age 40, single, non-smoker, no dependents).
-- **Plan Tier:** Lowest-cost adequate Silver-level Marketplace plan (CMS Exchange Public Use Files / State Exchange PUFs). Bronze plans with catastrophic deductibles that render ordinary care unusable are rejected.
-- **Out-of-Pocket Utilization:** Realistic expected non-catastrophic annual out-of-pocket medical expenditure modeled from MEPS (Medical Expenditure Panel Survey).
-- **Sensitivity Tiers:** Low utilization, typical utilization, higher utilization.
+- **Plan Tier:** Lowest-cost adequate Silver-level Marketplace plan (CMS Exchange Public Use Files / State Exchange PUFs). Bronze plans with catastrophic deductibles that render ordinary care unusable are rejected. No subsidy, Medicaid, employer contribution, or fake deductible/rating-area fallback.
+- **OD-002 OOP (FROZEN):** Weighted mean annual OOP among adults 18–64 with private insurance. Sensitivities: weighted median and weighted P75. Use the newest Full Year Consolidated MEPS file actually released (HC-251 / 2023 at freeze time unless a later file is listed).
 
 ### 6.5 Connectivity & Essentials
 
-- **Connectivity:** 1 mobile phone line (unlimited talk/text/basic data) + entry-level fixed residential broadband (BLS CE / FCC urban broadband rate benchmark).
+- **OD-009 connectivity (FROZEN):** Canonical minimum is **both** one ordinary mobile phone/data line **and** one residential broadband connection meeting the current ordinary FCC fixed-broadband benchmark (working standard 100 Mbps down / 20 Mbps up). Mobile-only and broadband-only are sensitivities. ACS internet tables are not a price source. If no acceptable authoritative mobile **price** source exists, methodology stays frozen and mobile evidence stays `SOURCE_GAP`.
 - **Essentials:** Restrictive basket of personal hygiene, toiletries, cleaning products, laundry, and basic apparel/footwear replacement using BLS CE single-person consumer unit microdata.
 
 ### 6.6 Social & Recreation
 
-- **Methodology:** Explicit, visible component based on conservative lower-quartile (P25) recreational and social participation expenditures among positive-spending single-person consumer units in the BLS Consumer Expenditure Survey, adjusted regionally via BEA Regional Price Parities (RPP).
+- **OD-008 (FROZEN):** Empirical baseline is BLS CE weighted P25 among single-person positive spenders on the approved recreation/social allowlist, adjusted regionally via BEA RPP.
+- **Canonical MSLC:** \(\max(\text{empirical P25}, \$1{,}200/\text{year})\).
+- **Preferred modest-life sensitivity:** \(\max(\text{empirical P25}, \$2{,}400/\text{year})\).
+- Empirical P20 / P25 / P30 are retained for transparency. The $200/month case is the **preferred modest-life social/recreation standard**, not a luxury case. These floors are consumption/social-participation standards, not emergency savings.
 
 ### 6.7 Resilience & Irregular Expenses
 
-- **Methodology:** Explicitly models unavoidable irregular replacements (minor appliances, emergency car repairs, unexpected household basics) ensuring zero double-counting against vehicle depreciation and MEPS out-of-pocket models.
+- **OD-012 (FROZEN):** No additional generic resilience reserve. Canonical extra reserve is **$0**. Do not add 5%, 10%, $1,200, $50/month, $100/month, or generic emergency savings.
+- Predictable irregular costs are annualized inside their actual component (vehicle repairs and replacement in transportation, clothing in essentials, healthcare utilization in healthcare). Newly discovered uncovered necessities are researched and added to the real category — not sneaked in as miscellaneous resilience.
 
 ---
 
@@ -196,7 +209,12 @@ where $\text{Taxes}(G, g, y)$ computes:
 2. Employee Medicare FICA (1.45%)
 3. Federal Statutory Income Tax (incorporating federal standard deduction and marginal brackets)
 4. State Statutory Income Tax (incorporating state standard deductions, personal exemptions, and state marginal brackets)
-5. Local Income/Earnings Taxes (where applicable at the county/city level).
+5. Local Income/Earnings Taxes (where applicable), classified under **OD-011**:
+   - A coterminous municipality/county-equivalent — apply directly;
+   - B true county-level tax — apply directly;
+   - C municipality covering only part of the modeled county — place/subcounty or defensible population-weighted exposure, else `SOURCE_GAP` / `UNAVAILABLE`;
+   - D unresolved — do not invent a rate.
+     A partial-city tax is never applied automatically to an entire county. Statewide average local tax rates are forbidden.
 
 ---
 

@@ -95,7 +95,10 @@ STATIC_SOURCES: list[StaticSourceDef] = [
         landing_page="https://www.census.gov/programs-surveys/acs",
         parser_identifier="foundation.sources.census_acs.parse_acs_summary_dat",
         source_vintage_note=(
-            "Frozen weight vintage is 2024 ACS 5-Year B01001. Used for both 2024 and 2026 cost years."
+            "OD-001 FROZEN: newest appropriate ACS 5-Year county adult 18+ vintage. "
+            "As of owner freeze that vintage is 2024. Historical 2024 costs stay on "
+            "2024 ACS. Current/2026 also uses 2024 until a newer ACS 5-Year county "
+            "vintage exists. Fixed-2024-weight sensitivity is retained."
         ),
     ),
     StaticSourceDef(
@@ -109,8 +112,9 @@ STATIC_SOURCES: list[StaticSourceDef] = [
         landing_page="https://www.census.gov/programs-surveys/acs",
         parser_identifier="foundation.sources.census_acs.parse_acs_summary_dat",
         source_vintage_note=(
-            "2026 cost year uses the same 2024 ACS 5-Year weight vintage as 2024. "
-            "Not a 2026 Census file."
+            "OD-001: 2026/current uses the newest available ACS 5-Year county vintage "
+            "(today 2024). Not a 2026 Census file. Historical 2024 is not rewritten "
+            "when a later vintage arrives. Fixed-2024-weight sensitivity retained."
         ),
     ),
     StaticSourceDef(
@@ -182,7 +186,7 @@ STATIC_SOURCES: list[StaticSourceDef] = [
         licensing_notes="Free official download. redistribution_status=FREE_DOWNLOAD_REDISTRIBUTION_UNCONFIRMED.",
         landing_page="https://content.naic.org/publications",
         parser_identifier="foundation.sources.auto_insurance.parse_naic_auto_insurance_csv",
-        source_vintage_note="data_year=2023; publication_year=2025; OD-006 measure not frozen.",
+        source_vintage_note="data_year=2023; publication_year=2025; OD-006 FROZEN combined average premium.",
     ),
     StaticSourceDef(
         source_id="fhwa_nhts_2024",

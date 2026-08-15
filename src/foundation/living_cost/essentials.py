@@ -41,7 +41,11 @@ def calculate_connectivity_and_essentials(
         retrieved_at=retrieved_at,
         source_artifact_sha256=source_sha256,
         methodology_version="0.2.0-draft",
-        notes="1 mobile phone line (talk/text/data) + basic residential broadband connectivity.",
+        notes=(
+            "OD-009 FROZEN: canonical connectivity requires one mobile line AND one "
+            "residential broadband connection (working standard 100/20 Mbps). "
+            "Mobile-only and broadband-only are sensitivities. ACS is not a price source."
+        ),
     )
 
     ess_obs = LivingCostComponentObservation(

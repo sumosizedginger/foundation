@@ -106,27 +106,30 @@ def test_usda_month_coverage_from_labels_not_row_counts():
 def test_owner_packet_od_updates(tmp_path: Path):
     payload = write_owner_decision_packet(tmp_path)
     assert payload["headline_calculated"] is False
-    assert payload["decisions_frozen"] is False
+    assert payload["decisions_frozen"] is True
+    assert payload["living_cost_release_authorized"] is False
     by_id = {item["id"]: item for item in DECISIONS}
-    assert "AUGUST 2026" in by_id["OD-002"]["source_support"]
-    assert "HC-251" in by_id["OD-002"]["source_support"]
-    assert "person file" in by_id["OD-003"]["source_support"]
-    assert "REFERENCE" not in by_id["OD-004"]["question"] or "cohort" in by_id["OD-004"]["question"]
-    assert "LICENSING_REVIEW" not in by_id["OD-006"]["question"]
-    assert "average expenditure" in by_id["OD-006"]["option_a"].lower()
-    assert "including zero" in by_id["OD-007"]["option_a"].lower()
+    assert by_id["OD-002"]["status"] == "ACCEPTED"
     assert (
-        "NOT a price source" in by_id["OD-009"]["why_it_matters"]
-        or "not a price" in by_id["OD-009"]["why_it_matters"].lower()
+        "HC-251" in by_id["OD-002"]["decision"] or by_id["OD-002"]["newest_listed_puf"] == "HC-251"
     )
-    assert "HYBRID" in by_id["OD-010"]["option_a"]
-    assert "coterminous" in by_id["OD-011"]["option_a"]
-    assert "09190" in by_id["OD-013"]["why_it_matters"]
-    assert "09110-09170" not in by_id["OD-013"]["why_it_matters"]
-    assert "FY2026" in by_id["OD-013"]["why_it_matters"]
-    assert "legacy HUD county" in by_id["OD-013"]["option_a"]
+    assert "FOUNDATION MOBILITY STANDARD" in by_id["OD-003"]["decision"]
+    assert (
+        "used-car" in by_id["OD-004"]["decision"].lower()
+        or "Used-car" in by_id["OD-004"]["decision"]
+    )
+    assert "combined average premium" in by_id["OD-006"]["decision"].lower()
+    assert "including zero" in by_id["OD-007"]["decision"].lower()
+    assert "acs is not a price source" in by_id["OD-009"]["decision"].lower()
+    assert "CPI_UPDATED" in by_id["OD-010"]["decision"]
+    assert "coterminous" in by_id["OD-011"]["decision"]
+    assert "legacy county" in by_id["OD-013"]["decision"].lower()
+    assert "planning-region" in by_id["OD-013"]["decision"].lower()
     for item in DECISIONS:
-        assert "ACCEPTED" not in item["recommended"]
+        assert item["status"] == "ACCEPTED"
+        assert item["methodology_status"] == "FROZEN"
+    assert (tmp_path / "living_cost_owner_decisions_frozen.json").exists()
+    assert (tmp_path / "living_cost_owner_decisions_frozen.md").exists()
 
 
 def test_sbe_per_state_official_urls_are_year_specific():

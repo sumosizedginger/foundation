@@ -194,7 +194,7 @@
       "landing_page": "https://content.naic.org/publications",
       "licensing_notes": "Free official download. redistribution_status=FREE_DOWNLOAD_REDISTRIBUTION_UNCONFIRMED.",
       "parser_identifier": "foundation.sources.auto_insurance.parse_naic_auto_insurance_csv",
-      "source_vintage_note": "data_year=2023; publication_year=2025; OD-006 measure not frozen.",
+      "source_vintage_note": "data_year=2023; publication_year=2025; OD-006 FROZEN combined average premium.",
       "parser_version": "0.2.0-draft",
       "retrieved_at": "2026-08-14T20:19:04+00:00",
       "sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
@@ -202,7 +202,7 @@
       "local_cache_filename": "publication-aut-pb-auto-insurance-database.pdf",
       "validation_status": "RETRIEVED_UNVALIDATED",
       "resolved_url": "https://content.naic.org/sites/default/files/publication-aut-pb-auto-insurance-database.pdf",
-      "retrieval_notes": "Official NAIC 2022/2023 Auto Insurance Database Report retrieved. source_url=https://content.naic.org/sites/default/files/publication-aut-pb-auto-insurance-database.pdf; publication_year=2025 (Adopted December 2025; news release 2026-02-13); data_year=2023; byte_size=9807383; sha256=34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78; retrieved_at=2026-08-14T20:19:04+00:00; redistribution_status=FREE_DOWNLOAD_REDISTRIBUTION_UNCONFIRMED. Free download is not a redistribution license. Derived statistics with attribution are handled separately from raw-artifact redistribution. OD-006 remains unfrozen: choose average expenditure vs combined average premium vs coverage-specific measure."
+      "retrieval_notes": "Official NAIC 2022/2023 Auto Insurance Database Report retrieved. source_url=https://content.naic.org/sites/default/files/publication-aut-pb-auto-insurance-database.pdf; publication_year=2025 (Adopted December 2025; news release 2026-02-13); data_year=2023; byte_size=9807383; sha256=34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78; retrieved_at=2026-08-14T20:19:04+00:00; redistribution_status=FREE_DOWNLOAD_REDISTRIBUTION_UNCONFIRMED. Free download is not a redistribution license. Derived statistics with attribution are handled separately from raw-artifact redistribution. OD-006 FROZEN: canonical measure is combined average premium; sensitivities are average expenditure and mandatory/liability-only where reproducible."
     },
     {
       "source_id": "fhwa_nhts_2024",
@@ -582,7 +582,7 @@
       "local_cache_filename": "epa_fueleconomy_vehicles.csv.zip",
       "validation_status": "RETRIEVED_UNVALIDATED",
       "resolved_url": "https://www.fueleconomy.gov/feg/epadata/vehicles.csv.zip",
-      "retrieval_notes": "EPA MPG candidates parsed (4 cohorts). OD-004 not frozen. 24/28/32 are not the empirical model."
+      "retrieval_notes": "EPA MPG candidates parsed (4 cohorts). OD-004 FROZEN used-car compact+midsize median. 24/28/32 are not the empirical model."
     },
     {
       "source_id": "fcc_urs_broadband_2024",
@@ -962,7 +962,7 @@
       "local_cache_filename": "publication-aut-pb-auto-insurance-database.pdf",
       "validation_status": "RETRIEVED_UNVALIDATED",
       "resolved_url": "https://content.naic.org/sites/default/files/publication-aut-pb-auto-insurance-database.pdf",
-      "retrieval_notes": "Official NAIC 2022/2023 Auto Insurance Database Report retrieved. source_url=https://content.naic.org/sites/default/files/publication-aut-pb-auto-insurance-database.pdf; publication_year=2025 (Adopted December 2025; news release 2026-02-13); data_year=2023; byte_size=9807383; sha256=34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78; retrieved_at=2026-08-14T20:19:04+00:00; redistribution_status=FREE_DOWNLOAD_REDISTRIBUTION_UNCONFIRMED. Free download is not a redistribution license. Derived statistics with attribution are handled separately from raw-artifact redistribution. OD-006 remains unfrozen: choose average expenditure vs combined average premium vs coverage-specific measure."
+      "retrieval_notes": "Official NAIC 2022/2023 Auto Insurance Database Report retrieved. source_url=https://content.naic.org/sites/default/files/publication-aut-pb-auto-insurance-database.pdf; publication_year=2025 (Adopted December 2025; news release 2026-02-13); data_year=2023; byte_size=9807383; sha256=34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78; retrieved_at=2026-08-14T20:19:04+00:00; redistribution_status=FREE_DOWNLOAD_REDISTRIBUTION_UNCONFIRMED. Free download is not a redistribution license. Derived statistics with attribution are handled separately from raw-artifact redistribution. OD-006 FROZEN: canonical measure is combined average premium; sensitivities are average expenditure and mandatory/liability-only where reproducible."
     },
     {
       "source_id": "epa_mpg_2026",
@@ -972,7 +972,7 @@
       "local_cache_filename": "epa_fueleconomy_vehicles.csv.zip",
       "validation_status": "RETRIEVED_UNVALIDATED",
       "resolved_url": "https://www.fueleconomy.gov/feg/epadata/vehicles.csv.zip",
-      "retrieval_notes": "EPA MPG candidates parsed (4 cohorts). OD-004 not frozen. 24/28/32 are not the empirical model."
+      "retrieval_notes": "EPA MPG candidates parsed (4 cohorts). OD-004 FROZEN used-car compact+midsize median. 24/28/32 are not the empirical model."
     },
     {
       "source_id": "fcc_urs_broadband_2026",

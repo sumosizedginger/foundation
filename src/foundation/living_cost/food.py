@@ -1,7 +1,7 @@
 """Food component calculator for Minimum Sustainable Living Cost.
 
-Rule: USDA Low-Cost Food Plan as primary sustainable baseline (single adult age 19-50 with +20% 1-person adjustment).
-USDA Thrifty Food Plan as lower sensitivity bound.
+Rule: USDA Low-Cost Food Plan as canonical sustainable baseline (single adult age 19-50 with +20% 1-person adjustment).
+USDA Thrifty Food Plan is the lower sensitivity, not the canonical plan. Incomplete years use YTD.
 """
 
 from __future__ import annotations

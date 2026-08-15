@@ -655,6 +655,52 @@ STATE_STATUTORY_SCHEDULES: dict[int, dict[str, dict[str, Any]]] = {
     },
 }
 
+# OD-011 geography class:
+#   A = coterminous municipality / county-equivalent
+#   B = true county-level tax
+#   C = municipality covering only part of modeled county (do NOT apply countywide)
+#   D = unresolved
+LOCAL_TAX_GEOGRAPHY: dict[str, str] = {
+    # Maryland county income tax — true county-level (class B)
+    **{
+        fips: "B"
+        for fips in (
+            "24001",
+            "24003",
+            "24005",
+            "24009",
+            "24011",
+            "24013",
+            "24015",
+            "24017",
+            "24019",
+            "24021",
+            "24023",
+            "24025",
+            "24027",
+            "24029",
+            "24031",
+            "24033",
+            "24035",
+            "24037",
+            "24039",
+            "24041",
+            "24043",
+            "24045",
+            "24047",
+            "24510",
+        )
+    },
+    # NYC boroughs are coterminous county-equivalents (class A)
+    "36005": "A",
+    "36047": "A",
+    "36061": "A",
+    "36081": "A",
+    "36085": "A",
+    # Philadelphia city/county is coterminous (class A)
+    "42101": "A",
+}
+
 # Specific county/city local income tax rates by 5-digit FIPS code
 # Only attached to explicit geographies where statutory authority mandates county/city income tax
 LOCAL_TAX_RATES_BY_FIPS: dict[str, float] = {
@@ -775,8 +821,22 @@ def calculate_state_income_tax(gross: float, state: str, year: int = 2024) -> fl
 
 
 def calculate_local_income_tax(gross: float, fips_code: str = "") -> float:
-    """Calculate statutory local income tax attached to specific county FIPS."""
+    """Calculate statutory local income tax attached to specific county FIPS.
+
+    OD-011: class C (partial-city) taxes cannot be applied automatically to an
+    entire county. Unclassified / class D geographies do not silently invent a rate.
+    """
+    from foundation.living_cost.owner_freeze import local_tax_application_rule
+
     if not fips_code:
+        return 0.0
+    classification = LOCAL_TAX_GEOGRAPHY.get(fips_code, "D")
+    rule = local_tax_application_rule(classification)  # type: ignore[arg-type]
+    if classification == "C":
+        raise ValueError(
+            f"partial-city tax cannot be applied automatically to entire county {fips_code}"
+        )
+    if not rule["apply"]:
         return 0.0
     rate = LOCAL_TAX_RATES_BY_FIPS.get(fips_code, 0.0)
     return gross * rate

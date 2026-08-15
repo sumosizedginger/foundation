@@ -1,10 +1,12 @@
 # Project Status
 
-**Updated:** 2026-08-14  
+**Updated:** 2026-08-15  
 **Active Methodology Version:** `0.2.0-draft`  
-**Current Milestone:** Pre-owner-freeze evidence cleanup complete; **owner freeze of OD-001–OD-013 is next**
+**Current Milestone:** Owner freeze of OD-001–OD-013 is **ACCEPTED / FROZEN**. No MSLC headline is authorized.
 
-Current living-cost closeout: `data/metadata/living_cost_pre_owner_freeze_closeout.md`  
+Current owner-freeze record: `data/metadata/living_cost_owner_decisions_frozen.md`  
+Historical pending packet: `data/metadata/historical/living_cost_owner_decisions_pending.md`  
+Pre-freeze closeout: `data/metadata/living_cost_pre_owner_freeze_closeout.md`  
 Superseded Deliverable 2A snapshot: `data/metadata/historical/living_cost_deliverable_2a_report.md` (NOT current status)
 
 ---
@@ -43,7 +45,7 @@ Superseded Deliverable 2A snapshot: `data/metadata/historical/living_cost_delive
 
 The $51,220.16 / $55,551.89 prototype headlines, 51-state rankings, -$29,420.16 gap, and 43% adequacy ratio are **retired**. They were produced from synthetic geography and are not current results.
 
-Current work is the empirical source layer: official HUD/CMS/MEPS/BLS artifacts or explicit `SOURCE_GAP` / `LICENSING_REVIEW`. No living-cost headline is authorized.
+Owner freeze (D-043) is recorded. Remaining work before any candidate economic calculation is an independent audit, then a later authorized calculation pass. Source gaps (BLS CE 403, mobile price, registration, some tax inventory, MEPS 2024 FY if still unlisted) remain truthful. No living-cost headline is authorized.
 
 ---
 

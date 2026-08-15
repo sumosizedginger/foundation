@@ -87,7 +87,7 @@ def parse_fcc_urs_broadband(
     retrieved_at: str = "",
     file_sha256: str = "",
 ) -> list[LivingCostComponentObservation]:
-    """Parse official URS broadband rows into unfrozen price candidates."""
+    """Parse official URS broadband rows into OD-009 broadband price candidates."""
     spec = FCC_URS_FILES.get(reference_year) or FCC_URS_FILES[2026]
     path = cache_dir if cache_dir.is_file() else cache_dir / spec["filename"]
     if not path.exists():
@@ -155,7 +155,7 @@ def parse_fcc_urs_broadband(
             source_artifact_sha256=file_sha256,
             methodology_version="0.2.0-draft",
             notes=(
-                f"FCC Urban Rate Survey broadband candidate (OD-009, not frozen). "
+                f"FCC Urban Rate Survey broadband candidate (OD-009 FROZEN: mobile+broadband canonical; 100/20 working standard). "
                 f"n={len(prices)} surveyed monthly rates in workbook; "
                 f"median=${median_m:.2f}/mo; mean=${mean_m:.2f}/mo. "
                 "This is urban surveyed rate evidence, not a national COLI. "

@@ -23,9 +23,24 @@ from foundation.sources.acquisition import acquire_source, record_unretrieved
 
 logger = logging.getLogger(__name__)
 
-# Frozen population-weight vintage for BOTH 2024 and 2026 cost years.
-ACS_WEIGHT_VINTAGE_YEAR = 2024
-CENSUS_VINTAGE = "2024 ACS 5-Year Estimates"
+# OD-001: do not permanently freeze an obsolete ACS vintage.
+# Today the newest county-level ACS 5-Year vintage is 2024, so both the
+# historical 2024 benchmark and the current/2026 model use 2024 weights.
+# Current-cost calculations must advance when a newer ACS 5-Year county
+# vintage becomes available. Historical 2024 must not be rewritten.
+from foundation.living_cost.owner_freeze import select_acs_weight_vintage
+
+KNOWN_ACS5_COUNTY_VINTAGES = (2024,)
+ACS_WEIGHT_VINTAGE_YEAR = select_acs_weight_vintage(
+    2026, KNOWN_ACS5_COUNTY_VINTAGES, mode="canonical"
+)
+ACS_WEIGHT_VINTAGE_YEAR_2024 = select_acs_weight_vintage(
+    2024, KNOWN_ACS5_COUNTY_VINTAGES, mode="canonical"
+)
+ACS_FIXED_2024_SENSITIVITY_VINTAGE = select_acs_weight_vintage(
+    2026, KNOWN_ACS5_COUNTY_VINTAGES, mode="fixed_2024_sensitivity"
+)
+CENSUS_VINTAGE = f"{ACS_WEIGHT_VINTAGE_YEAR} ACS 5-Year Estimates"
 
 # Required B01001 variables for Adult Population (18+)
 ACS_VARS = [

@@ -1,9 +1,8 @@
 """Transportation component assembly.
 
-Unsupported constants (28 MPG, $1,200 maintenance, $1,600 replacement,
-hand-entered 51-state registration fees) are not used as measured inputs.
-Those components remain ESTIMATED_OWNER_REVIEW / SOURCE_GAP until the
-owner packet is resolved.
+OD-004/005/006/007 are methodology-frozen. Unsupported constants
+(28 MPG, $1,200 maintenance, $1,600 replacement, hand-entered 51-state
+registration fees) are not used as measured inputs.
 """
 
 from __future__ import annotations
@@ -11,6 +10,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from foundation.living_cost.models import ComponentStatus, LivingCostComponentObservation
+from foundation.living_cost.owner_freeze import vehicle_replacement_reserve
 
 
 @dataclass(frozen=True)
@@ -82,9 +82,13 @@ def calculate_transportation(
         source_artifact_sha256=source_sha256,
         methodology_version="0.2.0-draft",
         notes=(
-            f"Auto model (ESTIMATED_OWNER_REVIEW): {breakdown.annual_miles:,.0f} mi/yr; "
+            f"Auto model (OD-003/004/005/006/007 FROZEN methodology): "
+            f"{breakdown.annual_miles:,.0f} mi/yr Foundation Mobility Standard input; "
             f"Fuel: ${breakdown.fuel_cost_annual:,.2f}, Ins: ${breakdown.insurance_cost_annual:,.2f}, "
             f"Maint: ${breakdown.maintenance_tires_annual:,.2f}, Reg: ${breakdown.registration_fees_annual:,.2f}, "
-            f"Replacement Reserve (ESTIMATED): ${breakdown.replacement_reserve_annual:,.2f}."
+            f"Replacement reserve uses formula "
+            f"{vehicle_replacement_reserve(None, None, None)['formula']}; "
+            f"supplied annual=${breakdown.replacement_reserve_annual:,.2f} "
+            f"(numeric result pending evidence; $1,600 is not a default)."
         ),
     )

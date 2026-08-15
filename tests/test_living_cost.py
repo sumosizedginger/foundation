@@ -68,7 +68,7 @@ def test_social_recreation_rpp():
 
 def test_resilience_reserve():
     obs = calculate_resilience_reserve(1200.0, 2024, "06075", "San Francisco County, CA", "CA")
-    assert obs.value_annual == 1200.0
+    assert obs.value_annual == 0.0
 
 
 def test_federal_tax_brackets_boundary_tests():

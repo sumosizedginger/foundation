@@ -155,7 +155,23 @@ Represents the population-weighted aggregation across all localities in the 50 s
 
 ---
 
-## 6. Status Enum
+## 6. Owner-freeze / translation fields
+
+Every living-cost component that later enters a candidate calculation must carry:
+
+- `project_cost_year`
+- `source_data_year`
+- `translation_method` (`LATEST_AVAILABLE` | `RULE_YEAR` | `YTD` | `TARGET_YEAR_OBSERVATION` | `CPI_UPDATED` | `NONE_ALREADY_LOCAL` | `SOURCE_GAP` | `FORMULA_PENDING_INPUTS`)
+- `price_index_series`
+- `translation_factor`
+- `original_value`
+- `translated_value`
+
+Methodology status (`FROZEN`) is stored separately from evidence status (`VALIDATED`, `INCOMPLETE_PROVENANCE`, `SOURCE_GAP`, `RETRIEVED_UNVALIDATED`, `FORMULA_FROZEN_INPUTS_PENDING`, …).
+
+Owner-decision records live at `data/metadata/living_cost_owner_decisions_frozen.json`.
+
+## 7. Status Enum
 
 - `measured` — Derived directly from official microdata using deterministic formulas.
 - `research_estimate` — Transparent multi-component model undergoing active validation.
