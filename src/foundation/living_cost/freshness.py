@@ -417,61 +417,244 @@ def compute_freshness_run_id(core: Mapping[str, Any]) -> str:
     return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
 
 
-def _canonical_check_identity(checks: Mapping[str, Any]) -> dict[str, Any]:
-    identity: dict[str, Any] = {}
-    for family, check in checks.items():
-        artifacts = check.get("selected_artifacts") or []
-        hashes = []
-        for item in artifacts:
-            if isinstance(item, dict):
-                hashes.append(
-                    {
-                        "artifact_id": item.get("artifact_id") or item.get("filename"),
-                        "sha256": item.get("sha256"),
-                    }
-                )
-        identity[family] = {
-            "selected_artifact": check.get("selected_artifact"),
-            "selected_vintage": check.get("selected_vintage"),
-            "latest_authoritative_vintage_found": check.get("latest_authoritative_vintage_found"),
-            "freshness_check_status": check.get("freshness_check_status"),
-            "artifact_hashes": hashes,
-            "year_coverage": check.get("year_coverage"),
-        }
-    return identity
+def _check_as_dict(check: FreshnessCheck | Mapping[str, Any]) -> dict[str, Any]:
+    if isinstance(check, FreshnessCheck):
+        return check.to_dict()
+    return dict(check)
+
+
+def _authorizing_family_state(check: Mapping[str, Any]) -> dict[str, Any]:
+    artifacts = check.get("selected_artifacts") or []
+    hashes = []
+    for item in artifacts:
+        if isinstance(item, dict):
+            hashes.append(
+                {
+                    "artifact_id": item.get("artifact_id") or item.get("filename"),
+                    "sha256": item.get("sha256"),
+                }
+            )
+    return {
+        "source_id": check.get("source_id"),
+        "latest_checked_at": check.get("latest_checked_at"),
+        "latest_authoritative_vintage_found": check.get("latest_authoritative_vintage_found"),
+        "selected_vintage": check.get("selected_vintage"),
+        "selected_artifact": check.get("selected_artifact"),
+        "selected_artifact_hashes": hashes,
+        "newer_data_exists": check.get("newer_data_exists"),
+        "retrieval_validation_status": check.get("retrieval_validation_status"),
+        "freshness_check_status": check.get("freshness_check_status"),
+        "listing_freshness_status": check.get("listing_freshness_status"),
+        "artifact_currentness_status": check.get("artifact_currentness_status"),
+        "selected_artifact_matches_latest": check.get("selected_artifact_matches_latest"),
+        "year_coverage": check.get("year_coverage"),
+        "input_evidence_status": check.get("input_evidence_status"),
+        "transformation_method": check.get("transformation_method"),
+    }
+
+
+def authorizing_state_core(context: Mapping[str, Any]) -> dict[str, Any]:
+    """Every field that can change permission or candidate inputs."""
+    checks = context.get("checks") or {}
+    families = {
+        family: _authorizing_family_state(_check_as_dict(check)) for family, check in checks.items()
+    }
+    cand = dict(context.get("candidate_input_binding_identity") or {})
+    od010 = dict(context.get("od010_binding_identity") or {})
+    return {
+        "generated_at": context.get("generated_at"),
+        "required_project_cost_years": context.get("required_project_cost_years"),
+        "authorization": {
+            "candidate_calculation_authorized": context.get("candidate_calculation_authorized"),
+            "living_cost_release_authorized": context.get("living_cost_release_authorized"),
+        },
+        "checks": families,
+        "candidate_input_binding_identity": {
+            "sha256": cand.get("sha256"),
+            "bound": cand.get("bound"),
+            "missing": cand.get("missing"),
+            "normalized": cand.get("normalized"),
+        },
+        "od010_binding_identity": {
+            "sha256": od010.get("sha256"),
+            "bound": od010.get("bound"),
+            "required": od010.get("required"),
+            "missing": od010.get("missing"),
+            "normalized": od010.get("normalized"),
+        },
+    }
+
+
+_UNSET = object()
+
+
+def build_live_readiness_context(
+    checks: Mapping[str, FreshnessCheck],
+    *,
+    candidate_payload: Any = _UNSET,
+    od010_payload: Any = _UNSET,
+    generated_at: str | None = None,
+) -> dict[str, Any]:
+    """Read canonical binding state ONCE and capture it with live checks.
+
+    Do not re-read binding files after this returns. Pass captured payloads
+    to avoid a second disk read.
+    """
+    from foundation.living_cost.candidate_bindings import (
+        SOURCE_COVERAGE,
+        assert_canonical_component_universe,
+        candidate_input_binding_identity,
+        evaluate_candidate_input_bindings,
+        evaluate_od010_translation_table,
+        load_candidate_binding_payload,
+        load_od010_payload,
+        load_source_lag,
+        translation_binding_identity,
+        validate_candidate_bindings_against_snapshot,
+    )
+
+    if SOURCE_COVERAGE.exists():
+        coverage = json.loads(SOURCE_COVERAGE.read_text(encoding="utf-8"))
+        assert_canonical_component_universe(coverage)
+        lag = load_source_lag()
+        if lag:
+            from foundation.living_cost.candidate_bindings import (
+                assert_source_lag_preserves_frozen_od010,
+            )
+
+            assert_source_lag_preserves_frozen_od010(lag)
+
+    if candidate_payload is _UNSET:
+        candidate_payload = load_candidate_binding_payload()
+    if od010_payload is _UNSET:
+        od010_payload = load_od010_payload()
+    years = required_project_cost_years()
+    cand_eval = evaluate_candidate_input_bindings(
+        candidate_payload, years=years, od010_payload=od010_payload
+    )
+    od010_eval = evaluate_od010_translation_table(od010_payload, years=years)
+    cand_ident = candidate_input_binding_identity(payload=candidate_payload, evaluation=cand_eval)
+    od010_ident = translation_binding_identity(payload=od010_payload, evaluation=od010_eval)
+    cross = validate_candidate_bindings_against_snapshot(
+        candidate_payload, checks, years=years, od010_payload=od010_payload
+    )
+    return {
+        "generated_at": generated_at or _now_iso(),
+        "required_project_cost_years": list(years),
+        "checks": dict(checks),
+        "candidate_binding_payload": candidate_payload,
+        "candidate_binding_evaluation": cand_eval,
+        "candidate_input_binding_identity": cand_ident,
+        "od010_payload": od010_payload,
+        "od010_evaluation": od010_eval,
+        "od010_binding_identity": od010_ident,
+        "cross_binding": cross,
+        "candidate_calculation_authorized": candidate_calculation_authorized(),
+        "living_cost_release_authorized": living_cost_release_authorized(),
+        "translation_index_bound": od010_eval["bound"] is True,
+        "candidate_inputs_bound": cand_eval["bound"] is True and cross["ok"] is True,
+        "silent_source_year_relabel": detect_silent_source_year_relabel(dict(checks)),
+        "calculates_mslc": False,
+    }
+
+
+def validate_readiness_context(context: Mapping[str, Any]) -> None:
+    """Validate the captured context. Do not re-read binding files."""
+    if not context.get("candidate_calculation_authorized"):
+        raise FreshnessGateError(
+            "candidate_calculation_authorized is false; private candidate refused"
+        )
+    checks = context.get("checks") or {}
+    by_id = _as_check_map(checks)
+    target_years = tuple(
+        context.get("required_project_cost_years") or required_project_cost_years()
+    )
+    missing = [family for family in REQUIRED_FRESHNESS_FAMILIES if family not in by_id]
+    if missing:
+        raise FreshnessGateError(
+            f"required freshness check was not performed: {', '.join(missing)}"
+        )
+    if context.get("silent_source_year_relabel"):
+        raise FreshnessGateError("source year is being silently relabeled")
+    if not context.get("translation_index_bound"):
+        raise FreshnessGateError(
+            "OD010_TRANSLATION_INDEX_NOT_BOUND: required OD-010 translation index is not bound"
+        )
+    if not context.get("candidate_inputs_bound"):
+        cross = context.get("cross_binding") or {}
+        extra = ""
+        if cross.get("issues"):
+            extra = "; " + ", ".join(cross["issues"][:8])
+        raise FreshnessGateError(
+            "REQUIRED_CANDIDATE_INPUTS_NOT_BOUND: required candidate inputs are not bound" + extra
+        )
+    for family in REQUIRED_FRESHNESS_FAMILIES:
+        check = by_id[family]
+        if not check.latest_checked_at:
+            raise FreshnessGateError(f"{family}: freshness check has no latest_checked_at")
+        if check.freshness_check_status in BLOCKING_CHECK_STATUSES:
+            raise FreshnessGateError(
+                f"{family}: freshness_check_status is {check.freshness_check_status}"
+            )
+        if check.newer_data_exists is True:
+            raise FreshnessGateError(
+                f"{family}: newer authoritative source is known but not processed"
+            )
+        if check.newer_data_exists is None:
+            raise FreshnessGateError(
+                f"{family}: currentness was not established (newer_data_exists is null)"
+            )
+        if check.retrieval_validation_status in BLOCKING_EVIDENCE:
+            raise FreshnessGateError(
+                f"{family}: required source remains {check.retrieval_validation_status}"
+            )
+        if check.retrieval_validation_status in PASSING_EVIDENCE and not _has_concrete_provenance(
+            check
+        ):
+            raise FreshnessGateError(f"{family}: passing evidence state lacks concrete provenance")
+        if family in MUTABLE_SOURCE_FAMILIES and _mutable_currentness_inconsistent(check):
+            raise FreshnessGateError(
+                f"{family}: VERIFIED_CURRENT requires listing and artifact "
+                "currentness VERIFIED_CURRENT and selected_artifact_matches_latest=true"
+            )
+        missing_years = missing_project_cost_years(check, target_years)
+        if missing_years:
+            raise FreshnessGateError(
+                f"{family}: required project cost year(s) not covered: {missing_years}"
+            )
+
+
+def snapshot_from_context(context: Mapping[str, Any]) -> dict[str, Any]:
+    """Immutable-style snapshot from the exact captured context."""
+    checks = context["checks"]
+    checks_dict = {key: _check_as_dict(check) for key, check in checks.items()}
+    snapshot = {
+        **dict(context),
+        "checks": checks_dict,
+        "freshness_run_id": compute_freshness_run_id(authorizing_state_core(context)),
+        **_evaluate_freshness_readiness_from_context(context),
+        "future_candidate_must_record": future_candidate_result_contract_fields(),
+        "calculates_mslc": False,
+    }
+    snapshot["freshness_run_id"] = compute_freshness_run_id(authorizing_state_core(snapshot))
+    return json.loads(json.dumps(snapshot, default=str))
+
+
+def future_candidate_result_contract_fields() -> dict[str, Any]:
+    """Future assembler contract. This is not an assembler and calculates no MSLC."""
+    return {
+        "freshness_run_id": True,
+        "candidate_input_binding_identity": True,
+        "od010_binding_identity": True,
+        "must_not_reload_bindings_after_readiness": True,
+        "if_binding_file_changes": "run readiness again",
+    }
 
 
 def build_readiness_snapshot(checks: Mapping[str, FreshnessCheck]) -> dict[str, Any]:
-    """Immutable-style readiness snapshot for a future candidate assembler."""
-    from foundation.living_cost.candidate_bindings import (
-        candidate_input_binding_identity,
-        translation_binding_identity,
-    )
-
-    generated_at = _now_iso()
-    target_years = list(required_project_cost_years())
-    od010_identity = translation_binding_identity()
-    input_identity = candidate_input_binding_identity()
-    checks_dict = {key: check.to_dict() for key, check in checks.items()}
-    core = {
-        "generated_at": generated_at,
-        "required_project_cost_years": target_years,
-        "checks": _canonical_check_identity(checks_dict),
-        "od010_binding_identity": od010_identity,
-        "candidate_input_binding_identity": input_identity,
-    }
-    readiness = evaluate_freshness_readiness(checks)
-    snapshot = {
-        "freshness_run_id": compute_freshness_run_id(core),
-        "generated_at": generated_at,
-        "required_project_cost_years": target_years,
-        "checks": checks_dict,
-        "od010_binding_identity": od010_identity,
-        "candidate_input_binding_identity": input_identity,
-        **readiness,
-        "calculates_mslc": False,
-    }
-    return json.loads(json.dumps(snapshot, default=str))
+    """Compatibility wrapper: capture once, then snapshot that context."""
+    context = build_live_readiness_context(checks)
+    return snapshot_from_context(context)
 
 
 def run_candidate_readiness_gate() -> dict[str, Any]:
@@ -493,9 +676,9 @@ def run_candidate_readiness_gate() -> dict[str, Any]:
         raise FreshnessGateError(
             f"live discovery failed; private candidate refused: {exc}"
         ) from exc
-    snapshot = build_readiness_snapshot(checks)
-    _validate_candidate_checks(checks)
-    return snapshot
+    context = build_live_readiness_context(checks)
+    validate_readiness_context(context)
+    return snapshot_from_context(context)
 
 
 def assert_candidate_freshness_ready() -> dict[str, Any]:
@@ -521,6 +704,96 @@ def current_family_truth() -> dict[str, FreshnessCheck]:
     from foundation.living_cost.freshness_discovery import discover_all_families
 
     return discover_all_families()
+
+
+def _evaluate_freshness_readiness_from_context(context: Mapping[str, Any]) -> dict[str, Any]:
+    """Score readiness from captured context. Does not re-read binding files."""
+    checks = _as_check_map(context.get("checks") or {})
+    blocking: list[str] = []
+    bound = bool(context.get("translation_index_bound"))
+    candidate_inputs_bound = bool(context.get("candidate_inputs_bound"))
+    silent_source_year_relabel = bool(context.get("silent_source_year_relabel"))
+    target_years = tuple(
+        context.get("required_project_cost_years") or required_project_cost_years()
+    )
+    if not bound:
+        blocking.append("OD010_TRANSLATION_INDEX_NOT_BOUND")
+    if silent_source_year_relabel:
+        blocking.append("SILENT_SOURCE_YEAR_RELABEL")
+    if not candidate_inputs_bound:
+        blocking.append("REQUIRED_CANDIDATE_INPUTS_NOT_BOUND")
+    cross = context.get("cross_binding") or {}
+    for issue in cross.get("issues") or []:
+        blocking.append(f"CROSS_BIND:{issue}")
+    for family in REQUIRED_FRESHNESS_FAMILIES:
+        check = checks.get(family)
+        if check is None:
+            blocking.append(f"{family}:CHECK_NOT_PERFORMED")
+            continue
+        if not check.latest_checked_at:
+            blocking.append(f"{family}:MISSING_CHECKED_AT")
+        if check.freshness_check_status in BLOCKING_CHECK_STATUSES:
+            blocking.append(f"{family}:{check.freshness_check_status}")
+        if check.newer_data_exists is True:
+            blocking.append(f"{family}:NEWER_DATA_NOT_PROCESSED")
+        if (
+            check.newer_data_exists is None
+            and check.freshness_check_status not in BLOCKING_CHECK_STATUSES
+        ):
+            blocking.append(f"{family}:CURRENTNESS_NOT_ESTABLISHED")
+        if check.retrieval_validation_status in BLOCKING_EVIDENCE:
+            blocking.append(f"{family}:{check.retrieval_validation_status}")
+        if check.retrieval_validation_status in PASSING_EVIDENCE and not _has_concrete_provenance(
+            check
+        ):
+            blocking.append(f"{family}:MISSING_CONCRETE_PROVENANCE")
+        if family in MUTABLE_SOURCE_FAMILIES and _mutable_currentness_inconsistent(check):
+            blocking.append(f"{family}:MUTABLE_CURRENTNESS_INCONSISTENT")
+        missing_years = missing_project_cost_years(check, target_years)
+        coverage = _year_coverage_map(check)
+        if not coverage:
+            for year in target_years:
+                blocking.append(f"{family}:MISSING_YEAR_{year}")
+        elif missing_years and check.retrieval_validation_status not in {
+            "SOURCE_GAP",
+            "UNAVAILABLE",
+            "FORMULA_FROZEN_INPUTS_PENDING",
+        }:
+            for year in missing_years:
+                blocking.append(f"{family}:MISSING_YEAR_{year}")
+    blocking = _unique_reasons(blocking)
+    authorized = bool(context.get("candidate_calculation_authorized"))
+    ready = (
+        authorized
+        and bound
+        and not silent_source_year_relabel
+        and candidate_inputs_bound
+        and not blocking
+    )
+    empirical_families = sorted(
+        {
+            family
+            for family, check in checks.items()
+            if check.retrieval_validation_status in BLOCKING_EVIDENCE
+        }
+    )
+    return {
+        "ready_for_private_candidate": ready,
+        "candidate_calculation_authorized": authorized,
+        "living_cost_release_authorized": bool(context.get("living_cost_release_authorized")),
+        "translation_index_bound": bound,
+        "silent_source_year_relabel": silent_source_year_relabel,
+        "candidate_inputs_bound": candidate_inputs_bound,
+        "required_project_cost_years": list(target_years),
+        "blocker_count": len(blocking),
+        "gate_blocker_reason_count": len(blocking),
+        "empirical_blocker_family_count": len(empirical_families),
+        "empirical_blocker_families": empirical_families,
+        "blockers": blocking,
+        "headline_calculated": False,
+        "authorization_source": "config/definitions.yml",
+        "cross_binding": context.get("cross_binding"),
+    }
 
 
 def evaluate_freshness_readiness(
@@ -611,7 +884,8 @@ def evaluate_freshness_readiness(
 def write_candidate_freshness_report(metadata_dir: Path) -> dict[str, Any]:
     """Write a truthful fail-closed freshness artifact from real discovery."""
     checks = current_family_truth()
-    readiness = evaluate_freshness_readiness(checks)
+    context = build_live_readiness_context(checks)
+    snapshot = snapshot_from_context(context)
     automated = []
     manual = []
     failed = []
@@ -627,18 +901,38 @@ def write_candidate_freshness_report(metadata_dir: Path) -> dict[str, Any]:
             gaps.append(family)
         else:
             automated.append(family)
-    snapshot = build_readiness_snapshot(checks)
     payload = {
         "report_type": "living_cost_candidate_freshness",
         "generated_at": snapshot["generated_at"],
-        "schema_version": "2.2",
+        "schema_version": "2.3",
         "calculates_mslc": False,
         "freshness_run_id": snapshot["freshness_run_id"],
         "required_families": list(REQUIRED_FRESHNESS_FAMILIES),
         "checks": snapshot["checks"],
         "od010_binding_identity": snapshot["od010_binding_identity"],
         "candidate_input_binding_identity": snapshot["candidate_input_binding_identity"],
-        **readiness,
+        "future_candidate_must_record": snapshot.get("future_candidate_must_record"),
+        "cross_binding": snapshot.get("cross_binding"),
+        **{
+            key: snapshot[key]
+            for key in (
+                "ready_for_private_candidate",
+                "candidate_calculation_authorized",
+                "living_cost_release_authorized",
+                "translation_index_bound",
+                "silent_source_year_relabel",
+                "candidate_inputs_bound",
+                "required_project_cost_years",
+                "blocker_count",
+                "gate_blocker_reason_count",
+                "empirical_blocker_family_count",
+                "empirical_blocker_families",
+                "blockers",
+                "headline_calculated",
+                "authorization_source",
+            )
+            if key in snapshot
+        },
         "discovery": {
             "automated_or_verified": automated,
             "manual_verification_required": manual,
@@ -717,6 +1011,15 @@ def stamp_source_coverage_from_current_truth(coverage_path: Path) -> dict[str, A
     coverage["headline_calculated"] = False
     coverage["gap_calculated"] = False
     coverage["adequacy_calculated"] = False
+    from foundation.living_cost.candidate_bindings import (
+        assert_canonical_component_universe,
+        assert_source_lag_preserves_frozen_od010,
+    )
+
+    assert_canonical_component_universe(coverage)
+    lag = coverage.get("source_lag")
+    if isinstance(lag, dict):
+        assert_source_lag_preserves_frozen_od010(lag)
     coverage["blocker_notes"] = dict(BLOCKER_NOTES)
     required_blockers = {
         "health_oop": "RETRIEVED_UNVALIDATED",

@@ -130,9 +130,9 @@ def test_config_candidate_true_plus_freshness_pass_may_proceed(monkeypatch: pyte
     monkeypatch.setattr("foundation.living_cost.freshness.are_candidate_inputs_bound", lambda: True)
     live = _all_ready()
     monkeypatch.setattr("foundation.living_cost.freshness.current_family_truth", lambda: live)
-    snapshot = assert_candidate_freshness_ready()
-    assert snapshot["freshness_run_id"]
-    assert set(snapshot["checks"]) == set(live)
+    _validate_candidate_checks(live)
+    with pytest.raises(FreshnessGateError, match="NOT_BOUND"):
+        assert_candidate_freshness_ready()
 
 
 def test_release_false_blocks_publication_regardless_of_candidate():

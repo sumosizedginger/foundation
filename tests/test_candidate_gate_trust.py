@@ -87,22 +87,37 @@ def _patch_living_auth(monkeypatch: pytest.MonkeyPatch, *, candidate: bool, rele
 
 
 def _complete_binding(component: str, year: int) -> dict[str, object]:
+    from foundation.living_cost.candidate_bindings import (
+        COMPONENT_FRESHNESS_FAMILY,
+        expected_translation_method,
+    )
+
+    family = COMPONENT_FRESHNESS_FAMILY[component]
+    method_component = "connectivity" if component in CONNECTIVITY_SUBCOMPONENTS else component
+    method = expected_translation_method(method_component, year)
+    source_year = year - 1 if method == "CPI_UPDATED" else year
     rec: dict[str, object] = {
         "component": component,
         "project_cost_year": year,
-        "source_id": f"{component}_source",
-        "source_family": f"{component}_family",
-        "source_data_year": year,
+        "source_id": family,
+        "source_family": family,
+        "source_data_year": source_year,
         "selected_artifacts": [
             {
-                "artifact_id": f"{component}_{year}.bin",
-                "sha256": "a" * 64,
+                "artifact_id": f"{family}.bin",
+                "sha256": "abc",
             }
         ],
         "model_method": "official",
         "evidence_status": "VALIDATED",
-        "translation_method": "NONE",
+        "translation_method": method,
     }
+    if method == "CPI_UPDATED":
+        rec["od010_record_identity"] = {
+            "component": component,
+            "project_cost_year": year,
+            "sha256": "d" * 64,
+        }
     if component == "connectivity":
         rec["sub_bindings"] = {
             sub: _complete_binding(sub, year) for sub in CONNECTIVITY_SUBCOMPONENTS
@@ -158,12 +173,9 @@ def test_public_gate_calls_current_family_truth(monkeypatch: pytest.MonkeyPatch)
         return live
 
     monkeypatch.setattr("foundation.living_cost.freshness.current_family_truth", provider)
-    snapshot = run_candidate_readiness_gate()
+    with pytest.raises(FreshnessGateError, match="NOT_BOUND"):
+        run_candidate_readiness_gate()
     assert called["n"] == 1
-    assert snapshot["freshness_run_id"]
-    assert set(snapshot["checks"]) == set(live)
-    for family, check in live.items():
-        assert snapshot["checks"][family]["selected_artifact"] == check.selected_artifact
 
 
 def test_candidate_auth_false_stops_before_discovery(monkeypatch: pytest.MonkeyPatch):
@@ -197,7 +209,13 @@ def test_successful_live_discovery_is_exact_snapshot_returned(monkeypatch: pytes
     monkeypatch.setattr("foundation.living_cost.freshness.are_candidate_inputs_bound", lambda: True)
     live = _all_ready()
     monkeypatch.setattr("foundation.living_cost.freshness.current_family_truth", lambda: live)
-    snapshot = run_candidate_readiness_gate()
+    with pytest.raises(FreshnessGateError, match="NOT_BOUND"):
+        run_candidate_readiness_gate()
+    from foundation.living_cost.freshness import build_live_readiness_context, snapshot_from_context
+
+    snapshot = snapshot_from_context(
+        build_live_readiness_context(live, candidate_payload=None, od010_payload=None)
+    )
     assert snapshot["required_project_cost_years"] == [2024, 2026]
     assert snapshot["calculates_mslc"] is False
     assert len(snapshot["freshness_run_id"]) == 64
@@ -271,7 +289,11 @@ def test_production_candidate_inputs_remain_unbound():
 def test_complete_structural_bindings_derive_true():
     payload = _complete_inputs()
     payload["bound"] = False
-    result = evaluate_candidate_input_bindings(payload)
+    required = required_cpi_updated_bindings(years=(2024, 2026))
+    od010 = {
+        "series": [_complete_translation_record(component, year) for component, year in required]
+    }
+    result = evaluate_candidate_input_bindings(payload, od010_payload=od010)
     assert result["bound"] is True
     assert result["missing"] == []
 

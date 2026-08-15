@@ -528,8 +528,9 @@ def test_candidate_authorization_is_separate_from_public_release(
         "foundation.living_cost.freshness.current_family_truth",
         lambda: ready_with_years,
     )
-    snapshot = assert_candidate_freshness_ready()
-    assert snapshot["freshness_run_id"]
+    from foundation.living_cost.freshness import _validate_candidate_checks
+
+    _validate_candidate_checks(ready_with_years)
     # Public publication still blocked.
     with pytest.raises(FreshnessGateError, match="living_cost_release_authorized"):
         assert_public_release_authorized()
