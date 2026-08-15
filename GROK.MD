@@ -1,154 +1,238 @@
-# THE FOUNDATION — FINAL CANDIDATE-GATE HARDENING STATUS
+# THE FOUNDATION — LIVE CANDIDATE-GATE TRUST BINDING
 
-Implementation SHA: `733f9d46ef7cea338da1555314e32903167a8901`  
-Started from audited HEAD: `32a6abf2bf0ecc8df29e1e53105258b831ed8b76`  
-(plus the later docs commit `6c5b665`)
+## Status: COMPLETE (fail-closed)
+
+Implementation HEAD: `5d2b2e2a3f836a9d6ddac183fd778292c301b928`  
+Core implementation: `855e42f10a883d59713b9cbc1281d288e8725104`  
+Follow-up (CI collection): `5d2b2e2a3f836a9d6ddac183fd778292c301b928`
+
+Audited FROM: `733f9d46ef7cea338da1555314e32903167a8901`
 
 OD-001 through OD-013 remain **ACCEPTED / FROZEN**.
 
-Authorization source of truth is only `config/definitions.yml`:
+**NO MINIMUM SUSTAINABLE LIVING COST WAS CALCULATED OR PUBLISHED.**  
+**The private candidate assembler was not built.**  
+**Private calculation was not authorized.**  
+**Public release was not authorized.**
 
-```yaml
-living_cost:
-  candidate_calculation_authorized: false
-  release_authorized: false
-  required_project_cost_years: [2024, 2026]
+---
+
+## End-state flags (config + runtime)
+
+| Flag | Value |
+|---|---|
+| `candidate_calculation_authorized` | `false` |
+| `living_cost.release_authorized` | `false` |
+| `states_modeled` | `0` |
+| `ready_for_private_candidate` | `false` |
+| `candidate_inputs_bound` | `false` (derived; binding file absent) |
+| `translation_index_bound` | `false` (derived; OD-010 table absent) |
+| `required_project_cost_years` | `[2024, 2026]` |
+| `calculates_mslc` | `false` |
+
+Authorization is read only from `config/definitions.yml`.
+
+---
+
+## What this pass completed
+
+### 1. Public candidate gate runs live discovery itself
+
+Public production functions:
+
+```text
+run_candidate_readiness_gate() -> dict
+assert_candidate_freshness_ready() -> dict
 ```
 
-`states_modeled = 0`  
-`ready_for_private_candidate = false`  
-`candidate_inputs_bound = false`  
-`translation_index_bound = false`  
-`headline_calculated = false`
+Both take **no** `checks` argument. Injecting checks raises `TypeError`.
 
-**NO MINIMUM SUSTAINABLE LIVING COST WAS CALCULATED OR PUBLISHED.**
+The public gate internally:
 
-The private candidate assembler was not built.
+1. refuses if `candidate_calculation_authorized()` is false (**before** discovery);
+2. calls `current_family_truth()`;
+3. wraps discovery failure as `FreshnessGateError`;
+4. builds an immutable-style snapshot with `freshness_run_id`;
+5. validates the **live** checks.
+
+`_validate_candidate_checks(checks)` is the internal/pure validator for synthetic unit tests only.
+
+A future assembler must consume the returned snapshot. It must not discard live discovery and later load an older committed JSON file.
+
+### 2. Tests use synthetic checks only through the internal validator
+
+Ordinary unit tests:
+
+- inspect the public signature (no `checks`);
+- monkeypatch `current_family_truth` under the public boundary;
+- reconstruct committed-artifact checks without network;
+- do **not** import a `tests` package (CI collection requires this).
+
+### 3. Readiness-run ID
+
+Each live snapshot records:
+
+- `freshness_run_id` = SHA-256 of canonical JSON of `generated_at`, `required_project_cost_years`, selected artifacts/hashes, OD-010 binding identity, candidate-input binding identity
+- `generated_at`
+- `required_project_cost_years`
+
+Committed artifact:
+
+- `generated_at`: `2026-08-15T17:15:46Z`
+- `schema_version`: `2.2`
+- `freshness_run_id`: `da4d93960acab8d976f1926223449f2b20840fbc183426a5a4e2257765b18a8a`
+
+### 4. Candidate-input binding is structural
+
+`are_candidate_inputs_bound()` derives completeness. A manual `{"bound": true, "inputs": {...}}` is ignored.
+
+Required components for 2024 and 2026:
+
+housing, population_weights, food, health_premium, health_oop, mileage, mpg, gas, insurance, maintenance, registration, replacement, connectivity (broadband + mobile), essentials, recreation, rpp, federal_tax, state_tax, local_tax.
+
+The binding file remains **absent**. `candidate_inputs_bound = false`. This still blocks the assertion gate.
+
+### 5. OD-010 binding is structural
+
+`is_translation_index_bound()` derives completeness from source-lag `CPI_UPDATED` pairs (currently health_oop 2024/2026, insurance 2024/2026, maintenance/essentials/recreation 2026).
+
+`{"bound": true, "series": {"foo": "..."}}` does **not** bind.
+
+The OD-010 table remains **absent**. `translation_index_bound = false`. `OD010_TRANSLATION_INDEX_NOT_BOUND` remains a blocker.
+
+### 6. Mutable-artifact invariants are gated
+
+Families: USDA, EIA, EPA/DOE, BEA, CMS current PUF, NAIC current report.
+
+`freshness_check_status = VERIFIED_CURRENT` requires:
+
+- `listing_freshness_status = VERIFIED_CURRENT`
+- `artifact_currentness_status = VERIFIED_CURRENT`
+- `selected_artifact_matches_latest = true`
+
+An inconsistent object fails even if discovery later regresses.
+
+### 7. Year coverage is explicit
+
+A year is covered only when the record is a dict with `covered: true`.
+
+Absent, `false`, `{"covered": false}`, and `{}` are missing.
+
+### 8. BEA status is from the committed artifact
+
+Historical SHA `733f9d4` reported `bea_rpp: CHECK_FAILED` (connection reset). That historical artifact was **not** rewritten.
+
+This pass regenerated freshness by live discovery. **Actual committed result now:**
+
+- BEA evidence: `VALIDATED`
+- BEA freshness: `VERIFIED_CURRENT`
+- listing: `VERIFIED_CURRENT`
+- artifact currentness: `VERIFIED_CURRENT`
+- `selected_artifact_matches_latest`: `true`
+- vintage: BEA SARPP All-items 2024 / current release February 19, 2026
+
+`freshness_status_summary()` derives text from the artifact. It does not invent `VERIFIED_CURRENT`.
+
+### 9. Check failure is not bad data
+
+Axes remain separate:
+
+- BEA: `VALIDATED` evidence + `VERIFIED_CURRENT` freshness (this run)
+- CMS: `MODELED_FROM_MEASURED_INPUTS` + `CHECK_FAILED` (listing current; current-year byte currentness unresolved)
+- NHTS: `VALIDATED` + `CHECK_FAILED`
+- EPA: `RETRIEVED_UNVALIDATED` + `CHECK_FAILED`
+
+Validated cached evidence was not demoted. Freshness was not promoted merely because cached evidence is validated.
+
+### 10. Preserved good state
+
+- OD-001–OD-013 ACCEPTED / FROZEN
+- recreation floor $1,200 / preferred $2,400
+- extra resilience reserve $0
+- USDA 2024 = 12 official months; USDA 2026 selected = January–May; official latest month = May 2026; `substituted_2024_for_2026 = false`
+- EIA selected / official max observation = `2026-08-10`
+- NAIC latest identifier = `AUT-PB 2022-2023`; local PDF not bound; state extraction `RETRIEVED_UNVALIDATED`; freshness `CHECK_FAILED`
+- CMS current-year byte currentness still unresolved
+- EPA cohort validation still unresolved
+- local tax fail-closed
+- unsupported tax years fail-closed
+- authorization only from `config/definitions.yml`
+
+### 11. Empirical blockers were not solved
+
+12 empirical blocker families remain. Unique gate reasons in the committed artifact: **35**.
 
 ---
 
-## GitHub CI (implementation SHA `733f9d4`)
+## GitHub CI (real Actions, not local pytest)
 
-These are GitHub Actions results, not local pytest.
+On implementation HEAD `5d2b2e2`:
 
-| Workflow | Run | Result |
-|---|---|---|
-| Tests & Code Quality | [31894205899](https://github.com/sumosizedginger/foundation/actions/runs/31894205899) | **success — 161 passed, 5 skipped, 1 warning** |
-| Validate Living Cost Sources | [31894205780](https://github.com/sumosizedginger/foundation/actions/runs/31894205780) | **success** |
-| Deploy Pages | [31894205831](https://github.com/sumosizedginger/foundation/actions/runs/31894205831) | **success** |
-
-Dual independent verifiers: both `VERDICT: PASS`  
-(`/tmp/goal-verifier-a9cbc4c02224-code-review.md`, `/tmp/goal-verifier-a9cbc4c02224-qa.md`).
-
----
-
-## Completed this pass
-
-1. **Public freshness-gate bypasses removed.**  
-   `assert_candidate_freshness_ready(checks)` and `evaluate_freshness_readiness(checks)` accept only `checks`.  
-   No `required_families`, `translation_index_bound`, `silent_source_year_relabel`, `candidate_inputs_bound`, or `project_cost_year` parameters.  
-   The production gate always uses `REQUIRED_FRESHNESS_FAMILIES` and `is_translation_index_bound()`.  
-   Silent year-relabel is derived from check metadata (`substituted_2024_for_2026` / `silent_relabel`).  
-   Tests monkeypatch providers, not truth-value kwargs.
-
-2. **Candidate year bundle is real.**  
-   `required_project_cost_years = [2024, 2026]` lives in `config/definitions.yml`.  
-   The gate refuses a family that does not cover a required year.  
-   A 2024-only record cannot silently satisfy 2026.
-
-3. **`candidate_inputs_bound` is part of the assertion gate.**  
-   Canonical reader: `are_candidate_inputs_bound()` from  
-   `data/metadata/living_cost_candidate_input_bindings.json`.  
-   The file does not exist. The value is **false**.  
-   The public assertion raises `REQUIRED_CANDIDATE_INPUTS_NOT_BOUND`.  
-   No caller override. Assembler not built.
-
-4. **Listing freshness is separate from artifact-byte freshness.**  
-   New fields: `listing_freshness_status`, `artifact_currentness_status`,  
-   `selected_artifact_matches_latest`.  
-   A mutable source cannot be `VERIFIED_CURRENT` from a landing-page filename alone.
-
-5. **USDA mutable workbook currentness.**  
-   Official latest month is parsed from the FNS page and from official workbook bytes  
-   downloaded to a temp file (cache is not overwritten).  
-   Official latest = selected latest = **May 2026**. Hashes match. Family `VERIFIED_CURRENT`.  
-   Cached May + official June => `NEWER_AVAILABLE`.  
-   Same month + changed bytes => `NEWER_AVAILABLE`.  
-   2024 remains 12 months. 2026 remains January–May.  
-   `substituted_2024_for_2026 = false`.
-
-6. **Mutable-artifact rule applied to other rolling sources.**  
-   EIA `pswrgvwall.xls`: official max observation **2026-08-10** matches selected; hashes match; `VERIFIED_CURRENT`.  
-   EPA `vehicles.csv.zip`: listing current, bytes not proven; family `CHECK_FAILED`.  
-   BEA `SARPP.zip`: official zip hashed against selected; `VERIFIED_CURRENT` on this run.  
-   CMS current plan-year PUF: dual federal+SBE listing still required; mutable current-year archives are not treated as byte-current; family `CHECK_FAILED`.  
-   NAIC current report: vintage parsed, local PDF not proven to be that report; family `CHECK_FAILED`.
-
-7. **NAIC vintage discovery.**  
-   Latest identifier: **AUT-PB 2022-2023**.  
-   Parser accepts `2022/2023`, `2022-2023`, `AUT-PB 2022-2023`.  
-   Highest ending year is selected.  
-   Generic title without a year range cannot be `VERIFIED_CURRENT`.  
-   Evidence remains `RETRIEVED_UNVALIDATED`.
-
-8. **Duplicate gate reasons counted once.**  
-   `empirical_blocker_family_count = 12`  
-   `gate_blocker_reason_count = 38` (unique strings)  
-   Freshness still **FAIL**s. That is correct.
-
-9. **Preserved good state.**  
-   Frozen ODs, config-only authorization, both flags false, Oregon individual = federal PUF,  
-   Oregon SBE = SHOP-only, local tax unresolved ≠ 0, unsupported tax years fail closed.
-
----
-
-## Report values (committed artifact)
-
-| Field | Value |
+| Workflow | Result |
 |---|---|
-| `candidate_calculation_authorized` | false |
-| `living_cost.release_authorized` | false |
-| `candidate_inputs_bound` | false |
-| `required_project_cost_years` | [2024, 2026] |
-| USDA official latest month | May 2026 |
-| USDA selected latest month | May 2026 |
-| EIA latest observation | 2026-08-10 |
-| NAIC discovered identifier | AUT-PB 2022-2023 |
-| empirical blocker families | 12 |
-| unique gate blocker reasons | 38 |
+| Tests & Code Quality | **success — 181 passed, 5 skipped, 1 warning** ([31898654468](https://github.com/sumosizedginger/foundation/actions/runs/31898654468)) |
+| Deploy Pages | **success** ([31898654502](https://github.com/sumosizedginger/foundation/actions/runs/31898654502)) |
+
+Validate Living Cost Sources is path-filtered. `5d2b2e2` changed tests only. Last validate on living-cost source changes (`855e42f`): **success** ([31898397462](https://github.com/sumosizedginger/foundation/actions/runs/31898397462)).
+
+Local pytest (not CI): 186 passed, 1 warning (the 5 CI-skipped integration tests ran locally).
 
 ---
 
-## NOT COMPLETED
+## Public gate report (GROK.MD §12)
 
-These remain open. This pass did not paper over them.
-
-- Private candidate engine (not authorized; do not build)
-- Public MSLC / Gap / Adequacy / rankings / national median / Composite
-- Binding file for candidate inputs (`candidate_inputs_bound` stays false)
-- Bound OD-010 CPI/medical translation table
-- Bound vehicle-replacement inputs
-- Official BLS CE ZIP retrieve (HTTP 403 / `INCOMPLETE_PROVENANCE`)
-- Successful NHTS listing discovery
-- Successful FCC Urban Rate Survey retrieve
-- Mobile phone price (`SOURCE_GAP`)
-- Vehicle registration inventory (`SOURCE_GAP`)
-- NAIC local PDF bound to AUT-PB 2022-2023 and state-table extraction validated
-- EPA MPG cohort extraction (`RETRIEVED_UNVALIDATED`; listing is not byte proof)
-- CMS current-year PUF byte currentness
-- Federal tax inventory (`INVENTORY_NOT_VALIDATED`)
-- State/local tax inventories
-- MEPS health OOP derivation (`RETRIEVED_UNVALIDATED`; HC-251 / 2023)
-- 12 empirical evidence blocker families
+- **Signature:** `run_candidate_readiness_gate()` / `assert_candidate_freshness_ready()` — no parameters
+- **Live discovery internally:** yes (`current_family_truth()`)
+- **freshness_run_id:** SHA-256 of the live snapshot core; committed `da4d93960acab8d976f1926223449f2b20840fbc183426a5a4e2257765b18a8a`
+- **Candidate-input binding:** structurally unbound (`false`)
+- **OD-010 binding:** structurally unbound (`false`)
+- **Required project years:** `[2024, 2026]`
+- **BEA actual freshness from committed artifact:** `VERIFIED_CURRENT` (evidence `VALIDATED`)
+- **Empirical blocker family count:** 12
+- **Gate blocker reason count:** 35
 
 ---
 
-## Next
+## Dual verifiers
 
-Do not calculate an MSLC.
+Both wrote `VERDICT: PASS` on HEAD `5d2b2e2` after the CI collection fix:
 
-A later owner may set `candidate_calculation_authorized: true` only after freshness can pass, candidate inputs are bound, and the year bundle is covered.
+- `/tmp/goal-verifier-b3658864afae-code-review.md`
+- `/tmp/goal-verifier-b3658864afae-qa.md`
 
-Publication still needs `release_authorized` and a built, approved release engine.
+First QA FAIL: unpushed work + live-network unit test.  
+Second QA FAIL: `from tests.test_freshness_control` broke GitHub collection (`ModuleNotFoundError: No module named 'tests'`).  
+Fixed by inlining helpers. Both PASS on the same latest source.
 
-STOP.
+---
+
+## NOT COMPLETED (still remaining)
+
+Do not paper these over. They are honest fail-closed blockers.
+
+1. **BLS CE** official retrieve HTTP 403 / `INCOMPLETE_PROVENANCE` (maintenance, essentials, recreation cache)
+2. **Mobile phone price** `SOURCE_GAP`
+3. **FCC broadband** `SOURCE_GAP` / incomplete
+4. **Vehicle registration** `SOURCE_GAP`
+5. **Vehicle replacement** `FORMULA_FROZEN_INPUTS_PENDING` (acquisition / residual / usable years unbound)
+6. **NAIC** state-table extraction `RETRIEVED_UNVALIDATED`; local PDF not bound to AUT-PB 2022-2023
+7. **Federal tax** `INVENTORY_NOT_VALIDATED`
+8. **State / local tax** `SOURCE_GAP` / most FIPS unresolved; class-C overlay not generally implemented
+9. **MEPS health OOP** `RETRIEVED_UNVALIDATED` (download ≠ derivation; newest Full Year Consolidated is HC-251 / 2023)
+10. **EPA MPG** `RETRIEVED_UNVALIDATED` (methodology frozen ≠ validated cohort extraction)
+11. **OD-010** CPI/medical translation series not bound
+12. **`candidate_inputs_bound = false`** — assembler not built (do not build it unless authorized)
+13. **CMS** current-year PUF byte currentness still `CHECK_FAILED`
+14. **NHTS** live discovery `CHECK_FAILED`
+15. No MSLC until later owner authorization **and** a passing freshness gate
+16. Both authorization flags remain `false`
+
+Nit only (not a blocker): the committed snapshot still stores pre-fix binding-identity paths (`D:\Foundation\...`, `missing: ["ABSENT"]`). Live helpers now emit repo-relative paths and required component/year pairs. This does not affect the public gate.
+
+---
+
+## Stop
+
+DO NOT BUILD THE CANDIDATE ASSEMBLER.
+
+NO MINIMUM SUSTAINABLE LIVING COST WAS CALCULATED OR PUBLISHED.
