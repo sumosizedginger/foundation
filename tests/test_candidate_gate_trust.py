@@ -90,6 +90,7 @@ def _complete_binding(component: str, year: int) -> dict[str, object]:
     from foundation.living_cost.candidate_bindings import (
         COMPONENT_FRESHNESS_FAMILY,
         expected_translation_method,
+        od010_record_hash,
     )
 
     family = COMPONENT_FRESHNESS_FAMILY[component]
@@ -112,11 +113,16 @@ def _complete_binding(component: str, year: int) -> dict[str, object]:
         "evidence_status": "VALIDATED",
         "translation_method": method,
     }
+    if method == "SOURCE_CLASSIFIED":
+        rec["source_class"] = "high_frequency"
+        rec["translation_method"] = "YTD"
     if method == "CPI_UPDATED":
+        od_rec = _complete_translation_record(component, year)
         rec["od010_record_identity"] = {
             "component": component,
             "project_cost_year": year,
-            "sha256": "d" * 64,
+            "source_data_year": source_year,
+            "record_hash": od010_record_hash(od_rec),
         }
     if component == "connectivity":
         rec["sub_bindings"] = {

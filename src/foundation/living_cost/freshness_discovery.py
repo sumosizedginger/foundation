@@ -256,12 +256,16 @@ def discover_acs() -> FreshnessCheck:
         year_coverage=_year_coverage(
             {
                 "covered": has_2024,
+                "source_data_year": 2024,
                 "artifact": "acsdt5y2024-b01001.dat",
+                "sha256": selected.get("sha256"),
                 "note": "2024 ACS 5-Year B01001",
             },
             {
                 "covered": has_2024,
+                "source_data_year": 2024,
                 "artifact": "acsdt5y2024-b01001.dat",
+                "sha256": selected.get("sha256"),
                 "note": "newest appropriate ACS; currently 2024; do not relabel as 2026",
             },
         ),
@@ -340,12 +344,16 @@ def discover_hud() -> FreshnessCheck:
         year_coverage=_year_coverage(
             {
                 "covered": has_2024,
+                "source_data_year": 2024,
                 "artifact": "FMR2024_final_revised.xlsx",
+                "sha256": arts[0].get("sha256") if arts else None,
                 "note": "FY2024",
             },
             {
                 "covered": has_2026,
+                "source_data_year": 2026,
                 "artifact": "FY26_FMRs_revised.xlsx",
+                "sha256": arts[1].get("sha256") if len(arts) > 1 else None,
                 "note": "FY2026",
             },
         ),
@@ -360,8 +368,25 @@ USDA_WORKBOOK_FILENAMES: dict[str, str] = {
 }
 
 
+def _normalize_year_record(year: int, rec: dict[str, Any]) -> dict[str, Any]:
+    out = dict(rec)
+    out["project_cost_year"] = year
+    artifacts = out.get("artifacts")
+    if not isinstance(artifacts, list) or not artifacts:
+        ident = out.get("artifact")
+        if ident:
+            item = {"artifact_id": ident}
+            if out.get("sha256"):
+                item["sha256"] = out["sha256"]
+            out["artifacts"] = [item]
+    return out
+
+
 def _year_coverage(y2024: dict[str, Any], y2026: dict[str, Any]) -> dict[str, Any]:
-    return {"2024": y2024, "2026": y2026}
+    return {
+        "2024": _normalize_year_record(2024, y2024),
+        "2026": _normalize_year_record(2026, y2026),
+    }
 
 
 def inspect_usda_official_workbook(url: str) -> dict[str, Any]:
@@ -791,8 +816,20 @@ def discover_meps() -> FreshnessCheck:
         transformation_method="weighted-mean OOP pending; not yet derived",
         input_evidence_status="RETRIEVED_UNVALIDATED",
         year_coverage=_year_coverage(
-            {"covered": True, "note": "MEPS source year 2023; 2024 uses OD-010 translation"},
-            {"covered": True, "note": "MEPS source year 2023; 2026 uses OD-010 translation"},
+            {
+                "covered": True,
+                "source_data_year": MEPS_DATA_YEAR,
+                "artifact": "h251dat.zip",
+                "sha256": art.get("sha256"),
+                "note": "MEPS source year 2023; 2024 uses OD-010 translation",
+            },
+            {
+                "covered": True,
+                "source_data_year": MEPS_DATA_YEAR,
+                "artifact": "h251dat.zip",
+                "sha256": art.get("sha256"),
+                "note": "MEPS source year 2023; 2026 uses OD-010 translation",
+            },
         ),
         extra={"listing": refresh},
     )
@@ -872,8 +909,20 @@ def discover_nhts() -> FreshnessCheck:
         transformation_method="weighted median of filtered one-person one-worker licensed households",
         input_evidence_status="VALIDATED",
         year_coverage=_year_coverage(
-            {"covered": has_2022, "note": "2022 NHTS structural survey applies to 2024"},
-            {"covered": has_2022, "note": "2022 NHTS structural survey applies to 2026"},
+            {
+                "covered": has_2022,
+                "source_data_year": 2022,
+                "artifact": "nhts_2022_csv.zip",
+                "sha256": art.get("sha256"),
+                "note": "2022 NHTS structural survey applies to 2024",
+            },
+            {
+                "covered": has_2022,
+                "source_data_year": 2022,
+                "artifact": "nhts_2022_csv.zip",
+                "sha256": art.get("sha256"),
+                "note": "2022 NHTS structural survey applies to 2026",
+            },
         ),
         extra={"primary_error": primary_err, "used_url": used_url},
     )
@@ -1142,10 +1191,16 @@ def discover_naic() -> FreshnessCheck:
         year_coverage=_year_coverage(
             {
                 "covered": True,
+                "source_data_year": latest.end_year,
+                "artifact": "publication-aut-pb-auto-insurance-database.pdf",
+                "sha256": art.get("sha256"),
                 "note": f"lagged NAIC report {latest.display_identifier} applies to 2024",
             },
             {
                 "covered": True,
+                "source_data_year": latest.end_year,
+                "artifact": "publication-aut-pb-auto-insurance-database.pdf",
+                "sha256": art.get("sha256"),
                 "note": f"lagged NAIC report {latest.display_identifier} applies to 2026",
             },
         ),

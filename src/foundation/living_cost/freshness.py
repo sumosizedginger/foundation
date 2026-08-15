@@ -501,13 +501,14 @@ def build_live_readiness_context(
     to avoid a second disk read.
     """
     from foundation.living_cost.candidate_bindings import (
+        CANDIDATE_INPUT_BINDINGS,
+        OD010_TABLE,
         SOURCE_COVERAGE,
         assert_canonical_component_universe,
         candidate_input_binding_identity,
+        capture_json_artifact,
         evaluate_candidate_input_bindings,
         evaluate_od010_translation_table,
-        load_candidate_binding_payload,
-        load_od010_payload,
         load_source_lag,
         translation_binding_identity,
         validate_candidate_bindings_against_snapshot,
@@ -525,16 +526,40 @@ def build_live_readiness_context(
             assert_source_lag_preserves_frozen_od010(lag)
 
     if candidate_payload is _UNSET:
-        candidate_payload = load_candidate_binding_payload()
+        cand_art = capture_json_artifact(CANDIDATE_INPUT_BINDINGS)
+        candidate_payload = cand_art.payload
+        cand_sha = cand_art.raw_sha256
+        cand_exists = cand_art.exists
+    else:
+        cand_sha = None
+        cand_exists = candidate_payload is not None
     if od010_payload is _UNSET:
-        od010_payload = load_od010_payload()
+        od_art = capture_json_artifact(OD010_TABLE)
+        od010_payload = od_art.payload
+        od_sha = od_art.raw_sha256
+        od_exists = od_art.exists
+    else:
+        od_sha = None
+        od_exists = od010_payload is not None
     years = required_project_cost_years()
     cand_eval = evaluate_candidate_input_bindings(
         candidate_payload, years=years, od010_payload=od010_payload
     )
     od010_eval = evaluate_od010_translation_table(od010_payload, years=years)
-    cand_ident = candidate_input_binding_identity(payload=candidate_payload, evaluation=cand_eval)
-    od010_ident = translation_binding_identity(payload=od010_payload, evaluation=od010_eval)
+    cand_ident = candidate_input_binding_identity(
+        payload=candidate_payload,
+        evaluation=cand_eval,
+        sha256=cand_sha,
+        exists=cand_exists,
+        captured=True,
+    )
+    od010_ident = translation_binding_identity(
+        payload=od010_payload,
+        evaluation=od010_eval,
+        sha256=od_sha,
+        exists=od_exists,
+        captured=True,
+    )
     cross = validate_candidate_bindings_against_snapshot(
         candidate_payload, checks, years=years, od010_payload=od010_payload
     )

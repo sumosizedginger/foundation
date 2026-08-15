@@ -257,7 +257,7 @@
         "2024": null,
         "2026": null
       },
-      "translation_method": "SOURCE_GAP"
+      "translation_method": "RULE_YEAR"
     },
     "replacement": {
       "project_cost_year": {
@@ -268,7 +268,7 @@
         "2024": null,
         "2026": null
       },
-      "translation_method": "FORMULA_PENDING_INPUTS"
+      "translation_method": "MODEL_SUBINPUT"
     },
     "connectivity": {
       "project_cost_year": {
@@ -279,10 +279,7 @@
         "2024": 2024,
         "2026": 2026
       },
-      "translation_method": {
-        "2024": "YTD",
-        "2026": "YTD"
-      },
+      "translation_method": "SOURCE_CLASSIFIED",
       "price_index_series": null
     },
     "state_tax": {
@@ -305,7 +302,7 @@
         "2024": null,
         "2026": null
       },
-      "translation_method": "SOURCE_GAP"
+      "translation_method": "RULE_YEAR"
     }
   },
   "retrieved_artifacts": [

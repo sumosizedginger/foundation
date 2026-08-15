@@ -9,7 +9,9 @@ This module does not calculate an MSLC and does not create fake bindings.
 
 from __future__ import annotations
 
+import hashlib
 import json
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -69,15 +71,29 @@ FROZEN_TRANSLATION_POLICY: dict[str, str | dict[int, str]] = {
     "gas": "NONE",
     "insurance": "CPI_UPDATED",
     "maintenance": {2024: "NONE", 2026: "CPI_UPDATED"},
-    "registration": "SOURCE_GAP",
-    "replacement": "FORMULA_PENDING_INPUTS",
-    "connectivity": "YTD",
+    "registration": "RULE_YEAR",
+    "replacement": "MODEL_SUBINPUT",
+    "connectivity": "SOURCE_CLASSIFIED",
     "essentials": {2024: "NONE", 2026: "CPI_UPDATED"},
     "recreation": {2024: "NONE", 2026: "CPI_UPDATED"},
     "rpp": "LATEST_AVAILABLE",
     "federal_tax": "RULE_YEAR",
     "state_tax": "RULE_YEAR",
-    "local_tax": "SOURCE_GAP",
+    "local_tax": "RULE_YEAR",
+}
+
+# Evidence status is separate. Registration/local-tax remain SOURCE_GAP.
+REPLACEMENT_SUBINPUT_POLICY: dict[str, str] = {
+    "formula": "(acquisition - residual) / usable remaining years",
+    "acquisition": "LATEST_AVAILABLE",
+    "residual": "LATEST_AVAILABLE",
+    "usable_years": "LATEST_AVAILABLE",
+    "evidence_status": "FORMULA_FROZEN_INPUTS_PENDING",
+}
+
+CONNECTIVITY_SOURCE_CLASS_METHODS: dict[str, str] = {
+    "high_frequency": "YTD",
+    "point_in_time": "NONE",
 }
 
 FROZEN_CPI_UPDATED_PAIRS: tuple[tuple[str, int], ...] = (
@@ -176,6 +192,30 @@ def expected_translation_method(component: str, year: int) -> str:
             raise SourceLagAuthorityError(f"no frozen translation policy for {component}:{year}")
         return policy[year]
     return policy
+
+
+def od010_record_hash(record: dict[str, Any]) -> str:
+    """Canonical SHA-256 of the authorizing OD-010 translation record."""
+    core = {
+        "component": record.get("component"),
+        "source_data_year": record.get("source_data_year"),
+        "project_cost_year": record.get("project_cost_year"),
+        "official_series_identifier": record.get("official_series_identifier")
+        or record.get("series_id")
+        or record.get("official_series"),
+        "publisher": record.get("publisher"),
+        "observation_period": record.get("observation_period") or record.get("period"),
+        "source_artifact": record.get("source_artifact")
+        or record.get("provenance")
+        or record.get("source_provenance"),
+        "translation_factor": record.get("translation_factor"),
+        "calculation_inputs": record.get("calculation_inputs"),
+        "retrieval_validation_state": record.get("retrieval_validation_state")
+        or record.get("retrieval_validation_status")
+        or record.get("validation_state"),
+    }
+    encoded = json.dumps(core, sort_keys=True, separators=(",", ":"), default=str)
+    return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
 
 
 def required_cpi_updated_bindings(
@@ -333,11 +373,15 @@ def _binding_record_complete(
     evidence = rec.get("evidence_status")
     if evidence not in PASSING_BINDING_EVIDENCE:
         return False
-    expected = expected_translation_method(
-        "connectivity" if component in CONNECTIVITY_SUBCOMPONENTS else component,
-        year,
-    )
-    if rec.get("translation_method") != expected:
+    method_component = "connectivity" if component in CONNECTIVITY_SUBCOMPONENTS else component
+    expected = expected_translation_method(method_component, year)
+    if expected == "SOURCE_CLASSIFIED":
+        source_class = rec.get("source_class")
+        if source_class not in CONNECTIVITY_SOURCE_CLASS_METHODS:
+            return False
+        if rec.get("translation_method") != CONNECTIVITY_SOURCE_CLASS_METHODS[str(source_class)]:
+            return False
+    elif rec.get("translation_method") != expected:
         return False
     if expected == "CPI_UPDATED":
         if od010_index is None:
@@ -358,7 +402,10 @@ def _binding_record_complete(
             return False
         if _year_int(identity.get("project_cost_year")) != year:
             return False
-        if not _nonempty_str(identity.get("sha256") or identity.get("record_hash")):
+        if _year_int(identity.get("source_data_year")) != od_source_year:
+            return False
+        claimed = identity.get("record_hash") or identity.get("sha256")
+        if claimed != od010_record_hash(od_rec):
             return False
     return True
 
@@ -496,6 +543,57 @@ def _live_evidence(check: Any) -> str | None:
     return status if isinstance(status, str) else None
 
 
+def year_coverage_record(check: Any, year: int) -> dict[str, Any] | None:
+    coverage = getattr(check, "year_coverage", None)
+    if coverage is None and isinstance(check, dict):
+        coverage = check.get("year_coverage")
+    extra = getattr(check, "extra", None)
+    if coverage is None and isinstance(extra, dict):
+        coverage = extra.get("year_coverage")
+    if not isinstance(coverage, dict):
+        return None
+    rec = coverage.get(year)
+    if rec is None:
+        rec = coverage.get(str(year))
+    return rec if isinstance(rec, dict) else None
+
+
+def authorized_artifacts_for_year(check: Any, year: int) -> set[tuple[str, str]]:
+    """Artifacts authorized for one project cost year. Empty if unspecified."""
+    rec = year_coverage_record(check, year)
+    keys: set[tuple[str, str]] = set()
+    if rec is None:
+        return keys
+    artifacts = rec.get("artifacts")
+    if isinstance(artifacts, list):
+        for item in artifacts:
+            if not isinstance(item, dict):
+                continue
+            ident = item.get("artifact_id") or item.get("filename")
+            sha = item.get("sha256")
+            if _nonempty_str(ident) and _nonempty_str(sha):
+                keys.add((str(ident), str(sha)))
+    if keys:
+        return keys
+    ident = rec.get("artifact")
+    if _nonempty_str(ident):
+        sha = rec.get("sha256")
+        if _nonempty_str(sha):
+            keys.add((str(ident), str(sha)))
+        else:
+            for live_id, live_sha in _live_artifact_keys(check):
+                if live_id == ident:
+                    keys.add((live_id, live_sha))
+    return keys
+
+
+def live_source_data_year(check: Any, year: int) -> int | None:
+    rec = year_coverage_record(check, year)
+    if rec is None:
+        return None
+    return _year_int(rec.get("source_data_year"))
+
+
 def validate_candidate_bindings_against_snapshot(
     payload: Any,
     live_checks: Any,
@@ -529,20 +627,29 @@ def validate_candidate_bindings_against_snapshot(
         source = rec.get("source_id") or rec.get("source_family")
         if not _nonempty_str(source) or not source_id_matches_family(str(source), family, year):
             issues.append(f"{component}:{year}:SOURCE_ID_MISMATCH")
-        live_keys = _live_artifact_keys(check)
+        year_rec = year_coverage_record(check, year)
+        if year_rec is None or year_rec.get("covered") is not True:
+            issues.append(f"{component}:{year}:YEAR_NOT_COVERED")
+        live_sdy = live_source_data_year(check, year)
+        bind_sdy = _year_int(rec.get("source_data_year"))
+        if live_sdy is None:
+            issues.append(f"{component}:{year}:SOURCE_DATA_YEAR_UNSPECIFIED")
+        elif bind_sdy != live_sdy:
+            issues.append(f"{component}:{year}:SOURCE_DATA_YEAR_MISMATCH")
+        year_keys = authorized_artifacts_for_year(check, year)
+        if not year_keys:
+            issues.append(f"{component}:{year}:YEAR_ARTIFACTS_UNSPECIFIED")
         for item in rec.get("selected_artifacts") or []:
             if not isinstance(item, dict):
-                issues.append(f"{component}:{year}:ARTIFACT_SHA_MISMATCH")
+                issues.append(f"{component}:{year}:YEAR_ARTIFACT_MISMATCH")
                 continue
             ident = item.get("artifact_id") or item.get("filename")
             sha = item.get("sha256")
             if not _nonempty_str(ident) or not _nonempty_str(sha):
-                issues.append(f"{component}:{year}:ARTIFACT_SHA_MISMATCH")
+                issues.append(f"{component}:{year}:YEAR_ARTIFACT_MISMATCH")
                 continue
-            if (str(ident), str(sha)) not in live_keys and str(sha) not in {
-                k[1] for k in live_keys
-            }:
-                issues.append(f"{component}:{year}:ARTIFACT_SHA_MISMATCH")
+            if (str(ident), str(sha)) not in year_keys:
+                issues.append(f"{component}:{year}:YEAR_ARTIFACT_MISMATCH")
         live_status = _live_evidence(check)
         if rec.get("evidence_status") != live_status:
             issues.append(f"{component}:{year}:EVIDENCE_STATUS_MISMATCH")
@@ -652,16 +759,33 @@ def _translation_record_complete(rec: dict[str, Any], *, component: str, year: i
         or rec.get("retrieval_validation_status")
         or rec.get("validation_state")
     )
-    return _nonempty_str(state)
+    return state in PASSING_BINDING_EVIDENCE
+
+
+@dataclass(frozen=True)
+class CapturedJsonArtifact:
+    path: str
+    exists: bool
+    raw_sha256: str | None
+    payload: Any
+
+
+def capture_json_artifact(path: Path) -> CapturedJsonArtifact:
+    """Read file bytes once. Hash and parse those exact bytes."""
+    rel = _relative_metadata_path(path)
+    if not path.exists():
+        return CapturedJsonArtifact(path=rel, exists=False, raw_sha256=None, payload=None)
+    raw = path.read_bytes()
+    digest = hashlib.sha256(raw).hexdigest()
+    try:
+        payload = json.loads(raw.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        payload = None
+    return CapturedJsonArtifact(path=rel, exists=True, raw_sha256=digest, payload=payload)
 
 
 def _load_json(path: Path) -> Any:
-    if not path.exists():
-        return None
-    try:
-        return json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        return None
+    return capture_json_artifact(path).payload
 
 
 def candidate_inputs_are_bound(path: Path | None = None) -> bool:
@@ -738,10 +862,17 @@ def candidate_input_binding_identity(
     path: Path | None = None,
     payload: Any | None = None,
     evaluation: dict[str, Any] | None = None,
+    *,
+    sha256: str | None = None,
+    exists: bool | None = None,
+    captured: bool = False,
 ) -> dict[str, Any]:
     target = path or CANDIDATE_INPUT_BINDINGS
-    if payload is None:
-        payload = _load_json(target)
+    if not captured and payload is None:
+        artifact = capture_json_artifact(target)
+        payload = artifact.payload
+        sha256 = artifact.raw_sha256
+        exists = artifact.exists
     if evaluation is None:
         if payload is None:
             from foundation.living_cost.freshness import required_project_cost_years
@@ -764,10 +895,10 @@ def candidate_input_binding_identity(
     years = tuple(int(year) for year in years_raw) if years_raw else ()
     return {
         "path": _relative_metadata_path(target),
-        "exists": target.exists() if payload is None or path is not None else bool(payload),
+        "exists": bool(exists) if exists is not None else bool(payload),
         "bound": evaluation["bound"],
         "missing": evaluation.get("missing", []),
-        "sha256": _file_sha256(target),
+        "sha256": sha256,
         "normalized": _normalized_binding_identities(payload, years) if years else [],
     }
 
@@ -776,10 +907,17 @@ def translation_binding_identity(
     path: Path | None = None,
     payload: Any | None = None,
     evaluation: dict[str, Any] | None = None,
+    *,
+    sha256: str | None = None,
+    exists: bool | None = None,
+    captured: bool = False,
 ) -> dict[str, Any]:
     target = path or OD010_TABLE
-    if payload is None:
-        payload = _load_json(target)
+    if not captured and payload is None:
+        artifact = capture_json_artifact(target)
+        payload = artifact.payload
+        sha256 = artifact.raw_sha256
+        exists = artifact.exists
     if evaluation is None:
         if payload is None:
             required = [
@@ -795,11 +933,11 @@ def translation_binding_identity(
             evaluation = evaluate_od010_translation_table(payload)
     return {
         "path": _relative_metadata_path(target),
-        "exists": target.exists() if payload is None or path is not None else bool(payload),
+        "exists": bool(exists) if exists is not None else bool(payload),
         "bound": evaluation["bound"],
         "missing": evaluation.get("missing", []),
         "required": evaluation.get("required", []),
-        "sha256": _file_sha256(target),
+        "sha256": sha256,
         "normalized": _normalized_od010_identities(payload),
     }
 

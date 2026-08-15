@@ -653,17 +653,17 @@ def write_coverage(artifacts: list[RetrievedSourceArtifact]) -> dict:
             "registration": {
                 "project_cost_year": {"2024": 2024, "2026": 2026},
                 "source_data_year": {"2024": None, "2026": None},
-                "translation_method": "SOURCE_GAP",
+                "translation_method": "RULE_YEAR",
             },
             "replacement": {
                 "project_cost_year": {"2024": 2024, "2026": 2026},
                 "source_data_year": {"2024": None, "2026": None},
-                "translation_method": "FORMULA_PENDING_INPUTS",
+                "translation_method": "MODEL_SUBINPUT",
             },
             "connectivity": {
                 "project_cost_year": {"2024": 2024, "2026": 2026},
                 "source_data_year": {"2024": 2024, "2026": 2026},
-                "translation_method": {"2024": "YTD", "2026": "YTD"},
+                "translation_method": "SOURCE_CLASSIFIED",
                 "price_index_series": None,
             },
             "state_tax": {
@@ -674,7 +674,7 @@ def write_coverage(artifacts: list[RetrievedSourceArtifact]) -> dict:
             "local_tax": {
                 "project_cost_year": {"2024": 2024, "2026": 2026},
                 "source_data_year": {"2024": None, "2026": None},
-                "translation_method": "SOURCE_GAP",
+                "translation_method": "RULE_YEAR",
             },
         },
         "retrieved_artifacts": [
