@@ -663,6 +663,342 @@ def validate_candidate_bindings_against_snapshot(
     return {"ok": not unique, "issues": unique}
 
 
+def od010_series_coverage(check: Any) -> dict[str, Any]:
+    """Structured live OD-010 series inventory. Empty if the family is too vague."""
+    coverage = getattr(check, "series_coverage", None)
+    if coverage is None and isinstance(check, dict):
+        coverage = check.get("series_coverage")
+    extra = getattr(check, "extra", None)
+    if extra is None and isinstance(check, dict):
+        extra = check.get("extra")
+    if coverage is None and isinstance(extra, dict):
+        coverage = extra.get("series_coverage")
+    return coverage if isinstance(coverage, dict) else {}
+
+
+def od010_series_slot(check: Any, component: str, year: int) -> dict[str, Any] | None:
+    coverage = od010_series_coverage(check)
+    block = coverage.get(component)
+    if not isinstance(block, dict):
+        return None
+    rec = block.get(year)
+    if rec is None:
+        rec = block.get(str(year))
+    return rec if isinstance(rec, dict) else None
+
+
+def unbound_od010_series_coverage(
+    years: tuple[int, ...] | None = None,
+) -> dict[str, dict[str, dict[str, Any]]]:
+    """Required series slots with no invented identifiers or observations."""
+    if years is None:
+        from foundation.living_cost.freshness import required_project_cost_years
+
+        years = required_project_cost_years()
+    year_set = set(years)
+    coverage: dict[str, dict[str, dict[str, Any]]] = {}
+    for component, year in FROZEN_CPI_UPDATED_PAIRS:
+        if year not in year_set:
+            continue
+        coverage.setdefault(component, {})[str(year)] = {
+            "covered": False,
+            "official_series_identifier": None,
+            "publisher": None,
+            "latest_observation_period": None,
+            "target_observation_period": None,
+            "base_observation_period": None,
+            "source_data_year": None,
+            "selected_artifact": None,
+            "api_identity": None,
+            "sha256": None,
+            "note": "series not inventoried; do not invent official series identifiers",
+        }
+    return coverage
+
+
+def od010_series_inventory_is_specific(
+    check: Any,
+    years: tuple[int, ...] | None = None,
+) -> bool:
+    """True only when every frozen CPI_UPDATED pair has concrete live series evidence."""
+    if years is None:
+        from foundation.living_cost.freshness import required_project_cost_years
+
+        years = required_project_cost_years()
+    coverage = od010_series_coverage(check)
+    if not coverage:
+        return False
+    for component, year in required_cpi_updated_bindings(years=years):
+        slot = od010_series_slot(check, component, year)
+        if slot is None or slot.get("covered") is not True:
+            return False
+        if not _nonempty_str(slot.get("official_series_identifier")):
+            return False
+        period = (
+            slot.get("latest_observation_period")
+            or slot.get("target_observation_period")
+            or slot.get("observation_period")
+        )
+        if not _nonempty_str(period):
+            return False
+        artifact = slot.get("selected_artifact") or slot.get("api_identity")
+        if not _nonempty_str(artifact):
+            return False
+        if _year_int(slot.get("source_data_year")) is None:
+            return False
+    return True
+
+
+def _od010_record_series_id(rec: dict[str, Any]) -> str | None:
+    value = (
+        rec.get("official_series_identifier") or rec.get("series_id") or rec.get("official_series")
+    )
+    return str(value) if _nonempty_str(value) else None
+
+
+def _od010_record_period(rec: dict[str, Any]) -> str | None:
+    value = rec.get("observation_period") or rec.get("period")
+    return str(value) if _nonempty_str(value) else None
+
+
+def _od010_record_artifact(rec: dict[str, Any]) -> str | None:
+    value = rec.get("source_artifact") or rec.get("provenance") or rec.get("source_provenance")
+    if isinstance(value, dict):
+        ident = value.get("artifact_id") or value.get("filename") or value.get("api_identity")
+        return str(ident) if _nonempty_str(ident) else None
+    return str(value) if _nonempty_str(value) else None
+
+
+def _od010_record_sha(rec: dict[str, Any]) -> str | None:
+    for key in ("sha256", "source_artifact_sha256", "response_identity"):
+        value = rec.get(key)
+        if _nonempty_str(value):
+            return str(value)
+    artifact = rec.get("source_artifact")
+    if isinstance(artifact, dict) and _nonempty_str(artifact.get("sha256")):
+        return str(artifact["sha256"])
+    calc = rec.get("calculation_inputs")
+    if isinstance(calc, dict) and _nonempty_str(calc.get("sha256")):
+        return str(calc["sha256"])
+    return None
+
+
+def _live_series_period(slot: dict[str, Any]) -> str | None:
+    value = (
+        slot.get("latest_observation_period")
+        or slot.get("target_observation_period")
+        or slot.get("observation_period")
+    )
+    return str(value) if _nonempty_str(value) else None
+
+
+def _live_series_artifact(slot: dict[str, Any]) -> str | None:
+    value = slot.get("selected_artifact") or slot.get("api_identity")
+    return str(value) if _nonempty_str(value) else None
+
+
+def _live_series_sha(slot: dict[str, Any]) -> str | None:
+    for key in ("sha256", "response_identity"):
+        value = slot.get(key)
+        if _nonempty_str(value):
+            return str(value)
+    return None
+
+
+def _calculation_inputs(rec: dict[str, Any]) -> dict[str, Any]:
+    calc = rec.get("calculation_inputs")
+    return calc if isinstance(calc, dict) else {}
+
+
+def _normalized_od010_cross_pair(
+    component: str,
+    year: int,
+    rec: dict[str, Any] | None,
+    slot: dict[str, Any] | None,
+    *,
+    cross_bound: bool,
+) -> dict[str, Any]:
+    calc = _calculation_inputs(rec or {})
+    return {
+        "component": component,
+        "project_cost_year": year,
+        "source_data_year": None if rec is None else rec.get("source_data_year"),
+        "official_series_identifier": None if rec is None else _od010_record_series_id(rec),
+        "live_official_series_identifier": None
+        if slot is None
+        else slot.get("official_series_identifier"),
+        "publisher": None if rec is None else rec.get("publisher"),
+        "observation_period": None if rec is None else _od010_record_period(rec),
+        "live_observation_period": None if slot is None else _live_series_period(slot),
+        "source_artifact": None if rec is None else _od010_record_artifact(rec),
+        "live_artifact": None if slot is None else _live_series_artifact(slot),
+        "sha256": None if rec is None else _od010_record_sha(rec),
+        "live_sha256": None if slot is None else _live_series_sha(slot),
+        "base_observation_period": calc.get("base_observation_period"),
+        "target_observation_period": calc.get("target_observation_period"),
+        "base_index_value": calc.get("base_index_value"),
+        "target_index_value": calc.get("target_index_value"),
+        "translation_factor": None if rec is None else rec.get("translation_factor"),
+        "cross_bound": cross_bound,
+    }
+
+
+def validate_od010_bindings_against_snapshot(
+    od010_payload: Any,
+    live_checks: Any,
+    years: tuple[int, ...] | None = None,
+) -> dict[str, Any]:
+    """Cross-bind every frozen CPI_UPDATED record to live od010_price_index evidence."""
+    if years is None:
+        from foundation.living_cost.freshness import required_project_cost_years
+
+        years = required_project_cost_years()
+    issues: list[str] = []
+    required = required_cpi_updated_bindings(years=years)
+    required_labels = [f"{component}:{year}" for component, year in required]
+    if not isinstance(live_checks, dict):
+        return {
+            "ok": False,
+            "issues": ["OD010_LIVE_FRESHNESS_MISSING"],
+            "required": required_labels,
+            "normalized": [],
+        }
+    check = live_checks.get("od010_price_index")
+    if check is None:
+        return {
+            "ok": False,
+            "issues": ["OD010_LIVE_FRESHNESS_MISSING"],
+            "required": required_labels,
+            "normalized": [],
+        }
+    coverage = od010_series_coverage(check)
+    inventory_specific = od010_series_inventory_is_specific(check, years=years)
+    if not coverage or not inventory_specific:
+        issues.append("OD010_SERIES_COVERAGE_TOO_VAGUE")
+    if not isinstance(od010_payload, dict):
+        issues.append("OD010_TABLE_ABSENT")
+        normalized = [
+            _normalized_od010_cross_pair(
+                component,
+                year,
+                None,
+                od010_series_slot(check, component, year),
+                cross_bound=False,
+            )
+            for component, year in required
+        ]
+        return {
+            "ok": False,
+            "issues": _unique_issue_strings(issues),
+            "required": required_labels,
+            "normalized": normalized,
+        }
+
+    indexed = _od010_index(od010_payload)
+    normalized: list[dict[str, Any]] = []
+    for component, year in required:
+        rec = indexed.get((component, year))
+        slot = od010_series_slot(check, component, year)
+        pair_issues: list[str] = []
+        if rec is None:
+            pair_issues.append(f"{component}:{year}:OD010_RECORD_MISSING")
+        elif not _translation_record_complete(rec, component=component, year=year):
+            pair_issues.append(f"{component}:{year}:OD010_RECORD_INCOMPLETE")
+        if slot is None or slot.get("covered") is not True:
+            pair_issues.append(f"{component}:{year}:SERIES_NOT_COVERED")
+        if rec is not None and slot is not None and slot.get("covered") is True:
+            table_series = _od010_record_series_id(rec)
+            live_series = (
+                str(slot["official_series_identifier"])
+                if _nonempty_str(slot.get("official_series_identifier"))
+                else None
+            )
+            if table_series != live_series:
+                pair_issues.append(f"{component}:{year}:SERIES_IDENTIFIER_MISMATCH")
+            live_sdy = _year_int(slot.get("source_data_year"))
+            table_sdy = _year_int(rec.get("source_data_year"))
+            if live_sdy is None:
+                pair_issues.append(f"{component}:{year}:LIVE_SOURCE_DATA_YEAR_UNSPECIFIED")
+            elif table_sdy != live_sdy:
+                pair_issues.append(f"{component}:{year}:SOURCE_DATA_YEAR_MISMATCH")
+            live_publisher = slot.get("publisher")
+            if _nonempty_str(live_publisher) and rec.get("publisher") != live_publisher:
+                pair_issues.append(f"{component}:{year}:PUBLISHER_MISMATCH")
+            table_period = _od010_record_period(rec)
+            live_period = _live_series_period(slot)
+            if live_period is None:
+                pair_issues.append(f"{component}:{year}:LIVE_OBSERVATION_UNSPECIFIED")
+            elif table_period != live_period:
+                pair_issues.append(f"{component}:{year}:OBSERVATION_PERIOD_MISMATCH")
+            table_artifact = _od010_record_artifact(rec)
+            live_artifact = _live_series_artifact(slot)
+            live_api = slot.get("api_identity")
+            artifact_ok = False
+            if _nonempty_str(table_artifact) and _nonempty_str(live_artifact):
+                artifact_ok = table_artifact == live_artifact or (
+                    _nonempty_str(live_api) and table_artifact == str(live_api)
+                )
+            if not artifact_ok:
+                pair_issues.append(f"{component}:{year}:ARTIFACT_MISMATCH")
+            table_sha = _od010_record_sha(rec)
+            live_sha = _live_series_sha(slot)
+            if (live_sha or table_sha) and table_sha != live_sha:
+                pair_issues.append(f"{component}:{year}:ARTIFACT_HASH_MISMATCH")
+            calc = _calculation_inputs(rec)
+            if not calc:
+                pair_issues.append(f"{component}:{year}:TRANSLATION_FACTOR_UNBOUND")
+            else:
+                calc_series = (
+                    calc.get("official_series_identifier") or calc.get("series_id") or table_series
+                )
+                if live_series is not None and str(calc_series) != live_series:
+                    pair_issues.append(f"{component}:{year}:CALC_SERIES_MISMATCH")
+                calc_target = calc.get("target_observation_period") or calc.get(
+                    "observation_period"
+                )
+                if not _nonempty_str(calc_target):
+                    pair_issues.append(f"{component}:{year}:CALC_TARGET_PERIOD_MISSING")
+                elif live_period is not None and str(calc_target) != live_period:
+                    pair_issues.append(f"{component}:{year}:OBSERVATION_PERIOD_MISMATCH")
+                live_base = slot.get("base_observation_period")
+                calc_base = calc.get("base_observation_period")
+                if _nonempty_str(live_base):
+                    if not _nonempty_str(calc_base) or str(calc_base) != str(live_base):
+                        pair_issues.append(f"{component}:{year}:CALC_BASE_PERIOD_MISMATCH")
+                elif not _nonempty_str(calc_base):
+                    pair_issues.append(f"{component}:{year}:CALC_BASE_PERIOD_MISSING")
+                calc_artifact = calc.get("source_artifact") or calc.get("api_identity")
+                if _nonempty_str(calc_artifact) and not (
+                    str(calc_artifact) == live_artifact
+                    or (_nonempty_str(live_api) and str(calc_artifact) == str(live_api))
+                ):
+                    pair_issues.append(f"{component}:{year}:CALC_ARTIFACT_MISMATCH")
+                if calc.get("base_index_value") is None or calc.get("target_index_value") is None:
+                    pair_issues.append(f"{component}:{year}:CALC_INDEX_VALUES_MISSING")
+        issues.extend(pair_issues)
+        normalized.append(
+            _normalized_od010_cross_pair(component, year, rec, slot, cross_bound=not pair_issues)
+        )
+    unique = _unique_issue_strings(issues)
+    return {
+        "ok": not unique,
+        "issues": unique,
+        "required": required_labels,
+        "normalized": normalized,
+    }
+
+
+def _unique_issue_strings(issues: list[str]) -> list[str]:
+    unique: list[str] = []
+    seen: set[str] = set()
+    for issue in issues:
+        if issue in seen:
+            continue
+        seen.add(issue)
+        unique.append(issue)
+    return unique
+
+
 def evaluate_od010_translation_table(
     payload: Any,
     years: tuple[int, ...] | None = None,
@@ -845,6 +1181,9 @@ def _normalized_od010_identities(payload: Any) -> list[dict[str, Any]]:
         return []
     out: list[dict[str, Any]] = []
     for rec in _normalize_translation_records(payload):
+        calc = (
+            rec.get("calculation_inputs") if isinstance(rec.get("calculation_inputs"), dict) else {}
+        )
         out.append(
             {
                 "component": rec.get("component"),
@@ -852,7 +1191,17 @@ def _normalized_od010_identities(payload: Any) -> list[dict[str, Any]]:
                 "source_data_year": rec.get("source_data_year"),
                 "official_series_identifier": rec.get("official_series_identifier")
                 or rec.get("series_id"),
+                "publisher": rec.get("publisher"),
+                "observation_period": rec.get("observation_period") or rec.get("period"),
+                "source_artifact": rec.get("source_artifact") or rec.get("provenance"),
+                "sha256": rec.get("sha256") or (calc.get("sha256") if calc else None),
                 "translation_factor": rec.get("translation_factor"),
+                "base_observation_period": calc.get("base_observation_period") if calc else None,
+                "target_observation_period": calc.get("target_observation_period")
+                if calc
+                else None,
+                "base_index_value": calc.get("base_index_value") if calc else None,
+                "target_index_value": calc.get("target_index_value") if calc else None,
             }
         )
     return out

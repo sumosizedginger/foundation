@@ -1578,24 +1578,50 @@ def discover_replacement() -> FreshnessCheck:
 
 
 def discover_od010() -> FreshnessCheck:
-    from foundation.living_cost.candidate_bindings import od010_translation_is_bound
+    from foundation.living_cost.candidate_bindings import (
+        od010_series_inventory_is_specific,
+        od010_translation_is_bound,
+        unbound_od010_series_coverage,
+    )
 
     table = METADATA_DIR / "living_cost_od010_translation_table.json"
     bound = od010_translation_is_bound(table)
-    return FreshnessCheck(
+    series_coverage = unbound_od010_series_coverage()
+    # Do not invent series IDs or observations. A vague BLS CPI landing is
+    # not enough to authorize VERIFIED_CURRENT or a translation factor.
+    status = "MANUAL_VERIFICATION_REQUIRED"
+    evidence = "INVENTORY_NOT_VALIDATED"
+    probe = FreshnessCheck(
         source_id="od010_price_index",
         latest_checked_at=_now_iso(),
         latest_authoritative_vintage_found=None,
         selected_vintage=None,
         selected_artifact=None,
         newer_data_exists=None,
-        retrieval_validation_status="INVENTORY_NOT_VALIDATED",
+        retrieval_validation_status=evidence,
+        freshness_check_status=status,
+        series_coverage=series_coverage,
+    )
+    if status == "VERIFIED_CURRENT" and not od010_series_inventory_is_specific(probe):
+        status = "MANUAL_VERIFICATION_REQUIRED"
+        evidence = "INVENTORY_NOT_VALIDATED"
+    return FreshnessCheck(
+        source_id="od010_price_index",
+        latest_checked_at=probe.latest_checked_at,
+        latest_authoritative_vintage_found=None,
+        selected_vintage=None,
+        selected_artifact=None,
+        newer_data_exists=None,
+        retrieval_validation_status=evidence,
         reason_if_not_refreshed=(
             "Component-specific CPI/index series for lagged nominal dollars are not bound "
             f"into a live translation table (bound={bound}). "
-            "translation_index_bound remains false until a real series table exists."
+            "Live freshness identifies required series slots but has no official "
+            "series identifiers or observations. Do not invent series IDs. "
+            "translation_index_bound remains false until a real series table "
+            "cross-binds to this inventory."
         ),
-        freshness_check_status="MANUAL_VERIFICATION_REQUIRED",
+        freshness_check_status=status,
         publisher="BLS CPI / medical / motor-vehicle indexes",
         landing_url="https://www.bls.gov/cpi/",
         selected_artifacts=(),
@@ -1605,7 +1631,12 @@ def discover_od010() -> FreshnessCheck:
             {"covered": bound, "note": "OD-010 translation table"},
             {"covered": bound, "note": "OD-010 translation table"},
         ),
-        extra={"translation_table_bound": bound},
+        series_coverage=series_coverage,
+        extra={
+            "translation_table_bound": bound,
+            "series_inventory_status": "NOT_INVENTORIED",
+            "series_inventory_specific": False,
+        },
     )
 
 

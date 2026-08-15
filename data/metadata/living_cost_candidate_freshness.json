@@ -1,9 +1,9 @@
 {
   "report_type": "living_cost_candidate_freshness",
-  "generated_at": "2026-08-15T17:15:46Z",
-  "schema_version": "2.2",
+  "generated_at": "2026-08-15T19:16:43Z",
+  "schema_version": "2.4",
   "calculates_mslc": false,
-  "freshness_run_id": "da4d93960acab8d976f1926223449f2b20840fbc183426a5a4e2257765b18a8a",
+  "freshness_run_id": "4b966f664968da6e938167e74eb8a12b921db10924f95b6f8ce61ec293aa24ff",
   "required_families": [
     "acs_population_weights",
     "hud_fmr",
@@ -70,6 +70,7 @@
           "note": "newest appropriate ACS; currently 2024; do not relabel as 2026"
         }
       },
+      "series_coverage": null,
       "extra": {
         "listed_years": [
           2005,
@@ -147,6 +148,7 @@
           "note": "FY2026"
         }
       },
+      "series_coverage": null,
       "extra": null
     },
     "usda_food": {
@@ -250,6 +252,7 @@
           "note": "2026 official YTD; not a 2024 substitution"
         }
       },
+      "series_coverage": null,
       "extra": {
         "historical_2024": {
           "source_year": 2024,
@@ -958,6 +961,7 @@
           "note": "PY2026 current-year PUF archives are mutable; listing is not byte proof"
         }
       },
+      "series_coverage": null,
       "extra": {
         "federal_exchange": {
           "kind": "federal_exchange",
@@ -1042,6 +1046,7 @@
           "note": "MEPS source year 2023; 2026 uses OD-010 translation"
         }
       },
+      "series_coverage": null,
       "extra": {
         "listing": {
           "checked_at_source": "https://meps.ahrq.gov/mepsweb/data_stats/download_data_files.jsp",
@@ -1087,6 +1092,7 @@
       "artifact_currentness_status": "CHECK_FAILED",
       "selected_artifact_matches_latest": null,
       "year_coverage": null,
+      "series_coverage": null,
       "extra": null
     },
     "epa_vehicle": {
@@ -1131,6 +1137,7 @@
           "note": "rolling EPA/DOE cohort applies to 2026 window"
         }
       },
+      "series_coverage": null,
       "extra": null
     },
     "eia_gasoline": {
@@ -1178,6 +1185,7 @@
           "note": "2026 YTD weekly observations"
         }
       },
+      "series_coverage": null,
       "extra": {
         "official_max_date": "2026-08-10",
         "selected_max_date": "2026-08-10"
@@ -1225,6 +1233,7 @@
           "note": "lagged NAIC report AUT-PB 2022-2023 applies to 2026"
         }
       },
+      "series_coverage": null,
       "extra": {
         "publication_code": "AUT-PB",
         "start_year": 2022,
@@ -1269,6 +1278,7 @@
       "artifact_currentness_status": "CHECK_FAILED",
       "selected_artifact_matches_latest": null,
       "year_coverage": null,
+      "series_coverage": null,
       "extra": null
     },
     "fcc_broadband": {
@@ -1295,6 +1305,7 @@
       "artifact_currentness_status": "CHECK_FAILED",
       "selected_artifact_matches_latest": null,
       "year_coverage": null,
+      "series_coverage": null,
       "extra": null
     },
     "mobile_price": {
@@ -1330,6 +1341,7 @@
           "reason": "SOURCE_GAP"
         }
       },
+      "series_coverage": null,
       "extra": null
     },
     "bea_rpp": {
@@ -1374,6 +1386,7 @@
           "note": "2026 reuses 2024 as LATEST_AVAILABLE; source year not relabeled"
         }
       },
+      "series_coverage": null,
       "extra": {
         "current_release": "February 19, 2026",
         "next_release": null
@@ -1412,6 +1425,7 @@
           "note": "federal tables present in code"
         }
       },
+      "series_coverage": null,
       "extra": {
         "rule_years_present": [
           2024,
@@ -1452,6 +1466,7 @@
           "note": "state inventory incomplete"
         }
       },
+      "series_coverage": null,
       "extra": null
     },
     "local_tax_law": {
@@ -1487,6 +1502,7 @@
           "note": "most FIPS unresolved"
         }
       },
+      "series_coverage": null,
       "extra": null
     },
     "vehicle_registration": {
@@ -1522,6 +1538,7 @@
           "reason": "SOURCE_GAP"
         }
       },
+      "series_coverage": null,
       "extra": null
     },
     "vehicle_replacement": {
@@ -1548,6 +1565,7 @@
       "artifact_currentness_status": null,
       "selected_artifact_matches_latest": null,
       "year_coverage": null,
+      "series_coverage": null,
       "extra": null
     },
     "od010_price_index": {
@@ -1583,29 +1601,587 @@
           "note": "OD-010 translation table"
         }
       },
+      "series_coverage": {
+        "health_oop": {
+          "2024": {
+            "covered": false,
+            "official_series_identifier": null,
+            "publisher": null,
+            "latest_observation_period": null,
+            "target_observation_period": null,
+            "base_observation_period": null,
+            "source_data_year": null,
+            "selected_artifact": null,
+            "api_identity": null,
+            "sha256": null,
+            "note": "series not inventoried; do not invent official series identifiers"
+          },
+          "2026": {
+            "covered": false,
+            "official_series_identifier": null,
+            "publisher": null,
+            "latest_observation_period": null,
+            "target_observation_period": null,
+            "base_observation_period": null,
+            "source_data_year": null,
+            "selected_artifact": null,
+            "api_identity": null,
+            "sha256": null,
+            "note": "series not inventoried; do not invent official series identifiers"
+          }
+        },
+        "insurance": {
+          "2024": {
+            "covered": false,
+            "official_series_identifier": null,
+            "publisher": null,
+            "latest_observation_period": null,
+            "target_observation_period": null,
+            "base_observation_period": null,
+            "source_data_year": null,
+            "selected_artifact": null,
+            "api_identity": null,
+            "sha256": null,
+            "note": "series not inventoried; do not invent official series identifiers"
+          },
+          "2026": {
+            "covered": false,
+            "official_series_identifier": null,
+            "publisher": null,
+            "latest_observation_period": null,
+            "target_observation_period": null,
+            "base_observation_period": null,
+            "source_data_year": null,
+            "selected_artifact": null,
+            "api_identity": null,
+            "sha256": null,
+            "note": "series not inventoried; do not invent official series identifiers"
+          }
+        },
+        "maintenance": {
+          "2026": {
+            "covered": false,
+            "official_series_identifier": null,
+            "publisher": null,
+            "latest_observation_period": null,
+            "target_observation_period": null,
+            "base_observation_period": null,
+            "source_data_year": null,
+            "selected_artifact": null,
+            "api_identity": null,
+            "sha256": null,
+            "note": "series not inventoried; do not invent official series identifiers"
+          }
+        },
+        "essentials": {
+          "2026": {
+            "covered": false,
+            "official_series_identifier": null,
+            "publisher": null,
+            "latest_observation_period": null,
+            "target_observation_period": null,
+            "base_observation_period": null,
+            "source_data_year": null,
+            "selected_artifact": null,
+            "api_identity": null,
+            "sha256": null,
+            "note": "series not inventoried; do not invent official series identifiers"
+          }
+        },
+        "recreation": {
+          "2026": {
+            "covered": false,
+            "official_series_identifier": null,
+            "publisher": null,
+            "latest_observation_period": null,
+            "target_observation_period": null,
+            "base_observation_period": null,
+            "source_data_year": null,
+            "selected_artifact": null,
+            "api_identity": null,
+            "sha256": null,
+            "note": "series not inventoried; do not invent official series identifiers"
+          }
+        }
+      },
       "extra": {
-        "translation_table_bound": false
+        "translation_table_bound": false,
+        "series_inventory_status": "NOT_INVENTORIED",
+        "series_inventory_specific": false
       }
     }
   },
   "od010_binding_identity": {
-    "path": "D:\\Foundation\\data\\metadata\\living_cost_od010_translation_table.json",
+    "path": "data/metadata/living_cost_od010_translation_table.json",
     "exists": false,
     "bound": false,
     "missing": [
-      "ABSENT"
+      "health_oop:2024",
+      "health_oop:2026",
+      "insurance:2024",
+      "insurance:2026",
+      "maintenance:2026",
+      "essentials:2026",
+      "recreation:2026"
     ],
-    "required": [],
-    "sha256": null
+    "required": [
+      "health_oop:2024",
+      "health_oop:2026",
+      "insurance:2024",
+      "insurance:2026",
+      "maintenance:2026",
+      "essentials:2026",
+      "recreation:2026"
+    ],
+    "sha256": null,
+    "normalized": []
   },
   "candidate_input_binding_identity": {
-    "path": "D:\\Foundation\\data\\metadata\\living_cost_candidate_input_bindings.json",
+    "path": "data/metadata/living_cost_candidate_input_bindings.json",
     "exists": false,
     "bound": false,
     "missing": [
-      "ABSENT"
+      "housing:2024",
+      "housing:2026",
+      "population_weights:2024",
+      "population_weights:2026",
+      "food:2024",
+      "food:2026",
+      "health_premium:2024",
+      "health_premium:2026",
+      "health_oop:2024",
+      "health_oop:2026",
+      "mileage:2024",
+      "mileage:2026",
+      "mpg:2024",
+      "mpg:2026",
+      "gas:2024",
+      "gas:2026",
+      "insurance:2024",
+      "insurance:2026",
+      "maintenance:2024",
+      "maintenance:2026",
+      "registration:2024",
+      "registration:2026",
+      "replacement:2024",
+      "replacement:2026",
+      "connectivity:2024",
+      "connectivity:2026",
+      "essentials:2024",
+      "essentials:2026",
+      "recreation:2024",
+      "recreation:2026",
+      "rpp:2024",
+      "rpp:2026",
+      "federal_tax:2024",
+      "federal_tax:2026",
+      "state_tax:2024",
+      "state_tax:2026",
+      "local_tax:2024",
+      "local_tax:2026"
     ],
-    "sha256": null
+    "sha256": null,
+    "normalized": [
+      {
+        "component": "housing",
+        "project_cost_year": 2024,
+        "present": false
+      },
+      {
+        "component": "housing",
+        "project_cost_year": 2026,
+        "present": false
+      },
+      {
+        "component": "population_weights",
+        "project_cost_year": 2024,
+        "present": false
+      },
+      {
+        "component": "population_weights",
+        "project_cost_year": 2026,
+        "present": false
+      },
+      {
+        "component": "food",
+        "project_cost_year": 2024,
+        "present": false
+      },
+      {
+        "component": "food",
+        "project_cost_year": 2026,
+        "present": false
+      },
+      {
+        "component": "health_premium",
+        "project_cost_year": 2024,
+        "present": false
+      },
+      {
+        "component": "health_premium",
+        "project_cost_year": 2026,
+        "present": false
+      },
+      {
+        "component": "health_oop",
+        "project_cost_year": 2024,
+        "present": false
+      },
+      {
+        "component": "health_oop",
+        "project_cost_year": 2026,
+        "present": false
+      },
+      {
+        "component": "mileage",
+        "project_cost_year": 2024,
+        "present": false
+      },
+      {
+        "component": "mileage",
+        "project_cost_year": 2026,
+        "present": false
+      },
+      {
+        "component": "mpg",
+        "project_cost_year": 2024,
+        "present": false
+      },
+      {
+        "component": "mpg",
+        "project_cost_year": 2026,
+        "present": false
+      },
+      {
+        "component": "gas",
+        "project_cost_year": 2024,
+        "present": false
+      },
+      {
+        "component": "gas",
+        "project_cost_year": 2026,
+        "present": false
+      },
+      {
+        "component": "insurance",
+        "project_cost_year": 2024,
+        "present": false
+      },
+      {
+        "component": "insurance",
+        "project_cost_year": 2026,
+        "present": false
+      },
+      {
+        "component": "maintenance",
+        "project_cost_year": 2024,
+        "present": false
+      },
+      {
+        "component": "maintenance",
+        "project_cost_year": 2026,
+        "present": false
+      },
+      {
+        "component": "registration",
+        "project_cost_year": 2024,
+        "present": false
+      },
+      {
+        "component": "registration",
+        "project_cost_year": 2026,
+        "present": false
+      },
+      {
+        "component": "replacement",
+        "project_cost_year": 2024,
+        "present": false
+      },
+      {
+        "component": "replacement",
+        "project_cost_year": 2026,
+        "present": false
+      },
+      {
+        "component": "connectivity",
+        "project_cost_year": 2024,
+        "present": false
+      },
+      {
+        "component": "connectivity",
+        "project_cost_year": 2026,
+        "present": false
+      },
+      {
+        "component": "essentials",
+        "project_cost_year": 2024,
+        "present": false
+      },
+      {
+        "component": "essentials",
+        "project_cost_year": 2026,
+        "present": false
+      },
+      {
+        "component": "recreation",
+        "project_cost_year": 2024,
+        "present": false
+      },
+      {
+        "component": "recreation",
+        "project_cost_year": 2026,
+        "present": false
+      },
+      {
+        "component": "rpp",
+        "project_cost_year": 2024,
+        "present": false
+      },
+      {
+        "component": "rpp",
+        "project_cost_year": 2026,
+        "present": false
+      },
+      {
+        "component": "federal_tax",
+        "project_cost_year": 2024,
+        "present": false
+      },
+      {
+        "component": "federal_tax",
+        "project_cost_year": 2026,
+        "present": false
+      },
+      {
+        "component": "state_tax",
+        "project_cost_year": 2024,
+        "present": false
+      },
+      {
+        "component": "state_tax",
+        "project_cost_year": 2026,
+        "present": false
+      },
+      {
+        "component": "local_tax",
+        "project_cost_year": 2024,
+        "present": false
+      },
+      {
+        "component": "local_tax",
+        "project_cost_year": 2026,
+        "present": false
+      }
+    ]
+  },
+  "future_candidate_must_record": {
+    "freshness_run_id": true,
+    "candidate_input_binding_identity": true,
+    "od010_binding_identity": true,
+    "od010_cross_binding": true,
+    "must_not_reload_bindings_after_readiness": true,
+    "if_binding_file_changes": "run readiness again"
+  },
+  "cross_binding": {
+    "ok": false,
+    "issues": [
+      "housing:2024:STRUCTURALLY_INCOMPLETE",
+      "housing:2026:STRUCTURALLY_INCOMPLETE",
+      "population_weights:2024:STRUCTURALLY_INCOMPLETE",
+      "population_weights:2026:STRUCTURALLY_INCOMPLETE",
+      "food:2024:STRUCTURALLY_INCOMPLETE",
+      "food:2026:STRUCTURALLY_INCOMPLETE",
+      "health_premium:2024:STRUCTURALLY_INCOMPLETE",
+      "health_premium:2026:STRUCTURALLY_INCOMPLETE",
+      "health_oop:2024:STRUCTURALLY_INCOMPLETE",
+      "health_oop:2026:STRUCTURALLY_INCOMPLETE",
+      "mileage:2024:STRUCTURALLY_INCOMPLETE",
+      "mileage:2026:STRUCTURALLY_INCOMPLETE",
+      "mpg:2024:STRUCTURALLY_INCOMPLETE",
+      "mpg:2026:STRUCTURALLY_INCOMPLETE",
+      "gas:2024:STRUCTURALLY_INCOMPLETE",
+      "gas:2026:STRUCTURALLY_INCOMPLETE",
+      "insurance:2024:STRUCTURALLY_INCOMPLETE",
+      "insurance:2026:STRUCTURALLY_INCOMPLETE",
+      "maintenance:2024:STRUCTURALLY_INCOMPLETE",
+      "maintenance:2026:STRUCTURALLY_INCOMPLETE",
+      "registration:2024:STRUCTURALLY_INCOMPLETE",
+      "registration:2026:STRUCTURALLY_INCOMPLETE",
+      "replacement:2024:STRUCTURALLY_INCOMPLETE",
+      "replacement:2026:STRUCTURALLY_INCOMPLETE",
+      "connectivity:2024:STRUCTURALLY_INCOMPLETE",
+      "connectivity:2026:STRUCTURALLY_INCOMPLETE",
+      "essentials:2024:STRUCTURALLY_INCOMPLETE",
+      "essentials:2026:STRUCTURALLY_INCOMPLETE",
+      "recreation:2024:STRUCTURALLY_INCOMPLETE",
+      "recreation:2026:STRUCTURALLY_INCOMPLETE",
+      "rpp:2024:STRUCTURALLY_INCOMPLETE",
+      "rpp:2026:STRUCTURALLY_INCOMPLETE",
+      "federal_tax:2024:STRUCTURALLY_INCOMPLETE",
+      "federal_tax:2026:STRUCTURALLY_INCOMPLETE",
+      "state_tax:2024:STRUCTURALLY_INCOMPLETE",
+      "state_tax:2026:STRUCTURALLY_INCOMPLETE",
+      "local_tax:2024:STRUCTURALLY_INCOMPLETE",
+      "local_tax:2026:STRUCTURALLY_INCOMPLETE"
+    ]
+  },
+  "od010_cross_binding": {
+    "ok": false,
+    "issues": [
+      "OD010_SERIES_COVERAGE_TOO_VAGUE",
+      "OD010_TABLE_ABSENT"
+    ],
+    "required": [
+      "health_oop:2024",
+      "health_oop:2026",
+      "insurance:2024",
+      "insurance:2026",
+      "maintenance:2026",
+      "essentials:2026",
+      "recreation:2026"
+    ],
+    "normalized": [
+      {
+        "component": "health_oop",
+        "project_cost_year": 2024,
+        "source_data_year": null,
+        "official_series_identifier": null,
+        "live_official_series_identifier": null,
+        "publisher": null,
+        "observation_period": null,
+        "live_observation_period": null,
+        "source_artifact": null,
+        "live_artifact": null,
+        "sha256": null,
+        "live_sha256": null,
+        "base_observation_period": null,
+        "target_observation_period": null,
+        "base_index_value": null,
+        "target_index_value": null,
+        "translation_factor": null,
+        "cross_bound": false
+      },
+      {
+        "component": "health_oop",
+        "project_cost_year": 2026,
+        "source_data_year": null,
+        "official_series_identifier": null,
+        "live_official_series_identifier": null,
+        "publisher": null,
+        "observation_period": null,
+        "live_observation_period": null,
+        "source_artifact": null,
+        "live_artifact": null,
+        "sha256": null,
+        "live_sha256": null,
+        "base_observation_period": null,
+        "target_observation_period": null,
+        "base_index_value": null,
+        "target_index_value": null,
+        "translation_factor": null,
+        "cross_bound": false
+      },
+      {
+        "component": "insurance",
+        "project_cost_year": 2024,
+        "source_data_year": null,
+        "official_series_identifier": null,
+        "live_official_series_identifier": null,
+        "publisher": null,
+        "observation_period": null,
+        "live_observation_period": null,
+        "source_artifact": null,
+        "live_artifact": null,
+        "sha256": null,
+        "live_sha256": null,
+        "base_observation_period": null,
+        "target_observation_period": null,
+        "base_index_value": null,
+        "target_index_value": null,
+        "translation_factor": null,
+        "cross_bound": false
+      },
+      {
+        "component": "insurance",
+        "project_cost_year": 2026,
+        "source_data_year": null,
+        "official_series_identifier": null,
+        "live_official_series_identifier": null,
+        "publisher": null,
+        "observation_period": null,
+        "live_observation_period": null,
+        "source_artifact": null,
+        "live_artifact": null,
+        "sha256": null,
+        "live_sha256": null,
+        "base_observation_period": null,
+        "target_observation_period": null,
+        "base_index_value": null,
+        "target_index_value": null,
+        "translation_factor": null,
+        "cross_bound": false
+      },
+      {
+        "component": "maintenance",
+        "project_cost_year": 2026,
+        "source_data_year": null,
+        "official_series_identifier": null,
+        "live_official_series_identifier": null,
+        "publisher": null,
+        "observation_period": null,
+        "live_observation_period": null,
+        "source_artifact": null,
+        "live_artifact": null,
+        "sha256": null,
+        "live_sha256": null,
+        "base_observation_period": null,
+        "target_observation_period": null,
+        "base_index_value": null,
+        "target_index_value": null,
+        "translation_factor": null,
+        "cross_bound": false
+      },
+      {
+        "component": "essentials",
+        "project_cost_year": 2026,
+        "source_data_year": null,
+        "official_series_identifier": null,
+        "live_official_series_identifier": null,
+        "publisher": null,
+        "observation_period": null,
+        "live_observation_period": null,
+        "source_artifact": null,
+        "live_artifact": null,
+        "sha256": null,
+        "live_sha256": null,
+        "base_observation_period": null,
+        "target_observation_period": null,
+        "base_index_value": null,
+        "target_index_value": null,
+        "translation_factor": null,
+        "cross_bound": false
+      },
+      {
+        "component": "recreation",
+        "project_cost_year": 2026,
+        "source_data_year": null,
+        "official_series_identifier": null,
+        "live_official_series_identifier": null,
+        "publisher": null,
+        "observation_period": null,
+        "live_observation_period": null,
+        "source_artifact": null,
+        "live_artifact": null,
+        "sha256": null,
+        "live_sha256": null,
+        "base_observation_period": null,
+        "target_observation_period": null,
+        "base_index_value": null,
+        "target_index_value": null,
+        "translation_factor": null,
+        "cross_bound": false
+      }
+    ]
   },
   "ready_for_private_candidate": false,
   "candidate_calculation_authorized": false,
@@ -1617,8 +2193,8 @@
     2024,
     2026
   ],
-  "blocker_count": 35,
-  "gate_blocker_reason_count": 35,
+  "blocker_count": 75,
+  "gate_blocker_reason_count": 75,
   "empirical_blocker_family_count": 12,
   "empirical_blocker_families": [
     "bls_ce",
@@ -1637,6 +2213,46 @@
   "blockers": [
     "OD010_TRANSLATION_INDEX_NOT_BOUND",
     "REQUIRED_CANDIDATE_INPUTS_NOT_BOUND",
+    "CROSS_BIND:housing:2024:STRUCTURALLY_INCOMPLETE",
+    "CROSS_BIND:housing:2026:STRUCTURALLY_INCOMPLETE",
+    "CROSS_BIND:population_weights:2024:STRUCTURALLY_INCOMPLETE",
+    "CROSS_BIND:population_weights:2026:STRUCTURALLY_INCOMPLETE",
+    "CROSS_BIND:food:2024:STRUCTURALLY_INCOMPLETE",
+    "CROSS_BIND:food:2026:STRUCTURALLY_INCOMPLETE",
+    "CROSS_BIND:health_premium:2024:STRUCTURALLY_INCOMPLETE",
+    "CROSS_BIND:health_premium:2026:STRUCTURALLY_INCOMPLETE",
+    "CROSS_BIND:health_oop:2024:STRUCTURALLY_INCOMPLETE",
+    "CROSS_BIND:health_oop:2026:STRUCTURALLY_INCOMPLETE",
+    "CROSS_BIND:mileage:2024:STRUCTURALLY_INCOMPLETE",
+    "CROSS_BIND:mileage:2026:STRUCTURALLY_INCOMPLETE",
+    "CROSS_BIND:mpg:2024:STRUCTURALLY_INCOMPLETE",
+    "CROSS_BIND:mpg:2026:STRUCTURALLY_INCOMPLETE",
+    "CROSS_BIND:gas:2024:STRUCTURALLY_INCOMPLETE",
+    "CROSS_BIND:gas:2026:STRUCTURALLY_INCOMPLETE",
+    "CROSS_BIND:insurance:2024:STRUCTURALLY_INCOMPLETE",
+    "CROSS_BIND:insurance:2026:STRUCTURALLY_INCOMPLETE",
+    "CROSS_BIND:maintenance:2024:STRUCTURALLY_INCOMPLETE",
+    "CROSS_BIND:maintenance:2026:STRUCTURALLY_INCOMPLETE",
+    "CROSS_BIND:registration:2024:STRUCTURALLY_INCOMPLETE",
+    "CROSS_BIND:registration:2026:STRUCTURALLY_INCOMPLETE",
+    "CROSS_BIND:replacement:2024:STRUCTURALLY_INCOMPLETE",
+    "CROSS_BIND:replacement:2026:STRUCTURALLY_INCOMPLETE",
+    "CROSS_BIND:connectivity:2024:STRUCTURALLY_INCOMPLETE",
+    "CROSS_BIND:connectivity:2026:STRUCTURALLY_INCOMPLETE",
+    "CROSS_BIND:essentials:2024:STRUCTURALLY_INCOMPLETE",
+    "CROSS_BIND:essentials:2026:STRUCTURALLY_INCOMPLETE",
+    "CROSS_BIND:recreation:2024:STRUCTURALLY_INCOMPLETE",
+    "CROSS_BIND:recreation:2026:STRUCTURALLY_INCOMPLETE",
+    "CROSS_BIND:rpp:2024:STRUCTURALLY_INCOMPLETE",
+    "CROSS_BIND:rpp:2026:STRUCTURALLY_INCOMPLETE",
+    "CROSS_BIND:federal_tax:2024:STRUCTURALLY_INCOMPLETE",
+    "CROSS_BIND:federal_tax:2026:STRUCTURALLY_INCOMPLETE",
+    "CROSS_BIND:state_tax:2024:STRUCTURALLY_INCOMPLETE",
+    "CROSS_BIND:state_tax:2026:STRUCTURALLY_INCOMPLETE",
+    "CROSS_BIND:local_tax:2024:STRUCTURALLY_INCOMPLETE",
+    "CROSS_BIND:local_tax:2026:STRUCTURALLY_INCOMPLETE",
+    "OD010_CROSS_BIND:OD010_SERIES_COVERAGE_TOO_VAGUE",
+    "OD010_CROSS_BIND:OD010_TABLE_ABSENT",
     "cms_marketplace_sbe:CHECK_FAILED",
     "meps_full_year_consolidated:RETRIEVED_UNVALIDATED",
     "nhts_mileage:CHECK_FAILED",

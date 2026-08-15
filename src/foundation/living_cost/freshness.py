@@ -119,6 +119,7 @@ class FreshnessCheck:
     artifact_currentness_status: str | None = None
     selected_artifact_matches_latest: bool | None = None
     year_coverage: dict[str, Any] | None = None
+    series_coverage: dict[str, Any] | None = None
     extra: dict[str, Any] | None = field(default=None)
 
     def to_dict(self) -> dict[str, Any]:
@@ -185,9 +186,11 @@ def living_cost_release_authorized() -> bool:
 
 
 def is_translation_index_bound() -> bool:
-    """True only when required CPI_UPDATED component/year records are complete.
+    """Structural OD-010 table completeness only.
 
-    A manually written {"bound": true, "series": {"foo": "..."}} does not bind.
+    Readiness context translation_index_bound is this AND a successful
+    live od010_price_index series cross-bind. A manually written
+    {"bound": true, "series": {"foo": "..."}} does not bind.
     """
     from foundation.living_cost.candidate_bindings import od010_translation_is_bound
 
@@ -448,6 +451,7 @@ def _authorizing_family_state(check: Mapping[str, Any]) -> dict[str, Any]:
         "artifact_currentness_status": check.get("artifact_currentness_status"),
         "selected_artifact_matches_latest": check.get("selected_artifact_matches_latest"),
         "year_coverage": check.get("year_coverage"),
+        "series_coverage": check.get("series_coverage"),
         "input_evidence_status": check.get("input_evidence_status"),
         "transformation_method": check.get("transformation_method"),
     }
@@ -461,6 +465,7 @@ def authorizing_state_core(context: Mapping[str, Any]) -> dict[str, Any]:
     }
     cand = dict(context.get("candidate_input_binding_identity") or {})
     od010 = dict(context.get("od010_binding_identity") or {})
+    od010_cross = dict(context.get("od010_cross_binding") or {})
     return {
         "generated_at": context.get("generated_at"),
         "required_project_cost_years": context.get("required_project_cost_years"),
@@ -481,6 +486,12 @@ def authorizing_state_core(context: Mapping[str, Any]) -> dict[str, Any]:
             "required": od010.get("required"),
             "missing": od010.get("missing"),
             "normalized": od010.get("normalized"),
+        },
+        "od010_cross_binding": {
+            "ok": od010_cross.get("ok"),
+            "issues": od010_cross.get("issues"),
+            "required": od010_cross.get("required"),
+            "normalized": od010_cross.get("normalized"),
         },
     }
 
@@ -512,6 +523,7 @@ def build_live_readiness_context(
         load_source_lag,
         translation_binding_identity,
         validate_candidate_bindings_against_snapshot,
+        validate_od010_bindings_against_snapshot,
     )
 
     if SOURCE_COVERAGE.exists():
@@ -563,6 +575,7 @@ def build_live_readiness_context(
     cross = validate_candidate_bindings_against_snapshot(
         candidate_payload, checks, years=years, od010_payload=od010_payload
     )
+    od010_cross = validate_od010_bindings_against_snapshot(od010_payload, checks, years=years)
     return {
         "generated_at": generated_at or _now_iso(),
         "required_project_cost_years": list(years),
@@ -573,10 +586,11 @@ def build_live_readiness_context(
         "od010_payload": od010_payload,
         "od010_evaluation": od010_eval,
         "od010_binding_identity": od010_ident,
+        "od010_cross_binding": od010_cross,
         "cross_binding": cross,
         "candidate_calculation_authorized": candidate_calculation_authorized(),
         "living_cost_release_authorized": living_cost_release_authorized(),
-        "translation_index_bound": od010_eval["bound"] is True,
+        "translation_index_bound": od010_eval["bound"] is True and od010_cross["ok"] is True,
         "candidate_inputs_bound": cand_eval["bound"] is True and cross["ok"] is True,
         "silent_source_year_relabel": detect_silent_source_year_relabel(dict(checks)),
         "calculates_mslc": False,
@@ -671,6 +685,7 @@ def future_candidate_result_contract_fields() -> dict[str, Any]:
         "freshness_run_id": True,
         "candidate_input_binding_identity": True,
         "od010_binding_identity": True,
+        "od010_cross_binding": True,
         "must_not_reload_bindings_after_readiness": True,
         "if_binding_file_changes": "run readiness again",
     }
@@ -750,6 +765,9 @@ def _evaluate_freshness_readiness_from_context(context: Mapping[str, Any]) -> di
     cross = context.get("cross_binding") or {}
     for issue in cross.get("issues") or []:
         blocking.append(f"CROSS_BIND:{issue}")
+    od010_cross = context.get("od010_cross_binding") or {}
+    for issue in od010_cross.get("issues") or []:
+        blocking.append(f"OD010_CROSS_BIND:{issue}")
     for family in REQUIRED_FRESHNESS_FAMILIES:
         check = checks.get(family)
         if check is None:
@@ -818,6 +836,7 @@ def _evaluate_freshness_readiness_from_context(context: Mapping[str, Any]) -> di
         "headline_calculated": False,
         "authorization_source": "config/definitions.yml",
         "cross_binding": context.get("cross_binding"),
+        "od010_cross_binding": context.get("od010_cross_binding"),
     }
 
 
@@ -929,7 +948,7 @@ def write_candidate_freshness_report(metadata_dir: Path) -> dict[str, Any]:
     payload = {
         "report_type": "living_cost_candidate_freshness",
         "generated_at": snapshot["generated_at"],
-        "schema_version": "2.3",
+        "schema_version": "2.4",
         "calculates_mslc": False,
         "freshness_run_id": snapshot["freshness_run_id"],
         "required_families": list(REQUIRED_FRESHNESS_FAMILIES),
@@ -938,6 +957,7 @@ def write_candidate_freshness_report(metadata_dir: Path) -> dict[str, Any]:
         "candidate_input_binding_identity": snapshot["candidate_input_binding_identity"],
         "future_candidate_must_record": snapshot.get("future_candidate_must_record"),
         "cross_binding": snapshot.get("cross_binding"),
+        "od010_cross_binding": snapshot.get("od010_cross_binding"),
         **{
             key: snapshot[key]
             for key in (
