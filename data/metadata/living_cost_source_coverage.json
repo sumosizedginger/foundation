@@ -1,6 +1,6 @@
 {
   "report_type": "living_cost_source_coverage",
-  "generated_at": "2026-08-18T19:16:47+00:00",
+  "generated_at": "2026-08-18T20:48:40+00:00",
   "question": "What still prevents the living-cost model from being calculated?",
   "required_components": [
     "housing",
@@ -33,7 +33,7 @@
       "mileage": "VALIDATED",
       "mpg": "MODELED_FROM_MEASURED_INPUTS",
       "gas": "VALIDATED",
-      "insurance": "RETRIEVED_UNVALIDATED",
+      "insurance": "VALIDATED",
       "maintenance": "INCOMPLETE_PROVENANCE",
       "registration": "SOURCE_GAP",
       "replacement": "FORMULA_FROZEN_INPUTS_PENDING",
@@ -41,7 +41,7 @@
       "essentials": "INCOMPLETE_PROVENANCE",
       "recreation": "INCOMPLETE_PROVENANCE",
       "rpp": "VALIDATED",
-      "federal_tax": "INVENTORY_NOT_VALIDATED",
+      "federal_tax": "VALIDATED",
       "state_tax": "SOURCE_GAP",
       "local_tax": "SOURCE_GAP"
     },
@@ -54,7 +54,7 @@
       "mileage": "VALIDATED",
       "mpg": "MODELED_FROM_MEASURED_INPUTS",
       "gas": "VALIDATED",
-      "insurance": "RETRIEVED_UNVALIDATED",
+      "insurance": "VALIDATED",
       "maintenance": "INCOMPLETE_PROVENANCE",
       "registration": "SOURCE_GAP",
       "replacement": "FORMULA_FROZEN_INPUTS_PENDING",
@@ -62,7 +62,7 @@
       "essentials": "INCOMPLETE_PROVENANCE",
       "recreation": "INCOMPLETE_PROVENANCE",
       "rpp": "VALIDATED",
-      "federal_tax": "INVENTORY_NOT_VALIDATED",
+      "federal_tax": "VALIDATED",
       "state_tax": "SOURCE_GAP",
       "local_tax": "SOURCE_GAP"
     }
@@ -1018,7 +1018,7 @@
           "methodology_status": "FROZEN"
         },
         "insurance": {
-          "evidence_status": "RETRIEVED_UNVALIDATED",
+          "evidence_status": "VALIDATED",
           "methodology_status": "FROZEN"
         },
         "maintenance": {
@@ -1096,7 +1096,7 @@
           "methodology_status": "FROZEN"
         },
         "insurance": {
-          "evidence_status": "RETRIEVED_UNVALIDATED",
+          "evidence_status": "VALIDATED",
           "methodology_status": "FROZEN"
         },
         "maintenance": {
@@ -1143,24 +1143,20 @@
     }
   },
   "blocking_components": [
-    "2024:insurance:RETRIEVED_UNVALIDATED",
     "2024:maintenance:INCOMPLETE_PROVENANCE",
     "2024:registration:SOURCE_GAP",
     "2024:replacement:FORMULA_FROZEN_INPUTS_PENDING",
     "2024:connectivity:SOURCE_GAP",
     "2024:essentials:INCOMPLETE_PROVENANCE",
     "2024:recreation:INCOMPLETE_PROVENANCE",
-    "2024:federal_tax:INVENTORY_NOT_VALIDATED",
     "2024:state_tax:SOURCE_GAP",
     "2024:local_tax:SOURCE_GAP",
-    "2026:insurance:RETRIEVED_UNVALIDATED",
     "2026:maintenance:INCOMPLETE_PROVENANCE",
     "2026:registration:SOURCE_GAP",
     "2026:replacement:FORMULA_FROZEN_INPUTS_PENDING",
     "2026:connectivity:SOURCE_GAP",
     "2026:essentials:INCOMPLETE_PROVENANCE",
     "2026:recreation:INCOMPLETE_PROVENANCE",
-    "2026:federal_tax:INVENTORY_NOT_VALIDATED",
     "2026:state_tax:SOURCE_GAP",
     "2026:local_tax:SOURCE_GAP"
   ],

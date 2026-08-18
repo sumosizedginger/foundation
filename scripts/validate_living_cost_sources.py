@@ -15,11 +15,15 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+import requests
+
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 from foundation.living_cost.evidence_validators import (
     epa_evidence_status,
+    federal_tax_evidence_status,
     meps_evidence_status,
+    naic_evidence_status,
 )
 from foundation.living_cost.freshness import (
     BLOCKER_NOTES,
@@ -448,7 +452,7 @@ def _upgrade_parsed_artifacts(
             elif art.source_id.startswith("naic_auto_ins_"):
                 upgraded[i] = replace(
                     art,
-                    validation_status="RETRIEVED_UNVALIDATED"
+                    validation_status=naic_evidence_status()
                     if art.sha256
                     else art.validation_status,
                 )
@@ -570,6 +574,8 @@ def _component_status(artifacts: list[RetrievedSourceArtifact], *source_ids: str
 def write_coverage(artifacts: list[RetrievedSourceArtifact]) -> dict:
     meps_status = meps_evidence_status()
     epa_status = epa_evidence_status()
+    naic_status = naic_evidence_status()
+    federal_tax_status = federal_tax_evidence_status()
     coverage_by_year: dict[str, dict[str, str]] = {}
     for year in (2024, 2026):
         coverage_by_year[str(year)] = {
@@ -602,7 +608,11 @@ def write_coverage(artifacts: list[RetrievedSourceArtifact]) -> dict:
                 )
             ),
             "gas": _component_status(artifacts, f"eia_gas_price_{year}"),
-            "insurance": _component_status(artifacts, f"naic_auto_ins_{year}"),
+            "insurance": (
+                naic_status
+                if naic_status == "VALIDATED"
+                else _component_status(artifacts, f"naic_auto_ins_{year}")
+            ),
             "maintenance": "INCOMPLETE_PROVENANCE",
             "registration": "SOURCE_GAP",
             "replacement": "FORMULA_FROZEN_INPUTS_PENDING",
@@ -624,7 +634,7 @@ def write_coverage(artifacts: list[RetrievedSourceArtifact]) -> dict:
             if _component_status(artifacts, f"bls_ce_{year}") == "VALIDATED"
             else _component_status(artifacts, f"bls_ce_{year}"),
             "rpp": _component_status(artifacts, f"bea_rpp_{year}"),
-            "federal_tax": "INVENTORY_NOT_VALIDATED",
+            "federal_tax": federal_tax_status,
             "state_tax": "SOURCE_GAP",
             "local_tax": "SOURCE_GAP",
         }
@@ -899,6 +909,7 @@ def main() -> int:
     generate_source_manifest(all_artifacts, manifest_path)
     logger.info("Source manifest generated at %s", manifest_path)
 
+    write_naic_and_federal_evidence()
     coverage = write_coverage(all_artifacts)
     assert_official_eia_year_coverage(coverage.get("eia_year_coverage") or {})
     from foundation.living_cost.freshness import write_candidate_freshness_report
@@ -916,6 +927,53 @@ def main() -> int:
     )
     logger.info("Validation complete. No living-cost headline was calculated.")
     return 0
+
+
+def write_naic_and_federal_evidence() -> None:
+    """Derive NAIC Table 5 and federal-tax inventory. No MSLC."""
+    from foundation.living_cost.freshness_currentness import (
+        parse_naic_report_identifiers,
+        select_latest_naic_report,
+    )
+    from foundation.living_cost.freshness_discovery import fetch_text
+    from foundation.sources.acquisition import read_retrieval_sidecar
+    from foundation.sources.federal_tax import write_federal_tax_inventory
+    from foundation.sources.naic_report import (
+        NAIC_LANDING,
+        NAIC_NEWS_URL,
+        NAIC_REPORT_URL,
+        parse_naic_news_national_premium,
+        selected_naic_pdf_sha256,
+        write_naic_derivation_report,
+    )
+
+    pdf = CACHE_DIR / "publication-aut-pb-auto-insurance-database.pdf"
+    sha = selected_naic_pdf_sha256(pdf)
+    sidecar = read_retrieval_sidecar(pdf) or {}
+    listing_id = "AUT-PB 2022-2023"
+    news_national = None
+    try:
+        html, _checked = fetch_text(NAIC_LANDING)
+        latest = select_latest_naic_report(parse_naic_report_identifiers(html))
+        if latest is not None:
+            listing_id = latest.display_identifier
+    except (OSError, RuntimeError, ValueError, requests.RequestException) as exc:
+        logger.warning("NAIC listing retrieve failed during evidence write: %s", exc)
+    try:
+        news_html, _ = fetch_text(NAIC_NEWS_URL)
+        news_national = parse_naic_news_national_premium(news_html)
+    except (OSError, RuntimeError, ValueError, requests.RequestException) as exc:
+        logger.warning("NAIC news retrieve failed: %s", exc)
+    write_naic_derivation_report(
+        pdf,
+        publication_identifier=listing_id,
+        listing_identifier=listing_id,
+        selected_sha=sha,
+        retrieved_at=str(sidecar.get("retrieved_at") or ""),
+        resolved_url=str(sidecar.get("url") or NAIC_REPORT_URL),
+        news_national=news_national,
+    )
+    write_federal_tax_inventory()
 
 
 def write_correction_side_reports() -> None:
@@ -1071,12 +1129,13 @@ def write_tax_coverage() -> None:
     payload = {
         "report_type": "living_cost_tax_coverage",
         "generated_at": datetime.now(UTC).replace(microsecond=0).isoformat(),
-        "federal_2024_validated_tables": False,
+        "federal_2024_validated_tables": federal_tax_evidence_status() == "VALIDATED",
         "federal_validation_gate": (
-            "Boundary tests exist in tests/test_living_cost.py but IRS source PDFs "
-            "are not retrieved/parsed, so federal_tax is not VALIDATED."
+            "Federal tax is VALIDATED only when IRS/SSA authorities are bound and "
+            "FEDERAL_TAX_RULES match living_cost_federal_tax_inventory.json."
         ),
-        "federal_2026_values_match_rev_proc_2025_32": True,
+        "federal_tax_evidence_status": federal_tax_evidence_status(),
+        "federal_2026_values_match_rev_proc_2025_32": federal_tax_evidence_status() == "VALIDATED",
         "local_tax_classes": {
             "A": "geography is coterminous / tax applies throughout modeled county-equivalent; direct overlay may be appropriate",
             "B": "tax is county-level; direct overlay may be appropriate",
@@ -1116,8 +1175,12 @@ def write_transport_coverage() -> None:
                 "note": "PADD/regional is not state-measured.",
             },
             "insurance": {
-                "status": "RETRIEVED_UNVALIDATED",
-                "note": "Official free NAIC 2022/2023 Auto Insurance Database Report retrieved. redistribution_status=FREE_DOWNLOAD_REDISTRIBUTION_UNCONFIRMED. OD-006 FROZEN: combined average premium is canonical.",
+                "status": naic_evidence_status(),
+                "note": (
+                    "NAIC Auto Insurance Database Report Table 5 Combined Average "
+                    "Premium is VALIDATED only when the derivation binds to selected "
+                    "PDF bytes. OD-006 FROZEN: combined average premium is canonical."
+                ),
             },
             "maintenance": {
                 "evidence_status": "INCOMPLETE_PROVENANCE",

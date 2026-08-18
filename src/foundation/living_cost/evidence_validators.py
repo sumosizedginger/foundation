@@ -242,3 +242,222 @@ def epa_evidence_status(
     selected_sha: str | None = None,
 ) -> str:
     return validate_epa_cohorts(report_path, selected_sha=selected_sha).evidence_status
+
+
+NAIC_CACHE_NAME = "publication-aut-pb-auto-insurance-database.pdf"
+NAIC_DERIVATION_PATH = METADATA_DIR / "living_cost_naic_auto_insurance.json"
+NAIC_REPORT_TYPE = "living_cost_naic_auto_insurance"
+NAIC_VALIDATED = "VALIDATED"
+NAIC_NOT_VALIDATED = "RETRIEVED_UNVALIDATED"
+FEDERAL_TAX_INVENTORY_PATH = METADATA_DIR / "living_cost_federal_tax_inventory.json"
+FEDERAL_TAX_REPORT_TYPE = "living_cost_federal_tax_inventory"
+FEDERAL_TAX_VALIDATED = "VALIDATED"
+FEDERAL_TAX_NOT_VALIDATED = "INVENTORY_NOT_VALIDATED"
+
+
+def validate_naic_derivation(
+    report_path: Path | None = None,
+    *,
+    selected_sha: str | None = None,
+) -> EvidenceValidation:
+    """NAIC is VALIDATED only when Table 5 binds to selected PDF bytes."""
+    from foundation.sources.naic_report import US_STATE_NAMES
+
+    path = report_path or NAIC_DERIVATION_PATH
+    issues: list[str] = []
+    payload = _load_json(path)
+    if payload is None:
+        return EvidenceValidation(False, NAIC_NOT_VALIDATED, ["NAIC_DERIVATION_UNREADABLE"])
+    if payload.get("report_type") != NAIC_REPORT_TYPE:
+        issues.append("NAIC_REPORT_TYPE_INVALID")
+    if payload.get("canonical_measure") != "combined_average_premium":
+        issues.append("NAIC_CANONICAL_MEASURE_INVALID")
+    if payload.get("calculates_mslc") is True:
+        issues.append("NAIC_CLAIMS_MSLC")
+    expected_sha = selected_sha if selected_sha is not None else selected_cache_sha(NAIC_CACHE_NAME)
+    report_sha = payload.get("sha256")
+    if not isinstance(report_sha, str) or not report_sha:
+        issues.append("NAIC_REPORT_SHA_MISSING")
+    elif not expected_sha:
+        issues.append("NAIC_SELECTED_PDF_SHA_MISSING")
+    elif report_sha != expected_sha:
+        issues.append("NAIC_REPORT_SHA_MISMATCH")
+    if payload.get("pdf_identifier_bound") is not True:
+        issues.append("NAIC_PDF_NOT_IDENTIFIER_BOUND")
+    ident = payload.get("publication_identifier")
+    listing = payload.get("listing_identifier")
+    if not ident or ident != listing:
+        issues.append("NAIC_LISTING_IDENTIFIER_MISMATCH")
+    if payload.get("source_data_year") != (payload.get("data_year_range") or {}).get("end"):
+        issues.append("NAIC_SOURCE_DATA_YEAR_INVALID")
+    rows = payload.get("jurisdictions")
+    if not isinstance(rows, list) or not rows:
+        issues.append("NAIC_JURISDICTIONS_MISSING")
+        rows = []
+    states: list[str] = []
+    for rec in rows:
+        if not isinstance(rec, dict):
+            issues.append("NAIC_ROW_INVALID")
+            continue
+        st = rec.get("state")
+        if not isinstance(st, str):
+            issues.append("NAIC_STATE_INVALID")
+            continue
+        states.append(st)
+        prem = rec.get("combined_average_premium")
+        if not _positive_number(prem):
+            issues.append(f"NAIC_PREMIUM_INVALID:{st}")
+        if rec.get("source_artifact_sha256") != report_sha:
+            issues.append(f"NAIC_ROW_SHA_MISMATCH:{st}")
+    if len(states) != len(set(states)):
+        issues.append("NAIC_DUPLICATE_STATES")
+    if set(states) != set(US_STATE_NAMES.values()):
+        issues.append("NAIC_STATE_SET_INCOMPLETE")
+    national = payload.get("national")
+    if not isinstance(national, dict) or not _positive_number(
+        national.get("combined_average_premium")
+    ):
+        issues.append("NAIC_NATIONAL_ROW_MISSING")
+    elif national.get("not_state_average") is not True:
+        issues.append("NAIC_NATIONAL_NOT_MARKED_SEPARATE")
+    release = payload.get("official_release_national_combined_average_premium")
+    if isinstance(national, dict) and isinstance(release, (int, float)):
+        pdf_nat = national.get("combined_average_premium")
+        if _positive_number(pdf_nat) and abs(round(float(pdf_nat)) - round(float(release))) > 1:
+            issues.append("NAIC_NATIONAL_RELEASE_MISMATCH")
+    if payload.get("validation_ok") is not True:
+        issues.append("NAIC_VALIDATION_FLAG_FALSE")
+    ok = not issues
+    return EvidenceValidation(ok, NAIC_VALIDATED if ok else NAIC_NOT_VALIDATED, issues, payload)
+
+
+def _brackets_match(code_brackets: list[Any], inventory_brackets: list[Any]) -> bool:
+    if len(code_brackets) != len(inventory_brackets):
+        return False
+    for code, inv in zip(code_brackets, inventory_brackets, strict=True):
+        code_upper, code_rate = code
+        inv_upper = inv.get("upper")
+        inv_rate = inv.get("rate")
+        if abs(float(code_rate) - float(inv_rate)) > 1e-12:
+            return False
+        if code_upper == float("inf"):
+            if inv_upper is not None:
+                return False
+        elif inv_upper is None or abs(float(code_upper) - float(inv_upper)) > 0.01:
+            return False
+    return True
+
+
+def validate_federal_tax_inventory(
+    report_path: Path | None = None,
+) -> EvidenceValidation:
+    """Federal tax is VALIDATED only when code tables match bound IRS/SSA inventory."""
+    from foundation.living_cost.taxes import FEDERAL_TAX_RULES
+
+    path = report_path or FEDERAL_TAX_INVENTORY_PATH
+    issues: list[str] = []
+    payload = _load_json(path)
+    if payload is None:
+        return EvidenceValidation(
+            False, FEDERAL_TAX_NOT_VALIDATED, ["FEDERAL_TAX_INVENTORY_UNREADABLE"]
+        )
+    if payload.get("report_type") != FEDERAL_TAX_REPORT_TYPE:
+        issues.append("FEDERAL_TAX_REPORT_TYPE_INVALID")
+    if payload.get("calculates_mslc") is True:
+        issues.append("FEDERAL_TAX_CLAIMS_MSLC")
+    years = payload.get("years")
+    if not isinstance(years, dict):
+        return EvidenceValidation(
+            False, FEDERAL_TAX_NOT_VALIDATED, issues + ["FEDERAL_TAX_YEARS_MISSING"], payload
+        )
+    artifacts = payload.get("retrieved_artifacts") or []
+    hashed = [a for a in artifacts if isinstance(a, dict) and a.get("sha256") and a.get("http_ok")]
+    if len(hashed) < 2:
+        issues.append("FEDERAL_TAX_AUTHORITIES_NOT_BOUND")
+    for year in (2024, 2026):
+        rec = years.get(str(year))
+        if not isinstance(rec, dict):
+            issues.append(f"FEDERAL_TAX_YEAR_MISSING:{year}")
+            continue
+        if rec.get("parsed_ok") is not True or rec.get("issues"):
+            issues.append(f"FEDERAL_TAX_YEAR_UNPARSED:{year}:{rec.get('issues')}")
+        if year not in FEDERAL_TAX_RULES:
+            issues.append(f"FEDERAL_TAX_CODE_YEAR_MISSING:{year}")
+            continue
+        rules = FEDERAL_TAX_RULES[year]
+        std = (rec.get("standard_deduction") or {}).get("value")
+        if std is None or abs(float(rules["standard_deduction"]) - float(std)) > 0.01:
+            issues.append(f"FEDERAL_TAX_RULES_MISMATCH:{year}:standard_deduction")
+        oasdi = rec.get("oasdi") or {}
+        if (
+            oasdi.get("employee_rate") is None
+            or abs(float(rules["ss_tax_rate"]) - float(oasdi["employee_rate"])) > 1e-12
+        ):
+            issues.append(f"FEDERAL_TAX_RULES_MISMATCH:{year}:oasdi_rate")
+        if (
+            oasdi.get("taxable_maximum") is None
+            or abs(float(rules["ss_wage_cap"]) - float(oasdi["taxable_maximum"])) > 0.01
+        ):
+            issues.append(f"FEDERAL_TAX_RULES_MISMATCH:{year}:oasdi_cap")
+        hi = rec.get("medicare_hi") or {}
+        if (
+            hi.get("employee_rate") is None
+            or abs(float(rules["medicare_rate"]) - float(hi["employee_rate"])) > 1e-12
+        ):
+            issues.append(f"FEDERAL_TAX_RULES_MISMATCH:{year}:medicare_rate")
+        if hi.get("no_limit") is not True:
+            issues.append(f"FEDERAL_TAX_RULES_MISMATCH:{year}:medicare_cap")
+        addl = rec.get("additional_medicare_tax") or {}
+        if addl.get("applicable") is not True:
+            issues.append(
+                f"FEDERAL_TAX_MODEL_GAP:{year}:additional_medicare_missing_from_inventory"
+            )
+        else:
+            code_rate = rules.get("additional_medicare_rate")
+            code_thr = rules.get("additional_medicare_threshold")
+            if code_rate is None or code_thr is None:
+                issues.append(
+                    f"FEDERAL_TAX_MODEL_GAP:{year}:additional_medicare "
+                    f"threshold={addl.get('threshold')} rate={addl.get('rate')} "
+                    "existing=omitted required=IRC_3101(b)(2)"
+                )
+            else:
+                if abs(float(code_rate) - float(addl.get("rate") or 0)) > 1e-12:
+                    issues.append(f"FEDERAL_TAX_RULES_MISMATCH:{year}:additional_medicare_rate")
+                if abs(float(code_thr) - float(addl.get("threshold") or 0)) > 0.01:
+                    issues.append(
+                        f"FEDERAL_TAX_RULES_MISMATCH:{year}:additional_medicare_threshold"
+                    )
+        inv_br = rec.get("income_tax_brackets") or []
+        if not _brackets_match(list(rules["brackets"]), inv_br):
+            issues.append(f"FEDERAL_TAX_RULES_MISMATCH:{year}:brackets")
+    if 2025 in FEDERAL_TAX_RULES:
+        issues.append("FEDERAL_TAX_UNSUPPORTED_YEAR_PRESENT:2025")
+    ok = not issues
+    return EvidenceValidation(
+        ok, FEDERAL_TAX_VALIDATED if ok else FEDERAL_TAX_NOT_VALIDATED, issues, payload
+    )
+
+
+def naic_derivation_is_valid(
+    report_path: Path | None = None,
+    *,
+    selected_sha: str | None = None,
+) -> bool:
+    return validate_naic_derivation(report_path, selected_sha=selected_sha).ok
+
+
+def naic_evidence_status(
+    report_path: Path | None = None,
+    *,
+    selected_sha: str | None = None,
+) -> str:
+    return validate_naic_derivation(report_path, selected_sha=selected_sha).evidence_status
+
+
+def federal_tax_inventory_is_valid(report_path: Path | None = None) -> bool:
+    return validate_federal_tax_inventory(report_path).ok
+
+
+def federal_tax_evidence_status(report_path: Path | None = None) -> str:
+    return validate_federal_tax_inventory(report_path).evidence_status

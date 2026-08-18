@@ -5,7 +5,7 @@ Solves for gross required income G such that:
 
 Calculates:
 - Employee Social Security Tax (6.2% up to statutory cap)
-- Employee Medicare Tax (1.45%)
+- Employee Medicare Tax (1.45% on all wages plus Additional Medicare 0.9% above the statutory single threshold)
 - Federal Statutory Income Tax (incorporating single standard deduction & marginal brackets)
 - State Statutory Income Tax (explicit year-specific 2024 and 2026 statutory configurations for all 50 states + DC)
 - Local County/Municipal Income Tax attached to specific county FIPS
@@ -25,6 +25,8 @@ FEDERAL_TAX_RULES = {
         "ss_tax_rate": 0.062,
         "ss_wage_cap": 168600.0,
         "medicare_rate": 0.0145,
+        "additional_medicare_rate": 0.009,
+        "additional_medicare_threshold": 200000.0,
         "brackets": [
             (11600.0, 0.10),
             (47150.0, 0.12),
@@ -41,6 +43,8 @@ FEDERAL_TAX_RULES = {
         "ss_tax_rate": 0.062,
         "ss_wage_cap": 184500.0,
         "medicare_rate": 0.0145,
+        "additional_medicare_rate": 0.009,
+        "additional_medicare_threshold": 200000.0,
         "brackets": [
             (12400.0, 0.10),
             (50400.0, 0.12),
@@ -863,6 +867,10 @@ def calculate_fica_taxes(gross: float, year: int = 2024) -> tuple[float, float]:
     ss_taxable = min(gross, rules["ss_wage_cap"])
     ss_tax = ss_taxable * rules["ss_tax_rate"]
     medicare_tax = gross * rules["medicare_rate"]
+    addl_rate = float(rules.get("additional_medicare_rate") or 0.0)
+    addl_threshold = rules.get("additional_medicare_threshold")
+    if addl_rate > 0 and isinstance(addl_threshold, (int, float)):
+        medicare_tax += max(0.0, gross - float(addl_threshold)) * addl_rate
     return ss_tax, medicare_tax
 
 

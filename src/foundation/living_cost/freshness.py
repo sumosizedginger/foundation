@@ -1073,7 +1073,9 @@ def stamp_source_coverage_from_current_truth(coverage_path: Path) -> dict[str, A
     coverage["blocker_notes"] = dict(BLOCKER_NOTES)
     from foundation.living_cost.evidence_validators import (
         epa_evidence_status,
+        federal_tax_evidence_status,
         meps_evidence_status,
+        naic_evidence_status,
     )
 
     required_blockers = {
@@ -1082,11 +1084,11 @@ def stamp_source_coverage_from_current_truth(coverage_path: Path) -> dict[str, A
         "maintenance": "INCOMPLETE_PROVENANCE",
         "essentials": "INCOMPLETE_PROVENANCE",
         "recreation": "INCOMPLETE_PROVENANCE",
-        "insurance": "RETRIEVED_UNVALIDATED",
+        "insurance": naic_evidence_status(),
         "registration": "SOURCE_GAP",
         "replacement": "FORMULA_FROZEN_INPUTS_PENDING",
         "connectivity": "SOURCE_GAP",
-        "federal_tax": "INVENTORY_NOT_VALIDATED",
+        "federal_tax": federal_tax_evidence_status(),
         "state_tax": "SOURCE_GAP",
         "local_tax": "SOURCE_GAP",
     }

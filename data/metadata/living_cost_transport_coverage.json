@@ -1,6 +1,6 @@
 {
   "report_type": "living_cost_transport_coverage",
-  "generated_at": "2026-08-18T17:24:54+00:00",
+  "generated_at": "2026-08-18T20:48:40+00:00",
   "components": {
     "mileage": {
       "status": "MEASURED_TRAVEL_BEHAVIOR",
@@ -17,8 +17,8 @@
       "note": "PADD/regional is not state-measured."
     },
     "insurance": {
-      "status": "RETRIEVED_UNVALIDATED",
-      "note": "Official free NAIC 2022/2023 Auto Insurance Database Report retrieved. redistribution_status=FREE_DOWNLOAD_REDISTRIBUTION_UNCONFIRMED. OD-006 FROZEN: combined average premium is canonical."
+      "status": "VALIDATED",
+      "note": "NAIC Auto Insurance Database Report Table 5 Combined Average Premium is VALIDATED only when the derivation binds to selected PDF bytes. OD-006 FROZEN: combined average premium is canonical."
     },
     "maintenance": {
       "evidence_status": "INCOMPLETE_PROVENANCE",

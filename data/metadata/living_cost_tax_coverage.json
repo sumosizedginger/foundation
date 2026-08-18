@@ -1,8 +1,9 @@
 {
   "report_type": "living_cost_tax_coverage",
-  "generated_at": "2026-08-14T21:50:49+00:00",
-  "federal_2024_validated_tables": false,
-  "federal_validation_gate": "Boundary tests exist in tests/test_living_cost.py but IRS source PDFs are not retrieved/parsed, so federal_tax is not VALIDATED.",
+  "generated_at": "2026-08-18T20:48:40+00:00",
+  "federal_2024_validated_tables": true,
+  "federal_validation_gate": "Federal tax is VALIDATED only when IRS/SSA authorities are bound and FEDERAL_TAX_RULES match living_cost_federal_tax_inventory.json.",
+  "federal_tax_evidence_status": "VALIDATED",
   "federal_2026_values_match_rev_proc_2025_32": true,
   "local_tax_classes": {
     "A": "geography is coterminous / tax applies throughout modeled county-equivalent; direct overlay may be appropriate",

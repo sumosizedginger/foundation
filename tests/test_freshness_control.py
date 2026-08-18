@@ -252,14 +252,14 @@ def test_empirical_blockers_unchanged():
         row = coverage["coverage_by_year"][year]
         assert row["health_oop"] == "MODELED_FROM_MEASURED_INPUTS"
         assert row["mpg"] == "MODELED_FROM_MEASURED_INPUTS"
-        assert row["insurance"] == "RETRIEVED_UNVALIDATED"
+        assert row["insurance"] == "VALIDATED"
         assert row["maintenance"] == "INCOMPLETE_PROVENANCE"
         assert row["essentials"] == "INCOMPLETE_PROVENANCE"
         assert row["recreation"] == "INCOMPLETE_PROVENANCE"
         assert row["registration"] == "SOURCE_GAP"
         assert row["replacement"] == "FORMULA_FROZEN_INPUTS_PENDING"
         assert row["connectivity"] == "SOURCE_GAP"
-        assert row["federal_tax"] == "INVENTORY_NOT_VALIDATED"
+        assert row["federal_tax"] == "VALIDATED"
         assert row["state_tax"] == "SOURCE_GAP"
         assert row["local_tax"] == "SOURCE_GAP"
 

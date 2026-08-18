@@ -1,0 +1,1121 @@
+{
+  "report_type": "living_cost_naic_auto_insurance",
+  "generated_at": "2026-08-18T20:48:31+00:00",
+  "publisher": "National Association of Insurance Commissioners",
+  "report_title": "Auto Insurance Database Report",
+  "publication_identifier": "AUT-PB 2022-2023",
+  "listing_identifier": "AUT-PB 2022-2023",
+  "data_year_range": {
+    "start": 2022,
+    "end": 2023
+  },
+  "source_data_year": 2023,
+  "canonical_measure": "combined_average_premium",
+  "sensitivity_measure": "average_expenditure",
+  "landing_url": "https://content.naic.org/publications",
+  "resolved_url": "https://content.naic.org/sites/default/files/publication-aut-pb-auto-insurance-database.pdf",
+  "retrieved_at": "2026-08-14T20:19:04+00:00",
+  "sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+  "redistribution_status": "FREE_DOWNLOAD_REDISTRIBUTION_UNCONFIRMED",
+  "table_identity": {
+    "table_number": "Table 5",
+    "table_title": "Combined Average Premium",
+    "column_name": "Combined Average Premium",
+    "pages": [
+      3,
+      10,
+      30
+    ],
+    "unit": "USD_PER_INSURED_VEHICLE",
+    "data_year": 2023
+  },
+  "jurisdiction_count": 51,
+  "jurisdictions": [
+    {
+      "state": "AL",
+      "state_name": "Alabama",
+      "source_data_year": 2023,
+      "combined_average_premium": 1268.71,
+      "average_expenditure": 1081.24,
+      "publication_identifier": "AUT-PB 2022-2023",
+      "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+      "table_identity": {
+        "table_number": "Table 5",
+        "table_title": "Combined Average Premium, 2019-2023",
+        "column_name": "Combined Average Premium",
+        "pages": [
+          3,
+          10,
+          30
+        ],
+        "unit": "USD_PER_INSURED_VEHICLE"
+      },
+      "validation_status": "MEASURED"
+    },
+    {
+      "state": "AK",
+      "state_name": "Alaska",
+      "source_data_year": 2023,
+      "combined_average_premium": 1262.49,
+      "average_expenditure": 1112.96,
+      "publication_identifier": "AUT-PB 2022-2023",
+      "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+      "table_identity": {
+        "table_number": "Table 5",
+        "table_title": "Combined Average Premium, 2019-2023",
+        "column_name": "Combined Average Premium",
+        "pages": [
+          3,
+          10,
+          30
+        ],
+        "unit": "USD_PER_INSURED_VEHICLE"
+      },
+      "validation_status": "MEASURED"
+    },
+    {
+      "state": "AZ",
+      "state_name": "Arizona",
+      "source_data_year": 2023,
+      "combined_average_premium": 1504.59,
+      "average_expenditure": 1344.24,
+      "publication_identifier": "AUT-PB 2022-2023",
+      "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+      "table_identity": {
+        "table_number": "Table 5",
+        "table_title": "Combined Average Premium, 2019-2023",
+        "column_name": "Combined Average Premium",
+        "pages": [
+          3,
+          10,
+          30
+        ],
+        "unit": "USD_PER_INSURED_VEHICLE"
+      },
+      "validation_status": "MEASURED"
+    },
+    {
+      "state": "AR",
+      "state_name": "Arkansas",
+      "source_data_year": 2023,
+      "combined_average_premium": 1296.46,
+      "average_expenditure": 1050.52,
+      "publication_identifier": "AUT-PB 2022-2023",
+      "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+      "table_identity": {
+        "table_number": "Table 5",
+        "table_title": "Combined Average Premium, 2019-2023",
+        "column_name": "Combined Average Premium",
+        "pages": [
+          3,
+          10,
+          30
+        ],
+        "unit": "USD_PER_INSURED_VEHICLE"
+      },
+      "validation_status": "MEASURED"
+    },
+    {
+      "state": "CA",
+      "state_name": "California",
+      "source_data_year": 2023,
+      "combined_average_premium": 1417.94,
+      "average_expenditure": 1225.02,
+      "publication_identifier": "AUT-PB 2022-2023",
+      "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+      "table_identity": {
+        "table_number": "Table 5",
+        "table_title": "Combined Average Premium, 2019-2023",
+        "column_name": "Combined Average Premium",
+        "pages": [
+          3,
+          10,
+          30
+        ],
+        "unit": "USD_PER_INSURED_VEHICLE"
+      },
+      "validation_status": "MEASURED"
+    },
+    {
+      "state": "CO",
+      "state_name": "Colorado",
+      "source_data_year": 2023,
+      "combined_average_premium": 1655.3,
+      "average_expenditure": 1452.82,
+      "publication_identifier": "AUT-PB 2022-2023",
+      "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+      "table_identity": {
+        "table_number": "Table 5",
+        "table_title": "Combined Average Premium, 2019-2023",
+        "column_name": "Combined Average Premium",
+        "pages": [
+          3,
+          10,
+          30
+        ],
+        "unit": "USD_PER_INSURED_VEHICLE"
+      },
+      "validation_status": "MEASURED"
+    },
+    {
+      "state": "CT",
+      "state_name": "Connecticut",
+      "source_data_year": 2023,
+      "combined_average_premium": 1508.21,
+      "average_expenditure": 1393.9,
+      "publication_identifier": "AUT-PB 2022-2023",
+      "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+      "table_identity": {
+        "table_number": "Table 5",
+        "table_title": "Combined Average Premium, 2019-2023",
+        "column_name": "Combined Average Premium",
+        "pages": [
+          3,
+          10,
+          30
+        ],
+        "unit": "USD_PER_INSURED_VEHICLE"
+      },
+      "validation_status": "MEASURED"
+    },
+    {
+      "state": "DE",
+      "state_name": "Delaware",
+      "source_data_year": 2023,
+      "combined_average_premium": 1569.21,
+      "average_expenditure": 1462.03,
+      "publication_identifier": "AUT-PB 2022-2023",
+      "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+      "table_identity": {
+        "table_number": "Table 5",
+        "table_title": "Combined Average Premium, 2019-2023",
+        "column_name": "Combined Average Premium",
+        "pages": [
+          3,
+          10,
+          30
+        ],
+        "unit": "USD_PER_INSURED_VEHICLE"
+      },
+      "validation_status": "MEASURED"
+    },
+    {
+      "state": "DC",
+      "state_name": "District of Columbia",
+      "source_data_year": 2023,
+      "combined_average_premium": 1818.28,
+      "average_expenditure": 1676.99,
+      "publication_identifier": "AUT-PB 2022-2023",
+      "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+      "table_identity": {
+        "table_number": "Table 5",
+        "table_title": "Combined Average Premium, 2019-2023",
+        "column_name": "Combined Average Premium",
+        "pages": [
+          3,
+          10,
+          30
+        ],
+        "unit": "USD_PER_INSURED_VEHICLE"
+      },
+      "validation_status": "MEASURED"
+    },
+    {
+      "state": "FL",
+      "state_name": "Florida",
+      "source_data_year": 2023,
+      "combined_average_premium": 1993.81,
+      "average_expenditure": 1864.63,
+      "publication_identifier": "AUT-PB 2022-2023",
+      "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+      "table_identity": {
+        "table_number": "Table 5",
+        "table_title": "Combined Average Premium, 2019-2023",
+        "column_name": "Combined Average Premium",
+        "pages": [
+          3,
+          10,
+          30
+        ],
+        "unit": "USD_PER_INSURED_VEHICLE"
+      },
+      "validation_status": "MEASURED"
+    },
+    {
+      "state": "GA",
+      "state_name": "Georgia",
+      "source_data_year": 2023,
+      "combined_average_premium": 1746.32,
+      "average_expenditure": 1555.1,
+      "publication_identifier": "AUT-PB 2022-2023",
+      "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+      "table_identity": {
+        "table_number": "Table 5",
+        "table_title": "Combined Average Premium, 2019-2023",
+        "column_name": "Combined Average Premium",
+        "pages": [
+          3,
+          10,
+          30
+        ],
+        "unit": "USD_PER_INSURED_VEHICLE"
+      },
+      "validation_status": "MEASURED"
+    },
+    {
+      "state": "HI",
+      "state_name": "Hawaii",
+      "source_data_year": 2023,
+      "combined_average_premium": 998.04,
+      "average_expenditure": 888.07,
+      "publication_identifier": "AUT-PB 2022-2023",
+      "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+      "table_identity": {
+        "table_number": "Table 5",
+        "table_title": "Combined Average Premium, 2019-2023",
+        "column_name": "Combined Average Premium",
+        "pages": [
+          3,
+          10,
+          30
+        ],
+        "unit": "USD_PER_INSURED_VEHICLE"
+      },
+      "validation_status": "MEASURED"
+    },
+    {
+      "state": "ID",
+      "state_name": "Idaho",
+      "source_data_year": 2023,
+      "combined_average_premium": 981.01,
+      "average_expenditure": 863.91,
+      "publication_identifier": "AUT-PB 2022-2023",
+      "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+      "table_identity": {
+        "table_number": "Table 5",
+        "table_title": "Combined Average Premium, 2019-2023",
+        "column_name": "Combined Average Premium",
+        "pages": [
+          3,
+          10,
+          30
+        ],
+        "unit": "USD_PER_INSURED_VEHICLE"
+      },
+      "validation_status": "MEASURED"
+    },
+    {
+      "state": "IL",
+      "state_name": "Illinois",
+      "source_data_year": 2023,
+      "combined_average_premium": 1256.58,
+      "average_expenditure": 1153.11,
+      "publication_identifier": "AUT-PB 2022-2023",
+      "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+      "table_identity": {
+        "table_number": "Table 5",
+        "table_title": "Combined Average Premium, 2019-2023",
+        "column_name": "Combined Average Premium",
+        "pages": [
+          3,
+          10,
+          30
+        ],
+        "unit": "USD_PER_INSURED_VEHICLE"
+      },
+      "validation_status": "MEASURED"
+    },
+    {
+      "state": "IN",
+      "state_name": "Indiana",
+      "source_data_year": 2023,
+      "combined_average_premium": 1031.86,
+      "average_expenditure": 926.41,
+      "publication_identifier": "AUT-PB 2022-2023",
+      "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+      "table_identity": {
+        "table_number": "Table 5",
+        "table_title": "Combined Average Premium, 2019-2023",
+        "column_name": "Combined Average Premium",
+        "pages": [
+          3,
+          10,
+          30
+        ],
+        "unit": "USD_PER_INSURED_VEHICLE"
+      },
+      "validation_status": "MEASURED"
+    },
+    {
+      "state": "IA",
+      "state_name": "Iowa",
+      "source_data_year": 2023,
+      "combined_average_premium": 1010.4,
+      "average_expenditure": 872.61,
+      "publication_identifier": "AUT-PB 2022-2023",
+      "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+      "table_identity": {
+        "table_number": "Table 5",
+        "table_title": "Combined Average Premium, 2019-2023",
+        "column_name": "Combined Average Premium",
+        "pages": [
+          3,
+          10,
+          30
+        ],
+        "unit": "USD_PER_INSURED_VEHICLE"
+      },
+      "validation_status": "MEASURED"
+    },
+    {
+      "state": "KS",
+      "state_name": "Kansas",
+      "source_data_year": 2023,
+      "combined_average_premium": 1181.69,
+      "average_expenditure": 972.57,
+      "publication_identifier": "AUT-PB 2022-2023",
+      "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+      "table_identity": {
+        "table_number": "Table 5",
+        "table_title": "Combined Average Premium, 2019-2023",
+        "column_name": "Combined Average Premium",
+        "pages": [
+          3,
+          10,
+          30
+        ],
+        "unit": "USD_PER_INSURED_VEHICLE"
+      },
+      "validation_status": "MEASURED"
+    },
+    {
+      "state": "KY",
+      "state_name": "Kentucky",
+      "source_data_year": 2023,
+      "combined_average_premium": 1208.29,
+      "average_expenditure": 1045.66,
+      "publication_identifier": "AUT-PB 2022-2023",
+      "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+      "table_identity": {
+        "table_number": "Table 5",
+        "table_title": "Combined Average Premium, 2019-2023",
+        "column_name": "Combined Average Premium",
+        "pages": [
+          3,
+          10,
+          30
+        ],
+        "unit": "USD_PER_INSURED_VEHICLE"
+      },
+      "validation_status": "MEASURED"
+    },
+    {
+      "state": "LA",
+      "state_name": "Louisiana",
+      "source_data_year": 2023,
+      "combined_average_premium": 1982.65,
+      "average_expenditure": 1754.03,
+      "publication_identifier": "AUT-PB 2022-2023",
+      "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+      "table_identity": {
+        "table_number": "Table 5",
+        "table_title": "Combined Average Premium, 2019-2023",
+        "column_name": "Combined Average Premium",
+        "pages": [
+          3,
+          10,
+          30
+        ],
+        "unit": "USD_PER_INSURED_VEHICLE"
+      },
+      "validation_status": "MEASURED"
+    },
+    {
+      "state": "ME",
+      "state_name": "Maine",
+      "source_data_year": 2023,
+      "combined_average_premium": 926.02,
+      "average_expenditure": 856.28,
+      "publication_identifier": "AUT-PB 2022-2023",
+      "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+      "table_identity": {
+        "table_number": "Table 5",
+        "table_title": "Combined Average Premium, 2019-2023",
+        "column_name": "Combined Average Premium",
+        "pages": [
+          3,
+          10,
+          30
+        ],
+        "unit": "USD_PER_INSURED_VEHICLE"
+      },
+      "validation_status": "MEASURED"
+    },
+    {
+      "state": "MD",
+      "state_name": "Maryland",
+      "source_data_year": 2023,
+      "combined_average_premium": 1601.63,
+      "average_expenditure": 1476.78,
+      "publication_identifier": "AUT-PB 2022-2023",
+      "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+      "table_identity": {
+        "table_number": "Table 5",
+        "table_title": "Combined Average Premium, 2019-2023",
+        "column_name": "Combined Average Premium",
+        "pages": [
+          3,
+          10,
+          30
+        ],
+        "unit": "USD_PER_INSURED_VEHICLE"
+      },
+      "validation_status": "MEASURED"
+    },
+    {
+      "state": "MA",
+      "state_name": "Massachusetts",
+      "source_data_year": 2023,
+      "combined_average_premium": 1413.49,
+      "average_expenditure": 1326.46,
+      "publication_identifier": "AUT-PB 2022-2023",
+      "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+      "table_identity": {
+        "table_number": "Table 5",
+        "table_title": "Combined Average Premium, 2019-2023",
+        "column_name": "Combined Average Premium",
+        "pages": [
+          3,
+          10,
+          30
+        ],
+        "unit": "USD_PER_INSURED_VEHICLE"
+      },
+      "validation_status": "MEASURED"
+    },
+    {
+      "state": "MI",
+      "state_name": "Michigan",
+      "source_data_year": 2023,
+      "combined_average_premium": 1572.77,
+      "average_expenditure": 1444.01,
+      "publication_identifier": "AUT-PB 2022-2023",
+      "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+      "table_identity": {
+        "table_number": "Table 5",
+        "table_title": "Combined Average Premium, 2019-2023",
+        "column_name": "Combined Average Premium",
+        "pages": [
+          3,
+          10,
+          30
+        ],
+        "unit": "USD_PER_INSURED_VEHICLE"
+      },
+      "validation_status": "MEASURED"
+    },
+    {
+      "state": "MN",
+      "state_name": "Minnesota",
+      "source_data_year": 2023,
+      "combined_average_premium": 1223.48,
+      "average_expenditure": 1103.05,
+      "publication_identifier": "AUT-PB 2022-2023",
+      "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+      "table_identity": {
+        "table_number": "Table 5",
+        "table_title": "Combined Average Premium, 2019-2023",
+        "column_name": "Combined Average Premium",
+        "pages": [
+          3,
+          10,
+          30
+        ],
+        "unit": "USD_PER_INSURED_VEHICLE"
+      },
+      "validation_status": "MEASURED"
+    },
+    {
+      "state": "MS",
+      "state_name": "Mississippi",
+      "source_data_year": 2023,
+      "combined_average_premium": 1394.52,
+      "average_expenditure": 1199.52,
+      "publication_identifier": "AUT-PB 2022-2023",
+      "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+      "table_identity": {
+        "table_number": "Table 5",
+        "table_title": "Combined Average Premium, 2019-2023",
+        "column_name": "Combined Average Premium",
+        "pages": [
+          3,
+          10,
+          30
+        ],
+        "unit": "USD_PER_INSURED_VEHICLE"
+      },
+      "validation_status": "MEASURED"
+    },
+    {
+      "state": "MO",
+      "state_name": "Missouri",
+      "source_data_year": 2023,
+      "combined_average_premium": 1322.55,
+      "average_expenditure": 1154.78,
+      "publication_identifier": "AUT-PB 2022-2023",
+      "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+      "table_identity": {
+        "table_number": "Table 5",
+        "table_title": "Combined Average Premium, 2019-2023",
+        "column_name": "Combined Average Premium",
+        "pages": [
+          3,
+          10,
+          30
+        ],
+        "unit": "USD_PER_INSURED_VEHICLE"
+      },
+      "validation_status": "MEASURED"
+    },
+    {
+      "state": "MT",
+      "state_name": "Montana",
+      "source_data_year": 2023,
+      "combined_average_premium": 1183.66,
+      "average_expenditure": 975.02,
+      "publication_identifier": "AUT-PB 2022-2023",
+      "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+      "table_identity": {
+        "table_number": "Table 5",
+        "table_title": "Combined Average Premium, 2019-2023",
+        "column_name": "Combined Average Premium",
+        "pages": [
+          3,
+          10,
+          30
+        ],
+        "unit": "USD_PER_INSURED_VEHICLE"
+      },
+      "validation_status": "MEASURED"
+    },
+    {
+      "state": "NE",
+      "state_name": "Nebraska",
+      "source_data_year": 2023,
+      "combined_average_premium": 1183.88,
+      "average_expenditure": 981.06,
+      "publication_identifier": "AUT-PB 2022-2023",
+      "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+      "table_identity": {
+        "table_number": "Table 5",
+        "table_title": "Combined Average Premium, 2019-2023",
+        "column_name": "Combined Average Premium",
+        "pages": [
+          3,
+          10,
+          30
+        ],
+        "unit": "USD_PER_INSURED_VEHICLE"
+      },
+      "validation_status": "MEASURED"
+    },
+    {
+      "state": "NV",
+      "state_name": "Nevada",
+      "source_data_year": 2023,
+      "combined_average_premium": 1600.12,
+      "average_expenditure": 1461.54,
+      "publication_identifier": "AUT-PB 2022-2023",
+      "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+      "table_identity": {
+        "table_number": "Table 5",
+        "table_title": "Combined Average Premium, 2019-2023",
+        "column_name": "Combined Average Premium",
+        "pages": [
+          3,
+          10,
+          30
+        ],
+        "unit": "USD_PER_INSURED_VEHICLE"
+      },
+      "validation_status": "MEASURED"
+    },
+    {
+      "state": "NH",
+      "state_name": "New Hampshire",
+      "source_data_year": 2023,
+      "combined_average_premium": 1032.01,
+      "average_expenditure": 986.84,
+      "publication_identifier": "AUT-PB 2022-2023",
+      "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+      "table_identity": {
+        "table_number": "Table 5",
+        "table_title": "Combined Average Premium, 2019-2023",
+        "column_name": "Combined Average Premium",
+        "pages": [
+          3,
+          10,
+          30
+        ],
+        "unit": "USD_PER_INSURED_VEHICLE"
+      },
+      "validation_status": "MEASURED"
+    },
+    {
+      "state": "NJ",
+      "state_name": "New Jersey",
+      "source_data_year": 2023,
+      "combined_average_premium": 1693.39,
+      "average_expenditure": 1573.21,
+      "publication_identifier": "AUT-PB 2022-2023",
+      "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+      "table_identity": {
+        "table_number": "Table 5",
+        "table_title": "Combined Average Premium, 2019-2023",
+        "column_name": "Combined Average Premium",
+        "pages": [
+          3,
+          10,
+          30
+        ],
+        "unit": "USD_PER_INSURED_VEHICLE"
+      },
+      "validation_status": "MEASURED"
+    },
+    {
+      "state": "NM",
+      "state_name": "New Mexico",
+      "source_data_year": 2023,
+      "combined_average_premium": 1301.12,
+      "average_expenditure": 1081.61,
+      "publication_identifier": "AUT-PB 2022-2023",
+      "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+      "table_identity": {
+        "table_number": "Table 5",
+        "table_title": "Combined Average Premium, 2019-2023",
+        "column_name": "Combined Average Premium",
+        "pages": [
+          3,
+          10,
+          30
+        ],
+        "unit": "USD_PER_INSURED_VEHICLE"
+      },
+      "validation_status": "MEASURED"
+    },
+    {
+      "state": "NY",
+      "state_name": "New York",
+      "source_data_year": 2023,
+      "combined_average_premium": 1895.99,
+      "average_expenditure": 1752.55,
+      "publication_identifier": "AUT-PB 2022-2023",
+      "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+      "table_identity": {
+        "table_number": "Table 5",
+        "table_title": "Combined Average Premium, 2019-2023",
+        "column_name": "Combined Average Premium",
+        "pages": [
+          3,
+          10,
+          30
+        ],
+        "unit": "USD_PER_INSURED_VEHICLE"
+      },
+      "validation_status": "MEASURED"
+    },
+    {
+      "state": "NC",
+      "state_name": "North Carolina",
+      "source_data_year": 2023,
+      "combined_average_premium": 1096.56,
+      "average_expenditure": 925.08,
+      "publication_identifier": "AUT-PB 2022-2023",
+      "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+      "table_identity": {
+        "table_number": "Table 5",
+        "table_title": "Combined Average Premium, 2019-2023",
+        "column_name": "Combined Average Premium",
+        "pages": [
+          3,
+          10,
+          30
+        ],
+        "unit": "USD_PER_INSURED_VEHICLE"
+      },
+      "validation_status": "MEASURED"
+    },
+    {
+      "state": "ND",
+      "state_name": "North Dakota",
+      "source_data_year": 2023,
+      "combined_average_premium": 961.28,
+      "average_expenditure": 807.77,
+      "publication_identifier": "AUT-PB 2022-2023",
+      "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+      "table_identity": {
+        "table_number": "Table 5",
+        "table_title": "Combined Average Premium, 2019-2023",
+        "column_name": "Combined Average Premium",
+        "pages": [
+          3,
+          10,
+          30
+        ],
+        "unit": "USD_PER_INSURED_VEHICLE"
+      },
+      "validation_status": "MEASURED"
+    },
+    {
+      "state": "OH",
+      "state_name": "Ohio",
+      "source_data_year": 2023,
+      "combined_average_premium": 1037.61,
+      "average_expenditure": 947.22,
+      "publication_identifier": "AUT-PB 2022-2023",
+      "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+      "table_identity": {
+        "table_number": "Table 5",
+        "table_title": "Combined Average Premium, 2019-2023",
+        "column_name": "Combined Average Premium",
+        "pages": [
+          3,
+          10,
+          30
+        ],
+        "unit": "USD_PER_INSURED_VEHICLE"
+      },
+      "validation_status": "MEASURED"
+    },
+    {
+      "state": "OK",
+      "state_name": "Oklahoma",
+      "source_data_year": 2023,
+      "combined_average_premium": 1324.15,
+      "average_expenditure": 1083.97,
+      "publication_identifier": "AUT-PB 2022-2023",
+      "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+      "table_identity": {
+        "table_number": "Table 5",
+        "table_title": "Combined Average Premium, 2019-2023",
+        "column_name": "Combined Average Premium",
+        "pages": [
+          3,
+          10,
+          30
+        ],
+        "unit": "USD_PER_INSURED_VEHICLE"
+      },
+      "validation_status": "MEASURED"
+    },
+    {
+      "state": "OR",
+      "state_name": "Oregon",
+      "source_data_year": 2023,
+      "combined_average_premium": 1268.47,
+      "average_expenditure": 1170.31,
+      "publication_identifier": "AUT-PB 2022-2023",
+      "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+      "table_identity": {
+        "table_number": "Table 5",
+        "table_title": "Combined Average Premium, 2019-2023",
+        "column_name": "Combined Average Premium",
+        "pages": [
+          3,
+          10,
+          30
+        ],
+        "unit": "USD_PER_INSURED_VEHICLE"
+      },
+      "validation_status": "MEASURED"
+    },
+    {
+      "state": "PA",
+      "state_name": "Pennsylvania",
+      "source_data_year": 2023,
+      "combined_average_premium": 1273.46,
+      "average_expenditure": 1154.57,
+      "publication_identifier": "AUT-PB 2022-2023",
+      "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+      "table_identity": {
+        "table_number": "Table 5",
+        "table_title": "Combined Average Premium, 2019-2023",
+        "column_name": "Combined Average Premium",
+        "pages": [
+          3,
+          10,
+          30
+        ],
+        "unit": "USD_PER_INSURED_VEHICLE"
+      },
+      "validation_status": "MEASURED"
+    },
+    {
+      "state": "RI",
+      "state_name": "Rhode Island",
+      "source_data_year": 2023,
+      "combined_average_premium": 1709.69,
+      "average_expenditure": 1539.65,
+      "publication_identifier": "AUT-PB 2022-2023",
+      "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+      "table_identity": {
+        "table_number": "Table 5",
+        "table_title": "Combined Average Premium, 2019-2023",
+        "column_name": "Combined Average Premium",
+        "pages": [
+          3,
+          10,
+          30
+        ],
+        "unit": "USD_PER_INSURED_VEHICLE"
+      },
+      "validation_status": "MEASURED"
+    },
+    {
+      "state": "SC",
+      "state_name": "South Carolina",
+      "source_data_year": 2023,
+      "combined_average_premium": 1516.71,
+      "average_expenditure": 1367.39,
+      "publication_identifier": "AUT-PB 2022-2023",
+      "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+      "table_identity": {
+        "table_number": "Table 5",
+        "table_title": "Combined Average Premium, 2019-2023",
+        "column_name": "Combined Average Premium",
+        "pages": [
+          3,
+          10,
+          30
+        ],
+        "unit": "USD_PER_INSURED_VEHICLE"
+      },
+      "validation_status": "MEASURED"
+    },
+    {
+      "state": "SD",
+      "state_name": "South Dakota",
+      "source_data_year": 2023,
+      "combined_average_premium": 1157.7,
+      "average_expenditure": 936.84,
+      "publication_identifier": "AUT-PB 2022-2023",
+      "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+      "table_identity": {
+        "table_number": "Table 5",
+        "table_title": "Combined Average Premium, 2019-2023",
+        "column_name": "Combined Average Premium",
+        "pages": [
+          3,
+          10,
+          30
+        ],
+        "unit": "USD_PER_INSURED_VEHICLE"
+      },
+      "validation_status": "MEASURED"
+    },
+    {
+      "state": "TN",
+      "state_name": "Tennessee",
+      "source_data_year": 2023,
+      "combined_average_premium": 1211.72,
+      "average_expenditure": 1049.8,
+      "publication_identifier": "AUT-PB 2022-2023",
+      "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+      "table_identity": {
+        "table_number": "Table 5",
+        "table_title": "Combined Average Premium, 2019-2023",
+        "column_name": "Combined Average Premium",
+        "pages": [
+          3,
+          10,
+          30
+        ],
+        "unit": "USD_PER_INSURED_VEHICLE"
+      },
+      "validation_status": "MEASURED"
+    },
+    {
+      "state": "TX",
+      "state_name": "Texas",
+      "source_data_year": 2023,
+      "combined_average_premium": 1726.91,
+      "average_expenditure": 1428.94,
+      "publication_identifier": "AUT-PB 2022-2023",
+      "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+      "table_identity": {
+        "table_number": "Table 5",
+        "table_title": "Combined Average Premium, 2019-2023",
+        "column_name": "Combined Average Premium",
+        "pages": [
+          3,
+          10,
+          30
+        ],
+        "unit": "USD_PER_INSURED_VEHICLE"
+      },
+      "validation_status": "MEASURED"
+    },
+    {
+      "state": "UT",
+      "state_name": "Utah",
+      "source_data_year": 2023,
+      "combined_average_premium": 1284.6,
+      "average_expenditure": 1168.93,
+      "publication_identifier": "AUT-PB 2022-2023",
+      "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+      "table_identity": {
+        "table_number": "Table 5",
+        "table_title": "Combined Average Premium, 2019-2023",
+        "column_name": "Combined Average Premium",
+        "pages": [
+          3,
+          10,
+          30
+        ],
+        "unit": "USD_PER_INSURED_VEHICLE"
+      },
+      "validation_status": "MEASURED"
+    },
+    {
+      "state": "VT",
+      "state_name": "Vermont",
+      "source_data_year": 2023,
+      "combined_average_premium": 957.8,
+      "average_expenditure": 893.16,
+      "publication_identifier": "AUT-PB 2022-2023",
+      "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+      "table_identity": {
+        "table_number": "Table 5",
+        "table_title": "Combined Average Premium, 2019-2023",
+        "column_name": "Combined Average Premium",
+        "pages": [
+          3,
+          10,
+          30
+        ],
+        "unit": "USD_PER_INSURED_VEHICLE"
+      },
+      "validation_status": "MEASURED"
+    },
+    {
+      "state": "VA",
+      "state_name": "Virginia",
+      "source_data_year": 2023,
+      "combined_average_premium": 1238.13,
+      "average_expenditure": 1114.46,
+      "publication_identifier": "AUT-PB 2022-2023",
+      "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+      "table_identity": {
+        "table_number": "Table 5",
+        "table_title": "Combined Average Premium, 2019-2023",
+        "column_name": "Combined Average Premium",
+        "pages": [
+          3,
+          10,
+          30
+        ],
+        "unit": "USD_PER_INSURED_VEHICLE"
+      },
+      "validation_status": "MEASURED"
+    },
+    {
+      "state": "WA",
+      "state_name": "Washington",
+      "source_data_year": 2023,
+      "combined_average_premium": 1234.68,
+      "average_expenditure": 1152.5,
+      "publication_identifier": "AUT-PB 2022-2023",
+      "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+      "table_identity": {
+        "table_number": "Table 5",
+        "table_title": "Combined Average Premium, 2019-2023",
+        "column_name": "Combined Average Premium",
+        "pages": [
+          3,
+          10,
+          30
+        ],
+        "unit": "USD_PER_INSURED_VEHICLE"
+      },
+      "validation_status": "MEASURED"
+    },
+    {
+      "state": "WV",
+      "state_name": "West Virginia",
+      "source_data_year": 2023,
+      "combined_average_premium": 1227.39,
+      "average_expenditure": 1062.98,
+      "publication_identifier": "AUT-PB 2022-2023",
+      "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+      "table_identity": {
+        "table_number": "Table 5",
+        "table_title": "Combined Average Premium, 2019-2023",
+        "column_name": "Combined Average Premium",
+        "pages": [
+          3,
+          10,
+          30
+        ],
+        "unit": "USD_PER_INSURED_VEHICLE"
+      },
+      "validation_status": "MEASURED"
+    },
+    {
+      "state": "WI",
+      "state_name": "Wisconsin",
+      "source_data_year": 2023,
+      "combined_average_premium": 999.99,
+      "average_expenditure": 922.41,
+      "publication_identifier": "AUT-PB 2022-2023",
+      "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+      "table_identity": {
+        "table_number": "Table 5",
+        "table_title": "Combined Average Premium, 2019-2023",
+        "column_name": "Combined Average Premium",
+        "pages": [
+          3,
+          10,
+          30
+        ],
+        "unit": "USD_PER_INSURED_VEHICLE"
+      },
+      "validation_status": "MEASURED"
+    },
+    {
+      "state": "WY",
+      "state_name": "Wyoming",
+      "source_data_year": 2023,
+      "combined_average_premium": 1180.01,
+      "average_expenditure": 948.37,
+      "publication_identifier": "AUT-PB 2022-2023",
+      "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+      "table_identity": {
+        "table_number": "Table 5",
+        "table_title": "Combined Average Premium, 2019-2023",
+        "column_name": "Combined Average Premium",
+        "pages": [
+          3,
+          10,
+          30
+        ],
+        "unit": "USD_PER_INSURED_VEHICLE"
+      },
+      "validation_status": "MEASURED"
+    }
+  ],
+  "national": {
+    "geography": "Countrywide",
+    "source_data_year": 2023,
+    "combined_average_premium": 1438.6,
+    "publication_identifier": "AUT-PB 2022-2023",
+    "source_artifact_sha256": "34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78",
+    "not_state_average": true
+  },
+  "official_release_national_combined_average_premium": 1438.0,
+  "pdf_identifier_bound": true,
+  "validation_ok": true,
+  "issues": [],
+  "evidence_status": "VALIDATED",
+  "calculates_mslc": false,
+  "headline_calculated": false
+}

@@ -1157,15 +1157,25 @@ def discover_eia() -> FreshnessCheck:
 
 
 def discover_naic() -> FreshnessCheck:
+    from foundation.living_cost.evidence_validators import (
+        naic_evidence_status,
+        validate_naic_derivation,
+    )
+    from foundation.sources.naic_report import identify_naic_pdf, selected_naic_pdf_sha256
+
     sidecar = _sidecar("publication-aut-pb-auto-insurance-database.pdf")
     landing = NAIC_PUBLICATIONS_LANDING
     local_pdf = CACHE_DIR / "publication-aut-pb-auto-insurance-database.pdf"
+    selected_sha = selected_naic_pdf_sha256(local_pdf)
+    pdf_identity = identify_naic_pdf(local_pdf) if local_pdf.is_file() else {}
+    naic_validation = validate_naic_derivation(selected_sha=selected_sha)
+    naic_status = naic_evidence_status(selected_sha=selected_sha)
     art = _artifact_record(
         artifact_id="publication-aut-pb-auto-insurance-database.pdf",
-        url=landing,
-        sha256=(sidecar or {}).get("sha256"),
+        url="https://content.naic.org/sites/default/files/publication-aut-pb-auto-insurance-database.pdf",
+        sha256=selected_sha,
         retrieved_at=(sidecar or {}).get("retrieved_at"),
-        validation_status="RETRIEVED_UNVALIDATED",
+        validation_status=naic_status,
     )
     try:
         html, checked = fetch_text(landing)
@@ -1196,63 +1206,95 @@ def discover_naic() -> FreshnessCheck:
                 "Report year range (for example AUT-PB 2022-2023) was identified."
             ),
         )
-    bound = local_pdf_matches_naic(local_pdf, latest)
-    currentness = mutable_artifact_status(
-        listing_ok=True,
-        official_sha=None,
-        selected_sha=(sidecar or {}).get("sha256") if bound is True else None,
-        official_identifier=latest.display_identifier,
-        selected_identifier=latest.display_identifier if bound is True else None,
-    )
-    if bound is not True:
+    pdf_ident = pdf_identity.get("publication_identifier")
+    bound = bool(pdf_ident) and pdf_ident == latest.display_identifier
+    if not bound:
+        raw_bound = local_pdf_matches_naic(local_pdf, latest)
+        bound = raw_bound is True
+    if not bound:
         currentness = {
             "listing_freshness_status": "VERIFIED_CURRENT",
             "artifact_currentness_status": "CHECK_FAILED",
-            "selected_artifact_matches_latest": False if bound is False else None,
+            "selected_artifact_matches_latest": False,
             "freshness_check_status": "CHECK_FAILED",
             "newer_data_exists": None,
             "reason": (
                 f"Latest listing is {latest.display_identifier} but the local PDF "
-                "was not proven to be that report."
+                f"identifier is {pdf_ident!r}."
             ),
         }
+    elif not naic_validation.ok:
+        currentness = {
+            "listing_freshness_status": "VERIFIED_CURRENT",
+            "artifact_currentness_status": "CHECK_FAILED",
+            "selected_artifact_matches_latest": True,
+            "freshness_check_status": "CHECK_FAILED",
+            "newer_data_exists": False,
+            "reason": (
+                f"PDF is bound to {latest.display_identifier} but NAIC table "
+                f"validation failed: {naic_validation.issues}."
+            ),
+        }
+    elif selected_sha is None:
+        currentness = {
+            "listing_freshness_status": "VERIFIED_CURRENT",
+            "artifact_currentness_status": "CHECK_FAILED",
+            "selected_artifact_matches_latest": None,
+            "freshness_check_status": "CHECK_FAILED",
+            "newer_data_exists": None,
+            "reason": "Selected NAIC PDF bytes are absent.",
+        }
+    else:
+        currentness = {
+            "listing_freshness_status": "VERIFIED_CURRENT",
+            "artifact_currentness_status": "VERIFIED_CURRENT",
+            "selected_artifact_matches_latest": True,
+            "freshness_check_status": "VERIFIED_CURRENT",
+            "newer_data_exists": False,
+            "reason": (
+                f"Live listing {latest.display_identifier} matches the selected PDF "
+                "identifier and Table 5 derivation binds to the selected-byte SHA."
+            ),
+        }
+    year_note = (
+        f"lagged NAIC report {latest.display_identifier}; source_data_year={latest.end_year}"
+    )
     return FreshnessCheck(
         source_id="naic_auto_insurance",
         latest_checked_at=checked,
         latest_authoritative_vintage_found=latest.display_identifier,
-        selected_vintage=latest.display_identifier if bound is True else None,
+        selected_vintage=latest.display_identifier if bound else None,
         selected_artifact="publication-aut-pb-auto-insurance-database.pdf",
         newer_data_exists=currentness["newer_data_exists"],
-        retrieval_validation_status="RETRIEVED_UNVALIDATED",
+        retrieval_validation_status=naic_status,
         reason_if_not_refreshed=(
             "Official NAIC Publications listing checked. Latest report identifier "
-            f"is {latest.display_identifier}. {currentness['reason']} "
-            "State-table extraction is not a validated numeric series."
+            f"is {latest.display_identifier}. {currentness['reason']}"
         ),
         freshness_check_status=str(currentness["freshness_check_status"]),
         publisher="National Association of Insurance Commissioners",
         landing_url=landing,
         selected_artifacts=(art,),
         retrieved_at=(sidecar or {}).get("retrieved_at"),
-        transformation_method="state-table extraction pending validation",
-        input_evidence_status="RETRIEVED_UNVALIDATED",
+        transformation_method="Table 5 combined average premium extract; no MSLC",
+        input_evidence_status=naic_status,
         listing_freshness_status=currentness["listing_freshness_status"],
         artifact_currentness_status=currentness["artifact_currentness_status"],
         selected_artifact_matches_latest=currentness["selected_artifact_matches_latest"],
         year_coverage=_year_coverage(
             {
-                "covered": True,
+                "covered": naic_validation.ok,
                 "source_data_year": latest.end_year,
                 "artifact": "publication-aut-pb-auto-insurance-database.pdf",
-                "sha256": art.get("sha256"),
-                "note": f"lagged NAIC report {latest.display_identifier} applies to 2024",
+                "sha256": selected_sha,
+                "note": year_note,
             },
             {
-                "covered": True,
+                "covered": naic_validation.ok,
                 "source_data_year": latest.end_year,
                 "artifact": "publication-aut-pb-auto-insurance-database.pdf",
-                "sha256": art.get("sha256"),
-                "note": f"lagged NAIC report {latest.display_identifier} applies to 2026",
+                "sha256": selected_sha,
+                "note": year_note,
             },
         ),
         extra={
@@ -1260,8 +1302,12 @@ def discover_naic() -> FreshnessCheck:
             "start_year": latest.start_year,
             "end_year": latest.end_year,
             "display_identifier": latest.display_identifier,
+            "pdf_identifier": pdf_ident,
             "identifiers_found": [item.display_identifier for item in reports],
             "local_pdf_bound": bound,
+            "selected_sha256": selected_sha,
+            "validation_issues": naic_validation.issues,
+            "jurisdiction_count": (naic_validation.payload or {}).get("jurisdiction_count"),
         },
     )
 
@@ -1474,10 +1520,31 @@ def discover_bea() -> FreshnessCheck:
 
 
 def discover_federal_tax() -> FreshnessCheck:
+    from foundation.living_cost.evidence_validators import (
+        federal_tax_evidence_status,
+        validate_federal_tax_inventory,
+    )
     from foundation.living_cost.taxes import FEDERAL_TAX_RULES
 
     years = sorted(FEDERAL_TAX_RULES)
     irs = "https://www.irs.gov/irb"
+    validation = validate_federal_tax_inventory()
+    evidence = federal_tax_evidence_status()
+    payload = validation.payload or {}
+    year_recs = payload.get("years") if isinstance(payload.get("years"), dict) else {}
+    artifacts = []
+    for item in payload.get("retrieved_artifacts") or []:
+        if not isinstance(item, dict) or not item.get("sha256"):
+            continue
+        artifacts.append(
+            _artifact_record(
+                artifact_id=str(item.get("filename") or item.get("key")),
+                url=item.get("url"),
+                sha256=item.get("sha256"),
+                retrieved_at=item.get("retrieved_at"),
+                validation_status="VALIDATED" if item.get("http_ok") else "UNAVAILABLE",
+            )
+        )
     try:
         html, checked = fetch_text(irs)
         fetched = True
@@ -1488,44 +1555,73 @@ def discover_federal_tax() -> FreshnessCheck:
         fetch_err = str(exc)
     else:
         fetch_err = None
-    if not fetched:
+    y2024_ok = bool((year_recs.get("2024") or {}).get("parsed_ok"))
+    y2026_ok = bool((year_recs.get("2026") or {}).get("parsed_ok"))
+    if validation.ok:
+        status = "VERIFIED_CURRENT"
+        newer: bool | None = False
+        reason = (
+            "Primary IRS and SSA authorities are bound and FEDERAL_TAX_RULES "
+            "matches the official inventory for 2024 and 2026, including Additional "
+            "Medicare Tax. Unsupported tax years remain fail-closed."
+        )
+    elif not fetched:
         status = "CHECK_FAILED"
-        newer: bool | None = None
+        newer = None
         reason = (
             f"IRS IRB landing could not be retrieved ({fetch_err}). "
-            f"Code tables exist for {years} only. Inventory not validated against primary IRS/SSA artifacts."
+            f"Inventory issues: {validation.issues}."
         )
+    elif any(str(i).startswith("FEDERAL_TAX_RULES_MISMATCH") for i in validation.issues) or any(
+        str(i).startswith("FEDERAL_TAX_MODEL_GAP") for i in validation.issues
+    ):
+        status = "CHECK_FAILED"
+        newer = None
+        reason = f"Federal tax inventory did not validate: {validation.issues}."
     else:
         status = "MANUAL_VERIFICATION_REQUIRED"
         newer = None
         reason = (
-            "IRS IRB page was reached, but presence of in-code 2024/2026 tables is not "
-            "proof they remain the newest applicable Rev. Proc. Manual verification required. "
-            f"Years present in code: {years}."
+            "IRS/SSA authorities were not fully parsed into a validated inventory. "
+            f"Issues: {validation.issues}."
         )
-        if "html" not in html.lower() and "irs" not in html.lower():
+        if fetched and "html" not in html.lower() and "irs" not in html.lower():
             status = "CHECK_FAILED"
             reason = "IRS IRB response did not look like the official bulletin page."
+    auth_2024 = (year_recs.get("2024") or {}).get("standard_deduction", {}).get("authority")
+    auth_2026 = (year_recs.get("2026") or {}).get("standard_deduction", {}).get("authority")
     return FreshnessCheck(
         source_id="federal_tax_law",
         latest_checked_at=checked,
-        latest_authoritative_vintage_found=f"code tables {years}",
+        latest_authoritative_vintage_found=f"{auth_2024} / {auth_2026}",
         selected_vintage="2024 and 2026 statutory tables in code",
-        selected_artifact=None,
+        selected_artifact="living_cost_federal_tax_inventory.json",
         newer_data_exists=newer,
-        retrieval_validation_status="INVENTORY_NOT_VALIDATED",
+        retrieval_validation_status=evidence,
         reason_if_not_refreshed=reason,
         freshness_check_status=status,
         publisher="Internal Revenue Service / SSA",
         landing_url=irs,
-        selected_artifacts=(),
+        selected_artifacts=tuple(artifacts),
         transformation_method="RULE_YEAR; no silent fallback to another year",
-        input_evidence_status="INVENTORY_NOT_VALIDATED",
+        input_evidence_status=evidence,
         year_coverage=_year_coverage(
-            {"covered": 2024 in years, "note": "federal tables present in code"},
-            {"covered": 2026 in years, "note": "federal tables present in code"},
+            {
+                "covered": y2024_ok and validation.ok,
+                "source_data_year": 2024,
+                "note": "federal 2024 inventory vs FEDERAL_TAX_RULES",
+            },
+            {
+                "covered": y2026_ok and validation.ok,
+                "source_data_year": 2026,
+                "note": "federal 2026 inventory vs FEDERAL_TAX_RULES",
+            },
         ),
-        extra={"rule_years_present": years},
+        extra={
+            "rule_years_present": years,
+            "validation_issues": validation.issues,
+            "inventory_generated_at": payload.get("generated_at"),
+        },
     )
 
 
