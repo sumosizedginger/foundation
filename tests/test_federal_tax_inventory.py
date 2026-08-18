@@ -209,3 +209,20 @@ def test_empty_inventory_is_not_validated(tmp_path: Path):
     result = validate_federal_tax_inventory(path)
     assert result.ok is False
     assert result.evidence_status == "INVENTORY_NOT_VALIDATED"
+
+
+def test_coverage_status_dimensions_use_federal_tax_validator():
+    """status_dimensions must not hard-code INVENTORY_NOT_VALIDATED over the validator."""
+    coverage = json.loads(
+        (ROOT / "data" / "metadata" / "living_cost_source_coverage.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    expected = validate_federal_tax_inventory().evidence_status
+    assert coverage["coverage_by_year"]["2024"]["federal_tax"] == expected
+    assert coverage["coverage_by_year"]["2026"]["federal_tax"] == expected
+    for year in ("2024", "2026"):
+        assert (
+            coverage["status_dimensions"]["by_year"][year]["federal_tax"]["evidence_status"]
+            == expected
+        )

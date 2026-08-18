@@ -1,6 +1,6 @@
 {
   "report_type": "living_cost_source_coverage",
-  "generated_at": "2026-08-18T20:48:40+00:00",
+  "generated_at": "2026-08-18T21:09:35+00:00",
   "question": "What still prevents the living-cost model from being calculated?",
   "required_components": [
     "housing",
@@ -1050,7 +1050,7 @@
           "methodology_status": "FROZEN"
         },
         "federal_tax": {
-          "evidence_status": "INVENTORY_NOT_VALIDATED",
+          "evidence_status": "VALIDATED",
           "methodology_status": "FROZEN"
         },
         "state_tax": {
@@ -1128,7 +1128,7 @@
           "methodology_status": "FROZEN"
         },
         "federal_tax": {
-          "evidence_status": "INVENTORY_NOT_VALIDATED",
+          "evidence_status": "VALIDATED",
           "methodology_status": "FROZEN"
         },
         "state_tax": {

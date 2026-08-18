@@ -856,7 +856,7 @@ def write_coverage(artifacts: list[RetrievedSourceArtifact]) -> dict:
                         "methodology_status": methodology_status_for_component("rpp"),
                     },
                     "federal_tax": {
-                        "evidence_status": "INVENTORY_NOT_VALIDATED",
+                        "evidence_status": coverage_by_year[year]["federal_tax"],
                         "methodology_status": methodology_status_for_component("federal_tax"),
                     },
                     "state_tax": {
