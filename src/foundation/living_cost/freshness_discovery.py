@@ -785,10 +785,14 @@ def discover_meps() -> FreshnessCheck:
         status = "VERIFIED_CURRENT"
         newer = False
     sidecar = _sidecar("h251dat.zip")
-    from foundation.living_cost.evidence_validators import validate_meps_derivation
+    from foundation.living_cost.evidence_validators import (
+        MEPS_CACHE_NAME,
+        selected_cache_sha,
+        validate_meps_derivation,
+    )
     from foundation.sources.meps import load_meps_oop_derivation
 
-    meps_validation = validate_meps_derivation(selected_sha=(sidecar or {}).get("sha256"))
+    meps_validation = validate_meps_derivation(selected_sha=selected_cache_sha(MEPS_CACHE_NAME))
     derivation = load_meps_oop_derivation() if meps_validation.ok else None
     derived = meps_validation.ok
     evidence = meps_validation.evidence_status
@@ -950,9 +954,13 @@ def discover_nhts() -> FreshnessCheck:
 
 def discover_epa() -> FreshnessCheck:
     sidecar = _sidecar("epa_fueleconomy_vehicles.csv.zip") or _sidecar("vehicles.csv.zip")
-    from foundation.living_cost.evidence_validators import validate_epa_cohorts
+    from foundation.living_cost.evidence_validators import (
+        EPA_CACHE_NAME,
+        selected_cache_sha,
+        validate_epa_cohorts,
+    )
 
-    epa_validation = validate_epa_cohorts(selected_sha=(sidecar or {}).get("sha256"))
+    epa_validation = validate_epa_cohorts(selected_sha=selected_cache_sha(EPA_CACHE_NAME))
     derived_mpg = epa_validation.ok
     epa_evidence = epa_validation.evidence_status
     art = _artifact_record(

@@ -534,14 +534,25 @@ def load_od010_live_currentness() -> dict[str, Any] | None:
 
 
 def live_currentness_unbinds_table() -> bool:
-    """True when a live official check has invalidated the canonical table."""
+    """True when a live official check has invalidated the canonical table.
+
+    A failed retrieve does not prove the table obsolete. A successful live
+    retrieve that does not current-bind the table (newer month, identity
+    mismatch, or explicit translation_index_bound=false) does.
+    """
     payload = load_od010_live_currentness()
     if not payload:
         return False
     status = payload.get("freshness_check_status") or payload.get("currentness_status")
     if status in INVALIDATING_CURRENTNESS:
         return True
-    return payload.get("translation_index_bound") is False and status == "NEWER_AVAILABLE"
+    if payload.get("live_bls_request") == "SUCCEEDED" and status != "VERIFIED_CURRENT":
+        return True
+    return payload.get("translation_index_bound") is False and status not in {
+        None,
+        "CHECK_FAILED",
+        "VERIFIED_CURRENT",
+    }
 
 
 def load_retrieved_series_coverage() -> dict[str, Any] | None:

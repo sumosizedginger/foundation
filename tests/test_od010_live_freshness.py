@@ -163,3 +163,36 @@ def test_discover_check_failed_does_not_use_cache_as_verified(tmp_path, monkeypa
         or check.freshness_check_status != "VERIFIED_CURRENT"
     )
     assert "failed" in (check.reason_if_not_refreshed or "").lower()
+    assert is_translation_index_bound() is True
+
+
+def test_live_identity_mismatch_unbinds_translation_index(tmp_path, monkeypatch):
+    metadata = tmp_path / "metadata"
+    metadata.mkdir()
+    table = metadata / "living_cost_od010_translation_table.json"
+    retrieve_path = metadata / "living_cost_od010_bls_retrieve.json"
+    currentness = metadata / "living_cost_od010_live_currentness.json"
+    history = metadata / "history"
+    monkeypatch.setattr(od010_cpi, "METADATA_DIR", metadata)
+    monkeypatch.setattr(od010_cpi, "OD010_TABLE", table)
+    monkeypatch.setattr(od010_cpi, "OD010_RETRIEVE", retrieve_path)
+    monkeypatch.setattr(od010_cpi, "OD010_LIVE_CURRENTNESS", currentness)
+    monkeypatch.setattr(od010_cpi, "OD010_TABLE_HISTORY_DIR", history)
+    monkeypatch.setattr("foundation.living_cost.freshness_discovery.METADATA_DIR", metadata)
+    monkeypatch.setattr("foundation.living_cost.freshness.OD010_TABLE", table)
+
+    july = _body(august=False)
+    write_od010_artifacts(
+        _retrieve(july, "raw-cached"), build_od010_records(_retrieve(july, "raw-cached"))
+    )
+    mutated = _body(august=False)
+    mutated["Results"]["series"][0]["data"][0]["value"] = "999.0"
+
+    def fake_retrieve(*_args, **_kwargs):
+        return _retrieve(mutated, "raw-live-mismatch")
+
+    monkeypatch.setattr(od010_cpi, "retrieve_bls_cpi_series", fake_retrieve)
+    check = discover_od010()
+    assert check.freshness_check_status != "VERIFIED_CURRENT"
+    assert check.extra["translation_table_bound"] is False
+    assert is_translation_index_bound() is False

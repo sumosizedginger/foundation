@@ -13,6 +13,7 @@ from foundation.living_cost.evidence_validators import (
     NOT_MODELED,
     epa_evidence_status,
     meps_evidence_status,
+    selected_cache_sha,
     validate_epa_cohorts,
     validate_meps_derivation,
 )
@@ -113,6 +114,35 @@ def test_file_existence_alone_is_not_modeled(tmp_path: Path):
     empty.write_text("{}", encoding="utf-8")
     assert validate_meps_derivation(empty, selected_sha="x").ok is False
     assert validate_epa_cohorts(empty, selected_sha="x").ok is False
+
+
+def test_freshness_discovery_hashes_selected_cache_bytes():
+    src = (
+        Path(__file__).resolve().parents[1]
+        / "src"
+        / "foundation"
+        / "living_cost"
+        / "freshness_discovery.py"
+    ).read_text(encoding="utf-8")
+    assert "selected_cache_sha(MEPS_CACHE_NAME)" in src
+    assert "selected_cache_sha(EPA_CACHE_NAME)" in src
+    assert "validate_meps_derivation(selected_sha=(sidecar" not in src
+    assert "validate_epa_cohorts(selected_sha=(sidecar" not in src
+
+
+def test_selected_cache_sha_prefers_file_bytes_over_sidecar(tmp_path: Path, monkeypatch):
+    from foundation.living_cost import evidence_validators as ev
+
+    cache_dir = tmp_path / "cache"
+    cache_dir.mkdir()
+    blob = cache_dir / "h251dat.zip"
+    blob.write_bytes(b"official-bytes")
+    sidecar = cache_dir / "h251dat.zip.provenance.json"
+    sidecar.write_text('{"sha256": "sidecar-does-not-match-file"}', encoding="utf-8")
+    monkeypatch.setattr(ev, "CACHE_DIR", cache_dir)
+    import hashlib
+
+    assert selected_cache_sha("h251dat.zip") == hashlib.sha256(b"official-bytes").hexdigest()
 
 
 def test_valid_reports_promote(tmp_path: Path):
