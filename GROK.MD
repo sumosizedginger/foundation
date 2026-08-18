@@ -12,7 +12,10 @@ redesign the gate architecture.
 
 ## FINAL SHA
 
-Pending first commit on this correction. Updated after push.
+`dd8ba691bf846113db1d52846a4047f7f0608997`
+
+Closeout documentation may sit on a later commit; this SHA is the
+correction implementation.
 
 ## GitHub CI
 
