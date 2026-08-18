@@ -1,9 +1,9 @@
 {
   "report_type": "living_cost_candidate_freshness",
-  "generated_at": "2026-08-18T18:12:02Z",
+  "generated_at": "2026-08-18T19:16:55Z",
   "schema_version": "2.4",
   "calculates_mslc": false,
-  "freshness_run_id": "d9dc07312e76475522a11a3a677ce3b7fe8238f5091ed1958d7dace3a033b4f8",
+  "freshness_run_id": "989a8efffa5736d6a0a108f089530c2330fc17923c3f1a657862fd78cb33a6fd",
   "required_families": [
     "acs_population_weights",
     "hud_fmr",
@@ -28,7 +28,7 @@
   "checks": {
     "acs_population_weights": {
       "source_id": "acs_population_weights",
-      "latest_checked_at": "2026-08-18T18:11:59Z",
+      "latest_checked_at": "2026-08-18T19:16:49Z",
       "latest_authoritative_vintage_found": "2024",
       "selected_vintage": "2024 ACS 5-Year B01001",
       "selected_artifact": "acsdt5y2024-b01001.dat",
@@ -116,7 +116,7 @@
     },
     "hud_fmr": {
       "source_id": "hud_fmr",
-      "latest_checked_at": "2026-08-18T18:11:59Z",
+      "latest_checked_at": "2026-08-18T19:16:52Z",
       "latest_authoritative_vintage_found": "FY2024 / FY2026",
       "selected_vintage": "FY2024 / FY2026",
       "selected_artifact": "FMR2024_final_revised.xlsx / FY26_FMRs_revised.xlsx",
@@ -189,7 +189,7 @@
     },
     "usda_food": {
       "source_id": "usda_food",
-      "latest_checked_at": "2026-08-18T18:12:00Z",
+      "latest_checked_at": "2026-08-18T19:16:52Z",
       "latest_authoritative_vintage_found": "USDA official monthly archives (2024 historical; official latest (2026, 5))",
       "selected_vintage": "USDA Low-Cost official monthly archive; 2026 uses official YTD months",
       "selected_artifact": "usda-lowcostplan-sept2007-present.xlsx",
@@ -551,7 +551,7 @@
     },
     "cms_marketplace_sbe": {
       "source_id": "cms_marketplace_sbe",
-      "latest_checked_at": "2026-08-18T18:12:00Z",
+      "latest_checked_at": "2026-08-18T19:16:52Z",
       "latest_authoritative_vintage_found": "PY2024 / PY2026 Exchange PUF + standalone SBE",
       "selected_vintage": "PY2024 / PY2026 federal Exchange PUF + year-specific standalone SBE",
       "selected_artifact": "cms_rate_puf / plan_puf / service_area_puf + SBE archives",
@@ -1008,7 +1008,7 @@
         "federal_exchange": {
           "kind": "federal_exchange",
           "landing_url": "https://www.cms.gov/marketplace/resources/data/public-use-files",
-          "checked_at": "2026-08-18T18:11:59Z",
+          "checked_at": "2026-08-18T19:16:50Z",
           "status": "VERIFIED_CURRENT",
           "plan_years_found": [
             2020,
@@ -1027,7 +1027,7 @@
         "sbe": {
           "kind": "sbe",
           "landing_url": "https://www.cms.gov/marketplace/resources/data/state-based-public-use-files",
-          "checked_at": "2026-08-18T18:12:00Z",
+          "checked_at": "2026-08-18T19:16:52Z",
           "status": "VERIFIED_CURRENT",
           "plan_years_found": [
             2020,
@@ -1048,7 +1048,7 @@
     },
     "meps_full_year_consolidated": {
       "source_id": "meps_full_year_consolidated",
-      "latest_checked_at": "2026-08-18T18:11:59Z",
+      "latest_checked_at": "2026-08-18T19:16:50Z",
       "latest_authoritative_vintage_found": "HC-251 / 2023",
       "selected_vintage": "HC-251 / 2023",
       "selected_artifact": "h251dat.zip",
@@ -1178,7 +1178,7 @@
     },
     "nhts_mileage": {
       "source_id": "nhts_mileage",
-      "latest_checked_at": "2026-08-18T18:11:59Z",
+      "latest_checked_at": "2026-08-18T19:16:49Z",
       "latest_authoritative_vintage_found": "2022 NHTS V2.1",
       "selected_vintage": "2022 NHTS V2.1",
       "selected_artifact": "nhts_2022_csv.zip",
@@ -1214,7 +1214,7 @@
     },
     "epa_vehicle": {
       "source_id": "epa_vehicle",
-      "latest_checked_at": "2026-08-18T18:11:59Z",
+      "latest_checked_at": "2026-08-18T19:16:50Z",
       "latest_authoritative_vintage_found": "EPA/DOE fueleconomy.gov vehicles.csv.zip",
       "selected_vintage": "EPA/DOE fueleconomy.gov vehicles.csv.zip",
       "selected_artifact": "epa_fueleconomy_vehicles.csv.zip",
@@ -1261,7 +1261,7 @@
     },
     "eia_gasoline": {
       "source_id": "eia_gasoline",
-      "latest_checked_at": "2026-08-18T18:11:59Z",
+      "latest_checked_at": "2026-08-18T19:16:53Z",
       "latest_authoritative_vintage_found": "EIA weekly retail gasoline through 2026-08-17",
       "selected_vintage": "EIA weekly retail gasoline through 2026-08-17",
       "selected_artifact": "pswrgvwall.xls",
@@ -1277,11 +1277,11 @@
           "filename": "pswrgvwall.xls",
           "url": "https://www.eia.gov/petroleum/gasdiesel/xls/pswrgvwall.xls",
           "sha256": "b352802e8c52b7276f002c0682d9867a89734815494269346941d810f9c78140",
-          "retrieved_at": "2026-08-18T18:11:24+00:00",
+          "retrieved_at": "2026-08-18T19:16:33+00:00",
           "validation_status": "VALIDATED"
         }
       ],
-      "retrieved_at": "2026-08-18T18:11:24+00:00",
+      "retrieved_at": "2026-08-18T19:16:33+00:00",
       "transformation_method": "target-year / YTD weekly retail regular gasoline",
       "input_evidence_status": "VALIDATED",
       "months_included": null,
@@ -1294,27 +1294,53 @@
       "year_coverage": {
         "2024": {
           "covered": true,
-          "selected_max_date": "2026-08-17",
+          "source_data_year": 2024,
+          "first_observation_date": "2024-01-01",
+          "last_observation_date": "2024-12-30",
+          "observation_count": 53,
+          "geographic_series_count": 12,
+          "artifact": "pswrgvwall.xls",
+          "sha256": "b352802e8c52b7276f002c0682d9867a89734815494269346941d810f9c78140",
           "note": "2024 weekly observations",
-          "project_cost_year": 2024
+          "project_cost_year": 2024,
+          "artifacts": [
+            {
+              "artifact_id": "pswrgvwall.xls",
+              "sha256": "b352802e8c52b7276f002c0682d9867a89734815494269346941d810f9c78140"
+            }
+          ]
         },
         "2026": {
           "covered": true,
-          "selected_max_date": "2026-08-17",
+          "source_data_year": 2026,
+          "first_observation_date": "2026-01-05",
+          "last_observation_date": "2026-08-17",
+          "observation_count": 33,
+          "geographic_series_count": 12,
+          "artifact": "pswrgvwall.xls",
+          "sha256": "b352802e8c52b7276f002c0682d9867a89734815494269346941d810f9c78140",
+          "note": "2026 weekly observations",
           "official_max_date": "2026-08-17",
-          "note": "2026 YTD weekly observations",
-          "project_cost_year": 2026
+          "project_cost_year": 2026,
+          "artifacts": [
+            {
+              "artifact_id": "pswrgvwall.xls",
+              "sha256": "b352802e8c52b7276f002c0682d9867a89734815494269346941d810f9c78140"
+            }
+          ]
         }
       },
       "series_coverage": null,
       "extra": {
         "official_max_date": "2026-08-17",
-        "selected_max_date": "2026-08-17"
+        "selected_max_date": "2026-08-17",
+        "selected_sha256": "b352802e8c52b7276f002c0682d9867a89734815494269346941d810f9c78140",
+        "official_sha256": "b352802e8c52b7276f002c0682d9867a89734815494269346941d810f9c78140"
       }
     },
     "naic_auto_insurance": {
       "source_id": "naic_auto_insurance",
-      "latest_checked_at": "2026-08-18T18:11:59Z",
+      "latest_checked_at": "2026-08-18T19:16:52Z",
       "latest_authoritative_vintage_found": "AUT-PB 2022-2023",
       "selected_vintage": null,
       "selected_artifact": "publication-aut-pb-auto-insurance-database.pdf",
@@ -1388,7 +1414,7 @@
     },
     "bls_ce": {
       "source_id": "bls_ce",
-      "latest_checked_at": "2026-08-18T18:11:59Z",
+      "latest_checked_at": "2026-08-18T19:16:50Z",
       "latest_authoritative_vintage_found": "2024 Interview PUMD",
       "selected_vintage": "2024 Interview PUMD",
       "selected_artifact": "intrvw24.zip",
@@ -1424,7 +1450,7 @@
     },
     "fcc_broadband": {
       "source_id": "fcc_broadband",
-      "latest_checked_at": "2026-08-18T18:11:59Z",
+      "latest_checked_at": "2026-08-18T19:16:52Z",
       "latest_authoritative_vintage_found": null,
       "selected_vintage": null,
       "selected_artifact": null,
@@ -1451,7 +1477,7 @@
     },
     "mobile_price": {
       "source_id": "mobile_price",
-      "latest_checked_at": "2026-08-18T18:11:59Z",
+      "latest_checked_at": "2026-08-18T19:16:50Z",
       "latest_authoritative_vintage_found": null,
       "selected_vintage": null,
       "selected_artifact": null,
@@ -1487,7 +1513,7 @@
     },
     "bea_rpp": {
       "source_id": "bea_rpp",
-      "latest_checked_at": "2026-08-18T18:12:00Z",
+      "latest_checked_at": "2026-08-18T19:16:52Z",
       "latest_authoritative_vintage_found": "BEA SARPP All-items 2024 / current release February 19, 2026",
       "selected_vintage": "BEA SARPP All-items 2024 / current release February 19, 2026",
       "selected_artifact": "SARPP.zip",
@@ -1537,7 +1563,7 @@
     },
     "federal_tax_law": {
       "source_id": "federal_tax_law",
-      "latest_checked_at": "2026-08-18T18:12:00Z",
+      "latest_checked_at": "2026-08-18T19:16:52Z",
       "latest_authoritative_vintage_found": "code tables [2024, 2026]",
       "selected_vintage": "2024 and 2026 statutory tables in code",
       "selected_artifact": null,
@@ -1580,7 +1606,7 @@
     },
     "state_tax_law": {
       "source_id": "state_tax_law",
-      "latest_checked_at": "2026-08-18T18:11:59Z",
+      "latest_checked_at": "2026-08-18T19:16:52Z",
       "latest_authoritative_vintage_found": "2024 and 2026 schedules in code",
       "selected_vintage": "2024 and 2026 schedules in code",
       "selected_artifact": null,
@@ -1618,7 +1644,7 @@
     },
     "local_tax_law": {
       "source_id": "local_tax_law",
-      "latest_checked_at": "2026-08-18T18:11:59Z",
+      "latest_checked_at": "2026-08-18T19:16:52Z",
       "latest_authoritative_vintage_found": "MD county / NYC / Philadelphia verified; Harris County TX verified no local EIT",
       "selected_vintage": "partial verified inventory",
       "selected_artifact": null,
@@ -1656,7 +1682,7 @@
     },
     "vehicle_registration": {
       "source_id": "vehicle_registration",
-      "latest_checked_at": "2026-08-18T18:11:59Z",
+      "latest_checked_at": "2026-08-18T19:16:52Z",
       "latest_authoritative_vintage_found": null,
       "selected_vintage": null,
       "selected_artifact": null,
@@ -1692,7 +1718,7 @@
     },
     "vehicle_replacement": {
       "source_id": "vehicle_replacement",
-      "latest_checked_at": "2026-08-18T18:11:59Z",
+      "latest_checked_at": "2026-08-18T19:16:52Z",
       "latest_authoritative_vintage_found": null,
       "selected_vintage": null,
       "selected_artifact": null,
@@ -1719,7 +1745,7 @@
     },
     "od010_price_index": {
       "source_id": "od010_price_index",
-      "latest_checked_at": "2026-08-18T18:11:59Z",
+      "latest_checked_at": "2026-08-18T19:16:52Z",
       "latest_authoritative_vintage_found": "BLS CPI-U official API",
       "selected_vintage": "BLS CPI-U official API",
       "selected_artifact": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
@@ -1734,7 +1760,7 @@
           "artifact_id": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
           "sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
           "observation_set_sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
-          "raw_response_sha256": "24280f2cc98daba77633a4b01202b3bd489189e0e77ff15c7fe9c65272757b88"
+          "raw_response_sha256": "4af99ff7b7969df4af0f8292bc54727f965d64d5936eb444c933036c4cf5f086"
         }
       ],
       "retrieved_at": null,
@@ -1772,7 +1798,7 @@
             "selected_artifact": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
             "api_identity": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
             "sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
-            "raw_response_sha256": "24280f2cc98daba77633a4b01202b3bd489189e0e77ff15c7fe9c65272757b88",
+            "raw_response_sha256": "4af99ff7b7969df4af0f8292bc54727f965d64d5936eb444c933036c4cf5f086",
             "observation_set_sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
             "target_period": "M13",
             "target_year": "2024",
@@ -1790,7 +1816,7 @@
             "selected_artifact": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
             "api_identity": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
             "sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
-            "raw_response_sha256": "24280f2cc98daba77633a4b01202b3bd489189e0e77ff15c7fe9c65272757b88",
+            "raw_response_sha256": "4af99ff7b7969df4af0f8292bc54727f965d64d5936eb444c933036c4cf5f086",
             "observation_set_sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
             "target_period": "M07",
             "target_year": "2026",
@@ -1810,7 +1836,7 @@
             "selected_artifact": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
             "api_identity": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
             "sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
-            "raw_response_sha256": "24280f2cc98daba77633a4b01202b3bd489189e0e77ff15c7fe9c65272757b88",
+            "raw_response_sha256": "4af99ff7b7969df4af0f8292bc54727f965d64d5936eb444c933036c4cf5f086",
             "observation_set_sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
             "target_period": "M13",
             "target_year": "2024",
@@ -1828,7 +1854,7 @@
             "selected_artifact": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
             "api_identity": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
             "sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
-            "raw_response_sha256": "24280f2cc98daba77633a4b01202b3bd489189e0e77ff15c7fe9c65272757b88",
+            "raw_response_sha256": "4af99ff7b7969df4af0f8292bc54727f965d64d5936eb444c933036c4cf5f086",
             "observation_set_sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
             "target_period": "M07",
             "target_year": "2026",
@@ -1848,7 +1874,7 @@
             "selected_artifact": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
             "api_identity": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
             "sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
-            "raw_response_sha256": "24280f2cc98daba77633a4b01202b3bd489189e0e77ff15c7fe9c65272757b88",
+            "raw_response_sha256": "4af99ff7b7969df4af0f8292bc54727f965d64d5936eb444c933036c4cf5f086",
             "observation_set_sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
             "target_period": "M07",
             "target_year": "2026",
@@ -1868,7 +1894,7 @@
             "selected_artifact": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
             "api_identity": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
             "sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
-            "raw_response_sha256": "24280f2cc98daba77633a4b01202b3bd489189e0e77ff15c7fe9c65272757b88",
+            "raw_response_sha256": "4af99ff7b7969df4af0f8292bc54727f965d64d5936eb444c933036c4cf5f086",
             "observation_set_sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
             "target_period": "M07",
             "target_year": "2026",
@@ -1888,7 +1914,7 @@
             "selected_artifact": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
             "api_identity": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
             "sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
-            "raw_response_sha256": "24280f2cc98daba77633a4b01202b3bd489189e0e77ff15c7fe9c65272757b88",
+            "raw_response_sha256": "4af99ff7b7969df4af0f8292bc54727f965d64d5936eb444c933036c4cf5f086",
             "observation_set_sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
             "target_period": "M07",
             "target_year": "2026",
@@ -1903,7 +1929,7 @@
         "series_inventory_status": "INVENTORIED",
         "series_inventory_specific": true,
         "live_bls_request": "SUCCEEDED",
-        "raw_response_sha256": "24280f2cc98daba77633a4b01202b3bd489189e0e77ff15c7fe9c65272757b88",
+        "raw_response_sha256": "4af99ff7b7969df4af0f8292bc54727f965d64d5936eb444c933036c4cf5f086",
         "observation_set_sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
         "live_latest_target_observation": "2026 July",
         "table_target_observation": "2026 July"

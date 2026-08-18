@@ -8,9 +8,12 @@ Economic consumption modeling (miles/MPG/gallons) is strictly separated into liv
 from __future__ import annotations
 
 import csv
+import hashlib
 import logging
+from collections.abc import Iterator
 from datetime import date
 from pathlib import Path
+from typing import Any
 
 from foundation.living_cost.models import ComponentStatus, LivingCostComponentObservation
 
@@ -20,6 +23,21 @@ EIA_GAS_URL = "https://www.eia.gov/petroleum/gasdiesel/"
 
 
 EIA_GAS_XLS_URL = "https://www.eia.gov/petroleum/gasdiesel/xls/pswrgvwall.xls"
+EIA_WORKBOOK_FILENAME = "pswrgvwall.xls"
+
+
+def selected_eia_workbook_sha256(file_path: Path) -> str | None:
+    """SHA-256 of the selected EIA workbook bytes.
+
+    The provenance sidecar is not identity. Missing workbook => None.
+    """
+    if not file_path.is_file():
+        return None
+    digest = hashlib.sha256()
+    with file_path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 def download_eia_gas_artifact(year: int, cache_dir: Path, force_download: bool = False):
@@ -140,6 +158,45 @@ EIA_NON_STATE_LABELS = {
 }
 
 
+def _iter_eia_weekly_rows(file_path: Path) -> Iterator[tuple[str, date | None, int | None, float]]:
+    """Yield (geo_name, observed_date, year, price) from the official workbook."""
+    try:
+        import xlrd
+    except ImportError:
+        logger.error("xlrd is required to parse EIA .xls workbooks")
+        return
+
+    try:
+        book = xlrd.open_workbook(file_path)
+    except (OSError, xlrd.XLRDError, ValueError) as exc:
+        logger.error("Failed to open EIA gasoline workbook: %s", exc)
+        return
+
+    for sheet in book.sheets():
+        header_row = None
+        geo_name = str(sheet.name).strip()
+        for r in range(min(sheet.nrows, 4000)):
+            row = [sheet.cell_value(r, c) for c in range(min(sheet.ncols, 4))]
+            blob = " ".join(str(x) for x in row).lower()
+            if header_row is None and ("date" in blob or "week" in blob):
+                header_row = r
+                continue
+            if header_row is None:
+                continue
+            raw_date, raw_val = row[0], row[1] if len(row) > 1 else None
+            observed = _eia_cell_date(raw_date, book.datemode)
+            year = (
+                observed.year if observed is not None else _eia_cell_year(raw_date, book.datemode)
+            )
+            try:
+                price = float(raw_val)  # type: ignore[arg-type]
+            except (TypeError, ValueError):
+                continue
+            if price <= 0:
+                continue
+            yield geo_name, observed, year, price
+
+
 def parse_eia_gas_prices_xls(
     file_path: Path,
     *,
@@ -152,48 +209,14 @@ def parse_eia_gas_prices_xls(
     The workbook is national + PADD + selected states. Observations that are
     PADD/regional are labeled as such and are not called state-measured.
     """
-    try:
-        import xlrd
-    except ImportError:
-        logger.error("xlrd is required to parse EIA .xls workbooks")
-        return []
-
-    try:
-        book = xlrd.open_workbook(file_path)
-    except (OSError, xlrd.XLRDError, ValueError) as exc:
-        logger.error("Failed to open EIA gasoline workbook: %s", exc)
-        return []
+    values_by_geo: dict[str, list[float]] = {}
+    for geo_name, _observed, year, price in _iter_eia_weekly_rows(file_path):
+        if year != reference_year:
+            continue
+        values_by_geo.setdefault(geo_name, []).append(price)
 
     observations: list[LivingCostComponentObservation] = []
-    # The first data sheet is typically the weekly U.S. series; later sheets
-    # are PADD/state. We walk every sheet and keep only calendar-year means.
-    for sheet in book.sheets():
-        header_row = None
-        geo_name = str(sheet.name).strip()
-        dates: list[float] = []
-        values: list[float] = []
-        for r in range(min(sheet.nrows, 4000)):
-            row = [sheet.cell_value(r, c) for c in range(min(sheet.ncols, 4))]
-            blob = " ".join(str(x) for x in row).lower()
-            if header_row is None and ("date" in blob or "week" in blob):
-                header_row = r
-                continue
-            if header_row is None:
-                continue
-            raw_date, raw_val = row[0], row[1] if len(row) > 1 else None
-            year = _eia_cell_year(raw_date, book.datemode)
-            if year != reference_year:
-                continue
-            try:
-                price = float(raw_val)  # type: ignore[arg-type]
-            except (TypeError, ValueError):
-                continue
-            if price <= 0:
-                continue
-            dates.append(price)
-            values.append(price)
-        if not values:
-            continue
+    for geo_name, values in values_by_geo.items():
         mean_price = round(sum(values) / len(values), 3)
         geo_upper = geo_name.upper()
         is_state = (
@@ -216,13 +239,13 @@ def parse_eia_gas_prices_xls(
                 source_id=f"eia_gas_price_{reference_year}",
                 source_variable="weekly_regular_retail_mean",
                 source_url=EIA_GAS_XLS_URL,
-                source_release=f"EIA Weekly Retail Gasoline ({sheet.name})",
+                source_release=f"EIA Weekly Retail Gasoline ({geo_name})",
                 source_reference_period=str(reference_year),
                 retrieved_at=retrieved_at,
                 source_artifact_sha256=file_sha256,
                 methodology_version="0.2.0-draft",
                 notes=(
-                    f"EIA workbook sheet '{sheet.name}' calendar-year mean of "
+                    f"EIA workbook sheet '{geo_name}' calendar-year mean of "
                     f"{len(values)} weekly regular retail observations in {reference_year}: "
                     f"${mean_price:.3f}/gal. "
                     + (
@@ -262,15 +285,89 @@ def max_eia_observation_date(file_path: Path) -> date | None:
     return latest
 
 
-def _eia_cell_year(raw_date: object, datemode: int) -> int | None:
+def eia_year_observation_dates(file_path: Path, reference_year: int) -> list[date]:
+    """Unique weekly observation dates for one calendar year, sorted."""
+    if not file_path.is_file():
+        return []
+    found: set[date] = set()
+    for _geo, observed, year, _price in _iter_eia_weekly_rows(file_path):
+        if year != reference_year or observed is None or observed.year != reference_year:
+            continue
+        found.add(observed)
+    return sorted(found)
+
+
+def summarize_eia_year(
+    file_path: Path,
+    *,
+    reference_year: int,
+    sha256: str | None = None,
+) -> dict[str, Any]:
+    """Year-specific EIA coverage from the official parser, not the global max date.
+
+    A year is covered only when parse_eia_gas_prices_xls returns canonical
+    evidence for that reference year. The last observation date is the last
+    row in that year, never a later year's global maximum.
+    """
+    digest = sha256 if sha256 is not None else selected_eia_workbook_sha256(file_path)
+    if not file_path.is_file():
+        return {
+            "covered": False,
+            "source_data_year": reference_year,
+            "first_observation_date": None,
+            "last_observation_date": None,
+            "observation_count": 0,
+            "geographic_series_count": 0,
+            "artifact": EIA_WORKBOOK_FILENAME,
+            "sha256": None,
+            "note": "selected workbook bytes are absent",
+        }
+    observations = parse_eia_gas_prices_xls(
+        file_path,
+        reference_year=reference_year,
+        file_sha256=digest or "",
+    )
+    dates = eia_year_observation_dates(file_path, reference_year)
+    covered = bool(observations)
+    return {
+        "covered": covered,
+        "source_data_year": reference_year,
+        "first_observation_date": None if not dates else dates[0].isoformat(),
+        "last_observation_date": None if not dates else dates[-1].isoformat(),
+        "observation_count": len(dates),
+        "geographic_series_count": len(observations),
+        "artifact": EIA_WORKBOOK_FILENAME,
+        "sha256": digest,
+        "note": (
+            f"{reference_year} weekly observations"
+            if covered
+            else f"{reference_year} weekly observations missing"
+        ),
+    }
+
+
+def _eia_cell_date(raw_date: object, datemode: int) -> date | None:
     if isinstance(raw_date, (int, float)) and raw_date > 200:
         try:
             import xlrd
 
             parts = xlrd.xldate_as_tuple(float(raw_date), datemode)
-            return int(parts[0])
+            return date(int(parts[0]), int(parts[1]), int(parts[2]))
         except (ValueError, TypeError, OverflowError):
             return None
+    text = str(raw_date).strip()
+    if len(text) >= 10 and text[4:5] in {"-", "/"}:
+        try:
+            return date.fromisoformat(text[:10].replace("/", "-"))
+        except ValueError:
+            return None
+    return None
+
+
+def _eia_cell_year(raw_date: object, datemode: int) -> int | None:
+    observed = _eia_cell_date(raw_date, datemode)
+    if observed is not None:
+        return observed.year
     text = str(raw_date)
     for token in text.replace("/", "-").split("-"):
         if token.isdigit() and len(token) == 4:

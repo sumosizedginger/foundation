@@ -54,7 +54,11 @@ from foundation.sources.cms_marketplace import (
     download_cms_marketplace_artifacts,
     download_cms_sbe_artifact,
 )
-from foundation.sources.eia import download_eia_gas_artifact
+from foundation.sources.eia import (
+    download_eia_gas_artifact,
+    selected_eia_workbook_sha256,
+    summarize_eia_year,
+)
 from foundation.sources.epa_mpg import download_epa_mpg_artifact, parse_epa_mpg_candidates
 from foundation.sources.fcc_urs import download_fcc_urs_artifact, parse_fcc_urs_broadband
 from foundation.sources.fhwa_nhts import download_fhwa_nhts_artifact
@@ -499,6 +503,62 @@ def _upgrade_parsed_artifacts(
     return upgraded
 
 
+def official_eia_year_coverage_report() -> dict[str, Any]:
+    """Year-specific coverage from the downloaded official EIA workbook bytes."""
+    path = CACHE_DIR / "pswrgvwall.xls"
+    sha = selected_eia_workbook_sha256(path)
+    y2024 = summarize_eia_year(path, reference_year=2024, sha256=sha)
+    y2026 = summarize_eia_year(path, reference_year=2026, sha256=sha)
+    report = {
+        "selected_sha256": sha,
+        "artifact": "pswrgvwall.xls",
+        "2024": y2024,
+        "2026": y2026,
+    }
+    logger.info(
+        "EIA official year coverage sha=%s 2024=%s..%s n=%s geos=%s 2026=%s..%s n=%s geos=%s",
+        sha,
+        y2024.get("first_observation_date"),
+        y2024.get("last_observation_date"),
+        y2024.get("observation_count"),
+        y2024.get("geographic_series_count"),
+        y2026.get("first_observation_date"),
+        y2026.get("last_observation_date"),
+        y2026.get("observation_count"),
+        y2026.get("geographic_series_count"),
+    )
+    return report
+
+
+def assert_official_eia_year_coverage(report: dict[str, Any] | None = None) -> dict[str, Any]:
+    """Fail closed if the official downloaded workbook lacks 2024 or 2026 evidence."""
+    payload = report or official_eia_year_coverage_report()
+    sha = payload.get("selected_sha256")
+    y2024 = payload.get("2024") if isinstance(payload.get("2024"), dict) else {}
+    y2026 = payload.get("2026") if isinstance(payload.get("2026"), dict) else {}
+    if not sha:
+        raise RuntimeError(
+            "EIA selected workbook bytes are absent; selected_sha=None and year coverage fail-closed."
+        )
+    missing = [
+        year for year, rec in (("2024", y2024), ("2026", y2026)) if rec.get("covered") is not True
+    ]
+    if missing:
+        raise RuntimeError(
+            "EIA official workbook is missing required year-specific evidence: "
+            + ", ".join(missing)
+        )
+    if (
+        y2024.get("last_observation_date")
+        and y2026.get("last_observation_date")
+        and y2024["last_observation_date"] == y2026["last_observation_date"]
+    ):
+        raise RuntimeError(
+            "EIA 2024 last_observation_date must be year-specific, not the 2026 global max."
+        )
+    return payload
+
+
 def _component_status(artifacts: list[RetrievedSourceArtifact], *source_ids: str) -> str:
     for source_id in source_ids:
         for art in artifacts:
@@ -578,12 +638,14 @@ def write_coverage(artifacts: list[RetrievedSourceArtifact]) -> dict:
             }:
                 blocking.append(f"{year}:{name}:{status}")
 
+    eia_year_coverage = official_eia_year_coverage_report()
     coverage = {
         "report_type": "living_cost_source_coverage",
         "generated_at": datetime.now(UTC).replace(microsecond=0).isoformat(),
         "question": "What still prevents the living-cost model from being calculated?",
         "required_components": list(REQUIRED_COMPONENTS),
         "coverage_by_year": coverage_by_year,
+        "eia_year_coverage": eia_year_coverage,
         "source_lag": {
             "housing": {
                 "project_cost_year": {"2024": 2024, "2026": 2026},
@@ -838,6 +900,7 @@ def main() -> int:
     logger.info("Source manifest generated at %s", manifest_path)
 
     coverage = write_coverage(all_artifacts)
+    assert_official_eia_year_coverage(coverage.get("eia_year_coverage") or {})
     from foundation.living_cost.freshness import write_candidate_freshness_report
 
     write_candidate_freshness_report(METADATA_DIR)

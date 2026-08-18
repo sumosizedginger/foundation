@@ -1,6 +1,6 @@
 {
   "report_type": "living_cost_source_coverage",
-  "generated_at": "2026-08-18T18:11:58+00:00",
+  "generated_at": "2026-08-18T19:16:47+00:00",
   "question": "What still prevents the living-cost model from being calculated?",
   "required_components": [
     "housing",
@@ -65,6 +65,32 @@
       "federal_tax": "INVENTORY_NOT_VALIDATED",
       "state_tax": "SOURCE_GAP",
       "local_tax": "SOURCE_GAP"
+    }
+  },
+  "eia_year_coverage": {
+    "selected_sha256": "b352802e8c52b7276f002c0682d9867a89734815494269346941d810f9c78140",
+    "artifact": "pswrgvwall.xls",
+    "2024": {
+      "covered": true,
+      "source_data_year": 2024,
+      "first_observation_date": "2024-01-01",
+      "last_observation_date": "2024-12-30",
+      "observation_count": 53,
+      "geographic_series_count": 12,
+      "artifact": "pswrgvwall.xls",
+      "sha256": "b352802e8c52b7276f002c0682d9867a89734815494269346941d810f9c78140",
+      "note": "2024 weekly observations"
+    },
+    "2026": {
+      "covered": true,
+      "source_data_year": 2026,
+      "first_observation_date": "2026-01-05",
+      "last_observation_date": "2026-08-17",
+      "observation_count": 33,
+      "geographic_series_count": 12,
+      "artifact": "pswrgvwall.xls",
+      "sha256": "b352802e8c52b7276f002c0682d9867a89734815494269346941d810f9c78140",
+      "note": "2026 weekly observations"
     }
   },
   "source_lag": {
@@ -591,8 +617,8 @@
       "validation_status": "VALIDATED",
       "sha256": "b352802e8c52b7276f002c0682d9867a89734815494269346941d810f9c78140",
       "byte_size": 7467008,
-      "retrieved_at": "2026-08-18T18:11:24+00:00",
-      "notes": "Parsed 12 EIA regular retail series for 2024. Regional/PADD series are not labeled state-measured."
+      "retrieved_at": "2026-08-18T19:16:33+00:00",
+      "notes": "Parsed 12 EIA regular retail series for 2024. first=2024-01-01 last=2024-12-30 weeks=53. Regional/PADD series are not labeled state-measured."
     },
     {
       "source_id": "naic_auto_ins_2024",
@@ -927,8 +953,8 @@
       "validation_status": "VALIDATED",
       "sha256": "b352802e8c52b7276f002c0682d9867a89734815494269346941d810f9c78140",
       "byte_size": 7467008,
-      "retrieved_at": "2026-08-18T18:11:24+00:00",
-      "notes": "Parsed 12 EIA regular retail series for 2026. Regional/PADD series are not labeled state-measured."
+      "retrieved_at": "2026-08-18T19:16:33+00:00",
+      "notes": "Parsed 12 EIA regular retail series for 2026. first=2026-01-05 last=2026-08-17 weeks=33. Regional/PADD series are not labeled state-measured."
     },
     {
       "source_id": "naic_auto_ins_2026",

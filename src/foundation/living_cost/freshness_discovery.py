@@ -1045,18 +1045,28 @@ def discover_epa() -> FreshnessCheck:
 
 
 def discover_eia() -> FreshnessCheck:
-    from foundation.sources.eia import EIA_GAS_XLS_URL, max_eia_observation_date
+    from foundation.sources.eia import (
+        EIA_GAS_XLS_URL,
+        EIA_WORKBOOK_FILENAME,
+        max_eia_observation_date,
+        selected_eia_workbook_sha256,
+        summarize_eia_year,
+    )
 
-    sidecar = _sidecar("pswrgvwall.xls")
-    local_path = CACHE_DIR / "pswrgvwall.xls"
-    selected_max = max_eia_observation_date(local_path) if local_path.exists() else None
-    selected_sha = (sidecar or {}).get("sha256")
+    sidecar = _sidecar(EIA_WORKBOOK_FILENAME)
+    local_path = CACHE_DIR / EIA_WORKBOOK_FILENAME
+    # Identity is the selected workbook bytes. Sidecar SHA must not override.
+    selected_sha = selected_eia_workbook_sha256(local_path)
+    selected_max = max_eia_observation_date(local_path) if local_path.is_file() else None
+    year_2024 = summarize_eia_year(local_path, reference_year=2024, sha256=selected_sha)
+    year_2026 = summarize_eia_year(local_path, reference_year=2026, sha256=selected_sha)
+    year_coverage = _year_coverage(year_2024, year_2026)
     art = _artifact_record(
-        artifact_id="pswrgvwall.xls",
+        artifact_id=EIA_WORKBOOK_FILENAME,
         url=EIA_GAS_XLS_URL,
         sha256=selected_sha,
         retrieved_at=(sidecar or {}).get("retrieved_at"),
-        validation_status="VALIDATED",
+        validation_status="VALIDATED" if selected_sha else "UNAVAILABLE",
     )
     try:
         html, checked = fetch_text(EIA_GAS_LANDING)
@@ -1065,11 +1075,12 @@ def discover_eia() -> FreshnessCheck:
             "eia_gasoline",
             publisher="U.S. Energy Information Administration",
             landing_url=EIA_GAS_LANDING,
-            evidence="VALIDATED",
+            evidence="VALIDATED" if selected_sha else "UNAVAILABLE",
             vintage="EIA weekly retail gasoline",
-            artifact="pswrgvwall.xls",
+            artifact=EIA_WORKBOOK_FILENAME,
             artifacts=[art],
             reason=f"EIA gasoline/diesel page could not be retrieved: {exc}",
+            extra={"year_coverage": year_coverage, "selected_sha256": selected_sha},
         )
     has_xls = "pswrgvwall" in html.lower() or "gasdiesel" in html.lower()
     if not has_xls:
@@ -1077,11 +1088,12 @@ def discover_eia() -> FreshnessCheck:
             "eia_gasoline",
             publisher="U.S. Energy Information Administration",
             landing_url=EIA_GAS_LANDING,
-            evidence="VALIDATED",
+            evidence="VALIDATED" if selected_sha else "UNAVAILABLE",
             vintage="EIA weekly retail gasoline",
-            artifact="pswrgvwall.xls",
+            artifact=EIA_WORKBOOK_FILENAME,
             artifacts=[art],
             reason="EIA page retrieved but pswrgvwall.xls / weekly gasoline workbook was not found.",
+            extra={"year_coverage": year_coverage, "selected_sha256": selected_sha},
         )
     official_max = None
     official_sha = None
@@ -1092,24 +1104,17 @@ def discover_eia() -> FreshnessCheck:
     except (OSError, RuntimeError, ValueError, requests.RequestException):
         official_max = None
         official_sha = None
+    if official_max is not None:
+        year_2026 = {
+            **year_2026,
+            "official_max_date": official_max.isoformat(),
+        }
+        year_coverage = _year_coverage(year_2024, year_2026)
     currentness = eia_currentness_status(
         official_max_date=official_max,
         selected_max_date=selected_max,
         official_sha=official_sha,
         selected_sha=selected_sha,
-    )
-    year_coverage = _year_coverage(
-        {
-            "covered": selected_max is not None and selected_max.year >= 2024,
-            "selected_max_date": None if selected_max is None else selected_max.isoformat(),
-            "note": "2024 weekly observations",
-        },
-        {
-            "covered": selected_max is not None and selected_max.year >= 2026,
-            "selected_max_date": None if selected_max is None else selected_max.isoformat(),
-            "official_max_date": None if official_max is None else official_max.isoformat(),
-            "note": "2026 YTD weekly observations",
-        },
     )
     return FreshnessCheck(
         source_id="eia_gasoline",
@@ -1124,9 +1129,9 @@ def discover_eia() -> FreshnessCheck:
             if selected_max is None
             else f"EIA weekly retail gasoline through {selected_max.isoformat()}"
         ),
-        selected_artifact="pswrgvwall.xls",
+        selected_artifact=EIA_WORKBOOK_FILENAME,
         newer_data_exists=currentness["newer_data_exists"],
-        retrieval_validation_status="VALIDATED",
+        retrieval_validation_status="VALIDATED" if selected_sha else "UNAVAILABLE",
         reason_if_not_refreshed=(
             "Official EIA gasoline/diesel page checked. pswrgvwall.xls is a mutable URL. "
             f"{currentness['reason']}"
@@ -1137,7 +1142,7 @@ def discover_eia() -> FreshnessCheck:
         selected_artifacts=(art,),
         retrieved_at=(sidecar or {}).get("retrieved_at"),
         transformation_method="target-year / YTD weekly retail regular gasoline",
-        input_evidence_status="VALIDATED",
+        input_evidence_status="VALIDATED" if selected_sha else "UNAVAILABLE",
         listing_freshness_status=currentness["listing_freshness_status"],
         artifact_currentness_status=currentness["artifact_currentness_status"],
         selected_artifact_matches_latest=currentness["selected_artifact_matches_latest"],
@@ -1145,6 +1150,8 @@ def discover_eia() -> FreshnessCheck:
         extra={
             "official_max_date": None if official_max is None else official_max.isoformat(),
             "selected_max_date": None if selected_max is None else selected_max.isoformat(),
+            "selected_sha256": selected_sha,
+            "official_sha256": official_sha,
         },
     )
 
