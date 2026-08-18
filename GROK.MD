@@ -12,10 +12,10 @@ redesign the gate architecture.
 
 ## FINAL SHA
 
-`dd8ba691bf846113db1d52846a4047f7f0608997`
+`58cb6d72a93633d48e4fdbfdf7533ff12fa05316`
 
-Closeout documentation may sit on a later commit; this SHA is the
-correction implementation.
+Correction implementation: `dd8ba691bf846113db1d52846a4047f7f0608997`.
+Follow-up fail-closed bind/cache-hash fix: `58cb6d72a93633d48e4fdbfdf7533ff12fa05316`.
 
 ## GitHub CI
 
