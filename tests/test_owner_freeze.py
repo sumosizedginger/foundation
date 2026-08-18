@@ -574,10 +574,10 @@ def test_candidate_authorization_is_separate_from_public_release(
         "FORMULA_FROZEN_INPUTS_PENDING"
     )
     assert report["checks"]["meps_full_year_consolidated"]["retrieval_validation_status"] == (
-        "RETRIEVED_UNVALIDATED"
+        "MODELED_FROM_MEASURED_INPUTS"
     )
     assert report["checks"]["epa_vehicle"]["retrieval_validation_status"] == (
-        "RETRIEVED_UNVALIDATED"
+        "MODELED_FROM_MEASURED_INPUTS"
     )
 
 

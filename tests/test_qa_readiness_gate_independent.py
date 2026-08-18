@@ -89,17 +89,15 @@ def test_live_freshness_writer_is_fail_closed(tmp_path: Path, monkeypatch: pytes
     assert payload["living_cost_release_authorized"] is False
     assert payload["blocker_count"] >= 13
     assert len(payload["blockers"]) == payload["blocker_count"]
-    assert "OD010_TRANSLATION_INDEX_NOT_BOUND" in payload["blockers"]
-    assert "meps_full_year_consolidated:RETRIEVED_UNVALIDATED" in payload["blockers"]
-    assert "epa_vehicle:RETRIEVED_UNVALIDATED" in payload["blockers"]
+    assert "REQUIRED_CANDIDATE_INPUTS_NOT_BOUND" in payload["blockers"]
     assert "vehicle_replacement:FORMULA_FROZEN_INPUTS_PENDING" in payload["blockers"]
     assert "bea_rpp" in payload["required_families"]
     assert "vehicle_replacement" in payload["required_families"]
     assert payload["checks"]["meps_full_year_consolidated"]["retrieval_validation_status"] == (
-        "RETRIEVED_UNVALIDATED"
+        "MODELED_FROM_MEASURED_INPUTS"
     )
     assert payload["checks"]["epa_vehicle"]["retrieval_validation_status"] == (
-        "RETRIEVED_UNVALIDATED"
+        "MODELED_FROM_MEASURED_INPUTS"
     )
     assert payload["checks"]["vehicle_replacement"]["retrieval_validation_status"] == (
         "FORMULA_FROZEN_INPUTS_PENDING"
@@ -138,7 +136,7 @@ def test_production_freshness_artifact_matches_fail_closed_contract():
     assert payload["candidate_calculation_authorized"] is False
     assert payload["living_cost_release_authorized"] is False
     assert payload["blocker_count"] >= 13
-    assert "OD010_TRANSLATION_INDEX_NOT_BOUND" in payload["blockers"]
+    assert "REQUIRED_CANDIDATE_INPUTS_NOT_BOUND" in payload["blockers"]
     required = payload["required_families"]
     assert len(required) == 19
     assert "vehicle_replacement" in required
@@ -148,10 +146,10 @@ def test_production_freshness_artifact_matches_fail_closed_contract():
         "FORMULA_FROZEN_INPUTS_PENDING"
     )
     assert payload["checks"]["meps_full_year_consolidated"]["retrieval_validation_status"] == (
-        "RETRIEVED_UNVALIDATED"
+        "MODELED_FROM_MEASURED_INPUTS"
     )
     assert payload["checks"]["epa_vehicle"]["retrieval_validation_status"] == (
-        "RETRIEVED_UNVALIDATED"
+        "MODELED_FROM_MEASURED_INPUTS"
     )
     bea = payload["checks"]["bea_rpp"]
     assert bea["retrieval_validation_status"] == "VALIDATED"

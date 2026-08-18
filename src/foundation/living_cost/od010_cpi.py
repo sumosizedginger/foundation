@@ -25,6 +25,25 @@ PROJECT_ROOT = Path(__file__).resolve().parents[3]
 METADATA_DIR = PROJECT_ROOT / "data" / "metadata"
 OD010_TABLE = METADATA_DIR / "living_cost_od010_translation_table.json"
 OD010_RETRIEVE = METADATA_DIR / "living_cost_od010_bls_retrieve.json"
+OD010_LIVE_CURRENTNESS = METADATA_DIR / "living_cost_od010_live_currentness.json"
+OD010_TABLE_HISTORY_DIR = METADATA_DIR / "history"
+
+_MONTH_PERIOD: dict[str, str] = {
+    "january": "M01",
+    "february": "M02",
+    "march": "M03",
+    "april": "M04",
+    "may": "M05",
+    "june": "M06",
+    "july": "M07",
+    "august": "M08",
+    "september": "M09",
+    "october": "M10",
+    "november": "M11",
+    "december": "M12",
+    "annual": "M13",
+}
+INVALIDATING_CURRENTNESS = frozenset({"NEWER_AVAILABLE", "STALE", "INVALIDATED"})
 
 BLS_CPI_LANDING = "https://www.bls.gov/cpi/"
 BLS_API_IDENTITY = BLS_V2_URL
@@ -106,14 +125,24 @@ def _now_iso() -> str:
     return datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
+def required_od010_series_ids() -> list[str]:
+    """Official BLS series currently selected for frozen OD-010 pairs."""
+    return [
+        FROZEN_OD010_SERIES[name]["official_series_identifier"]
+        for name in ("health_oop", "insurance", "maintenance", "recreation", "essentials")
+    ]
+
+
 def retrieve_bls_cpi_series(
-    series_ids: list[str],
+    series_ids: list[str] | None = None,
     *,
     start_year: int = 2023,
     end_year: int | None = None,
     timeout: float = 40.0,
 ) -> dict[str, Any]:
     """POST official BLS public API. Returns parsed JSON plus byte identity."""
+    if series_ids is None:
+        series_ids = required_od010_series_ids()
     if end_year is None:
         end_year = datetime.now(UTC).year
     payload = {
@@ -135,13 +164,16 @@ def retrieve_bls_cpi_series(
     data = json.loads(raw.decode("utf-8"))
     if data.get("status") != "REQUEST_SUCCEEDED":
         raise RuntimeError(f"BLS API status={data.get('status')} message={data.get('message')}")
+    raw_sha = hashlib.sha256(raw).hexdigest()
     return {
         "http_status": response.status_code,
         "retrieved_at": retrieved_at,
         "request_url": BLS_V2_URL,
         "request_payload": payload,
         "byte_size": len(raw),
-        "sha256": hashlib.sha256(raw).hexdigest(),
+        "sha256": raw_sha,
+        "raw_response_sha256": raw_sha,
+        "observation_set_sha256": compute_observation_set_sha256(data),
         "body": data,
     }
 
@@ -222,6 +254,100 @@ def select_target_observation(
     return latest_monthly(rows, project_cost_year) or annual_average(rows, project_cost_year)
 
 
+def _canonical_observation(series_id: str, obs: dict[str, Any]) -> dict[str, str]:
+    return {
+        "seriesID": str(series_id),
+        "year": str(obs.get("year", "")),
+        "period": str(obs.get("period", "")),
+        "periodName": str(obs.get("periodName") or ""),
+        "value": str(obs.get("value", "")).strip(),
+    }
+
+
+def selected_canonical_observations(
+    by_series: dict[str, list[dict[str, Any]]],
+    *,
+    source_years: dict[str, int] | None = None,
+) -> list[dict[str, str]]:
+    """Observations needed for the seven frozen CPI_UPDATED pairs.
+
+    Includes each pair's base observation, selected target observation, and
+    the newest applicable target-year observation. Volatile API metadata is
+    excluded.
+    """
+    source_years = source_years or DEFAULT_SOURCE_DATA_YEAR
+    seen: dict[tuple[str, str, str], dict[str, str]] = {}
+    for component, year in FROZEN_CPI_UPDATED_PAIRS:
+        sid = FROZEN_OD010_SERIES[component]["official_series_identifier"]
+        rows = by_series.get(sid) or []
+        base_obs = annual_average(rows, source_years[component])
+        target_obs = select_target_observation(rows, year)
+        latest_target_year = latest_monthly(rows, year) or annual_average(rows, year)
+        for obs in (base_obs, target_obs, latest_target_year):
+            if not obs:
+                continue
+            rec = _canonical_observation(sid, obs)
+            key = (rec["seriesID"], rec["year"], rec["period"])
+            seen[key] = rec
+    return [seen[key] for key in sorted(seen)]
+
+
+def compute_observation_set_sha256(
+    body: dict[str, Any],
+    *,
+    source_years: dict[str, int] | None = None,
+) -> str:
+    observations = selected_canonical_observations(
+        observations_by_series(body), source_years=source_years
+    )
+    encoded = json.dumps(observations, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+    return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
+
+
+def period_tuple_from_obs(obs: dict[str, Any] | None) -> tuple[int, str] | None:
+    if not obs:
+        return None
+    try:
+        year = int(obs.get("year", 0))
+    except (TypeError, ValueError):
+        return None
+    period = str(obs.get("period") or "")
+    if not period:
+        return None
+    return (year, period)
+
+
+def period_tuple_from_label(label: str | None) -> tuple[int, str] | None:
+    if not label:
+        return None
+    text = str(label).strip()
+    if not text:
+        return None
+    parts = text.split()
+    try:
+        year = int(parts[0])
+    except (ValueError, IndexError):
+        return None
+    if len(parts) == 1:
+        return None
+    rest = " ".join(parts[1:]).strip().lower()
+    if rest in _MONTH_PERIOD:
+        return (year, _MONTH_PERIOD[rest])
+    if rest.startswith("m") and len(rest) <= 3:
+        return (year, rest.upper())
+    return None
+
+
+def target_observation_is_newer(
+    live_obs: dict[str, Any] | None, table_period_label: str | None
+) -> bool:
+    live_key = period_tuple_from_obs(live_obs)
+    table_key = period_tuple_from_label(table_period_label)
+    if live_key is None or table_key is None:
+        return False
+    return live_key > table_key
+
+
 def build_od010_records(
     retrieve: dict[str, Any],
     *,
@@ -230,6 +356,10 @@ def build_od010_records(
     """Build a real translation table from an official BLS retrieve payload."""
     source_years = source_years or DEFAULT_SOURCE_DATA_YEAR
     by_series = observations_by_series(retrieve["body"])
+    raw_sha = str(retrieve.get("raw_response_sha256") or retrieve["sha256"])
+    obs_sha = retrieve.get("observation_set_sha256")
+    if not obs_sha:
+        obs_sha = compute_observation_set_sha256(retrieve["body"], source_years=source_years)
     series_rows: list[dict[str, Any]] = []
     coverage: dict[str, dict[str, dict[str, Any]]] = {}
     for component, year in FROZEN_CPI_UPDATED_PAIRS:
@@ -257,7 +387,9 @@ def build_od010_records(
             "translation_factor": None if factor is None else format(factor, "f"),
             "official_series_identifier": sid,
             "source_artifact": BLS_API_IDENTITY,
-            "sha256": retrieve["sha256"],
+            "sha256": obs_sha,
+            "raw_response_sha256": raw_sha,
+            "observation_set_sha256": obs_sha,
         }
         rec = {
             "component": component,
@@ -267,7 +399,9 @@ def build_od010_records(
             "publisher": "BLS",
             "observation_period": period_label(target_obs),
             "source_artifact": BLS_API_IDENTITY,
-            "sha256": retrieve["sha256"],
+            "sha256": obs_sha,
+            "raw_response_sha256": raw_sha,
+            "observation_set_sha256": obs_sha,
             "translation_factor": None if factor is None else float(factor),
             "retrieval_validation_state": "VALIDATED" if covered else "RETRIEVED_UNVALIDATED",
             "calculation_inputs": calc,
@@ -287,7 +421,11 @@ def build_od010_records(
             "source_data_year": source_year,
             "selected_artifact": BLS_API_IDENTITY,
             "api_identity": BLS_API_IDENTITY,
-            "sha256": retrieve["sha256"],
+            "sha256": obs_sha,
+            "raw_response_sha256": raw_sha,
+            "observation_set_sha256": obs_sha,
+            "target_period": None if target_obs is None else target_obs.get("period"),
+            "target_year": None if target_obs is None else target_obs.get("year"),
             "base_index_value": None if base_val is None else format(base_val, "f"),
             "target_index_value": None if target_val is None else format(target_val, "f"),
         }
@@ -300,33 +438,110 @@ def build_od010_records(
         "publisher": "BLS",
         "landing_url": BLS_CPI_LANDING,
         "api_identity": BLS_API_IDENTITY,
-        "retrieve_sha256": retrieve["sha256"],
+        "retrieve_sha256": raw_sha,
+        "raw_response_sha256": raw_sha,
+        "observation_set_sha256": obs_sha,
         "retrieve_byte_size": retrieve["byte_size"],
         "bound": all_covered,
+        "currentness_status": "CURRENT" if all_covered else "INCOMPLETE",
         "series": series_rows,
         "series_coverage": coverage,
         "calculates_mslc": False,
     }
 
 
-def write_od010_artifacts(retrieve: dict[str, Any], table: dict[str, Any]) -> None:
-    METADATA_DIR.mkdir(parents=True, exist_ok=True)
+def _atomic_write_json(path: Path, payload: dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_name(path.name + ".tmp")
+    tmp.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    tmp.replace(path)
+
+
+def archive_od010_table(path: Path | None = None) -> Path | None:
+    """Preserve the prior canonical table under an immutable archival name."""
+    source = path or OD010_TABLE
+    if not source.exists():
+        return None
+    raw = source.read_bytes()
+    digest = hashlib.sha256(raw).hexdigest()[:16]
+    generated = "unknown"
+    try:
+        payload = json.loads(raw.decode("utf-8"))
+        stamp = str(payload.get("generated_at") or "").strip()
+        if stamp:
+            generated = stamp.replace(":", "").replace("+", "").replace(".", "").replace(" ", "T")
+    except (UnicodeDecodeError, json.JSONDecodeError, TypeError):
+        generated = "unreadable"
+    OD010_TABLE_HISTORY_DIR.mkdir(parents=True, exist_ok=True)
+    dest = (
+        OD010_TABLE_HISTORY_DIR / f"living_cost_od010_translation_table_{generated}_{digest}.json"
+    )
+    dest.write_bytes(raw)
+    return dest
+
+
+def write_od010_retrieve(retrieve: dict[str, Any]) -> None:
     persist = {
         "report_type": "living_cost_od010_bls_retrieve",
         "retrieved_at": retrieve["retrieved_at"],
-        "http_status": retrieve["http_status"],
-        "request_url": retrieve["request_url"],
-        "request_payload": retrieve["request_payload"],
+        "http_status": retrieve.get("http_status"),
+        "request_url": retrieve.get("request_url"),
+        "request_payload": retrieve.get("request_payload"),
         "byte_size": retrieve["byte_size"],
-        "sha256": retrieve["sha256"],
+        "sha256": retrieve.get("raw_response_sha256") or retrieve["sha256"],
+        "raw_response_sha256": retrieve.get("raw_response_sha256") or retrieve["sha256"],
+        "observation_set_sha256": retrieve.get("observation_set_sha256")
+        or compute_observation_set_sha256(retrieve["body"]),
         "body": retrieve["body"],
     }
-    OD010_RETRIEVE.write_text(json.dumps(persist, indent=2), encoding="utf-8")
-    if table.get("bound") is True:
-        OD010_TABLE.write_text(json.dumps(table, indent=2), encoding="utf-8")
-    elif OD010_TABLE.exists():
-        # Do not leave a stale fake-bound table.
-        pass
+    _atomic_write_json(OD010_RETRIEVE, persist)
+
+
+def write_od010_artifacts(retrieve: dict[str, Any], table: dict[str, Any]) -> None:
+    """Persist retrieve bytes and the canonical current table.
+
+    A prior bound table is archived. The canonical file is always rewritten so
+    a newly retrieved incomplete/obsolete inventory cannot leave a stale
+    bound pointer in place.
+    """
+    METADATA_DIR.mkdir(parents=True, exist_ok=True)
+    write_od010_retrieve(retrieve)
+    if OD010_TABLE.exists():
+        archive_od010_table(OD010_TABLE)
+    payload = dict(table)
+    if payload.get("bound") is not True:
+        payload["bound"] = False
+        payload.setdefault("currentness_status", "INCOMPLETE")
+    _atomic_write_json(OD010_TABLE, payload)
+
+
+def write_od010_live_currentness(payload: dict[str, Any]) -> None:
+    record = dict(payload)
+    record.setdefault("report_type", "living_cost_od010_live_currentness")
+    record.setdefault("generated_at", _now_iso())
+    record["calculates_mslc"] = False
+    _atomic_write_json(OD010_LIVE_CURRENTNESS, record)
+
+
+def load_od010_live_currentness() -> dict[str, Any] | None:
+    if not OD010_LIVE_CURRENTNESS.exists():
+        return None
+    try:
+        payload = json.loads(OD010_LIVE_CURRENTNESS.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
+def live_currentness_unbinds_table() -> bool:
+    """True when a live official check has invalidated the canonical table."""
+    payload = load_od010_live_currentness()
+    if not payload:
+        return False
+    status = payload.get("freshness_check_status") or payload.get("currentness_status")
+    if status in INVALIDATING_CURRENTNESS:
+        return True
+    return payload.get("translation_index_bound") is False and status == "NEWER_AVAILABLE"
 
 
 def load_retrieved_series_coverage() -> dict[str, Any] | None:
@@ -338,3 +553,56 @@ def load_retrieved_series_coverage() -> dict[str, Any] | None:
         return None
     coverage = payload.get("series_coverage")
     return coverage if isinstance(coverage, dict) else None
+
+
+def load_od010_table() -> dict[str, Any] | None:
+    if not OD010_TABLE.exists():
+        return None
+    try:
+        payload = json.loads(OD010_TABLE.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
+def persisted_table_matches_live(
+    persisted: dict[str, Any] | None, live_table: dict[str, Any]
+) -> tuple[bool, list[str]]:
+    """Compare persisted table to an ephemeral live inventory (observation identity)."""
+    issues: list[str] = []
+    if not isinstance(persisted, dict):
+        return False, ["OD010_TABLE_ABSENT"]
+    live_obs = live_table.get("observation_set_sha256")
+    table_obs = persisted.get("observation_set_sha256")
+    if table_obs and live_obs and table_obs != live_obs:
+        issues.append("OBSERVATION_IDENTITY_MISMATCH")
+    live_cov = live_table.get("series_coverage") or {}
+    table_cov = persisted.get("series_coverage") or {}
+    newer = False
+    for component, year in FROZEN_CPI_UPDATED_PAIRS:
+        live_slot = (live_cov.get(component) or {}).get(str(year)) or {}
+        table_slot = (table_cov.get(component) or {}).get(str(year)) or {}
+        if live_slot.get("official_series_identifier") != table_slot.get(
+            "official_series_identifier"
+        ):
+            issues.append(f"{component}:{year}:SERIES_MISMATCH")
+        if live_slot.get("source_data_year") != table_slot.get("source_data_year"):
+            issues.append(f"{component}:{year}:SOURCE_YEAR_MISMATCH")
+        if live_slot.get("base_observation_period") != table_slot.get("base_observation_period"):
+            issues.append(f"{component}:{year}:BASE_PERIOD_MISMATCH")
+        if live_slot.get("target_observation_period") != table_slot.get(
+            "target_observation_period"
+        ):
+            issues.append(f"{component}:{year}:TARGET_PERIOD_MISMATCH")
+        if live_slot.get("base_index_value") != table_slot.get("base_index_value"):
+            issues.append(f"{component}:{year}:BASE_VALUE_MISMATCH")
+        if live_slot.get("target_index_value") != table_slot.get("target_index_value"):
+            issues.append(f"{component}:{year}:TARGET_VALUE_MISMATCH")
+        live_period = live_slot.get("target_observation_period")
+        table_period = table_slot.get("target_observation_period")
+        live_key = period_tuple_from_label(str(live_period) if live_period else None)
+        table_key = period_tuple_from_label(str(table_period) if table_period else None)
+        if live_key and table_key and live_key > table_key:
+            newer = True
+            issues.append(f"{component}:{year}:NEWER_TARGET_AVAILABLE")
+    return (not issues and not newer), issues

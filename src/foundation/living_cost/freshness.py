@@ -186,15 +186,20 @@ def living_cost_release_authorized() -> bool:
 
 
 def is_translation_index_bound() -> bool:
-    """Structural OD-010 table completeness only.
+    """Structural OD-010 table completeness AND not invalidated by live BLS.
 
     Readiness context translation_index_bound is this AND a successful
     live od010_price_index series cross-bind. A manually written
-    {"bound": true, "series": {"foo": "..."}} does not bind.
+    {"bound": true, "series": {"foo": "..."}} does not bind. A stale
+    prior table remains archival evidence after official retrieval
+    proves it incomplete or obsolete, but this function is false then.
     """
     from foundation.living_cost.candidate_bindings import od010_translation_is_bound
+    from foundation.living_cost.od010_cpi import live_currentness_unbinds_table
 
-    return od010_translation_is_bound(OD010_TABLE)
+    if not od010_translation_is_bound(OD010_TABLE):
+        return False
+    return not live_currentness_unbinds_table()
 
 
 def required_project_cost_years() -> tuple[int, ...]:
@@ -1028,7 +1033,7 @@ def freshness_status_summary(payload: dict[str, Any]) -> str:
 BLOCKER_NOTES: dict[str, str] = {
     "health_oop": (
         "MEPS HEALTH OOP DERIVATION: MODELED_FROM_MEASURED_INPUTS from official HC-251 "
-        "(2023). OD-002 weighted mean of TOTSLF23 among AGELAST 18-64 / INSCOV23=1. "
+        "(2023). OD-002 weighted mean of TOTSLF23 among AGELAST 18-64 / INSCOV23=1 (ANY PRIVATE). "
         "Median and P75 retained as sensitivities. source_data_year remains 2023. "
         "2024 Full Year Consolidated is not listed (scheduled August 2026). "
         "Lagged years use OD-010 medical-care CPI. Download is not derivation."
@@ -1036,7 +1041,7 @@ BLOCKER_NOTES: dict[str, str] = {
     "mpg": (
         "EPA MPG: MODELED_FROM_MEASURED_INPUTS from official fueleconomy.gov "
         "vehicles.csv.zip. OD-004 methodology is FROZEN. Used-car gasoline "
-        "compact+midsize median comb08 for model years cost_year-12..cost_year-8. "
+        "exact Compact Cars + Midsize Cars median comb08 for model years cost_year-12..cost_year-8. "
         "24/28/32 are not the model. The vehicles.csv.zip URL is mutable; listing "
         "is not byte currentness."
     ),
@@ -1066,9 +1071,14 @@ def stamp_source_coverage_from_current_truth(coverage_path: Path) -> dict[str, A
     if isinstance(lag, dict):
         assert_source_lag_preserves_frozen_od010(lag)
     coverage["blocker_notes"] = dict(BLOCKER_NOTES)
+    from foundation.living_cost.evidence_validators import (
+        epa_evidence_status,
+        meps_evidence_status,
+    )
+
     required_blockers = {
-        "health_oop": "MODELED_FROM_MEASURED_INPUTS",
-        "mpg": "MODELED_FROM_MEASURED_INPUTS",
+        "health_oop": meps_evidence_status(),
+        "mpg": epa_evidence_status(),
         "maintenance": "INCOMPLETE_PROVENANCE",
         "essentials": "INCOMPLETE_PROVENANCE",
         "recreation": "INCOMPLETE_PROVENANCE",

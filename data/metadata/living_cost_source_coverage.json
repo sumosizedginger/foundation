@@ -1,6 +1,6 @@
 {
   "report_type": "living_cost_source_coverage",
-  "generated_at": "2026-08-15T15:43:53+00:00",
+  "generated_at": "2026-08-18T17:24:53+00:00",
   "question": "What still prevents the living-cost model from being calculated?",
   "required_components": [
     "housing",
@@ -1147,7 +1147,7 @@
   "methodology_frozen_is_not_source_validated": true,
   "candidate_calculation_authorized": false,
   "blocker_notes": {
-    "health_oop": "MEPS HEALTH OOP DERIVATION: MODELED_FROM_MEASURED_INPUTS from official HC-251 (2023). OD-002 weighted mean of TOTSLF23 among AGELAST 18-64 / INSCOV23=1. Median and P75 retained as sensitivities. source_data_year remains 2023. 2024 Full Year Consolidated is not listed (scheduled August 2026). Lagged years use OD-010 medical-care CPI. Download is not derivation.",
-    "mpg": "EPA MPG: MODELED_FROM_MEASURED_INPUTS from official fueleconomy.gov vehicles.csv.zip. OD-004 methodology is FROZEN. Used-car gasoline compact+midsize median comb08 for model years cost_year-12..cost_year-8. 24/28/32 are not the model. The vehicles.csv.zip URL is mutable; listing is not byte currentness."
+    "health_oop": "MEPS HEALTH OOP DERIVATION: MODELED_FROM_MEASURED_INPUTS from official HC-251 (2023). OD-002 weighted mean of TOTSLF23 among AGELAST 18-64 / INSCOV23=1 (ANY PRIVATE). Median and P75 retained as sensitivities. source_data_year remains 2023. 2024 Full Year Consolidated is not listed (scheduled August 2026). Lagged years use OD-010 medical-care CPI. Download is not derivation.",
+    "mpg": "EPA MPG: MODELED_FROM_MEASURED_INPUTS from official fueleconomy.gov vehicles.csv.zip. OD-004 methodology is FROZEN. Used-car gasoline exact Compact Cars + Midsize Cars median comb08 for model years cost_year-12..cost_year-8. 24/28/32 are not the model. The vehicles.csv.zip URL is mutable; listing is not byte currentness."
   }
 }

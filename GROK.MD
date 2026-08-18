@@ -1,179 +1,122 @@
-# THE FOUNDATION — EVIDENCE ACQUISITION CAMPAIGN
-
-## STATUS: COMPLETE FOR THIS RUN (PARTIAL HONEST CLOSURE)
-
-THIS FILE IS THE CAMPAIGN REPORT.
+# THE FOUNDATION — EVIDENCE CAMPAIGN AUDIT CORRECTION (CLOSED)
 
 OD-001 through OD-013 remain ACCEPTED / FROZEN.
 
-**AUDITED FROM:** `55223158f9ae2e217a8c878a083f4f7fdc06231f`  
-**IMPLEMENTATION SHA:** `fc18bbdb0923acc2c403f0a7e78e1eb6240e2292`  
-**Prior campaign commits:** `8bf9a70` (OD-010 BLS), `76dd95b` (EPA cohorts; GitHub Tests failed ruff)
+NO MSLC.
+NO CANDIDATE ASSEMBLER.
+NO CANDIDATE AUTHORIZATION.
+NO RELEASE AUTHORIZATION.
 
-No MSLC, Gap, Adequacy, rankings, national median, or Composite was calculated.  
-The candidate assembler was not built.  
-`living_cost_candidate_input_bindings.json` was not created.
+This closeout records the evidence-integrity correction. It does not
+redesign the gate architecture.
 
-```text
-candidate_calculation_authorized = false
-living_cost.release_authorized   = false
-candidate_inputs_bound           = false
-translation_index_bound          = true
-ready_for_private_candidate      = false
-states_modeled                   = 0
-```
+## FINAL SHA
 
-`is_translation_index_bound()` is **true** from the official BLS OD-010 table plus live series/numeric cross-bind.  
-Committed `living_cost_candidate_freshness.json` is still a stale fail-closed snapshot (`translation_index_bound=false` on disk) and was not rewritten.
+Pending first commit on this correction. Updated after push.
 
----
+## GitHub CI
 
-## CLOSED THIS RUN
+Pending push. Required green checks:
 
-### CI failure on `76dd95b`
+- Tests & Code Quality
+- Validate Living Cost Sources
+- Deploy Pages
 
-GitHub Tests & Code Quality failed because `ruff format --check` wanted three files reformatted:
+Local pytest before commit: 279 passed, 1 warning.
 
-- `src/foundation/sources/epa_mpg.py`
-- `tests/test_epa_mpg_cohort.py`
-- `tests/test_qa_year_atomic_independent.py`
+## What was corrected
 
-Fixed. No test logic was weakened.
+1. `discover_od010()` performs a live official BLS API request via
+   `retrieve_bls_cpi_series()`. Cached table bytes are not
+   `VERIFIED_CURRENT`.
+2. Raw response SHA is preserved separately from canonical
+   `observation_set_sha256` (seriesID, year, period, periodName, value
+   for the seven frozen CPI_UPDATED pair observations). Cross-bind uses
+   observation identity, not volatile `responseTime`.
+3. Live currentness: `VERIFIED_CURRENT` only when the live inventory
+   matches the persisted table. Newer official target month =>
+   `NEWER_AVAILABLE` and `translation_index_bound=false`. Failed live
+   retrieve => `CHECK_FAILED`.
+4. `write_od010_artifacts()` archives the prior table and always writes
+   the canonical current file. A newly retrieved incomplete table cannot
+   leave a stale bound pointer.
+5. EPA canonical VClass is exact `Compact Cars` + `Midsize Cars`.
+   Subcompact/Minicompact are not in the canonical median.
+6. Canonical MPG is `comb08` only. Missing/invalid comb08 is counted as
+   `rows_missing_canonical_comb08`. No UCity / combA08 fallback.
+7. EPA cohorts recomputed from official cached `vehicles.csv.zip`.
+8. MEPS/EPA `MODELED_FROM_MEASURED_INPUTS` requires canonical validators
+   (`evidence_validators.py`), not file existence. Fail-closed SHA
+   mismatch tests added.
+9. MEPS wording: adults 18-64 with INSCOV23=1 (ANY PRIVATE). Filter
+   unchanged.
 
-### A. Wave 1A — OD-010 official series inventory
+## OD-010 live BLS
 
-| | |
-|---|---|
-| BEFORE | `INVENTORY_NOT_VALIDATED` / `MANUAL_VERIFICATION_REQUIRED` / no production table |
-| AFTER | Official BLS CPI-U NSA series retrieved and cross-bound |
-| Source | BLS public API `https://api.bls.gov/publicAPI/v2/timeseries/data/` |
-| Retrieve SHA | `91d408871d6789455435af6ed0188ade2ef0496db613f2d316cc6f17794941b0` |
+- live BLS check status: `VERIFIED_CURRENT`
+- live latest observation month: `2026 July`
+- cached/table target month: `2026 July`
+- raw response SHA: `33efde9de9040f432d4483b311cfc4dce9baf2b6aa9cdf7719ab3936f2c5e31b`
+- canonical observation-set SHA: `a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d`
+- translation_index_bound: `true`
 
-Official series (not invented):
+Official series unchanged: CUUR0000SAM / CUUR0000SETE / CUUR0000SETD /
+CUUR0000SAR / CUUR0000SA0.
 
-| component | series | item |
-|---|---|---|
-| health_oop | CUUR0000SAM | Medical care |
-| insurance | CUUR0000SETE | Motor vehicle insurance |
-| maintenance | CUUR0000SETD | Motor vehicle maintenance and repair |
-| recreation | CUUR0000SAR | Recreation |
-| essentials | CUUR0000SA0 | All items (disclosed fallback; OD-010 freeze: component-specific else CPI-U with disclosure) |
+## EPA
 
-Factors = official target / base:
+Exact VClass values used: `Compact Cars`, `Midsize Cars`.
 
-| pair | base | target | factor |
-|---|---|---|---|
-| health_oop 2024 | 2023 annual 549.084 | 2024 annual 563.841 | 1.026875669296501 |
-| health_oop 2026 | 2023 annual 549.084 | 2026 July 593.781 | 1.0814028454662674 |
-| insurance 2024 | 2023 annual 716.004 | 2024 annual 843.098 | 1.177504594946397 |
-| insurance 2026 | 2023 annual 716.004 | 2026 July 856.080 | 1.1956357785710694 |
-| maintenance 2026 | 2024 annual 407.275 | 2026 July 460.185 | 1.1299122214719783 |
-| essentials 2026 | 2024 annual 313.689 | 2026 July 333.918 | 1.064487438195155 |
-| recreation 2026 | 2024 annual 138.158 | 2026 July 145.242 | 1.0512746276002838 |
+| year | window      | gasoline ICE | exact compact/midsize | year-window | missing comb08 | final n | median | mean | compact median | midsize median |
+| ---- | ----------- | ------------ | --------------------- | ----------- | -------------- | ------- | ------ | ---- | -------------- | -------------- |
+| 2024 | MY2012-2016 | 45251        | 11565                 | 1708        | 0              | 1708    | 26.0   | 25.6 | 26.0           | 25.0           |
+| 2026 | MY2014-2018 | 45251        | 11565                 | 1784        | 0              | 1784    | 26.0   | 26.1 | 26.0           | 25.0           |
 
-`living_cost_od010_translation_table.json` exists and passes structural + numeric + live-series cross-bind.
+Total source rows: 50242. Source SHA:
+`66a2948c425c3cf8ad61a184a12296099ef368217d3012b3f7531dcc9c5e2649`.
 
-### B. Wave 1B — EPA MPG official cohort
+Prior 24.0 / 25.0 values were not preserved. They included
+subcompact/minicompact via substring matching.
 
-Official `vehicles.csv.zip` (SHA `66a2948c425c3cf8ad61a184a12296099ef368217d3012b3f7531dcc9c5e2649`).  
-OD-004 windows are year-specific (`cost_year-12 .. cost_year-8`), not one shared MY window.
+EPA listing currentness remains `CHECK_FAILED` (mutable URL bytes not
+proven equal to the currently advertised release). Evidence status is
+`MODELED_FROM_MEASURED_INPUTS` because the cohort report matches the
+selected cached official bytes.
 
-| year | MY window | n | median comb08 | mean | compact | midsize |
-|---|---|---|---|---|---|---|
-| 2024 | 2012–2016 | 2508 | 24.0 | 24.7 | 24.0 | 24.0 |
-| 2026 | 2014–2018 | 2618 | 25.0 | 25.2 | 25.0 | 25.0 |
+## MEPS
 
-These medians are data-derived. 24 / 28 / 32 are not the model.  
-Evidence promoted to **MODELED_FROM_MEASURED_INPUTS** when the cohort report SHA matches the cached official zip.
+- status: `MODELED_FROM_MEASURED_INPUTS`
+- source SHA: `ad0edc2e34b28b90c8c89f43869f4e90338c93c97c0bfc2cad73140b96edd55a`
+- mean: 1117.72
+- median: 311.0
+- P75: 1114.0
+- filter unchanged: AGELAST 18-64, INSCOV23=1 (ANY PRIVATE), TOTSLF23>=0,
+  PERWT23F>0, zeros included
+- live listing: newest Full Year Consolidated still HC-251 / 2023
 
-### C. Wave 1B — MEPS OOP official derivation
+## Metadata
 
-Download is not derivation. HC-251 2023 FYC was already cached. This run parsed official fixed-width `h251.dat` using official codebook / SAS `@start` columns:
+- source coverage generated_at: `2026-08-18T17:24:53+00:00`
+- candidate freshness generated_at: `2026-08-18T17:25:00Z`
+- empirical blocker family count: 9
+  (`bls_ce`, `fcc_broadband`, `federal_tax_law`, `local_tax_law`,
+  `mobile_price`, `naic_auto_insurance`, `state_tax_law`,
+  `vehicle_registration`, `vehicle_replacement`)
+- gate blocker reason count: 68
 
-| variable | columns | meaning |
-|---|---|---|
-| AGELAST | 194–195 | age last eligible |
-| INSCOV23 | 2090 | 1 = ANY PRIVATE |
-| TOTSLF23 | 2483–2488 | total amt paid by self/family 2023 |
-| PERWT23F | 3847–3859 | final person weight 2023 |
+MEPS, corrected EPA evidence, and live OD-010 are not in the empirical
+blocker-family list. Count derived from live statuses.
 
-Filter: AGELAST 18–64, INSCOV23=1, PERWT23F>0, TOTSLF23≥0 (zeros included).
+## Authorization (unchanged)
 
-| statistic | value |
-|---|---|
-| rows | 18,919 (matches official codebook total) |
-| in-universe n | 7,039 |
-| weighted mean (OD-002 canonical) | **$1,117.72** |
-| weighted median (sensitivity) | $311.00 |
-| weighted P75 (sensitivity) | $1,114.00 |
-| `source_data_year` | **2023** |
-| zip SHA | `ad0edc2e34b28b90c8c89f43869f4e90338c93c97c0bfc2cad73140b96edd55a` |
+- candidate_calculation_authorized = false
+- release_authorized = false
+- candidate_inputs_bound = false
+- states_modeled = 0
+- ready_for_private_candidate = false
 
-2024 Full Year Consolidated is still **not listed** (AHRQ schedule: August 2026).  
-Evidence promoted to **MODELED_FROM_MEASURED_INPUTS**. Lagged project years still use OD-010 medical-care CPI.
+NO MSLC.
+NO CANDIDATE ASSEMBLER.
 
----
-
-## NOT COMPLETED
-
-### Wave 1C
-
-| family | status | remaining issue |
-|---|---|---|
-| Federal tax | INVENTORY_NOT_VALIDATED | 2024/2026 tables exist in code (Rev. Proc. 2023-34 / 2025-32 cited); official IRS PDFs were not retrieved/parsed into a validated inventory this run |
-| State tax | SOURCE_GAP | 51-jurisdiction official DOR inventory not built |
-| Local tax | SOURCE_GAP | 3143 join geos not generally classified A/B/C/D; class C needs OD-011 overlay |
-| Vehicle registration | SOURCE_GAP | 51-jurisdiction official DMV/DOR fee inventory not built |
-| Vehicle replacement | FORMULA_FROZEN_INPUTS_PENDING | acquisition / residual / usable years unbound; NADA/KBB still prohibited |
-
-### Wave 2
-
-| family | status | remaining issue |
-|---|---|---|
-| BLS CE | INCOMPLETE_PROVENANCE | official ZIP retrieve historically HTTP 403 |
-| FCC broadband | SOURCE_GAP | URS retrieve/method still blocked (candidate review exists) |
-| Mobile price | SOURCE_GAP | no accepted authoritative PRICE source |
-| NAIC insurance | RETRIEVED_UNVALIDATED | AUT-PB 2022-2023 PDF cached; state combined-average table not extracted |
-| CMS currentness | CHECK_FAILED / incomplete | current-year byte proof still incomplete |
-| NHTS | 2022 structural | no newer released NHTS used |
-
-Committed freshness snapshot is stale (fail-closed). Live discovery is the authority.
-
----
-
-## GITHUB CI on `fc18bbd`
-
-| workflow | result |
-|---|---|
-| Tests & Code Quality | **success — 257 passed, 5 skipped, 1 warning** [31912746502](https://github.com/sumosizedginger/foundation/actions/runs/31912746502) |
-| Validate Living Cost Sources | **success** [31912746541](https://github.com/sumosizedginger/foundation/actions/runs/31912746541) |
-| Deploy Pages | **success** [31912746537](https://github.com/sumosizedginger/foundation/actions/runs/31912746537) |
-
-Local collection is 262 tests (5 skipped on CI).
-
----
-
-## DUAL VERIFIERS
-
-Both `VERDICT: PASS` after last source edit (`2026-08-15T22:40:15Z`):
-
-- `/tmp/goal-verifier-3964948915df-code-review.md` — PASS at `2026-08-15T22:48:59Z` (nits only)
-- `/tmp/goal-verifier-3964948915df-qa.md` — PASS at `2026-08-15T22:45:40Z` (nits only)
-
----
-
-## NEVER-DO (still in force)
-
-Do not calculate or publish MSLC / Gap / Adequacy / rankings / median / Composite.  
-Do not authorize candidate or release.  
-Do not build the assembler.  
-Do not invent prices, fees, or series.
-
----
-
-## STOP
-
-Evidence that could be closed truthfully in this run was closed (ruff CI; official OD-010 table; EPA cohort; official MEPS HC-251 derivation).  
-Wave 1C and Wave 2 remain visibly blocked.
-
-NO MINIMUM SUSTAINABLE LIVING COST WAS CALCULATED OR PUBLISHED.
+Stopped before NAIC, taxes, FCC/mobile, registration, replacement, and
+BLS CE acquisition work.

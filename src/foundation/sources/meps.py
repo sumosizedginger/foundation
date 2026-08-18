@@ -6,7 +6,7 @@ adults (Age 18-64) with private health insurance coverage from official AHRQ MEP
 STRICT FAIL-CLOSED RULES:
 - NO hardcoded numeric fallback values ($1,420 / $1,550).
 - If source observation cannot be parsed or verified, status = UNAVAILABLE with None values.
-- Population Filter: Adults age 18-64, privately insured throughout the survey year.
+- Population Filter: Adults age 18-64 with INSCOV23=1 (ANY PRIVATE).
 - Metric: Population-weighted mean out-of-pocket medical expenditure (TOTSLF23).
 
 2024 Full Year Consolidated is scheduled by AHRQ for AUGUST 2026. Do not claim it exists
@@ -241,7 +241,7 @@ def parse_meps_oop_csv(
     retrieved_at: str = "",
     file_sha256: str = "",
 ) -> LivingCostComponentObservation:
-    """Parse MEPS expected OOP healthcare expenditure table for privately insured adults 18-64."""
+    """Parse MEPS expected OOP healthcare expenditure table for adults 18-64 with INSCOV23=1 (ANY PRIVATE)."""
     file_path = cache_dir if cache_dir.is_file() else cache_dir / "h251dat.zip"
 
     if not file_path.exists():
@@ -370,7 +370,7 @@ def parse_meps_oop_csv(
         source_artifact_sha256=file_sha256,
         methodology_version="0.2.0-draft",
         notes=(
-            f"AHRQ MEPS weighted mean OOP medical spending for privately insured adults age 18-64 "
+            f"AHRQ MEPS weighted mean OOP medical spending for adults age 18-64 with INSCOV23=1 (ANY PRIVATE) "
             f"(Sample: {sample_size:,}, Represented: {represented_pop:,}). {MEPS_NOTE}"
         ),
     )

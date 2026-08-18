@@ -1,0 +1,18 @@
+{
+  "freshness_check_status": "VERIFIED_CURRENT",
+  "currentness_status": "VERIFIED_CURRENT",
+  "translation_index_bound": true,
+  "structural_table_bound": true,
+  "live_bls_request": "SUCCEEDED",
+  "raw_response_sha256": "33efde9de9040f432d4483b311cfc4dce9baf2b6aa9cdf7719ab3936f2c5e31b",
+  "observation_set_sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
+  "table_observation_set_sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
+  "live_latest_target_observation": "2026 July",
+  "table_target_observation": "2026 July",
+  "match_issues": [],
+  "cross_binding_ok": true,
+  "cross_binding_issues": [],
+  "report_type": "living_cost_od010_live_currentness",
+  "generated_at": "2026-08-18T17:24:56Z",
+  "calculates_mslc": false
+}

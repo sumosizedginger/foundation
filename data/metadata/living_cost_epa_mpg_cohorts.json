@@ -1,6 +1,6 @@
 {
   "report_type": "living_cost_epa_mpg_cohorts",
-  "generated_at": "2026-08-15T22:15:38Z",
+  "generated_at": "2026-08-18T17:23:53Z",
   "publisher": "EPA / DOE fueleconomy.gov",
   "landing_url": "https://www.fueleconomy.gov/feg/download.shtml",
   "artifact_url": "https://www.fueleconomy.gov/feg/epadata/vehicles.csv.zip",
@@ -10,6 +10,11 @@
   "csv_member": "vehicles.csv",
   "source_row_count": 50242,
   "combined_mpg_field": "comb08",
+  "canonical_vclass_values": [
+    "Compact Cars",
+    "Midsize Cars"
+  ],
+  "canonical_mpg_field": "comb08",
   "cohorts": {
     "2024": {
       "project_cost_year": 2024,
@@ -17,13 +22,19 @@
       "model_year_high": 2016,
       "total_source_rows": 50242,
       "rows_after_fuel_filter": 45251,
-      "rows_after_body_class_filter": 20031,
-      "rows_after_model_year_filter": 2508,
-      "final_cohort_row_count": 2508,
-      "median_mpg": 24.0,
-      "mean_mpg": 24.7,
-      "compact_only_median_mpg": 24.0,
-      "midsize_only_median_mpg": 24.0,
+      "rows_after_body_class_filter": 11565,
+      "rows_after_model_year_filter": 1708,
+      "rows_missing_canonical_comb08": 0,
+      "final_cohort_row_count": 1708,
+      "median_mpg": 26.0,
+      "mean_mpg": 25.6,
+      "compact_only_median_mpg": 26.0,
+      "midsize_only_median_mpg": 25.0,
+      "canonical_vclass_values": [
+        "Compact Cars",
+        "Midsize Cars"
+      ],
+      "canonical_mpg_field": "comb08",
       "filter_columns": [
         "fuelType",
         "fuelType1",
@@ -39,13 +50,19 @@
       "model_year_high": 2018,
       "total_source_rows": 50242,
       "rows_after_fuel_filter": 45251,
-      "rows_after_body_class_filter": 20031,
-      "rows_after_model_year_filter": 2618,
-      "final_cohort_row_count": 2618,
-      "median_mpg": 25.0,
-      "mean_mpg": 25.2,
-      "compact_only_median_mpg": 25.0,
+      "rows_after_body_class_filter": 11565,
+      "rows_after_model_year_filter": 1784,
+      "rows_missing_canonical_comb08": 0,
+      "final_cohort_row_count": 1784,
+      "median_mpg": 26.0,
+      "mean_mpg": 26.1,
+      "compact_only_median_mpg": 26.0,
       "midsize_only_median_mpg": 25.0,
+      "canonical_vclass_values": [
+        "Compact Cars",
+        "Midsize Cars"
+      ],
+      "canonical_mpg_field": "comb08",
       "filter_columns": [
         "fuelType",
         "fuelType1",

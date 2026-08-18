@@ -400,12 +400,45 @@ def test_vague_bls_landing_without_series_inventory_fails_closed():
     assert od010_series_inventory_is_specific(checks["od010_price_index"]) is False
 
 
-def test_discover_od010_uses_official_series_when_table_exists():
-    check = discover_od010()
-    table = METADATA / "living_cost_od010_translation_table.json"
-    if not table.exists():
-        assert check.freshness_check_status == "MANUAL_VERIFICATION_REQUIRED"
+def test_discover_od010_uses_official_series_when_table_exists(monkeypatch):
+    retrieve_path = METADATA / "living_cost_od010_bls_retrieve.json"
+    if not retrieve_path.exists():
+        check = discover_od010()
+        assert check.freshness_check_status in {
+            "CHECK_FAILED",
+            "MANUAL_VERIFICATION_REQUIRED",
+            "NEWER_AVAILABLE",
+            "VERIFIED_CURRENT",
+        }
         return
+    payload = json.loads(retrieve_path.read_text(encoding="utf-8"))
+
+    def fake_retrieve(*_args, **_kwargs):
+        from foundation.living_cost.od010_cpi import compute_observation_set_sha256
+
+        body = payload["body"]
+        raw = payload.get("raw_response_sha256") or payload.get("sha256") or "fixture"
+        return {
+            "retrieved_at": "2026-08-16T00:00:00Z",
+            "http_status": 200,
+            "request_url": payload.get("request_url"),
+            "request_payload": payload.get("request_payload") or {},
+            "byte_size": payload.get("byte_size") or 1,
+            "sha256": raw,
+            "raw_response_sha256": raw,
+            "observation_set_sha256": compute_observation_set_sha256(body),
+            "body": body,
+        }
+
+    monkeypatch.setattr("foundation.living_cost.od010_cpi.retrieve_bls_cpi_series", fake_retrieve)
+    monkeypatch.setattr(
+        "foundation.living_cost.od010_cpi.write_od010_retrieve", lambda *_a, **_k: None
+    )
+    monkeypatch.setattr(
+        "foundation.living_cost.od010_cpi.write_od010_live_currentness",
+        lambda *_a, **_k: None,
+    )
+    check = discover_od010()
     assert check.publisher == "BLS"
     coverage = check.series_coverage or {}
     for component, year in FROZEN_CPI_UPDATED_PAIRS:
@@ -414,6 +447,10 @@ def test_discover_od010_uses_official_series_when_table_exists():
         assert str(slot["official_series_identifier"]).startswith("CUUR0000")
         assert slot["base_index_value"] not in (None, "", 0, 0.0)
     assert od010_series_inventory_is_specific(check) is True
+    assert (
+        check.freshness_check_status != "VERIFIED_CURRENT"
+        or check.extra.get("live_bls_request") == "SUCCEEDED"
+    )
 
 
 def test_current_production_state_stays_fail_closed():

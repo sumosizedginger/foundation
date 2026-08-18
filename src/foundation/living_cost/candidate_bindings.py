@@ -792,8 +792,10 @@ def _od010_record_artifact(rec: dict[str, Any]) -> str | None:
 
 
 def _od010_record_sha(rec: dict[str, Any]) -> str | None:
-    """Table-level identity only. Do not fall back to calculation_inputs SHA."""
-    for key in ("sha256", "source_artifact_sha256", "response_identity"):
+    """Observation identity first, then table-level SHA. Never raw-only fallback
+    when observation_set_sha256 is present. Do not fall back to calculation_inputs SHA.
+    """
+    for key in ("observation_set_sha256", "sha256", "source_artifact_sha256", "response_identity"):
         value = rec.get(key)
         if _nonempty_str(value):
             return str(value)
@@ -804,7 +806,7 @@ def _od010_record_sha(rec: dict[str, Any]) -> str | None:
 
 
 def _calc_identity_sha(calc: dict[str, Any]) -> str | None:
-    for key in ("sha256", "response_identity"):
+    for key in ("observation_set_sha256", "sha256", "response_identity"):
         value = calc.get(key)
         if _nonempty_str(value):
             return str(value)
@@ -878,7 +880,7 @@ def _live_series_artifact(slot: dict[str, Any]) -> str | None:
 
 
 def _live_series_sha(slot: dict[str, Any]) -> str | None:
-    for key in ("sha256", "response_identity"):
+    for key in ("observation_set_sha256", "sha256", "response_identity"):
         value = slot.get(key)
         if _nonempty_str(value):
             return str(value)
@@ -1032,10 +1034,21 @@ def validate_od010_bindings_against_snapshot(
                 )
             if not artifact_ok:
                 pair_issues.append(f"{component}:{year}:ARTIFACT_MISMATCH")
+            table_obs = rec.get("observation_set_sha256")
+            live_obs = slot.get("observation_set_sha256")
             table_sha = _od010_record_sha(rec)
             live_sha = _live_series_sha(slot)
-            if (live_sha or table_sha) and table_sha != live_sha:
+            if _nonempty_str(table_obs) and _nonempty_str(live_obs):
+                if str(table_obs) != str(live_obs):
+                    pair_issues.append(f"{component}:{year}:ARTIFACT_HASH_MISMATCH")
+            elif (
+                not _nonempty_str(table_obs)
+                and not _nonempty_str(live_obs)
+                and (live_sha or table_sha)
+                and table_sha != live_sha
+            ):
                 pair_issues.append(f"{component}:{year}:ARTIFACT_HASH_MISMATCH")
+            # Mixed raw-response SHA vs observation identity is not currentness.
             calc = _calculation_inputs(rec)
             if not calc:
                 pair_issues.append(f"{component}:{year}:TRANSLATION_FACTOR_UNBOUND")
@@ -1065,9 +1078,18 @@ def validate_od010_bindings_against_snapshot(
                     or (_nonempty_str(live_api) and str(calc_artifact) == str(live_api))
                 ):
                     pair_issues.append(f"{component}:{year}:CALC_ARTIFACT_MISMATCH")
+                calc_obs = calc.get("observation_set_sha256")
                 calc_sha = _calc_identity_sha(calc)
-                if _nonempty_str(calc_sha) and (
-                    (live_sha and calc_sha != live_sha) or (table_sha and calc_sha != table_sha)
+                if _nonempty_str(calc_obs) and _nonempty_str(live_obs):
+                    if str(calc_obs) != str(live_obs):
+                        pair_issues.append(f"{component}:{year}:CALC_ARTIFACT_HASH_MISMATCH")
+                elif (
+                    not _nonempty_str(calc_obs)
+                    and not _nonempty_str(live_obs)
+                    and _nonempty_str(calc_sha)
+                    and (
+                        (live_sha and calc_sha != live_sha) or (table_sha and calc_sha != table_sha)
+                    )
                 ):
                     pair_issues.append(f"{component}:{year}:CALC_ARTIFACT_HASH_MISMATCH")
                 live_base_value = slot.get("base_index_value")

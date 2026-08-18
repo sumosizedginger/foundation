@@ -1,27 +1,23 @@
 {
   "report_type": "living_cost_transport_coverage",
-  "generated_at": "2026-08-15T00:00:00+00:00",
+  "generated_at": "2026-08-18T17:24:54+00:00",
   "components": {
     "mileage": {
       "status": "MEASURED_TRAVEL_BEHAVIOR",
       "source": "2022 NHTS V2.1 vehv2pub ANNMILES / hhv2pub WTHHFIN",
-      "methodology_status": "FROZEN",
       "note": "FOUNDATION MOBILITY STANDARD = NHTS weighted median. Observed, not MEASURED MINIMUM NECESSARY MILEAGE. OD-003 FROZEN."
     },
     "mpg": {
-      "status": "RETRIEVED_UNVALIDATED",
-      "methodology_status": "FROZEN",
-      "note": "EPA fueleconomy.gov vehicle-level candidates built. OD-004 FROZEN: used-car compact+midsize gasoline median. 24/28/32 are not the empirical model."
+      "status": "MODELED_FROM_MEASURED_INPUTS",
+      "note": "EPA fueleconomy.gov official cohort derived only when the canonical validator accepts exact Compact Cars + Midsize Cars comb08 medians matching the selected cached bytes. OD-004 FROZEN. 24/28/32 are not the empirical model."
     },
     "gas": {
       "status": "VALIDATED",
       "source": "EIA pswrgvwall.xls",
-      "methodology_status": "FROZEN",
       "note": "PADD/regional is not state-measured."
     },
     "insurance": {
       "status": "RETRIEVED_UNVALIDATED",
-      "methodology_status": "FROZEN",
       "note": "Official free NAIC 2022/2023 Auto Insurance Database Report retrieved. redistribution_status=FREE_DOWNLOAD_REDISTRIBUTION_UNCONFIRMED. OD-006 FROZEN: combined average premium is canonical."
     },
     "maintenance": {
@@ -43,7 +39,5 @@
       "note": "OD-005 FROZEN formula (acquisition-residual)/years. No $1,600 default. Numeric result pending evidence."
     }
   },
-  "headline_calculated": false,
-  "living_cost_release_authorized": false,
-  "states_modeled": 0
+  "headline_calculated": false
 }

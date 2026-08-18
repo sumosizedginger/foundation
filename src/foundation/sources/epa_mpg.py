@@ -32,12 +32,21 @@ EPA_FUELEconomy_LANDING = "https://www.fueleconomy.gov/feg/download.shtml"
 EPA_VEHICLES_ZIP = "https://www.fueleconomy.gov/feg/epadata/vehicles.csv.zip"
 EPA_EXPECTED_FILENAME = "epa_fueleconomy_vehicles.csv.zip"
 
-# Compact / midsize passenger-car class tokens in fueleconomy.gov VClass.
-COMPACT_TOKENS = ("compact", "subcompact", "minicompact")
-MIDSIZE_TOKENS = ("midsize", "mid-size", "mid size")
-CAR_TOKENS = ("car", "sedan", "coupe", "wagon")
+# Exact normalized EPA/DOE VClass values for canonical OD-004.
+# Substring "compact" must not pull Subcompact Cars or Minicompact Cars
+# into the canonical median.
+CANONICAL_VCLASS_VALUES: tuple[str, ...] = ("Compact Cars", "Midsize Cars")
+_CANONICAL_VCLASS_NORMALIZED: dict[str, str] = {
+    "compact cars": "compact",
+    "midsize cars": "midsize",
+}
+SENSITIVITY_VCLASS_NORMALIZED: dict[str, str] = {
+    "subcompact cars": "subcompact",
+    "minicompact cars": "minicompact",
+}
 BEV_TOKENS = ("electricity", "electric")
 PHEV_TOKENS = ("plug-in", "phev")
+CANONICAL_MPG_FIELD = "comb08"
 
 
 def download_epa_mpg_artifact(year: int, cache_dir: Path, force_download: bool = False):
@@ -79,33 +88,29 @@ def _row_is_gasoline_ice(row: dict[str, str]) -> bool:
     return "gas" in fuel or fuel in {"regular", "premium", "midgrade"}
 
 
+def _normalized_vclass(row: dict[str, str]) -> str:
+    return " ".join(str(row.get("VClass") or row.get("vclass") or "").split()).strip().lower()
+
+
 def _row_class(row: dict[str, str]) -> str | None:
-    vclass = str(row.get("VClass") or row.get("vclass") or "").strip().lower()
-    if not vclass:
-        return None
-    if "pickup" in vclass or "suv" in vclass or "van" in vclass or "special" in vclass:
-        return None
-    if any(tok in vclass for tok in COMPACT_TOKENS):
-        return "compact"
-    if any(tok in vclass for tok in MIDSIZE_TOKENS):
-        return "midsize"
-    if any(tok in vclass for tok in CAR_TOKENS) and "two seater" not in vclass:
-        return "other_car"
-    return None
+    """Canonical class is exact Compact Cars / Midsize Cars only."""
+    return _CANONICAL_VCLASS_NORMALIZED.get(_normalized_vclass(row))
+
+
+def _sensitivity_class(row: dict[str, str]) -> str | None:
+    return SENSITIVITY_VCLASS_NORMALIZED.get(_normalized_vclass(row))
 
 
 def _combined_mpg(row: dict[str, str]) -> float | None:
-    for key in ("comb08", "UCity", "combA08"):
-        raw = str(row.get(key) or "").strip()
-        if not raw:
-            continue
-        try:
-            value = float(raw)
-        except ValueError:
-            continue
-        if value > 0:
-            return value
-    return None
+    """Canonical OD-004 MPG is comb08 only. No UCity / combA08 substitution."""
+    raw = str(row.get(CANONICAL_MPG_FIELD) or "").strip()
+    if not raw:
+        return None
+    try:
+        value = float(raw)
+    except ValueError:
+        return None
+    return value if value > 0 else None
 
 
 def _model_year(row: dict[str, str]) -> int | None:
@@ -126,6 +131,7 @@ def filter_funnel(rows: list[dict[str, str]], cost_year: int) -> dict[str, Any]:
     after_fuel = 0
     after_class = 0
     after_year = 0
+    missing_comb08 = 0
     final_mpgs: list[float] = []
     compact_mpgs: list[float] = []
     midsize_mpgs: list[float] = []
@@ -143,6 +149,7 @@ def filter_funnel(rows: list[dict[str, str]], cost_year: int) -> dict[str, Any]:
         after_year += 1
         mpg = _combined_mpg(row)
         if mpg is None:
+            missing_comb08 += 1
             continue
         final_mpgs.append(mpg)
         if klass == "compact":
@@ -158,6 +165,7 @@ def filter_funnel(rows: list[dict[str, str]], cost_year: int) -> dict[str, Any]:
         "rows_after_fuel_filter": after_fuel,
         "rows_after_body_class_filter": after_class,
         "rows_after_model_year_filter": after_year,
+        "rows_missing_canonical_comb08": missing_comb08,
         "final_cohort_row_count": len(final_mpgs),
         "median_mpg": (
             round(weighted_percentile(final_mpgs, weights, 0.50), 1) if final_mpgs else None
@@ -173,6 +181,8 @@ def filter_funnel(rows: list[dict[str, str]], cost_year: int) -> dict[str, Any]:
             if midsize_mpgs
             else None
         ),
+        "canonical_vclass_values": list(CANONICAL_VCLASS_VALUES),
+        "canonical_mpg_field": CANONICAL_MPG_FIELD,
         "filter_columns": ["fuelType", "fuelType1", "atvType", "VClass", "year", "comb08"],
     }
 
@@ -207,6 +217,15 @@ def build_mpg_candidates(rows: list[dict[str, str]], cost_year: int) -> list[dic
             "years": set(range(used_lo, used_hi + 1)),
             "classes": {"midsize"},
         },
+        {
+            "id": "used_subcompact_minicompact_gasoline_sensitivity",
+            "label": (
+                f"SENSITIVITY used-car gasoline Subcompact/Minicompact Cars "
+                f"MY{used_lo}-{used_hi} (not canonical)"
+            ),
+            "years": set(range(used_lo, used_hi + 1)),
+            "classes": {"subcompact", "minicompact"},
+        },
     ]
     candidates: list[dict[str, Any]] = []
     for spec in specs:
@@ -217,7 +236,7 @@ def build_mpg_candidates(rows: list[dict[str, str]], cost_year: int) -> list[dic
                 continue
             if not _row_is_gasoline_ice(row):
                 continue
-            klass = _row_class(row)
+            klass = _row_class(row) or _sensitivity_class(row)
             if klass not in spec["classes"]:
                 continue
             mpg = _combined_mpg(row)
@@ -313,8 +332,8 @@ def parse_epa_mpg_candidates(
         )
         notes = (
             f"EPA reference-vehicle {role}: '{cand['label']}'. "
-            f"Filter: gasoline non-BEV/non-PHEV; class tokens compact/midsize as specified; "
-            f"combined real-world MPG = comb08. n={cand['n']}; "
+            f"Filter: gasoline non-BEV/non-PHEV; exact VClass Compact Cars + Midsize Cars; "
+            f"combined real-world MPG = comb08 only. n={cand['n']}; "
             f"median={cand['median_mpg']}; mean={cand['mean_mpg']}; "
             f"P25={cand['p25_mpg']}; P75={cand['p75_mpg']}. "
             "24/28/32 are not the empirical model."
@@ -372,7 +391,9 @@ def write_mpg_cohort_report(cache_zip: Path, dest: Path) -> dict[str, Any]:
         "byte_size": len(raw),
         "csv_member": members[0],
         "source_row_count": len(rows),
-        "combined_mpg_field": "comb08",
+        "combined_mpg_field": CANONICAL_MPG_FIELD,
+        "canonical_vclass_values": list(CANONICAL_VCLASS_VALUES),
+        "canonical_mpg_field": CANONICAL_MPG_FIELD,
         "cohorts": years,
         "canonical_cohort": "used_compact_midsize_gasoline",
         "calculates_mslc": False,

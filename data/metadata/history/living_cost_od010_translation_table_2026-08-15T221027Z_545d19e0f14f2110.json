@@ -5,11 +5,8 @@
   "landing_url": "https://www.bls.gov/cpi/",
   "api_identity": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
   "retrieve_sha256": "91d408871d6789455435af6ed0188ade2ef0496db613f2d316cc6f17794941b0",
-  "raw_response_sha256": "91d408871d6789455435af6ed0188ade2ef0496db613f2d316cc6f17794941b0",
-  "observation_set_sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
   "retrieve_byte_size": 20854,
   "bound": true,
-  "currentness_status": "CURRENT",
   "series": [
     {
       "component": "health_oop",
@@ -19,9 +16,7 @@
       "publisher": "BLS",
       "observation_period": "2024 annual",
       "source_artifact": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
-      "sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
-      "raw_response_sha256": "91d408871d6789455435af6ed0188ade2ef0496db613f2d316cc6f17794941b0",
-      "observation_set_sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
+      "sha256": "91d408871d6789455435af6ed0188ade2ef0496db613f2d316cc6f17794941b0",
       "translation_factor": 1.026875669296501,
       "retrieval_validation_state": "VALIDATED",
       "calculation_inputs": {
@@ -32,9 +27,7 @@
         "translation_factor": "1.026875669296501081801691544",
         "official_series_identifier": "CUUR0000SAM",
         "source_artifact": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
-        "sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
-        "raw_response_sha256": "91d408871d6789455435af6ed0188ade2ef0496db613f2d316cc6f17794941b0",
-        "observation_set_sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d"
+        "sha256": "91d408871d6789455435af6ed0188ade2ef0496db613f2d316cc6f17794941b0"
       },
       "item": "Medical care",
       "rationale": "OD-010: medical-care index for lagged MEPS OOP dollars.",
@@ -49,9 +42,7 @@
       "publisher": "BLS",
       "observation_period": "2026 July",
       "source_artifact": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
-      "sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
-      "raw_response_sha256": "91d408871d6789455435af6ed0188ade2ef0496db613f2d316cc6f17794941b0",
-      "observation_set_sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
+      "sha256": "91d408871d6789455435af6ed0188ade2ef0496db613f2d316cc6f17794941b0",
       "translation_factor": 1.0814028454662674,
       "retrieval_validation_state": "VALIDATED",
       "calculation_inputs": {
@@ -62,9 +53,7 @@
         "translation_factor": "1.081402845466267456345477195",
         "official_series_identifier": "CUUR0000SAM",
         "source_artifact": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
-        "sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
-        "raw_response_sha256": "91d408871d6789455435af6ed0188ade2ef0496db613f2d316cc6f17794941b0",
-        "observation_set_sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d"
+        "sha256": "91d408871d6789455435af6ed0188ade2ef0496db613f2d316cc6f17794941b0"
       },
       "item": "Medical care",
       "rationale": "OD-010: medical-care index for lagged MEPS OOP dollars.",
@@ -79,9 +68,7 @@
       "publisher": "BLS",
       "observation_period": "2024 annual",
       "source_artifact": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
-      "sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
-      "raw_response_sha256": "91d408871d6789455435af6ed0188ade2ef0496db613f2d316cc6f17794941b0",
-      "observation_set_sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
+      "sha256": "91d408871d6789455435af6ed0188ade2ef0496db613f2d316cc6f17794941b0",
       "translation_factor": 1.177504594946397,
       "retrieval_validation_state": "VALIDATED",
       "calculation_inputs": {
@@ -92,9 +79,7 @@
         "translation_factor": "1.177504594946396947503086575",
         "official_series_identifier": "CUUR0000SETE",
         "source_artifact": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
-        "sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
-        "raw_response_sha256": "91d408871d6789455435af6ed0188ade2ef0496db613f2d316cc6f17794941b0",
-        "observation_set_sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d"
+        "sha256": "91d408871d6789455435af6ed0188ade2ef0496db613f2d316cc6f17794941b0"
       },
       "item": "Motor vehicle insurance",
       "rationale": "OD-010 / OD-006: motor-vehicle-insurance CPI. Official BLS fact sheet https://www.bls.gov/cpi/factsheets/motor-vehicle-insurance.htm",
@@ -109,9 +94,7 @@
       "publisher": "BLS",
       "observation_period": "2026 July",
       "source_artifact": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
-      "sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
-      "raw_response_sha256": "91d408871d6789455435af6ed0188ade2ef0496db613f2d316cc6f17794941b0",
-      "observation_set_sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
+      "sha256": "91d408871d6789455435af6ed0188ade2ef0496db613f2d316cc6f17794941b0",
       "translation_factor": 1.1956357785710694,
       "retrieval_validation_state": "VALIDATED",
       "calculation_inputs": {
@@ -122,9 +105,7 @@
         "translation_factor": "1.195635778571069435366282870",
         "official_series_identifier": "CUUR0000SETE",
         "source_artifact": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
-        "sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
-        "raw_response_sha256": "91d408871d6789455435af6ed0188ade2ef0496db613f2d316cc6f17794941b0",
-        "observation_set_sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d"
+        "sha256": "91d408871d6789455435af6ed0188ade2ef0496db613f2d316cc6f17794941b0"
       },
       "item": "Motor vehicle insurance",
       "rationale": "OD-010 / OD-006: motor-vehicle-insurance CPI. Official BLS fact sheet https://www.bls.gov/cpi/factsheets/motor-vehicle-insurance.htm",
@@ -139,9 +120,7 @@
       "publisher": "BLS",
       "observation_period": "2026 July",
       "source_artifact": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
-      "sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
-      "raw_response_sha256": "91d408871d6789455435af6ed0188ade2ef0496db613f2d316cc6f17794941b0",
-      "observation_set_sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
+      "sha256": "91d408871d6789455435af6ed0188ade2ef0496db613f2d316cc6f17794941b0",
       "translation_factor": 1.1299122214719783,
       "retrieval_validation_state": "VALIDATED",
       "calculation_inputs": {
@@ -152,9 +131,7 @@
         "translation_factor": "1.129912221471978392977717758",
         "official_series_identifier": "CUUR0000SETD",
         "source_artifact": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
-        "sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
-        "raw_response_sha256": "91d408871d6789455435af6ed0188ade2ef0496db613f2d316cc6f17794941b0",
-        "observation_set_sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d"
+        "sha256": "91d408871d6789455435af6ed0188ade2ef0496db613f2d316cc6f17794941b0"
       },
       "item": "Motor vehicle maintenance and repair",
       "rationale": "OD-010: motor vehicle maintenance/repair index for lagged CE maintenance.",
@@ -169,9 +146,7 @@
       "publisher": "BLS",
       "observation_period": "2026 July",
       "source_artifact": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
-      "sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
-      "raw_response_sha256": "91d408871d6789455435af6ed0188ade2ef0496db613f2d316cc6f17794941b0",
-      "observation_set_sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
+      "sha256": "91d408871d6789455435af6ed0188ade2ef0496db613f2d316cc6f17794941b0",
       "translation_factor": 1.064487438195155,
       "retrieval_validation_state": "VALIDATED",
       "calculation_inputs": {
@@ -182,9 +157,7 @@
         "translation_factor": "1.064487438195155073974541664",
         "official_series_identifier": "CUUR0000SA0",
         "source_artifact": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
-        "sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
-        "raw_response_sha256": "91d408871d6789455435af6ed0188ade2ef0496db613f2d316cc6f17794941b0",
-        "observation_set_sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d"
+        "sha256": "91d408871d6789455435af6ed0188ade2ef0496db613f2d316cc6f17794941b0"
       },
       "item": "All items",
       "rationale": "OD-010: essentials is a mixed CE necessity basket (hygiene, cleaning, toiletries, basic apparel). No single more-specific official index covers the frozen allowlist without a new owner series choice. CPI-U All items is the disclosed fallback the freeze permits.",
@@ -199,9 +172,7 @@
       "publisher": "BLS",
       "observation_period": "2026 July",
       "source_artifact": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
-      "sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
-      "raw_response_sha256": "91d408871d6789455435af6ed0188ade2ef0496db613f2d316cc6f17794941b0",
-      "observation_set_sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
+      "sha256": "91d408871d6789455435af6ed0188ade2ef0496db613f2d316cc6f17794941b0",
       "translation_factor": 1.0512746276002838,
       "retrieval_validation_state": "VALIDATED",
       "calculation_inputs": {
@@ -212,9 +183,7 @@
         "translation_factor": "1.051274627600283733117155720",
         "official_series_identifier": "CUUR0000SAR",
         "source_artifact": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
-        "sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
-        "raw_response_sha256": "91d408871d6789455435af6ed0188ade2ef0496db613f2d316cc6f17794941b0",
-        "observation_set_sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d"
+        "sha256": "91d408871d6789455435af6ed0188ade2ef0496db613f2d316cc6f17794941b0"
       },
       "item": "Recreation",
       "rationale": "OD-010: recreation CPI is defensible for CE recreation/social dollars.",
@@ -234,11 +203,7 @@
         "source_data_year": 2023,
         "selected_artifact": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
         "api_identity": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
-        "sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
-        "raw_response_sha256": "91d408871d6789455435af6ed0188ade2ef0496db613f2d316cc6f17794941b0",
-        "observation_set_sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
-        "target_period": "M13",
-        "target_year": "2024",
+        "sha256": "91d408871d6789455435af6ed0188ade2ef0496db613f2d316cc6f17794941b0",
         "base_index_value": "549.084",
         "target_index_value": "563.841"
       },
@@ -252,11 +217,7 @@
         "source_data_year": 2023,
         "selected_artifact": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
         "api_identity": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
-        "sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
-        "raw_response_sha256": "91d408871d6789455435af6ed0188ade2ef0496db613f2d316cc6f17794941b0",
-        "observation_set_sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
-        "target_period": "M07",
-        "target_year": "2026",
+        "sha256": "91d408871d6789455435af6ed0188ade2ef0496db613f2d316cc6f17794941b0",
         "base_index_value": "549.084",
         "target_index_value": "593.781"
       }
@@ -272,11 +233,7 @@
         "source_data_year": 2023,
         "selected_artifact": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
         "api_identity": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
-        "sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
-        "raw_response_sha256": "91d408871d6789455435af6ed0188ade2ef0496db613f2d316cc6f17794941b0",
-        "observation_set_sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
-        "target_period": "M13",
-        "target_year": "2024",
+        "sha256": "91d408871d6789455435af6ed0188ade2ef0496db613f2d316cc6f17794941b0",
         "base_index_value": "716.004",
         "target_index_value": "843.098"
       },
@@ -290,11 +247,7 @@
         "source_data_year": 2023,
         "selected_artifact": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
         "api_identity": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
-        "sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
-        "raw_response_sha256": "91d408871d6789455435af6ed0188ade2ef0496db613f2d316cc6f17794941b0",
-        "observation_set_sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
-        "target_period": "M07",
-        "target_year": "2026",
+        "sha256": "91d408871d6789455435af6ed0188ade2ef0496db613f2d316cc6f17794941b0",
         "base_index_value": "716.004",
         "target_index_value": "856.080"
       }
@@ -310,11 +263,7 @@
         "source_data_year": 2024,
         "selected_artifact": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
         "api_identity": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
-        "sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
-        "raw_response_sha256": "91d408871d6789455435af6ed0188ade2ef0496db613f2d316cc6f17794941b0",
-        "observation_set_sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
-        "target_period": "M07",
-        "target_year": "2026",
+        "sha256": "91d408871d6789455435af6ed0188ade2ef0496db613f2d316cc6f17794941b0",
         "base_index_value": "407.275",
         "target_index_value": "460.185"
       }
@@ -330,11 +279,7 @@
         "source_data_year": 2024,
         "selected_artifact": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
         "api_identity": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
-        "sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
-        "raw_response_sha256": "91d408871d6789455435af6ed0188ade2ef0496db613f2d316cc6f17794941b0",
-        "observation_set_sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
-        "target_period": "M07",
-        "target_year": "2026",
+        "sha256": "91d408871d6789455435af6ed0188ade2ef0496db613f2d316cc6f17794941b0",
         "base_index_value": "313.689",
         "target_index_value": "333.918"
       }
@@ -350,11 +295,7 @@
         "source_data_year": 2024,
         "selected_artifact": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
         "api_identity": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
-        "sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
-        "raw_response_sha256": "91d408871d6789455435af6ed0188ade2ef0496db613f2d316cc6f17794941b0",
-        "observation_set_sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
-        "target_period": "M07",
-        "target_year": "2026",
+        "sha256": "91d408871d6789455435af6ed0188ade2ef0496db613f2d316cc6f17794941b0",
         "base_index_value": "138.158",
         "target_index_value": "145.242"
       }

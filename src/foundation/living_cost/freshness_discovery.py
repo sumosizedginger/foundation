@@ -785,16 +785,13 @@ def discover_meps() -> FreshnessCheck:
         status = "VERIFIED_CURRENT"
         newer = False
     sidecar = _sidecar("h251dat.zip")
+    from foundation.living_cost.evidence_validators import validate_meps_derivation
     from foundation.sources.meps import load_meps_oop_derivation
 
-    derivation = load_meps_oop_derivation()
-    derived = (
-        derivation is not None
-        and derivation.get("sha256") == (sidecar or {}).get("sha256")
-        and derivation.get("source_data_year") == MEPS_DATA_YEAR
-        and derivation.get("weighted_mean") is not None
-    )
-    evidence = "MODELED_FROM_MEASURED_INPUTS" if derived else "RETRIEVED_UNVALIDATED"
+    meps_validation = validate_meps_derivation(selected_sha=(sidecar or {}).get("sha256"))
+    derivation = load_meps_oop_derivation() if meps_validation.ok else None
+    derived = meps_validation.ok
+    evidence = meps_validation.evidence_status
     art = _artifact_record(
         artifact_id="h251dat.zip",
         url="https://meps.ahrq.gov/mepsweb/data_files/pufs/h251/h251dat.zip",
@@ -807,10 +804,11 @@ def discover_meps() -> FreshnessCheck:
             "MEPS HEALTH OOP DERIVATION: MODELED_FROM_MEASURED_INPUTS from official HC-251. "
             f"OD-002 weighted mean TOTSLF23={derivation['weighted_mean']}; "
             f"n={derivation['in_universe_n']}; source_data_year={MEPS_DATA_YEAR}. "
+            "Filter: adults 18-64 with INSCOV23=1 (ANY PRIVATE). "
             f"Official PUF listing checked at {MEPS_LISTING_URL}. {notes} "
             "Download is not derivation. 2024 FYC remains unreleased."
         )
-        method = "OD-002 weighted mean of TOTSLF23; AGELAST 18-64; INSCOV23=1"
+        method = "OD-002 weighted mean of TOTSLF23; AGELAST 18-64; INSCOV23=1 (ANY PRIVATE)"
     else:
         reason = (
             "MEPS HEALTH OOP DERIVATION: RETRIEVED_UNVALIDATED. "
@@ -952,22 +950,11 @@ def discover_nhts() -> FreshnessCheck:
 
 def discover_epa() -> FreshnessCheck:
     sidecar = _sidecar("epa_fueleconomy_vehicles.csv.zip") or _sidecar("vehicles.csv.zip")
-    cohort_path = METADATA_DIR / "living_cost_epa_mpg_cohorts.json"
-    cohort = None
-    if cohort_path.exists():
-        try:
-            cohort = json.loads(cohort_path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
-            cohort = None
-    derived_mpg = bool(
-        isinstance(cohort, dict)
-        and cohort.get("sha256") == (sidecar or {}).get("sha256")
-        and cohort.get("calculates_mslc") is False
-        and isinstance(cohort.get("cohorts"), dict)
-        and cohort["cohorts"].get("2024", {}).get("median_mpg")
-        and cohort["cohorts"].get("2026", {}).get("median_mpg")
-    )
-    epa_evidence = "MODELED_FROM_MEASURED_INPUTS" if derived_mpg else "RETRIEVED_UNVALIDATED"
+    from foundation.living_cost.evidence_validators import validate_epa_cohorts
+
+    epa_validation = validate_epa_cohorts(selected_sha=(sidecar or {}).get("sha256"))
+    derived_mpg = epa_validation.ok
+    epa_evidence = epa_validation.evidence_status
     art = _artifact_record(
         artifact_id="epa_fueleconomy_vehicles.csv.zip",
         url="https://www.fueleconomy.gov/feg/epadata/vehicles.csv.zip",
@@ -1626,105 +1613,245 @@ def discover_replacement() -> FreshnessCheck:
     )
 
 
-def _od010_selected_artifacts(selected: str | None) -> tuple[dict[str, Any], ...]:
+def _od010_selected_artifacts(
+    selected: str | None, *, observation_sha: str | None = None, raw_sha: str | None = None
+) -> tuple[dict[str, Any], ...]:
     if not selected:
         return ()
-    sha = None
-    table_path = METADATA_DIR / "living_cost_od010_translation_table.json"
-    if table_path.exists():
-        try:
-            payload = json.loads(table_path.read_text(encoding="utf-8"))
-            sha = payload.get("retrieve_sha256")
-        except (OSError, json.JSONDecodeError):
-            sha = None
-    return ({"artifact_id": selected, "sha256": sha},)
+    return (
+        {
+            "artifact_id": selected,
+            "sha256": observation_sha or raw_sha,
+            "observation_set_sha256": observation_sha,
+            "raw_response_sha256": raw_sha,
+        },
+    )
+
+
+def _od010_latest_target_label(coverage: dict[str, Any] | None) -> str | None:
+    if not isinstance(coverage, dict):
+        return None
+    latest: tuple[int, str] | None = None
+    latest_label: str | None = None
+    from foundation.living_cost.od010_cpi import period_tuple_from_label
+
+    for block in coverage.values():
+        if not isinstance(block, dict):
+            continue
+        for rec in block.values():
+            if not isinstance(rec, dict):
+                continue
+            label = rec.get("target_observation_period") or rec.get("latest_observation_period")
+            key = period_tuple_from_label(str(label) if label else None)
+            if key is None:
+                continue
+            if latest is None or key > latest:
+                latest = key
+                latest_label = str(label)
+    return latest_label
 
 
 def discover_od010() -> FreshnessCheck:
+    """Live official BLS freshness. Cached table bytes are not VERIFIED_CURRENT."""
     from foundation.living_cost.candidate_bindings import (
         od010_series_inventory_is_specific,
         od010_translation_is_bound,
         unbound_od010_series_coverage,
+        validate_od010_bindings_against_snapshot,
     )
     from foundation.living_cost.od010_cpi import (
         BLS_API_IDENTITY,
         BLS_CPI_LANDING,
-        load_retrieved_series_coverage,
+        build_od010_records,
+        load_od010_table,
+        persisted_table_matches_live,
+        retrieve_bls_cpi_series,
+        write_od010_live_currentness,
+        write_od010_retrieve,
     )
 
-    table = METADATA_DIR / "living_cost_od010_translation_table.json"
-    bound = od010_translation_is_bound(table)
-    retrieved = load_retrieved_series_coverage()
-    series_coverage = retrieved if isinstance(retrieved, dict) else unbound_od010_series_coverage()
     checked = _now_iso()
-    probe = FreshnessCheck(
+    table_path = METADATA_DIR / "living_cost_od010_translation_table.json"
+    persisted = load_od010_table()
+    structural_bound = od010_translation_is_bound(table_path)
+
+    try:
+        retrieve = retrieve_bls_cpi_series()
+        write_od010_retrieve(retrieve)
+        live_table = build_od010_records(retrieve)
+    except (
+        OSError,
+        RuntimeError,
+        ValueError,
+        TypeError,
+        KeyError,
+        requests.RequestException,
+    ) as exc:
+        write_od010_live_currentness(
+            {
+                "freshness_check_status": "CHECK_FAILED",
+                "currentness_status": "CHECK_FAILED",
+                "translation_index_bound": False,
+                "reason": f"live BLS retrieve failed: {exc}",
+                "structural_table_bound": structural_bound,
+            }
+        )
+        return FreshnessCheck(
+            source_id="od010_price_index",
+            latest_checked_at=checked,
+            latest_authoritative_vintage_found=None,
+            selected_vintage=None,
+            selected_artifact=None,
+            newer_data_exists=None,
+            retrieval_validation_status="INVENTORY_NOT_VALIDATED",
+            reason_if_not_refreshed=(
+                "Live official BLS CPI request failed. Cached translation-table "
+                "evidence is not marked VERIFIED_CURRENT. "
+                f"{exc}"
+            ),
+            freshness_check_status="CHECK_FAILED",
+            publisher="BLS",
+            landing_url=BLS_CPI_LANDING,
+            selected_artifacts=(),
+            transformation_method="CPI_UPDATED target/base",
+            input_evidence_status="INVENTORY_NOT_VALIDATED",
+            listing_freshness_status="CHECK_FAILED",
+            artifact_currentness_status="CHECK_FAILED",
+            selected_artifact_matches_latest=None,
+            year_coverage=_year_coverage(
+                {"covered": False, "note": "live BLS retrieve failed"},
+                {"covered": False, "note": "live BLS retrieve failed"},
+            ),
+            series_coverage=unbound_od010_series_coverage(),
+            extra={
+                "translation_table_bound": False,
+                "structural_table_bound": structural_bound,
+                "series_inventory_status": "NOT_INVENTORIED",
+                "series_inventory_specific": False,
+                "live_bls_request": "FAILED",
+            },
+        )
+
+    live_coverage = live_table.get("series_coverage") or unbound_od010_series_coverage()
+    live_obs_sha = live_table.get("observation_set_sha256")
+    live_raw_sha = live_table.get("raw_response_sha256") or retrieve.get("raw_response_sha256")
+    live_check = FreshnessCheck(
         source_id="od010_price_index",
         latest_checked_at=checked,
-        latest_authoritative_vintage_found=None,
-        selected_vintage=None,
-        selected_artifact=BLS_API_IDENTITY if retrieved else None,
-        newer_data_exists=None,
-        retrieval_validation_status="INVENTORY_NOT_VALIDATED",
-        freshness_check_status="MANUAL_VERIFICATION_REQUIRED",
+        latest_authoritative_vintage_found="BLS CPI-U official API",
+        selected_vintage="BLS CPI-U official API",
+        selected_artifact=BLS_API_IDENTITY,
+        newer_data_exists=False,
+        retrieval_validation_status="VALIDATED",
+        freshness_check_status="VERIFIED_CURRENT",
         publisher="BLS",
-        series_coverage=series_coverage,
+        landing_url=BLS_CPI_LANDING,
+        series_coverage=live_coverage,
     )
-    specific = od010_series_inventory_is_specific(probe)
-    if bound and specific:
+    specific = od010_series_inventory_is_specific(live_check)
+    cross = validate_od010_bindings_against_snapshot(persisted, {"od010_price_index": live_check})
+    matches, match_issues = persisted_table_matches_live(persisted, live_table)
+    newer_issues = [item for item in match_issues if item.endswith("NEWER_TARGET_AVAILABLE")]
+    live_latest = _od010_latest_target_label(live_coverage)
+    table_latest = _od010_latest_target_label(
+        persisted.get("series_coverage") if isinstance(persisted, dict) else None
+    )
+
+    if specific and matches and cross["ok"] is True and structural_bound:
         status = "VERIFIED_CURRENT"
         evidence = "VALIDATED"
         listing = "VERIFIED_CURRENT"
         artifact = "VERIFIED_CURRENT"
         match = True
         newer = False
+        live_bound = True
         reason = (
-            "Official BLS CPI-U NSA series retrieved via public API. "
-            "Seven frozen CPI_UPDATED pairs have concrete observations and "
-            "recomputed target/base factors."
+            "Live official BLS CPI-U NSA request succeeded. Persisted translation "
+            "table uses the same series, source years, base/target periods, values, "
+            "and canonical observation identity. Target/base factors recompute."
         )
-        vintage = "BLS CPI-U official API"
-        selected = BLS_API_IDENTITY
+    elif specific and newer_issues:
+        status = "NEWER_AVAILABLE"
+        evidence = "VALIDATED"
+        listing = "NEWER_AVAILABLE"
+        artifact = "NEWER_AVAILABLE"
+        match = False
+        newer = True
+        live_bound = False
+        reason = (
+            "Live official BLS request returned a newer target observation than "
+            "the persisted translation table. translation_index_bound is false "
+            "until the table is refreshed from the new official observations. "
+            f"live={live_latest}; table={table_latest}."
+        )
     else:
         status = "MANUAL_VERIFICATION_REQUIRED"
-        evidence = "INVENTORY_NOT_VALIDATED"
-        listing = None
+        evidence = "VALIDATED" if specific else "INVENTORY_NOT_VALIDATED"
+        listing = "VERIFIED_CURRENT" if specific else None
         artifact = None
-        match = None
-        newer = None
+        match = False if persisted else None
+        newer = False if specific and not newer_issues else None
+        live_bound = False
         reason = (
-            "Component-specific CPI/index series for lagged nominal dollars are not bound "
-            f"into a live translation table (bound={bound}, inventory_specific={specific}). "
-            "Do not invent series IDs."
+            "Live official BLS inventory does not current-bind the persisted "
+            f"translation table (specific={specific}, structural_bound={structural_bound}, "
+            f"cross_ok={cross['ok']}, issues={match_issues[:8] or cross.get('issues')})."
         )
-        vintage = None
-        selected = None
+
+    write_od010_live_currentness(
+        {
+            "freshness_check_status": status,
+            "currentness_status": status,
+            "translation_index_bound": live_bound,
+            "structural_table_bound": structural_bound,
+            "live_bls_request": "SUCCEEDED",
+            "raw_response_sha256": live_raw_sha,
+            "observation_set_sha256": live_obs_sha,
+            "table_observation_set_sha256": None
+            if not isinstance(persisted, dict)
+            else persisted.get("observation_set_sha256"),
+            "live_latest_target_observation": live_latest,
+            "table_target_observation": table_latest,
+            "match_issues": match_issues,
+            "cross_binding_ok": cross["ok"],
+            "cross_binding_issues": cross.get("issues") or [],
+        }
+    )
     return FreshnessCheck(
         source_id="od010_price_index",
         latest_checked_at=checked,
-        latest_authoritative_vintage_found=vintage,
-        selected_vintage=vintage,
-        selected_artifact=selected,
+        latest_authoritative_vintage_found="BLS CPI-U official API",
+        selected_vintage="BLS CPI-U official API" if specific else None,
+        selected_artifact=BLS_API_IDENTITY,
         newer_data_exists=newer,
         retrieval_validation_status=evidence,
         reason_if_not_refreshed=reason,
         freshness_check_status=status,
         publisher="BLS",
         landing_url=BLS_CPI_LANDING,
-        selected_artifacts=_od010_selected_artifacts(selected),
+        selected_artifacts=_od010_selected_artifacts(
+            BLS_API_IDENTITY, observation_sha=live_obs_sha, raw_sha=live_raw_sha
+        ),
         transformation_method="CPI_UPDATED target/base",
         input_evidence_status=evidence,
         listing_freshness_status=listing,
         artifact_currentness_status=artifact,
         selected_artifact_matches_latest=match,
         year_coverage=_year_coverage(
-            {"covered": bound and specific, "note": "OD-010 translation table"},
-            {"covered": bound and specific, "note": "OD-010 translation table"},
+            {"covered": specific, "note": "live BLS OD-010 inventory"},
+            {"covered": specific, "note": "live BLS OD-010 inventory"},
         ),
-        series_coverage=series_coverage,
+        series_coverage=live_coverage,
         extra={
-            "translation_table_bound": bound,
+            "translation_table_bound": live_bound,
+            "structural_table_bound": structural_bound,
             "series_inventory_status": "INVENTORIED" if specific else "NOT_INVENTORIED",
             "series_inventory_specific": specific,
+            "live_bls_request": "SUCCEEDED",
+            "raw_response_sha256": live_raw_sha,
+            "observation_set_sha256": live_obs_sha,
+            "live_latest_target_observation": live_latest,
+            "table_target_observation": table_latest,
         },
     )
 

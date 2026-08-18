@@ -17,6 +17,10 @@ from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
+from foundation.living_cost.evidence_validators import (
+    epa_evidence_status,
+    meps_evidence_status,
+)
 from foundation.living_cost.freshness import (
     BLOCKER_NOTES,
     candidate_calculation_authorized,
@@ -504,6 +508,8 @@ def _component_status(artifacts: list[RetrievedSourceArtifact], *source_ids: str
 
 
 def write_coverage(artifacts: list[RetrievedSourceArtifact]) -> dict:
+    meps_status = meps_evidence_status()
+    epa_status = epa_evidence_status()
     coverage_by_year: dict[str, dict[str, str]] = {}
     for year in (2024, 2026):
         coverage_by_year[str(year)] = {
@@ -515,14 +521,14 @@ def write_coverage(artifacts: list[RetrievedSourceArtifact]) -> dict:
             else _component_status(artifacts, f"usda_food_low_cost_{year}"),
             "health_premium": "MODELED_FROM_MEASURED_INPUTS",
             "health_oop": (
-                "MODELED_FROM_MEASURED_INPUTS"
-                if (METADATA_DIR / "living_cost_meps_oop_derivation.json").exists()
+                meps_status
+                if meps_status == "MODELED_FROM_MEASURED_INPUTS"
                 else _component_status(artifacts, f"meps_table1_{year}")
             ),
             "mileage": _component_status(artifacts, f"fhwa_nhts_{year}"),
             "mpg": (
-                "MODELED_FROM_MEASURED_INPUTS"
-                if (METADATA_DIR / "living_cost_epa_mpg_cohorts.json").exists()
+                epa_status
+                if epa_status == "MODELED_FROM_MEASURED_INPUTS"
                 else (
                     "RETRIEVED_UNVALIDATED"
                     if _component_status(artifacts, f"epa_mpg_{year}")
@@ -1033,8 +1039,13 @@ def write_transport_coverage() -> None:
                 "note": "FOUNDATION MOBILITY STANDARD = NHTS weighted median. Observed, not MEASURED MINIMUM NECESSARY MILEAGE. OD-003 FROZEN.",
             },
             "mpg": {
-                "status": "MODELED_FROM_MEASURED_INPUTS",
-                "note": "EPA fueleconomy.gov official cohort derived. OD-004 FROZEN: used-car compact+midsize gasoline median. 24/28/32 are not the empirical model.",
+                "status": epa_evidence_status(),
+                "note": (
+                    "EPA fueleconomy.gov official cohort derived only when the "
+                    "canonical validator accepts exact Compact Cars + Midsize Cars "
+                    "comb08 medians matching the selected cached bytes. OD-004 FROZEN. "
+                    "24/28/32 are not the empirical model."
+                ),
             },
             "gas": {
                 "status": "VALIDATED",
