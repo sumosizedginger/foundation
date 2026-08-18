@@ -1,6 +1,6 @@
 {
   "report_type": "living_cost_source_coverage",
-  "generated_at": "2026-08-18T17:24:53+00:00",
+  "generated_at": "2026-08-18T18:11:58+00:00",
   "question": "What still prevents the living-cost model from being calculated?",
   "required_components": [
     "housing",
@@ -589,9 +589,9 @@
     {
       "source_id": "eia_gas_price_2024",
       "validation_status": "VALIDATED",
-      "sha256": "658c4b7a34f3f466246f3ac762a880f4fd53cf56f7ab2505ff213f5905e0ff6c",
-      "byte_size": 7461376,
-      "retrieved_at": "2026-08-14T20:19:00+00:00",
+      "sha256": "b352802e8c52b7276f002c0682d9867a89734815494269346941d810f9c78140",
+      "byte_size": 7467008,
+      "retrieved_at": "2026-08-18T18:11:24+00:00",
       "notes": "Parsed 12 EIA regular retail series for 2024. Regional/PADD series are not labeled state-measured."
     },
     {
@@ -624,7 +624,7 @@
       "sha256": "f70c3ce6bac6e1e667ee29c150735224a9fb19d66edbdef17822ddc8006c238a",
       "byte_size": 29159,
       "retrieved_at": "2026-08-14T20:19:07+00:00",
-      "notes": ""
+      "notes": null
     },
     {
       "source_id": "hud_fmr_2026",
@@ -925,9 +925,9 @@
     {
       "source_id": "eia_gas_price_2026",
       "validation_status": "VALIDATED",
-      "sha256": "658c4b7a34f3f466246f3ac762a880f4fd53cf56f7ab2505ff213f5905e0ff6c",
-      "byte_size": 7461376,
-      "retrieved_at": "2026-08-14T20:19:00+00:00",
+      "sha256": "b352802e8c52b7276f002c0682d9867a89734815494269346941d810f9c78140",
+      "byte_size": 7467008,
+      "retrieved_at": "2026-08-18T18:11:24+00:00",
       "notes": "Parsed 12 EIA regular retail series for 2026. Regional/PADD series are not labeled state-measured."
     },
     {
@@ -1141,11 +1141,11 @@
   "headline_calculated": false,
   "gap_calculated": false,
   "adequacy_calculated": false,
+  "candidate_calculation_authorized": false,
   "living_cost_release_authorized": false,
   "states_modeled": 0,
   "decisions_frozen": true,
   "methodology_frozen_is_not_source_validated": true,
-  "candidate_calculation_authorized": false,
   "blocker_notes": {
     "health_oop": "MEPS HEALTH OOP DERIVATION: MODELED_FROM_MEASURED_INPUTS from official HC-251 (2023). OD-002 weighted mean of TOTSLF23 among AGELAST 18-64 / INSCOV23=1 (ANY PRIVATE). Median and P75 retained as sensitivities. source_data_year remains 2023. 2024 Full Year Consolidated is not listed (scheduled August 2026). Lagged years use OD-010 medical-care CPI. Download is not derivation.",
     "mpg": "EPA MPG: MODELED_FROM_MEASURED_INPUTS from official fueleconomy.gov vehicles.csv.zip. OD-004 methodology is FROZEN. Used-car gasoline exact Compact Cars + Midsize Cars median comb08 for model years cost_year-12..cost_year-8. 24/28/32 are not the model. The vehicles.csv.zip URL is mutable; listing is not byte currentness."
