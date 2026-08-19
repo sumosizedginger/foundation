@@ -18,7 +18,9 @@ from foundation.sources.state_tax import (
     detect_high_agi_income_tax,
     evaluate_state_tax_freshness,
     no_wage_tax_verified,
+    parse_future_income_tax,
     parse_no_wage_tax,
+    tax_applies_to_rule_year,
 )
 
 
@@ -62,20 +64,114 @@ def test_no_tax_parser_requires_official_wording() -> None:
     assert parse_no_wage_tax("If you are at or below the no tax due threshold", "TX") is False
 
 
-def test_washington_high_agi_tax_is_not_no_wage_tax() -> None:
+def test_washington_future_tax_does_not_apply_to_2024() -> None:
+    combined = (
+        "The Washington state legislature recently enacted an income tax on individuals "
+        "with an annual adjusted gross income of $1,000,000 or more. "
+        "Beginning January 1, 2028, a tax is imposed on the receipt of Washington taxable income."
+    )
+    info = parse_future_income_tax(combined)
+    assert info["tax_exists"] is True
+    assert info["first_tax_year"] == 2028
+    assert info["effective_start"] == "2028-01-01"
+    assert tax_applies_to_rule_year(info, 2024) is False
+    assert parse_no_wage_tax(combined, "WA", 2024) is True
+
+
+def test_washington_future_tax_does_not_apply_to_2026() -> None:
+    combined = (
+        "The Washington state legislature recently enacted an income tax on individuals "
+        "with an annual adjusted gross income of $1,000,000 or more. "
+        "Beginning January 1, 2028, a tax is imposed on the receipt of Washington taxable income."
+    )
+    assert tax_applies_to_rule_year(parse_future_income_tax(combined), 2026) is False
+    assert parse_no_wage_tax(combined, "WA", 2026) is True
+
+
+def test_washington_2028_tax_applies_but_project_year_fail_closed() -> None:
+    combined = (
+        "Beginning January 1, 2028, a tax is imposed on the receipt of Washington taxable income. "
+        "households with annual adjusted gross income of $1,000,000 or more"
+    )
+    assert tax_applies_to_rule_year(parse_future_income_tax(combined), 2028) is True
+    assert parse_no_wage_tax(combined, "WA", 2028) is False
+    try:
+        calculate_state_income_tax(40000.0, "WA", year=2028)
+    except UnsupportedTaxYearError:
+        return
+    raise AssertionError("2028 must fail closed as an unsupported project year")
+
+
+def test_washington_undated_future_tax_is_not_zero() -> None:
     official = (
         "The Washington state legislature recently enacted an income tax on individuals "
         "with an annual adjusted gross income of $1,000,000 or more."
     )
     assert detect_high_agi_income_tax(official) is True
-    assert parse_no_wage_tax(official, "WA") is False
-    assert (
-        parse_no_wage_tax(
-            "The State of Washington does not have a personal or corporate Income Tax.",
-            "WA",
-        )
-        is True
+    info = parse_future_income_tax(official)
+    assert info["unknown_effective_year"] is True
+    assert tax_applies_to_rule_year(info, 2024) is None
+    assert parse_no_wage_tax(official, "WA", 2024) is False
+    assert parse_no_wage_tax(official, "WA", 2026) is False
+
+
+def test_washington_2026_missing_authority_does_not_validate(tmp_path: Path) -> None:
+    payload = build_state_tax_inventory(
+        artifacts={
+            "st_wa_2024_no_wage_tax": {
+                **_art("WA", 2024, "aaa"),
+            }
+        }
     )
+    path = tmp_path / "inv.json"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    result = validate_state_tax_inventory(path)
+    assert result.ok is False
+    assert any("WA:2026" in i for i in result.issues)
+
+
+def test_washington_2026_sha_mismatch_fails(tmp_path: Path) -> None:
+    payload = {
+        "report_type": "living_cost_state_tax_inventory",
+        "calculates_mslc": False,
+        "family_complete": True,
+        "retrieved_artifacts": [_art("WA", 2024, "aaa"), _art("WA", 2026, "bbb")],
+        "jurisdictions": {
+            "WA": {
+                "years": {
+                    "2024": {
+                        "jurisdiction": "WA",
+                        "tax_year": 2024,
+                        "tax_status": STATUS_NO_WAGE_TAX,
+                        "parsed_ok": True,
+                        "validation_issues": [],
+                        "official_authorities": [{"sha256": "aaa"}],
+                        "standard_deduction": {
+                            "source_artifact_key": "st_wa_2024_no_wage_tax",
+                            "source_sha256": "aaa",
+                        },
+                    },
+                    "2026": {
+                        "jurisdiction": "WA",
+                        "tax_year": 2026,
+                        "tax_status": STATUS_NO_WAGE_TAX,
+                        "parsed_ok": True,
+                        "validation_issues": [],
+                        "official_authorities": [{"sha256": "bbb"}],
+                        "standard_deduction": {
+                            "source_artifact_key": "st_wa_2026_no_wage_tax",
+                            "source_sha256": "WRONG",
+                        },
+                    },
+                }
+            }
+        },
+    }
+    path = tmp_path / "inv.json"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    result = validate_state_tax_inventory(path)
+    assert result.ok is False
+    assert any("STATE_TAX_AUTHORITY_SHA_MISMATCH" in i for i in result.issues)
 
 
 def test_unverified_no_tax_candidate_is_not_zero() -> None:

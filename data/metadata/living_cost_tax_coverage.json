@@ -1,13 +1,13 @@
 {
   "report_type": "living_cost_tax_coverage",
-  "generated_at": "2026-08-19T03:50:17+00:00",
+  "generated_at": "2026-08-19T15:08:48+00:00",
   "federal_2024_validated_tables": true,
   "federal_validation_gate": "Federal tax is VALIDATED only when IRS/SSA authorities are bound and FEDERAL_TAX_RULES match living_cost_federal_tax_inventory.json.",
   "federal_tax_evidence_status": "VALIDATED",
   "state_tax_evidence_status": "INVENTORY_NOT_VALIDATED",
   "state_tax_family_complete": false,
-  "state_tax_validated_2024_count": 8,
-  "state_tax_validated_2026_count": 8,
+  "state_tax_validated_2024_count": 9,
+  "state_tax_validated_2026_count": 9,
   "completion_matrix": [
     {
       "state": "AL",
@@ -481,13 +481,13 @@
     },
     {
       "state": "WA",
-      "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
-      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
-      "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
-      "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_evidence_status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
+      "2024_code_match_status": "STATE_CODE_MATCH",
+      "2026_evidence_status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
+      "2026_code_match_status": "STATE_CODE_MATCH",
       "2026_freshness_status": "CURRENTNESS_PENDING",
-      "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
-      "remaining_issue": "STATE_TAX_MODEL_GAP:WA:2024:high_agi_income_tax; STATE_TAX_MODEL_GAP:WA:2026:high_agi_income_tax; STATE_TAX_2026_UNRESOLVED:WA"
+      "mandatory_payroll_status": "OWNER_TAX_METHOD_DECISION_REQUIRED",
+      "remaining_issue": ""
     },
     {
       "state": "WV",
@@ -1894,15 +1894,15 @@
     {
       "year": 2024,
       "state": "WA",
-      "status": "STATE_EVIDENCE_INCOMPLETE",
-      "primary_source": "candidate no-tax set; official verification required",
+      "status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
+      "primary_source": "https://lawfilesext.leg.wa.gov/biennium/2023-24/Pdf/Initiatives/Initiatives/Initiative%202111.sl.pdf",
       "brackets": null,
       "rates": null,
       "deductions": null,
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
+      "implementation_status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
@@ -3362,15 +3362,15 @@
     {
       "year": 2026,
       "state": "WA",
-      "status": "STATE_EVIDENCE_INCOMPLETE",
-      "primary_source": "candidate no-tax set; official verification required",
+      "status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
+      "primary_source": "https://lawfilesext.leg.wa.gov/biennium/2025-26/Pdf/Bills/Session%20Laws/Senate/6346-S.sl.pdf",
       "brackets": null,
       "rates": null,
       "deductions": null,
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
+      "implementation_status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {

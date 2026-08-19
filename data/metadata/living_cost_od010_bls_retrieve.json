@@ -1,6 +1,6 @@
 {
   "report_type": "living_cost_od010_bls_retrieve",
-  "retrieved_at": "2026-08-18T19:16:53Z",
+  "retrieved_at": "2026-08-19T15:08:52Z",
   "http_status": 200,
   "request_url": "https://api.bls.gov/publicAPI/v2/timeseries/data/",
   "request_payload": {
@@ -16,12 +16,12 @@
     "annualaverage": true
   },
   "byte_size": 20854,
-  "sha256": "4af99ff7b7969df4af0f8292bc54727f965d64d5936eb444c933036c4cf5f086",
-  "raw_response_sha256": "4af99ff7b7969df4af0f8292bc54727f965d64d5936eb444c933036c4cf5f086",
+  "sha256": "ab11d8a79ef8ce856a96f39d8e3944c66e30d7e696031b9cd492c058f73429a7",
+  "raw_response_sha256": "ab11d8a79ef8ce856a96f39d8e3944c66e30d7e696031b9cd492c058f73429a7",
   "observation_set_sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
   "body": {
     "status": "REQUEST_SUCCEEDED",
-    "responseTime": 167,
+    "responseTime": 114,
     "message": [],
     "Results": {
       "series": [

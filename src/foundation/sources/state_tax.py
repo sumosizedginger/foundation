@@ -393,6 +393,28 @@ def authority_catalog() -> list[dict[str, Any]]:
             spec["url"] = "https://www.gencourt.state.nh.us/rsa/html/V/77/77-mrg.htm"
             spec["publisher"] = "New Hampshire General Court / RSA 77"
             spec["authority_type"] = "statute"
+        ext = ".pdf" if spec["url"].lower().endswith(".pdf") else ".html"
+        spec["filename"] = f"{spec['key']}{ext}"
+    # Year-specific WA authorities: 2024 I-2111 prohibition vs 2026 ESSB 6346
+    # (tax imposed beginning January 1, 2028 — not a 2026 RULE_YEAR tax).
+    for spec in specs:
+        if spec["state"] != "WA":
+            continue
+        if spec["year"] == 2024:
+            spec["url"] = (
+                "https://lawfilesext.leg.wa.gov/biennium/2023-24/Pdf/Initiatives/"
+                "Initiatives/Initiative%202111.sl.pdf"
+            )
+            spec["publisher"] = "Washington State Legislature / Initiative 2111"
+            spec["authority_type"] = "enacted_legislation"
+        elif spec["year"] == 2026:
+            spec["url"] = (
+                "https://lawfilesext.leg.wa.gov/biennium/2025-26/Pdf/Bills/"
+                "Session%20Laws/Senate/6346-S.sl.pdf"
+            )
+            spec["publisher"] = "Washington State Legislature / ESSB 6346 Chapter 238"
+            spec["authority_type"] = "enacted_legislation"
+        spec["filename"] = f"{spec['key']}.pdf"
 
     taxing_pages: dict[str, tuple[str, str]] = {
         "AL": (
@@ -529,12 +551,77 @@ def detect_high_agi_income_tax(text: str) -> bool:
     return any(phrase in blob for phrase in HIGH_AGI_INCOME_TAX_PHRASES)
 
 
+def _normalize_statute_text(text: str) -> str:
+    """Collapse whitespace and PDF wrap-line numbers inserted between words."""
+    blob = re.sub(r"\s+", " ", text or "")
+    blob = re.sub(r"([A-Za-z,.$])\s+\d{1,3}\s+(\d)", r"\1 \2", blob)
+    blob = re.sub(r"([A-Za-z])\s+\d{1,3}\s+([A-Za-z])", r"\1 \2", blob)
+    return blob.lower()
+
+
+def parse_future_income_tax(text: str) -> dict[str, Any]:
+    """Parse enacted-but-possibly-future individual income tax applicability.
+
+    A DOR announcement that a tax 'exists' is not RULE_YEAR applicability.
+    Unknown effective year is fail-closed (not zero).
+    """
+    blob = _normalize_statute_text(text)
+    exists = detect_high_agi_income_tax(blob) or (
+        "a tax is imposed on the receipt of washington taxable income" in blob
+    )
+    first_year: int | None = None
+    m = re.search(
+        r"beginning\s+january\s+1,\s+(\d{4}),\s+a tax is imposed",
+        blob,
+    )
+    if m:
+        first_year = int(m.group(1))
+        exists = True
+    else:
+        m = re.search(r"imposed\s+beginning\s+january\s+1,\s+(\d{4})", blob)
+        if m:
+            first_year = int(m.group(1))
+            exists = True
+    threshold = None
+    if "$1,000,000" in blob or "1,000,000 or more" in blob or "one million dollar" in blob:
+        threshold = 1_000_000.0
+    unknown = bool(exists and first_year is None)
+    return {
+        "tax_exists": exists,
+        "effective_start": f"{first_year}-01-01" if first_year else None,
+        "first_tax_year": first_year,
+        "threshold": threshold,
+        "unknown_effective_year": unknown,
+    }
+
+
+def tax_applies_to_rule_year(info: Mapping[str, Any] | None, year: int) -> bool | None:
+    """True if the parsed tax applies to ``year``; None if existence is unknown-dated."""
+    if not info or not info.get("tax_exists"):
+        return False
+    if info.get("unknown_effective_year") or info.get("first_tax_year") is None:
+        return None
+    try:
+        return int(year) >= int(info["first_tax_year"])
+    except (TypeError, ValueError):
+        return None
+
+
 def parse_no_wage_tax(text: str, state: str, year: int | None = None) -> bool:
-    blob = re.sub(r"\s+", " ", text or "").lower()
+    blob = _normalize_statute_text(text)
     if not blob.strip():
         return False
-    if detect_high_agi_income_tax(blob):
-        # A high-AGI individual income tax is not "no general wage income tax".
+    future = parse_future_income_tax(blob)
+    applies: bool | None = False
+    if year is not None:
+        applies = tax_applies_to_rule_year(future, year)
+    elif future.get("tax_exists"):
+        # No RULE_YEAR supplied: existence of an undated or future tax is not
+        # proof of current-year zero, and is not proof it applies now.
+        applies = tax_applies_to_rule_year(future, 2026)
+    if applies is True:
+        return False
+    if applies is None and future.get("tax_exists"):
         return False
     phrases = NO_TAX_PHRASES.get(state, ())
     if state == "TN":
@@ -549,6 +636,16 @@ def parse_no_wage_tax(text: str, state: str, year: int | None = None) -> bool:
         if year == 2024:
             return i_and_d
         return i_and_d or repealed_2025
+    if state == "WA":
+        prohibition = (
+            "neither the state nor any county, city, or other local jurisdiction" in blob
+            and "personal income" in blob
+        ) or "personal income tax prohibition" in blob
+        if prohibition:
+            return True
+        if future.get("tax_exists") and applies is False:
+            return True
+        return any(phrase in blob for phrase in phrases)
     return any(phrase in blob for phrase in phrases)
 
 
@@ -684,12 +781,18 @@ def build_state_tax_inventory(
             no_tax_ok = (
                 parse_no_wage_tax(text, state, year) if state in NO_TAX_CANDIDATES else False
             )
-            high_agi = detect_high_agi_income_tax(text)
+            future = parse_future_income_tax(text)
+            applies = tax_applies_to_rule_year(future, year)
             code_sched = _schedule_from_code(state, year)
             tax_status = STATUS_INCOMPLETE
             official_sched: dict[str, Any] | None = None
             code_match = "STATE_EVIDENCE_INCOMPLETE"
-            if high_agi:
+            if applies is None and future.get("tax_exists"):
+                issues.append(
+                    f"STATE_TAX_MODEL_GAP:{state}:{year}:high_agi_income_tax_unknown_effective_year"
+                )
+                tax_status = STATUS_INCOMPLETE
+            elif applies is True:
                 issues.append(f"STATE_TAX_MODEL_GAP:{state}:{year}:high_agi_income_tax")
                 tax_status = STATUS_INCOMPLETE
             elif no_tax_ok and not issues:
@@ -788,6 +891,14 @@ def build_state_tax_inventory(
                 "currentness_status": "HISTORICAL_RULE_YEAR"
                 if year == 2024
                 else "CURRENTNESS_PENDING",
+                "future_legislation": {
+                    "tax_enacted": bool(future.get("tax_exists")),
+                    "tax_applies_to_year": applies,
+                    "effective_start": future.get("effective_start"),
+                    "first_tax_year": future.get("first_tax_year"),
+                    "threshold": future.get("threshold"),
+                    "unknown_effective_year": bool(future.get("unknown_effective_year")),
+                },
             }
             year_recs[str(year)] = rec
         jurisdictions[state] = {"jurisdiction": state, "years": year_recs}
