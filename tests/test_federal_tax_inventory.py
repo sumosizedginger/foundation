@@ -455,6 +455,23 @@ def test_newer_pub15_revision_is_not_verified_current():
     assert newer is True
 
 
+def test_unknown_payroll_compare_is_not_verified_current():
+    from foundation.sources.federal_tax import evaluate_federal_tax_freshness
+
+    status, newer, _reason = evaluate_federal_tax_freshness(
+        inventory_valid=True,
+        live={
+            "pub15_revision_year": 2026,
+            "rev_proc_2025_32_current": True,
+            "successor_rev_proc": None,
+            "current_pub15_payroll_matches": None,
+        },
+        live_error=None,
+    )
+    assert status == "CHECK_FAILED"
+    assert newer is None
+
+
 def test_agreeing_live_discovery_may_be_verified_current():
     from foundation.sources.federal_tax import evaluate_federal_tax_freshness
 

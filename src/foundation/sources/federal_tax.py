@@ -720,7 +720,17 @@ def evaluate_federal_tax_freshness(
             None,
             "Current official Publication 15 payroll values disagree with the bound 2026 inventory.",
         )
-    if inventory_valid and pub_year == 2026 and rp_current is True and payroll_match is not False:
+    if payroll_match is None:
+        return (
+            "CHECK_FAILED",
+            None,
+            (
+                "Live official Publication 15 payroll comparison did not complete. "
+                "Cached inventory remains VALIDATED if previously bound. "
+                "Do not claim VERIFIED_CURRENT without a successful compare."
+            ),
+        )
+    if inventory_valid and pub_year == 2026 and rp_current is True and payroll_match is True:
         return (
             "VERIFIED_CURRENT",
             False,
