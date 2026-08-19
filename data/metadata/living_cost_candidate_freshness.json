@@ -2463,14 +2463,14 @@
           "STATE_TAX_CELL_UNPARSED:CO:2026:['STATE_TAX_MODEL_GAP:CO:2026:schedule_not_extracted']",
           "STATE_TAX_CELL_UNRESOLVED:CO:2026"
         ],
-        "inventory_sha256": "51d5291c60df6d6e29a82f68d45fad0ec5a72b8cca3294f24f4f2688f9383cca",
+        "inventory_sha256": "3655dd92a20255a53cd6e13d5228dcb083d816f8ddd8bb4aae338873a887ec63",
         "inventory_generated_at": "2026-08-19T17:32:42+00:00",
         "inventory_binding": {
           "ok": true,
           "issues": [],
-          "inventory_sha256": "51d5291c60df6d6e29a82f68d45fad0ec5a72b8cca3294f24f4f2688f9383cca",
+          "inventory_sha256": "3655dd92a20255a53cd6e13d5228dcb083d816f8ddd8bb4aae338873a887ec63",
           "inventory_generated_at": "2026-08-19T17:32:42+00:00",
-          "freshness_inventory_sha": "51d5291c60df6d6e29a82f68d45fad0ec5a72b8cca3294f24f4f2688f9383cca",
+          "freshness_inventory_sha": "3655dd92a20255a53cd6e13d5228dcb083d816f8ddd8bb4aae338873a887ec63",
           "freshness_inventory_generated_at": "2026-08-19T17:32:42+00:00"
         }
       }

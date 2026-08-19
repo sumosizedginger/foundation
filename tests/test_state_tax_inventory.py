@@ -809,6 +809,16 @@ def test_nc_2025_labeled_page_cannot_complete_or_verify_2026() -> None:
     assert live["verified_current_2026_count"] == 0
 
 
+def test_inventory_sha_is_newline_invariant(tmp_path: Path) -> None:
+    payload = {"report_type": "living_cost_state_tax_inventory", "generated_at": "x"}
+    lf = tmp_path / "lf.json"
+    crlf = tmp_path / "crlf.json"
+    text = json.dumps(payload, indent=2) + "\n"
+    lf.write_bytes(text.encode("utf-8"))
+    crlf.write_bytes(text.replace("\n", "\r\n").encode("utf-8"))
+    assert inventory_file_sha256(lf) == inventory_file_sha256(crlf)
+
+
 def test_stale_freshness_cannot_claim_sync_with_newer_inventory(tmp_path: Path) -> None:
     inventory = {
         "report_type": "living_cost_state_tax_inventory",

@@ -1457,11 +1457,16 @@ def load_state_tax_inventory(
 
 
 def inventory_file_sha256(path: Path | None = None) -> str | None:
-    """SHA-256 of the inventory file bytes. Sidecar hashes are not used."""
+    """SHA-256 of inventory file bytes with newlines normalized to LF.
+
+    Git working copies may use CRLF on Windows. Binding identity must be
+    the same on Linux CI and a Windows checkout of the same commit.
+    """
     dest = path or INVENTORY_PATH
     if not dest.is_file():
         return None
-    return hashlib.sha256(dest.read_bytes()).hexdigest()
+    data = dest.read_bytes().replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+    return hashlib.sha256(data).hexdigest()
 
 
 def bind_state_tax_freshness_to_inventory(
