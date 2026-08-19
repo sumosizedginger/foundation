@@ -206,7 +206,7 @@ def _extract_pdf_text(path: Path) -> str:
         return ""
     try:
         reader = PdfReader(str(path))
-    except (OSError, ValueError) as exc:
+    except Exception as exc:  # noqa: BLE001
         logger.error("Failed to open state tax PDF %s: %s", path, exc)
         return ""
     parts: list[str] = []
@@ -232,7 +232,8 @@ def _html_to_text(raw: str) -> str:
 def _text_for_path(path: Path | None) -> str:
     if path is None or not path.is_file():
         return ""
-    if path.suffix.lower() == ".pdf":
+    header = path.read_bytes()[:8]
+    if path.suffix.lower() == ".pdf" or header.startswith(b"%PDF"):
         return _extract_pdf_text(path)
     return _html_to_text(path.read_text(encoding="utf-8", errors="replace"))
 
@@ -249,9 +250,16 @@ def _acquire(
     from foundation.sources.acquisition import acquire_source, write_retrieval_sidecar
 
     path = CACHE_DIR / filename
+    sidecar = Path(str(path) + ".provenance.json")
+    if sidecar.is_file() and not force_download:
+        try:
+            prev = json.loads(sidecar.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            prev = {}
+        if isinstance(prev, dict) and prev.get("url") and prev.get("url") != url:
+            force_download = True
     if force_download and path.is_file():
         path.unlink()
-        sidecar = Path(str(path) + ".provenance.json")
         if sidecar.is_file():
             sidecar.unlink()
     art = acquire_source(
@@ -415,6 +423,20 @@ def authority_catalog() -> list[dict[str, Any]]:
             spec["publisher"] = "Washington State Legislature / ESSB 6346 Chapter 238"
             spec["authority_type"] = "enacted_legislation"
         spec["filename"] = f"{spec['key']}.pdf"
+    add(
+        "WA",
+        2024,
+        (
+            "https://lawfilesext.leg.wa.gov/biennium/2023-24/Pdf/Bill%20Reports/"
+            "House/I2111%20HIB%20FIN%2024.pdf"
+        ),
+        role="preexisting_status",
+        publisher=(
+            "Washington State Legislature / House Finance Committee report on Initiative 2111"
+        ),
+        authority_type="legislative_analysis",
+        slug="preexisting_no_wage_tax",
+    )
 
     taxing_pages: dict[str, tuple[str, str]] = {
         "AL": (
@@ -543,6 +565,204 @@ def authority_catalog() -> list[dict[str, Any]]:
                 authority_type="dor_page",
                 slug="schedule",
             )
+    year_specific_taxing: dict[tuple[str, int], tuple[str, str, str]] = {
+        ("PA", 2024): (
+            "https://www.pa.gov/agencies/revenue/resources/tax-rates/personal-income-tax-rates",
+            "Pennsylvania Department of Revenue / Personal Income Tax Rates (2004–Present table)",
+            "rate_table",
+        ),
+        ("PA", 2026): (
+            "https://www.pa.gov/agencies/revenue/resources/tax-types-and-information/personal-income-tax",
+            "Pennsylvania Department of Revenue / Personal Income Tax",
+            "dor_page",
+        ),
+        ("IL", 2024): (
+            (
+                "https://tax.illinois.gov/content/dam/soi/en/web/tax/forms/incometax/documents/"
+                "2024/individual/il-1040-instr.pdf"
+            ),
+            "Illinois Department of Revenue / 2024 IL-1040 instructions",
+            "form_instructions",
+        ),
+        ("IL", 2026): (
+            "https://tax.illinois.gov/research/taxrates/income.html",
+            "Illinois Department of Revenue / Income Tax Rates",
+            "rate_table",
+        ),
+        ("NC", 2024): (
+            (
+                "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/"
+                "Chapter_105/GS_105-153.7.html"
+            ),
+            "North Carolina General Assembly / G.S. 105-153.7",
+            "statute",
+        ),
+        ("NC", 2026): (
+            (
+                "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/"
+                "Chapter_105/GS_105-153.7.html"
+            ),
+            "North Carolina General Assembly / G.S. 105-153.7",
+            "statute",
+        ),
+        ("AZ", 2024): (
+            "https://www.azleg.gov/ars/43/01011.htm",
+            "Arizona Legislature / A.R.S. § 43-1011",
+            "statute",
+        ),
+        ("AZ", 2026): (
+            "https://www.azleg.gov/ars/43/01011.htm",
+            "Arizona Legislature / A.R.S. § 43-1011",
+            "statute",
+        ),
+        ("IN", 2024): (
+            "https://iga.in.gov/laws/2024/ic/titles/6#6-3-2-1",
+            "Indiana General Assembly / Ind. Code § 6-3-2-1",
+            "statute",
+        ),
+        ("IN", 2026): (
+            "https://iga.in.gov/laws/2026/ic/titles/6#6-3-2-1",
+            "Indiana General Assembly / Ind. Code § 6-3-2-1",
+            "statute",
+        ),
+        ("KY", 2024): (
+            "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=54091",
+            "Kentucky General Assembly / KRS 141.020",
+            "statute",
+        ),
+        ("KY", 2026): (
+            "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=54091",
+            "Kentucky General Assembly / KRS 141.020",
+            "statute",
+        ),
+        ("MI", 2024): (
+            "https://www.michigan.gov/taxes/individual-income-tax",
+            "Michigan Department of Treasury",
+            "dor_page",
+        ),
+        ("MI", 2026): (
+            "https://www.michigan.gov/taxes/individual-income-tax",
+            "Michigan Department of Treasury",
+            "dor_page",
+        ),
+        ("UT", 2024): (
+            "https://tax.utah.gov/taxing/income",
+            "Utah State Tax Commission",
+            "dor_page",
+        ),
+        ("UT", 2026): (
+            "https://tax.utah.gov/taxing/income",
+            "Utah State Tax Commission",
+            "dor_page",
+        ),
+        ("IA", 2024): (
+            "https://revenue.iowa.gov/taxes/tax-guidance/individual-income-tax",
+            "Iowa Department of Revenue",
+            "dor_page",
+        ),
+        ("IA", 2026): (
+            "https://revenue.iowa.gov/taxes/tax-guidance/individual-income-tax",
+            "Iowa Department of Revenue",
+            "dor_page",
+        ),
+        ("GA", 2024): (
+            "https://dor.georgia.gov/taxes/individual-taxes",
+            "Georgia Department of Revenue",
+            "dor_page",
+        ),
+        ("GA", 2026): (
+            "https://dor.georgia.gov/taxes/individual-taxes",
+            "Georgia Department of Revenue",
+            "dor_page",
+        ),
+        ("CO", 2024): (
+            "https://tax.colorado.gov/individual-income-tax",
+            "Colorado Department of Revenue",
+            "dor_page",
+        ),
+        ("CO", 2026): (
+            "https://tax.colorado.gov/individual-income-tax",
+            "Colorado Department of Revenue",
+            "dor_page",
+        ),
+        ("ID", 2024): (
+            "https://tax.idaho.gov/taxes/income-tax/individual-income/",
+            "Idaho State Tax Commission",
+            "dor_page",
+        ),
+        ("ID", 2026): (
+            "https://tax.idaho.gov/taxes/income-tax/individual-income/",
+            "Idaho State Tax Commission",
+            "dor_page",
+        ),
+        ("MS", 2024): (
+            "https://www.dor.ms.gov/individual/individual-income-tax",
+            "Mississippi Department of Revenue",
+            "dor_page",
+        ),
+        ("MS", 2026): (
+            "https://www.dor.ms.gov/individual/individual-income-tax",
+            "Mississippi Department of Revenue",
+            "dor_page",
+        ),
+        ("OH", 2024): (
+            "https://tax.ohio.gov/individual/resources/individual-income-tax",
+            "Ohio Department of Taxation",
+            "dor_page",
+        ),
+        ("OH", 2026): (
+            "https://tax.ohio.gov/individual/resources/individual-income-tax",
+            "Ohio Department of Taxation",
+            "dor_page",
+        ),
+    }
+    for spec in specs:
+        key = (str(spec.get("state")), int(spec.get("year") or 0))
+        override = year_specific_taxing.get(key)
+        if override is None or spec.get("role") != "schedule":
+            continue
+        url, publisher, authority_type = override
+        spec["url"] = url
+        spec["publisher"] = publisher
+        spec["authority_type"] = authority_type
+        ext = ".pdf" if url.lower().endswith(".pdf") else ".html"
+        spec["filename"] = f"{spec['key']}{ext}"
+    add(
+        "NC",
+        2024,
+        "https://www.ncdor.gov/taxes-forms/individual-income-tax/tax-rate-schedules",
+        role="rate_table",
+        publisher="North Carolina Department of Revenue / Tax Rate Schedules",
+        authority_type="dor_page",
+        slug="rate_table",
+    )
+    add(
+        "NC",
+        2024,
+        "https://www.ncdor.gov/2024-d-400-schedule-web-fill-version/open",
+        role="standard_deduction",
+        publisher="North Carolina Department of Revenue / 2024 D-400 Schedule A",
+        authority_type="form_instructions",
+        slug="standard_deduction",
+    )
+    add(
+        "NC",
+        2026,
+        "https://www.ncdor.gov/income-tax-withholding-tables-and-instructions-employers/open",
+        role="standard_deduction",
+        publisher="North Carolina Department of Revenue / 2026 withholding tables",
+        authority_type="withholding_schedule",
+        slug="standard_deduction",
+    )
+    add(
+        "NC",
+        2026,
+        "https://www.ncdor.gov/taxes-forms/individual-income-tax/filing-topics/north-carolina-standard-deduction-or-north-carolina-itemized-deductions",
+        role="standard_deduction_current",
+        publisher="North Carolina Department of Revenue / NC standard deduction",
+        authority_type="dor_page",
+        slug="std_ded_page",
+    )
     return specs
 
 
@@ -605,6 +825,99 @@ def tax_applies_to_rule_year(info: Mapping[str, Any] | None, year: int) -> bool 
         return int(year) >= int(info["first_tax_year"])
     except (TypeError, ValueError):
         return None
+
+
+_MONTH_NUM = {
+    "january": 1,
+    "february": 2,
+    "march": 3,
+    "april": 4,
+    "may": 5,
+    "june": 6,
+    "july": 7,
+    "august": 8,
+    "september": 9,
+    "october": 10,
+    "november": 11,
+    "december": 12,
+}
+
+
+def _iso_date(month_name: str, day: str | int, year: str | int) -> str | None:
+    month = _MONTH_NUM.get(str(month_name).strip().lower())
+    if not month:
+        return None
+    try:
+        return f"{int(year):04d}-{month:02d}-{int(day):02d}"
+    except (TypeError, ValueError):
+        return None
+
+
+def parse_authority_effective_date(text: str) -> str | None:
+    """Parse a session-law / rule effective date. Never invent RULE_YEAR-01-01."""
+    if not (text or "").strip():
+        return None
+    header = re.search(
+        r"EFFECTIVE DATE:\s*([A-Za-z]+)\s+(\d{1,2}),\s*(\d{4})",
+        text,
+        re.IGNORECASE,
+    )
+    if header:
+        parsed = _iso_date(header.group(1), header.group(2), header.group(3))
+        if parsed:
+            return parsed
+    enacted = re.search(
+        r"Effective:\s*([A-Za-z]+)\s+(\d{1,2}),\s*(\d{4})",
+        text,
+    )
+    if enacted:
+        parsed = _iso_date(enacted.group(1), enacted.group(2), enacted.group(3))
+        if parsed:
+            return parsed
+    blob = _normalize_statute_text(text)
+    for pattern in (
+        r"this act takes effect ([a-z]+ \d{1,2}, \d{4})",
+        r"the (?:bill|initiative) takes effect ([a-z]+ \d{1,2}, \d{4})",
+        r"effective date[: ]+([a-z]+ \d{1,2}, \d{4})",
+        r"takes effect ([a-z]+ \d{1,2}, \d{4})",
+    ):
+        m = re.search(pattern, blob)
+        if not m:
+            continue
+        parts = m.group(1).split()
+        if len(parts) == 3:
+            parsed = _iso_date(parts[0], parts[1].rstrip(","), parts[2])
+            if parsed:
+                return parsed
+    return None
+
+
+def parse_preexisting_no_wage_tax(text: str) -> bool:
+    """Official 2024 contemporaneous proof that WA already had no wage PIT."""
+    blob = _normalize_statute_text(text)
+    phrases = (
+        "longstanding tradition of not having an income tax based on personal income",
+        "long-standing tradition of not having an income tax",
+        "long-standing tradition of opposition to an income tax",
+        "longstanding tradition of opposition to an income tax",
+        "does not capture any of the state's existing revenue sources",
+        "does not capture any of the states existing revenue sources",
+        "codify in law the state's longstanding tradition of not having an income tax",
+        "codify the state's long-standing tradition of opposition to an income tax",
+        "washington currently does not impose a personal income tax",
+        "washington does not currently impose a tax on personal income",
+        "the state does not currently impose a personal income tax",
+        "no existing tax would be repealed",
+        "fiscal impact is zero",
+        "no impact on state revenues",
+    )
+    return any(phrase in blob for phrase in phrases)
+
+
+def extract_year_identity(text: str, year: int) -> dict[str, Any]:
+    blob = text or ""
+    found = bool(re.search(rf"\b{int(year)}\b", blob))
+    return {"found": found, "year": int(year)}
 
 
 def parse_no_wage_tax(text: str, state: str, year: int | None = None) -> bool:
@@ -744,49 +1057,137 @@ def _empty_payroll() -> dict[str, Any]:
     }
 
 
+def _authority_record(art: Mapping[str, Any], *, text: str, authority_id: str) -> dict[str, Any]:
+    return {
+        "authority_id": authority_id,
+        "publisher": art.get("publisher"),
+        "url": art.get("url"),
+        "retrieved_at": art.get("retrieved_at"),
+        "sha256": art.get("sha256"),
+        "authority_effective_date": parse_authority_effective_date(text),
+        "effective_date": parse_authority_effective_date(text),
+        "authority_type": art.get("authority_type"),
+        "role": art.get("role"),
+        "source_artifact_key": art.get("key"),
+    }
+
+
+def _wa_2024_evidence_chain(
+    cell_arts: list[dict[str, Any]],
+    texts: list[str],
+) -> dict[str, Any]:
+    preexisting_ok = False
+    preexisting_art = None
+    i2111_art = None
+    i2111_text = ""
+    i2111_effective = None
+    for art, text in zip(cell_arts, texts, strict=False):
+        role = str(art.get("role") or "")
+        if role == "preexisting_status" or "HIB FIN" in str(art.get("url") or ""):
+            preexisting_art = art
+            preexisting_ok = parse_preexisting_no_wage_tax(text)
+        if role == "wage_income_status" or "Initiative%202111" in str(art.get("url") or ""):
+            i2111_art = art
+            i2111_text = text
+            i2111_effective = parse_authority_effective_date(text)
+    return {
+        "pre_existing_status": {
+            "status": ("no general wage-income tax before 2024-06-06" if preexisting_ok else None),
+            "authority_id": "ST_WA_2024_PREEXISTING" if preexisting_art else None,
+            "source_artifact_key": (preexisting_art or {}).get("key"),
+            "source_sha256": (preexisting_art or {}).get("sha256"),
+            "parsed_ok": preexisting_ok,
+            "url": (preexisting_art or {}).get("url"),
+        },
+        "initiative_2111": {
+            "effective_date": i2111_effective,
+            "role": "prospective prohibition",
+            "authority_id": "ST_WA_2024",
+            "source_artifact_key": (i2111_art or {}).get("key"),
+            "source_sha256": (i2111_art or {}).get("sha256"),
+            "prohibition_parsed": parse_no_wage_tax(i2111_text, "WA", 2024),
+        },
+        "rule_year_2024_result": (
+            "no general wage-income tax for full tax year"
+            if preexisting_ok and i2111_effective == "2024-06-06"
+            else None
+        ),
+    }
+
+
 def build_state_tax_inventory(
     artifacts: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Parse each jurisdiction-year from its designated official artifact."""
+    from foundation.sources.state_tax_schedules import (
+        extract_official_schedule,
+        official_to_compare,
+    )
+
     arts = artifacts if artifacts is not None else retrieve_state_tax_authorities()
-    by_cell: dict[tuple[str, int], dict[str, Any]] = {}
+    by_cell: dict[tuple[str, int], list[dict[str, Any]]] = {}
     for art in arts.values():
         if not isinstance(art, dict) or not art.get("state"):
             continue
-        by_cell[(str(art["state"]), int(art["year"]))] = art
+        by_cell.setdefault((str(art["state"]), int(art["year"])), []).append(art)
 
     jurisdictions: dict[str, Any] = {}
     matrix: list[dict[str, Any]] = []
     for state in ALL_JURISDICTIONS:
         year_recs: dict[str, Any] = {}
         for year in TAX_YEARS:
-            art = by_cell.get((state, year))
+            cell_arts = by_cell.get((state, year), [])
             issues: list[str] = []
-            text = _text_for_path(Path(art["path"]) if art and art.get("path") else None)
-            sha = art.get("sha256") if art else None
-            key = art.get("key") if art else None
+            texts: list[str] = []
+            for art in cell_arts:
+                texts.append(_text_for_path(Path(art["path"]) if art.get("path") else None))
+            combined = "\n".join(texts)
+            primary = None
+            for art in cell_arts:
+                if art.get("role") in {"wage_income_status", "schedule"}:
+                    primary = art
+                    break
+            if primary is None and cell_arts:
+                primary = cell_arts[0]
+            sha = primary.get("sha256") if primary else None
+            key = primary.get("key") if primary else None
             authority_id = f"ST_{state}_{year}"
-            if (
-                art is None
-                or not art.get("http_ok")
-                or not sha
-                or not official_state_url(art.get("url"))
-            ):
+            bound_ok = False
+            for art in cell_arts:
+                if (
+                    art.get("http_ok")
+                    and art.get("sha256")
+                    and official_state_url(art.get("url"))
+                    and art.get("state") == state
+                    and int(art.get("year") or 0) == year
+                ):
+                    bound_ok = True
+                elif art.get("state") != state:
+                    issues.append("STATE_TAX_AUTHORITY_JURISDICTION_MISMATCH")
+                elif int(art.get("year") or 0) != year:
+                    issues.append("STATE_TAX_AUTHORITY_YEAR_MISMATCH")
+            if not bound_ok:
                 issues.append(f"STATE_TAX_FIELD_AUTHORITY_UNBOUND:{state}:{year}:authority")
-            elif art.get("state") != state:
-                issues.append("STATE_TAX_AUTHORITY_JURISDICTION_MISMATCH")
-            elif int(art.get("year") or 0) != year:
-                issues.append("STATE_TAX_AUTHORITY_YEAR_MISMATCH")
 
             no_tax_ok = (
-                parse_no_wage_tax(text, state, year) if state in NO_TAX_CANDIDATES else False
+                parse_no_wage_tax(combined, state, year) if state in NO_TAX_CANDIDATES else False
             )
-            future = parse_future_income_tax(text)
+            future = parse_future_income_tax(combined)
             applies = tax_applies_to_rule_year(future, year)
+            authority_effective = parse_authority_effective_date(combined)
             code_sched = _schedule_from_code(state, year)
             tax_status = STATUS_INCOMPLETE
             official_sched: dict[str, Any] | None = None
             code_match = "STATE_EVIDENCE_INCOMPLETE"
+            evidence_chain: dict[str, Any] | None = None
+            wa_preexisting_ok = False
+            if state == "WA" and year == 2024:
+                evidence_chain = _wa_2024_evidence_chain(cell_arts, texts)
+                wa_preexisting_ok = bool(
+                    (evidence_chain.get("pre_existing_status") or {}).get("parsed_ok")
+                )
+                if no_tax_ok and not wa_preexisting_ok:
+                    issues.append("STATE_TAX_WA_PREEXISTING_UNBOUND:WA:2024")
             if applies is None and future.get("tax_exists"):
                 issues.append(
                     f"STATE_TAX_MODEL_GAP:{state}:{year}:high_agi_income_tax_unknown_effective_year"
@@ -809,39 +1210,61 @@ def build_state_tax_inventory(
                     code_match = "STATE_CODE_MISMATCH"
             elif state in NO_TAX_CANDIDATES:
                 issues.append(f"STATE_TAX_NO_WAGE_TAX_UNPARSED:{state}:{year}")
-            elif not issues and text:
-                # Taxing jurisdiction: official page retrieved, but schedule
-                # amounts are not inferred from candidate Python tables.
-                tax_status = STATUS_INCOMPLETE
-                issues.append(f"STATE_TAX_MODEL_GAP:{state}:{year}:schedule_not_extracted")
-                code_match = "STATE_EVIDENCE_INCOMPLETE"
+            elif bound_ok and combined.strip():
+                extracted = extract_official_schedule(state, year, combined)
+                if extracted and extracted.get("complete"):
+                    tax_status = STATUS_TAXING
+                    official_sched = extracted
+                    code_match = _compare_schedule(official_to_compare(extracted), code_sched)
+                else:
+                    tax_status = STATUS_INCOMPLETE
+                    issues.append(f"STATE_TAX_MODEL_GAP:{state}:{year}:schedule_not_extracted")
+                    code_match = "STATE_EVIDENCE_INCOMPLETE"
+                    if extracted and not extracted.get("complete"):
+                        official_sched = extracted
+                        code_match = "STATE_MODEL_INCOMPLETE"
             elif not issues:
                 issues.append(f"STATE_TAX_FIELD_AUTHORITY_UNBOUND:{state}:{year}:text")
 
             payroll = _empty_payroll()
-            if tax_status == STATUS_NO_WAGE_TAX:
+            if tax_status in {STATUS_NO_WAGE_TAX, STATUS_TAXING}:
                 payroll = {
                     "status": "OWNER_TAX_METHOD_DECISION_REQUIRED",
                     "contributions": [],
                     "notes": (
-                        "Ordinary wage income tax is verified absent. Mandatory "
-                        "employee SDI/PFML/SUTA-employee programs, if any, are "
-                        "not silently treated as zero or as income tax. Frozen "
-                        "methodology lists income/FICA/local taxes and does not "
-                        "authorize an owner decision here."
+                        "Ordinary wage income tax evidence is inventoried separately "
+                        "from mandatory employee SDI/PFML/SUTA-employee programs. "
+                        "Those programs are not silently treated as zero or as PIT."
                     ),
                 }
 
             std = None
+            exemption_field = None
             brackets: list[dict[str, Any]] = []
-            if official_sched is not None and key and sha:
-                std = _field(
-                    value=official_sched["deduction"],
-                    authority_id=authority_id,
-                    source_artifact_key=key,
-                    source_sha256=sha,
-                    extraction_identity=f"{state}_{year}_standard_deduction",
-                )
+            if (
+                official_sched is not None
+                and key
+                and sha
+                and official_sched.get("brackets") is not None
+            ):
+                if official_sched.get("deduction") is not None:
+                    std = _field(
+                        value=official_sched["deduction"],
+                        authority_id=authority_id,
+                        source_artifact_key=key,
+                        source_sha256=sha,
+                        extraction_identity=f"{state}_{year}_standard_deduction",
+                        tax_year=year,
+                    )
+                if official_sched.get("personal_exemption") is not None:
+                    exemption_field = _field(
+                        value=official_sched["personal_exemption"],
+                        authority_id=authority_id,
+                        source_artifact_key=key,
+                        source_sha256=sha,
+                        extraction_identity=f"{state}_{year}_personal_exemption",
+                        tax_year=year,
+                    )
                 brackets = [
                     _field(
                         upper=None if cap == float("inf") else cap,
@@ -850,31 +1273,34 @@ def build_state_tax_inventory(
                         source_artifact_key=key,
                         source_sha256=sha,
                         extraction_identity=f"{state}_{year}_brackets",
+                        tax_year=year,
                     )
                     for cap, rate in official_sched.get("brackets") or []
                 ]
+            parsed_ok = (
+                tax_status in {STATUS_NO_WAGE_TAX, STATUS_TAXING}
+                and not issues
+                and (tax_status != STATUS_TAXING or bool((official_sched or {}).get("complete")))
+            )
+            authorities = [
+                _authority_record(
+                    art, text=text, authority_id=f"ST_{state}_{year}_{art.get('role')}"
+                )
+                for art, text in zip(cell_arts, texts, strict=False)
+            ]
             rec = {
                 "jurisdiction": state,
                 "tax_year": year,
                 "filing_status": "SINGLE",
                 "wage_income_scope": True,
                 "tax_status": tax_status,
-                "official_authorities": [
-                    {
-                        "authority_id": authority_id,
-                        "publisher": (art or {}).get("publisher"),
-                        "url": (art or {}).get("url"),
-                        "retrieved_at": (art or {}).get("retrieved_at"),
-                        "sha256": sha,
-                        "effective_date": f"{year}-01-01",
-                        "authority_type": (art or {}).get("authority_type"),
-                    }
-                ]
-                if art
-                else [],
-                "starting_income_definition": "ordinary wage income of a single independent adult",
+                "official_authorities": authorities,
+                "starting_income_definition": (official_sched or {}).get(
+                    "starting_income_base",
+                    "ordinary wage income of a single independent adult",
+                ),
                 "standard_deduction": std,
-                "personal_exemption": None,
+                "personal_exemption": exemption_field,
                 "taxable_income_adjustments": [],
                 "brackets": brackets,
                 "rates": [b.get("rate") for b in brackets],
@@ -884,21 +1310,33 @@ def build_state_tax_inventory(
                 "special_statutory_formula": None,
                 "mandatory_employee_state_payroll_contributions": payroll,
                 "code_match_status": code_match,
-                "parsed_ok": tax_status == STATUS_NO_WAGE_TAX and not issues,
+                "parsed_ok": parsed_ok,
                 "validation_issues": issues,
-                "effective_date": f"{year}-01-01",
-                "authority_checked_at": (art or {}).get("retrieved_at"),
+                "authority_effective_date": authority_effective,
+                "effective_date": authority_effective,
+                "rule_applies_to_tax_year": True if parsed_ok else None,
+                "first_applicable_tax_year": (
+                    future.get("first_tax_year")
+                    if future.get("tax_exists")
+                    else year
+                    if parsed_ok
+                    else None
+                ),
+                "authority_checked_at": (primary or {}).get("retrieved_at"),
                 "currentness_status": "HISTORICAL_RULE_YEAR"
                 if year == 2024
                 else "CURRENTNESS_PENDING",
                 "future_legislation": {
                     "tax_enacted": bool(future.get("tax_exists")),
                     "tax_applies_to_year": applies,
+                    "authority_effective_date": authority_effective,
+                    "tax_imposition_start": future.get("effective_start"),
                     "effective_start": future.get("effective_start"),
                     "first_tax_year": future.get("first_tax_year"),
                     "threshold": future.get("threshold"),
                     "unknown_effective_year": bool(future.get("unknown_effective_year")),
                 },
+                "evidence_chain": evidence_chain,
             }
             year_recs[str(year)] = rec
         jurisdictions[state] = {"jurisdiction": state, "years": year_recs}
@@ -907,7 +1345,7 @@ def build_state_tax_inventory(
         remaining = []
         remaining.extend(y24.get("validation_issues") or [])
         remaining.extend(y26.get("validation_issues") or [])
-        if y26.get("tax_status") != STATUS_NO_WAGE_TAX:
+        if not y26.get("parsed_ok"):
             remaining.append(f"STATE_TAX_2026_UNRESOLVED:{state}")
         matrix.append(
             {
@@ -962,6 +1400,23 @@ def build_state_tax_inventory(
         "jurisdiction_count": len(ALL_JURISDICTIONS),
         "validated_2024_count": validated_2024,
         "validated_2026_count": validated_2026,
+        "live_verified_current_2026_count": 0,
+        "no_general_wage_tax_count": sum(
+            1
+            for st in ALL_JURISDICTIONS
+            if jurisdictions[st]["years"]["2024"].get("tax_status") == STATUS_NO_WAGE_TAX
+            and jurisdictions[st]["years"]["2024"].get("parsed_ok")
+            and jurisdictions[st]["years"]["2026"].get("tax_status") == STATUS_NO_WAGE_TAX
+            and jurisdictions[st]["years"]["2026"].get("parsed_ok")
+        ),
+        "taxing_pairs_completed": sum(
+            1
+            for st in ALL_JURISDICTIONS
+            if jurisdictions[st]["years"]["2024"].get("tax_status") == STATUS_TAXING
+            and jurisdictions[st]["years"]["2024"].get("parsed_ok")
+            and jurisdictions[st]["years"]["2026"].get("tax_status") == STATUS_TAXING
+            and jurisdictions[st]["years"]["2026"].get("parsed_ok")
+        ),
         "family_complete": validated_2024 == 51 and validated_2026 == 51,
         "jurisdictions": jurisdictions,
         "completion_matrix": matrix,
@@ -1015,6 +1470,36 @@ def evaluate_state_tax_freshness(
             ),
         )
     live = live or {}
+    if live.get("live_check_performed") is not True:
+        return (
+            "CHECK_FAILED",
+            None,
+            (
+                "No targeted first-party 2026 currentness check was performed. "
+                "Cached artifact validity is not currentness. "
+                f"evidence_valid_2026_count={live.get('evidence_valid_2026_count')} "
+                "live_verified_current_2026_count=0."
+            ),
+        )
+    if live.get("newer_data_exists") is True or live.get("newer_available_2026"):
+        return (
+            "NEWER_AVAILABLE",
+            True,
+            (
+                "A current official source shows a 2026-applicable change. "
+                f"newer={live.get('newer_available_2026')}"
+            ),
+        )
+    live_failed = live.get("live_failed_2026") or []
+    if live_failed:
+        return (
+            "CHECK_FAILED",
+            None,
+            (
+                "Targeted live official checks failed. Cached evidence is not demoted. "
+                f"live_failed={live_failed[:8]}"
+            ),
+        )
     unresolved = live.get("unresolved_2026") or []
     if unresolved:
         return (
@@ -1047,40 +1532,96 @@ def evaluate_state_tax_freshness(
 
 def discover_state_tax_live(
     inventory: Mapping[str, Any] | None = None,
+    *,
+    fetch_fn: Any | None = None,
+    perform_live: bool = True,
+    run_cache: dict[str, Any] | None = None,
 ) -> tuple[dict[str, Any] | None, str | None]:
-    """Targeted 2026 currentness from already-captured official artifacts.
+    """Targeted 2026 currentness. Cached SHA/URL is not VERIFIED_CURRENT.
 
-    Does not issue 102 live GETs. Callers that already retrieved artifacts
-    pass the captured inventory. A missing 2026 official bind is unresolved.
+    Issues one first-party GET per distinct currentness URL during this run,
+    and only for cells that are already evidence-valid (parsed_ok). Unparsed
+    taxing cells stay CURRENTNESS_PENDING rather than drawing 102 GETs.
     """
+    from foundation.sources.state_tax_currentness import (
+        STATUS_CHECK_FAILED,
+        STATUS_NEWER_AVAILABLE,
+        STATUS_VERIFIED_CURRENT,
+        assess_2026_currentness,
+        currentness_surfaces,
+        default_fetch_currentness,
+        fetch_with_run_cache,
+    )
+
     captured = load_state_tax_inventory(inventory)
     if not captured:
         return None, "state tax inventory missing"
-    unresolved: list[str] = []
-    current = 0
     jurisdictions = captured.get("jurisdictions") or {}
+    evidence_valid = 0
+    live_verified = 0
+    live_failed: list[str] = []
+    newer: list[str] = []
+    unresolved: list[str] = []
+    pending: list[str] = []
+    cache: dict[str, Any] = run_cache if run_cache is not None else {}
+    fetcher = fetch_fn or default_fetch_currentness
+    surfaces = currentness_surfaces()
+    live_check_performed = bool(perform_live)
+
     for state in ALL_JURISDICTIONS:
         rec = ((jurisdictions.get(state) or {}).get("years") or {}).get("2026") or {}
-        arts = rec.get("official_authorities") or []
-        ok = (
-            rec.get("parsed_ok") is True
-            and rec.get("tax_status") == STATUS_NO_WAGE_TAX
-            and arts
-            and arts[0].get("sha256")
-            and arts[0].get("url")
-        )
-        if ok:
-            current += 1
-        else:
+        valid = rec.get("parsed_ok") is True
+        if valid:
+            evidence_valid += 1
+        if not perform_live:
             unresolved.append(state)
-    return (
-        {
-            "verified_current_2026_count": current,
-            "unresolved_2026": unresolved,
-            "all_2026_current": current == 51 and not unresolved,
-        },
-        None,
-    )
+            pending.append(state)
+            continue
+        if not valid:
+            unresolved.append(state)
+            pending.append(state)
+            continue
+        surface = surfaces.get(state) or {}
+        url = surface.get("url")
+        if not url:
+            live_failed.append(state)
+            unresolved.append(state)
+            continue
+        live = fetch_with_run_cache(url, cache=cache, fetch_fn=fetcher)
+        assessed = assess_2026_currentness(
+            state=state,
+            cell=rec,
+            live=live,
+            live_check_performed=True,
+        )
+        status = assessed.get("currentness_status")
+        rec["currentness_status"] = status
+        rec["currentness"] = assessed
+        if status == STATUS_VERIFIED_CURRENT:
+            live_verified += 1
+        elif status == STATUS_NEWER_AVAILABLE:
+            newer.append(state)
+            unresolved.append(state)
+        elif status == STATUS_CHECK_FAILED:
+            live_failed.append(state)
+            unresolved.append(state)
+        else:
+            pending.append(state)
+            unresolved.append(state)
+
+    result = {
+        "evidence_valid_2026_count": evidence_valid,
+        "live_verified_current_2026_count": live_verified if perform_live else 0,
+        "verified_current_2026_count": live_verified if perform_live else 0,
+        "live_failed_2026": live_failed,
+        "live_not_checked_2026": pending,
+        "newer_available_2026": newer,
+        "unresolved_2026": unresolved,
+        "all_2026_current": perform_live and live_verified == 51 and not unresolved,
+        "live_check_performed": live_check_performed,
+        "newer_data_exists": True if newer else (False if live_verified == 51 else None),
+    }
+    return result, None
 
 
 def no_wage_tax_verified(state: str, year: int, inventory: Mapping[str, Any] | None = None) -> bool:

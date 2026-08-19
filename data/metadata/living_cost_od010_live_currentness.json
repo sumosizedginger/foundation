@@ -4,7 +4,7 @@
   "translation_index_bound": true,
   "structural_table_bound": true,
   "live_bls_request": "SUCCEEDED",
-  "raw_response_sha256": "ab11d8a79ef8ce856a96f39d8e3944c66e30d7e696031b9cd492c058f73429a7",
+  "raw_response_sha256": "9ff136ef10843259a72d5c3fe58e4b106a7e9149905442a542eb138e39359b86",
   "observation_set_sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
   "table_observation_set_sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
   "live_latest_target_observation": "2026 July",
@@ -13,6 +13,6 @@
   "cross_binding_ok": true,
   "cross_binding_issues": [],
   "report_type": "living_cost_od010_live_currentness",
-  "generated_at": "2026-08-19T15:08:53Z",
+  "generated_at": "2026-08-19T16:45:33Z",
   "calculates_mslc": false
 }

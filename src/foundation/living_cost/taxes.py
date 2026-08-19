@@ -527,9 +527,9 @@ STATE_STATUTORY_SCHEDULES: dict[int, dict[str, dict[str, Any]]] = {
             "brackets": [(21500.0, 0.047), (float("inf"), 0.059)],
         },
         "NC": {
-            "source": "N.C. Gen. Stat. § 105-153.7",
+            "source": "N.C. Gen. Stat. § 105-153.7 (After 2025 3.99%)",
             "deduction": 12750.0,
-            "brackets": [(float("inf"), 0.0425)],
+            "brackets": [(float("inf"), 0.0399)],
         },
         "ND": {
             "source": "N.D. Cent. Code § 57-38-30.3",
@@ -894,8 +894,9 @@ def calculate_state_income_tax(gross: float, state: str, year: int = 2024) -> fl
     if not sched:
         raise ValueError(f"State income tax schedule UNAVAILABLE for state {st} in {year}")
 
-    std_ded = sched["deduction"]
-    taxable = max(0.0, gross - std_ded)
+    std_ded = float(sched.get("deduction") or 0.0)
+    exemption = float(sched.get("exemption") or sched.get("personal_exemption") or 0.0)
+    taxable = max(0.0, gross - std_ded - exemption)
     if taxable <= 0:
         return 0.0
 

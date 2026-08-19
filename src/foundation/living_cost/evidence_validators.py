@@ -624,36 +624,32 @@ def validate_state_tax_inventory(
             if not authorities:
                 issues.append(f"STATE_TAX_FIELD_AUTHORITY_UNBOUND:{state}:{year}:authority")
                 continue
-            for field_name in ("standard_deduction",):
+            fields_to_check: tuple[str, ...] = ()
+            if status == "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX" or (
+                status == "GENERAL_WAGE_INCOME_TAX" and cell.get("parsed_ok") is True
+            ):
+                fields_to_check = ("standard_deduction",)
+            for field_name in fields_to_check:
                 field = cell.get(field_name)
-                if status == "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX":
-                    if not isinstance(field, dict):
-                        issues.append(
-                            f"STATE_TAX_FIELD_AUTHORITY_UNBOUND:{state}:{year}:{field_name}"
-                        )
-                        continue
-                    key = field.get("source_artifact_key")
-                    sha = field.get("source_sha256")
-                    art = artifacts.get(str(key))
-                    if not key or not isinstance(art, dict):
-                        issues.append(
-                            f"STATE_TAX_FIELD_AUTHORITY_UNBOUND:{state}:{year}:{field_name}"
-                        )
-                        continue
-                    if art.get("http_ok") is not True or not art.get("sha256"):
-                        issues.append(
-                            f"STATE_TAX_FIELD_AUTHORITY_UNBOUND:{state}:{year}:{field_name}"
-                        )
-                    if sha != art.get("sha256"):
-                        issues.append("STATE_TAX_AUTHORITY_SHA_MISMATCH")
-                    if not official_state_url(art.get("url")):
-                        issues.append(
-                            f"STATE_TAX_FIELD_AUTHORITY_UNBOUND:{state}:{year}:{field_name}"
-                        )
-                    if art.get("state") != state:
-                        issues.append("STATE_TAX_AUTHORITY_JURISDICTION_MISMATCH")
-                    if int(art.get("year") or 0) != year:
-                        issues.append("STATE_TAX_AUTHORITY_YEAR_MISMATCH")
+                if not isinstance(field, dict):
+                    issues.append(f"STATE_TAX_FIELD_AUTHORITY_UNBOUND:{state}:{year}:{field_name}")
+                    continue
+                key = field.get("source_artifact_key")
+                sha = field.get("source_sha256")
+                art = artifacts.get(str(key))
+                if not key or not isinstance(art, dict):
+                    issues.append(f"STATE_TAX_FIELD_AUTHORITY_UNBOUND:{state}:{year}:{field_name}")
+                    continue
+                if art.get("http_ok") is not True or not art.get("sha256"):
+                    issues.append(f"STATE_TAX_FIELD_AUTHORITY_UNBOUND:{state}:{year}:{field_name}")
+                if sha != art.get("sha256"):
+                    issues.append("STATE_TAX_AUTHORITY_SHA_MISMATCH")
+                if not official_state_url(art.get("url")):
+                    issues.append(f"STATE_TAX_FIELD_AUTHORITY_UNBOUND:{state}:{year}:{field_name}")
+                if art.get("state") != state:
+                    issues.append("STATE_TAX_AUTHORITY_JURISDICTION_MISMATCH")
+                if int(art.get("year") or 0) != year:
+                    issues.append("STATE_TAX_AUTHORITY_YEAR_MISMATCH")
     if payload.get("family_complete") is not True or len(issues) > 0:
         # Family VALIDATED only when every required cell is truthfully resolved.
         ok = False
