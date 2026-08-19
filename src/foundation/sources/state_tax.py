@@ -754,15 +754,6 @@ def authority_catalog() -> list[dict[str, Any]]:
         authority_type="withholding_schedule",
         slug="standard_deduction",
     )
-    add(
-        "NC",
-        2026,
-        "https://www.ncdor.gov/taxes-forms/individual-income-tax/filing-topics/north-carolina-standard-deduction-or-north-carolina-itemized-deductions",
-        role="standard_deduction_current",
-        publisher="North Carolina Department of Revenue / NC standard deduction",
-        authority_type="dor_page",
-        slug="std_ded_page",
-    )
     return specs
 
 
@@ -1121,6 +1112,7 @@ def build_state_tax_inventory(
     """Parse each jurisdiction-year from its designated official artifact."""
     from foundation.sources.state_tax_schedules import (
         extract_official_schedule,
+        merge_extracted_schedules,
         official_to_compare,
     )
 
@@ -1149,8 +1141,6 @@ def build_state_tax_inventory(
                     break
             if primary is None and cell_arts:
                 primary = cell_arts[0]
-            sha = primary.get("sha256") if primary else None
-            key = primary.get("key") if primary else None
             authority_id = f"ST_{state}_{year}"
             bound_ok = False
             for art in cell_arts:
@@ -1211,7 +1201,12 @@ def build_state_tax_inventory(
             elif state in NO_TAX_CANDIDATES:
                 issues.append(f"STATE_TAX_NO_WAGE_TAX_UNPARSED:{state}:{year}")
             elif bound_ok and combined.strip():
-                extracted = extract_official_schedule(state, year, combined)
+                parts: list[tuple[dict[str, Any], dict[str, Any]]] = []
+                for art, text in zip(cell_arts, texts, strict=False):
+                    piece = extract_official_schedule(state, year, text)
+                    if piece:
+                        parts.append((piece, art))
+                extracted = merge_extracted_schedules(parts)
                 if extracted and extracted.get("complete"):
                     tax_status = STATUS_TAXING
                     official_sched = extracted
@@ -1241,42 +1236,48 @@ def build_state_tax_inventory(
             std = None
             exemption_field = None
             brackets: list[dict[str, Any]] = []
-            if (
-                official_sched is not None
-                and key
-                and sha
-                and official_sched.get("brackets") is not None
-            ):
-                if official_sched.get("deduction") is not None:
+            field_sources = (official_sched or {}).get("field_sources") or {}
+            fallback_art = primary if isinstance(primary, dict) else {}
+
+            def _field_art(name: str, sources: Mapping[str, Any], fallback: dict[str, Any]) -> dict[str, Any]:
+                art = sources.get(name) or fallback
+                return art if isinstance(art, dict) else {}
+
+            if official_sched is not None and official_sched.get("brackets") is not None:
+                ded_art = _field_art("deduction", field_sources, fallback_art)
+                ex_art = _field_art("personal_exemption", field_sources, fallback_art)
+                br_art = _field_art("brackets", field_sources, fallback_art)
+                if official_sched.get("deduction") is not None and ded_art.get("sha256"):
                     std = _field(
                         value=official_sched["deduction"],
                         authority_id=authority_id,
-                        source_artifact_key=key,
-                        source_sha256=sha,
+                        source_artifact_key=ded_art.get("key"),
+                        source_sha256=ded_art.get("sha256"),
                         extraction_identity=f"{state}_{year}_standard_deduction",
                         tax_year=year,
                     )
-                if official_sched.get("personal_exemption") is not None:
+                if official_sched.get("personal_exemption") is not None and ex_art.get("sha256"):
                     exemption_field = _field(
                         value=official_sched["personal_exemption"],
                         authority_id=authority_id,
-                        source_artifact_key=key,
-                        source_sha256=sha,
+                        source_artifact_key=ex_art.get("key"),
+                        source_sha256=ex_art.get("sha256"),
                         extraction_identity=f"{state}_{year}_personal_exemption",
                         tax_year=year,
                     )
-                brackets = [
-                    _field(
-                        upper=None if cap == float("inf") else cap,
-                        rate=rate,
-                        authority_id=authority_id,
-                        source_artifact_key=key,
-                        source_sha256=sha,
-                        extraction_identity=f"{state}_{year}_brackets",
-                        tax_year=year,
-                    )
-                    for cap, rate in official_sched.get("brackets") or []
-                ]
+                if br_art.get("sha256"):
+                    brackets = [
+                        _field(
+                            upper=None if cap == float("inf") else cap,
+                            rate=rate,
+                            authority_id=authority_id,
+                            source_artifact_key=br_art.get("key"),
+                            source_sha256=br_art.get("sha256"),
+                            extraction_identity=f"{state}_{year}_brackets",
+                            tax_year=year,
+                        )
+                        for cap, rate in official_sched.get("brackets") or []
+                    ]
             parsed_ok = (
                 tax_status in {STATUS_NO_WAGE_TAX, STATUS_TAXING}
                 and not issues

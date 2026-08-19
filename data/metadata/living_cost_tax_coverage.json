@@ -1,6 +1,6 @@
 {
   "report_type": "living_cost_tax_coverage",
-  "generated_at": "2026-08-19T16:45:29+00:00",
+  "generated_at": "2026-08-19T17:32:54+00:00",
   "federal_2024_validated_tables": true,
   "federal_validation_gate": "Federal tax is VALIDATED only when IRS/SSA authorities are bound and FEDERAL_TAX_RULES match living_cost_federal_tax_inventory.json.",
   "federal_tax_evidence_status": "VALIDATED",

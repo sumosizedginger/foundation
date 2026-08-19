@@ -592,10 +592,19 @@ def test_nc_2024_and_2026_rates_from_statute() -> None:
     assert rec26 is not None and rec26["brackets"][0][1] == 0.0399
     assert rec24["complete"] is False
     assert rec26["complete"] is False
-    complete = statute + " Single $12,750 N.C. standard deduction"
+    complete = (
+        statute + " For tax year 2026, the N.C. standard deduction for the "
+        "single filing status ($12,750)"
+    )
     rec26c = extract_official_schedule("NC", 2026, complete)
     assert rec26c is not None and rec26c["complete"] is True
     assert rec26c["deduction"] == 12750.0
+    ty2025 = (
+        statute + " The following information applies to individuals for tax year 2025. "
+        "Single $12,750 N.C. standard deduction"
+    )
+    rec_wrong_year = extract_official_schedule("NC", 2026, ty2025)
+    assert rec_wrong_year is None or rec_wrong_year.get("complete") is not True
 
 
 def test_nc_2026_engine_uses_official_after_2025_rate() -> None:

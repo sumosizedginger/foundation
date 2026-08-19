@@ -1,6 +1,6 @@
 {
   "report_type": "living_cost_state_tax_inventory",
-  "generated_at": "2026-08-19T16:45:07+00:00",
+  "generated_at": "2026-08-19T17:32:42+00:00",
   "filing_status": "SINGLE",
   "required_years": [
     2024,
@@ -1766,14 +1766,7 @@
             }
           ],
           "starting_income_definition": "Illinois net income",
-          "standard_deduction": {
-            "authority_id": "ST_IL_2026",
-            "source_artifact_key": "st_il_2026_schedule",
-            "source_sha256": "96a4db285da69ec40c770182b9e89238cdda9efff8402ae8ad1813d6be3eecf7",
-            "extraction_identity": "IL_2026_standard_deduction",
-            "value": 0.0,
-            "tax_year": 2026
-          },
+          "standard_deduction": null,
           "personal_exemption": null,
           "taxable_income_adjustments": [],
           "brackets": [
@@ -1845,18 +1838,6 @@
               "authority_type": "statute",
               "role": "schedule",
               "source_artifact_key": "st_in_2024_schedule"
-            },
-            {
-              "authority_id": "ST_IN_2024_bulletin",
-              "publisher": "Indiana Department of Revenue / Income Tax Information Bulletin #2",
-              "url": "https://www.in.gov/dor/files/ib02.pdf",
-              "retrieved_at": null,
-              "sha256": null,
-              "authority_effective_date": null,
-              "effective_date": null,
-              "authority_type": "dor_bulletin",
-              "role": "bulletin",
-              "source_artifact_key": "st_in_2024_ib02"
             }
           ],
           "starting_income_definition": "ordinary wage income of a single independent adult",
@@ -1915,18 +1896,6 @@
               "authority_type": "statute",
               "role": "schedule",
               "source_artifact_key": "st_in_2026_schedule"
-            },
-            {
-              "authority_id": "ST_IN_2026_bulletin",
-              "publisher": "Indiana Department of Revenue / Income Tax Information Bulletin #2",
-              "url": "https://www.in.gov/dor/files/ib02.pdf",
-              "retrieved_at": null,
-              "sha256": null,
-              "authority_effective_date": null,
-              "effective_date": null,
-              "authority_type": "dor_bulletin",
-              "role": "bulletin",
-              "source_artifact_key": "st_in_2026_ib02"
             }
           ],
           "starting_income_definition": "ordinary wage income of a single independent adult",
@@ -4217,8 +4186,8 @@
           "starting_income_definition": "North Carolina taxable income",
           "standard_deduction": {
             "authority_id": "ST_NC_2024",
-            "source_artifact_key": "st_nc_2024_schedule",
-            "source_sha256": "32b3852efdedb19b585193c53e5f3c4fe5941301ca9d49f3c75977437d52ecfe",
+            "source_artifact_key": "st_nc_2024_standard_deduction",
+            "source_sha256": "75f33ce4b8c99c76a8fc0be1148d346adb60b748156ab3172cfe8c5ea3123638",
             "extraction_identity": "NC_2024_standard_deduction",
             "value": 12750.0,
             "tax_year": 2024
@@ -4299,25 +4268,13 @@
               "authority_type": "withholding_schedule",
               "role": "standard_deduction",
               "source_artifact_key": "st_nc_2026_standard_deduction"
-            },
-            {
-              "authority_id": "ST_NC_2026_standard_deduction_current",
-              "publisher": "North Carolina Department of Revenue / NC standard deduction",
-              "url": "https://www.ncdor.gov/taxes-forms/individual-income-tax/filing-topics/north-carolina-standard-deduction-or-north-carolina-itemized-deductions",
-              "retrieved_at": "2026-08-19T16:31:40+00:00",
-              "sha256": "d3cf97385f825b6c5b16da062bc8fd180af7e3f148bbf7cd2db695f3b433a6ce",
-              "authority_effective_date": null,
-              "effective_date": null,
-              "authority_type": "dor_page",
-              "role": "standard_deduction_current",
-              "source_artifact_key": "st_nc_2026_std_ded_page"
             }
           ],
           "starting_income_definition": "North Carolina taxable income",
           "standard_deduction": {
             "authority_id": "ST_NC_2026",
-            "source_artifact_key": "st_nc_2026_schedule",
-            "source_sha256": "32b3852efdedb19b585193c53e5f3c4fe5941301ca9d49f3c75977437d52ecfe",
+            "source_artifact_key": "st_nc_2026_standard_deduction",
+            "source_sha256": "56a00f942c48c51019c3b78d72da1f1cc04969890678c107fe9d0386c5d655be",
             "extraction_identity": "NC_2026_standard_deduction",
             "value": 12750.0,
             "tax_year": 2026
@@ -8446,45 +8403,6 @@
       "byte_size": 570759,
       "publisher": "North Carolina Department of Revenue / 2026 withholding tables",
       "role": "standard_deduction"
-    },
-    {
-      "key": "st_nc_2026_std_ded_page",
-      "state": "NC",
-      "year": 2026,
-      "url": "https://www.ncdor.gov/taxes-forms/individual-income-tax/filing-topics/north-carolina-standard-deduction-or-north-carolina-itemized-deductions",
-      "filename": "st_nc_2026_std_ded_page.html",
-      "sha256": "d3cf97385f825b6c5b16da062bc8fd180af7e3f148bbf7cd2db695f3b433a6ce",
-      "retrieved_at": "2026-08-19T16:31:40+00:00",
-      "http_ok": true,
-      "byte_size": 91528,
-      "publisher": "North Carolina Department of Revenue / NC standard deduction",
-      "role": "standard_deduction_current"
-    },
-    {
-      "key": "st_in_2024_ib02",
-      "state": "IN",
-      "year": 2024,
-      "url": "https://www.in.gov/dor/files/ib02.pdf",
-      "filename": "st_in_2024_ib02.pdf",
-      "sha256": null,
-      "retrieved_at": null,
-      "http_ok": false,
-      "byte_size": null,
-      "publisher": "Indiana Department of Revenue / Income Tax Information Bulletin #2",
-      "role": "bulletin"
-    },
-    {
-      "key": "st_in_2026_ib02",
-      "state": "IN",
-      "year": 2026,
-      "url": "https://www.in.gov/dor/files/ib02.pdf",
-      "filename": "st_in_2026_ib02.pdf",
-      "sha256": null,
-      "retrieved_at": null,
-      "http_ok": false,
-      "byte_size": null,
-      "publisher": "Indiana Department of Revenue / Income Tax Information Bulletin #2",
-      "role": "bulletin"
     }
   ],
   "calculates_mslc": false,

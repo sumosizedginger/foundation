@@ -121,7 +121,7 @@ def _extract_il(text: str, year: int) -> dict[str, Any] | None:
         return None
     if exemption is None:
         return {
-            "deduction": 0.0,
+            "deduction": None,
             "personal_exemption": None,
             "brackets": [(INF, 0.0495)],
             "starting_income_base": "Illinois net income",
@@ -154,30 +154,40 @@ def _extract_nc(text: str, year: int) -> dict[str, Any] | None:
         m2 = re.search(r"in 2026\s+([0-9.]+)\s*%", blob)
         if m2:
             rate = _pct(m2.group(1))
-    if rate is None:
-        return None
-    # Standard deduction is not in G.S. 105-153.7. Search companion text.
+    # Standard deduction is not in G.S. 105-153.7. Require year identity on
+    # the same artifact as $12,750 (do not use a 2025 landing as 2026 proof).
     deduction = None
-    if re.search(r"12,?750", blob) and re.search(
-        r"single.{0,100}12,?750|12,?750.{0,100}single|standard deduction.{0,80}12,?750",
-        blob,
-    ):
-        deduction = 12750.0
-    if deduction is None:
-        return {
-            "deduction": None,
-            "personal_exemption": None,
-            "brackets": [(INF, rate)],
-            "starting_income_base": "North Carolina taxable income",
-            "complete": False,
-            "notes": "Statutory rate parsed; standard deduction not on this artifact.",
-        }
-    return _complete_flat(
-        rate=rate,
-        deduction=deduction,
-        starting_income_base="North Carolina taxable income",
-        year_ok=True,
+    has_amount = bool(re.search(r"12,?750", blob)) and bool(
+        re.search(
+            r"single.{0,120}12,?750|12,?750.{0,120}single|standard deduction.{0,80}12,?750",
+            blob,
+        )
     )
+    if year == 2024 and has_amount and re.search(r"tax year 2024|2024 d-400|\b2024\b", blob):
+        if "tax year 2025" in blob and "tax year 2024" not in blob and "2024" not in blob[:400]:
+            has_amount = False
+        if has_amount:
+            deduction = 12750.0
+    elif year == 2026 and has_amount and re.search(r"tax year 2026|for tax year 2026", blob):
+        deduction = 12750.0
+    if rate is None and deduction is None:
+        return None
+    return {
+        "deduction": deduction,
+        "personal_exemption": None,
+        "brackets": [(INF, rate)] if rate is not None else None,
+        "starting_income_base": "North Carolina taxable income",
+        "complete": rate is not None and deduction is not None,
+        "notes": (
+            "Statutory rate parsed; standard deduction not on this artifact."
+            if rate is not None and deduction is None
+            else (
+                "Standard deduction parsed; statutory rate not on this artifact."
+                if deduction is not None and rate is None
+                else ""
+            )
+        ),
+    }
 
 
 def _extract_az(text: str, year: int) -> dict[str, Any] | None:
@@ -400,6 +410,41 @@ def _extract_oh(text: str, year: int) -> dict[str, Any] | None:
         "complete": False,
         "notes": "Rate token found; Ohio brackets/exemption not confirmed.",
     }
+
+
+def merge_extracted_schedules(
+    parts: list[tuple[dict[str, Any], Mapping[str, Any]]],
+) -> dict[str, Any] | None:
+    """Merge per-artifact extracts. Each field keeps the artifact that supplied it."""
+    if not parts:
+        return None
+    merged: dict[str, Any] = {
+        "deduction": None,
+        "personal_exemption": None,
+        "brackets": None,
+        "starting_income_base": "ordinary wage income of a single independent adult",
+        "complete": False,
+        "notes": "",
+        "field_sources": {},
+    }
+    notes: list[str] = []
+    for part, art in parts:
+        if part.get("brackets") and not merged.get("brackets"):
+            merged["brackets"] = part["brackets"]
+            merged["field_sources"]["brackets"] = art
+            if part.get("starting_income_base"):
+                merged["starting_income_base"] = part["starting_income_base"]
+        if part.get("deduction") is not None and merged.get("deduction") is None:
+            merged["deduction"] = part["deduction"]
+            merged["field_sources"]["deduction"] = art
+        if part.get("personal_exemption") is not None and merged.get("personal_exemption") is None:
+            merged["personal_exemption"] = part["personal_exemption"]
+            merged["field_sources"]["personal_exemption"] = art
+        if part.get("notes"):
+            notes.append(str(part["notes"]))
+    merged["notes"] = "; ".join(notes)
+    merged["complete"] = bool(merged.get("brackets")) and merged.get("deduction") is not None
+    return merged
 
 
 def official_to_compare(official: Mapping[str, Any]) -> dict[str, Any]:
