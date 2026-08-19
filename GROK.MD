@@ -13,23 +13,27 @@ This pass was a narrow federal-tax evidence correction.
 
 ## FINAL SHA
 
-Implementation: `751832355f8c50b2e47c017c3a697a5060af0712`
+Implementation: `e5aaa1fccf1f744adffffd572f576896c92d38a2`
 
 Pushed to `origin/main`.
 
+Field-provenance implementation: `751832355f8c50b2e47c017c3a697a5060af0712`
+
+Payroll-compare fail-closed follow-up: `e5aaa1fccf1f744adffffd572f576896c92d38a2`
+
 Audited starting implementation: `5992047a08284430de7e3f907c974b24ea68aa84`
 
-## GitHub Actions (on 7518323)
+## GitHub Actions (on e5aaa1f)
 
 | Workflow                     | Run ID                                                                                | Conclusion |
 | ---------------------------- | ------------------------------------------------------------------------------------- | ---------- |
-| Tests & Code Quality         | [32204930835](https://github.com/sumosizedginger/foundation/actions/runs/32204930835) | success    |
-| Deploy Pages                 | [32204930791](https://github.com/sumosizedginger/foundation/actions/runs/32204930791) | success    |
-| Validate Living Cost Sources | [32204930804](https://github.com/sumosizedginger/foundation/actions/runs/32204930804) | success    |
+| Tests & Code Quality         | [32206076477](https://github.com/sumosizedginger/foundation/actions/runs/32206076477) | success    |
+| Deploy Pages                 | [32206076475](https://github.com/sumosizedginger/foundation/actions/runs/32206076475) | success    |
+| Validate Living Cost Sources | [32206076471](https://github.com/sumosizedginger/foundation/actions/runs/32206076471) | success    |
 
-Tests & Code Quality pytest: **319 passed**, **5 skipped**, **1 warning** (`load_module` deprecation in `test_validation_cli_is_callable`).
+Tests & Code Quality pytest: **320 passed**, **5 skipped**, **1 warning** (`load_module` deprecation in `test_validation_cli_is_callable`).
 
-Local pytest: **324 passed**, 1 warning.
+The extra passing test versus 7518323 is `test_unknown_payroll_compare_is_not_verified_current`.
 
 ## Federal tax field provenance
 
@@ -51,6 +55,8 @@ Required authorities:
 
 IRB 2023-48 and Topic 751 remain corroboration only. They cannot substitute for the Rev. Proc. or year-specific Publication 15.
 
+Each field is parsed from its designated official artifact. Unrelated IRS files are not concatenated into one parse soup.
+
 ### Bound official bytes
 
 - 2024 Rev. Proc. 2023-34 SHA: `544ba41c7ba64f77da521e0d174a7b7394dc72b5c7c73d10adb19952d5aaae57`
@@ -59,16 +65,20 @@ IRB 2023-48 and Topic 751 remain corroboration only. They cannot substitute for 
 - 2026 Publication 15 SHA: `b46c3622439d8521e3a0faca4cd5b5ece3451b526f65f06a5e38d5c9f804c88b`
 - 2026 Pub 15 URL (year-specific prior, discovered from official IRS publications listing showing Publication 15 (2026)): `https://www.irs.gov/pub/irs-prior/p15--2026.pdf`
 
-Additional Medicare source artifact: Publication 15 for that tax year (`irs_pub15_2024` / `irs_pub15_2026`). Extracted from official text (“withhold a 0.9% Additional Medicare Tax … in excess of $200,000”). The Python constant is compared after extraction and does not manufacture the inventory record.
+Additional Medicare source artifact: Publication 15 for that tax year (`irs_pub15_2024` / `irs_pub15_2026`). Extracted from official text (“withhold a 0.9% Additional Medicare Tax … in excess of $200,000”). The Python constant is compared after extraction and does not manufacture the inventory record. Unparsed Additional Medicare is `ADDITIONAL_MEDICARE_UNPARSED`.
 
 SSA fact sheets still 403 from this client. They are recorded `http_ok=false` and are **not** counted as bound authorities.
 
-### Numeric rules (unchanged)
+### Numeric rules
+
+These numbers come from the bound official IRS bytes, not from the prompt text.
 
 | Year | std deduction | first bracket | OASDI | OASDI cap | Medicare HI | Additional Medicare |
 | ---- | ------------- | ------------- | ----- | --------- | ----------- | ------------------- |
 | 2024 | 14600         | 11600 @ 10%   | 6.2%  | 168600    | 1.45% no limit | 0.9% above 200000 |
 | 2026 | 16100         | 12400 @ 10%   | 6.2%  | 184500    | 1.45% no limit | 0.9% above 200000 |
+
+2026 standard deduction **16100** is the value extracted from official Rev. Proc. 2025-32 bytes (`e9ada115…`). It was not adopted merely because a prompt listed 16100.
 
 Field-provenance validator result: **VALIDATED** (no issues).
 
@@ -84,7 +94,15 @@ Evidence validity and freshness are separate.
 
 Targeted live discovery used the official IRS publications listing and the 2026 inflation-adjustment page — not `https://www.irs.gov/irb`. Live result: Publication 15 current revision is 2026; Rev. Proc. 2025-32 remains the cited 2026 inflation authority; current Publication 15 payroll values agree with the bound 2026 inventory.
 
-If live discovery throws, evidence stays VALIDATED and freshness is CHECK_FAILED / newer_data_exists=null. Adversarial tests cover that split.
+Fail-closed currentness (`evaluate_federal_tax_freshness`):
+
+- live discovery throws => evidence stays VALIDATED; freshness `CHECK_FAILED`; `newer_data_exists=null`
+- current Pub 15 revision newer than 2026 => `NEWER_AVAILABLE` / `CHECK_FAILED`, not `VERIFIED_CURRENT`
+- `current_pub15_payroll_matches is False` => `CHECK_FAILED`
+- `current_pub15_payroll_matches is None` => `CHECK_FAILED` (unknown compare is not agreement)
+- `VERIFIED_CURRENT` requires inventory valid AND Pub 15 revision 2026 AND Rev. Proc. 2025-32 current AND payroll compare `True`
+
+Adversarial tests A–I plus live-freshness tests, including `test_unknown_payroll_compare_is_not_verified_current`, cover that split.
 
 ## Regenerated metadata
 
