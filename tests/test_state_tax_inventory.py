@@ -34,20 +34,29 @@ def test_no_tax_parser_requires_official_wording() -> None:
     assert parse_no_wage_tax("Florida does not impose a personal income tax.", "FL") is True
     assert parse_no_wage_tax("Florida does not have an individual income tax.", "FL") is True
     assert parse_no_wage_tax("Texas does not have a personal income tax.", "TX") is True
-    assert parse_no_wage_tax(
-        "The Hall Income tax was repealed for tax periods that begin on January 1, 2021, or later.",
-        "TN",
-    ) is True
-    assert parse_no_wage_tax(
-        "Reduces the tax rate of, and in 2027 eliminates, the interest and dividends tax.",
-        "NH",
-        2024,
-    ) is True
-    assert parse_no_wage_tax(
-        "Chapter 77 Repealed Entire Chapter was repealed [Repealed by 2021, 91:99, II, eff. Jan. 1, 2025.]",
-        "NH",
-        2026,
-    ) is True
+    assert (
+        parse_no_wage_tax(
+            "The Hall Income tax was repealed for tax periods that begin on January 1, 2021, or later.",
+            "TN",
+        )
+        is True
+    )
+    assert (
+        parse_no_wage_tax(
+            "Reduces the tax rate of, and in 2027 eliminates, the interest and dividends tax.",
+            "NH",
+            2024,
+        )
+        is True
+    )
+    assert (
+        parse_no_wage_tax(
+            "Chapter 77 Repealed Entire Chapter was repealed [Repealed by 2021, 91:99, II, eff. Jan. 1, 2025.]",
+            "NH",
+            2026,
+        )
+        is True
+    )
     assert parse_no_wage_tax("Welcome to the Department of Revenue.", "FL") is False
     assert parse_no_wage_tax("", "FL") is False
     assert parse_no_wage_tax("If you are at or below the no tax due threshold", "TX") is False
@@ -60,10 +69,13 @@ def test_washington_high_agi_tax_is_not_no_wage_tax() -> None:
     )
     assert detect_high_agi_income_tax(official) is True
     assert parse_no_wage_tax(official, "WA") is False
-    assert parse_no_wage_tax(
-        "The State of Washington does not have a personal or corporate Income Tax.",
-        "WA",
-    ) is True
+    assert (
+        parse_no_wage_tax(
+            "The State of Washington does not have a personal or corporate Income Tax.",
+            "WA",
+        )
+        is True
+    )
 
 
 def test_unverified_no_tax_candidate_is_not_zero() -> None:

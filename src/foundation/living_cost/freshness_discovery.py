@@ -1672,7 +1672,11 @@ def discover_state_tax() -> FreshnessCheck:
                 "note": "current RULE_YEAR; family VALIDATED only if 51/51",
             },
         ),
-        extra={"live_currentness": live, "live_error": live_error, "issues": validation.issues[:20]},
+        extra={
+            "live_currentness": live,
+            "live_error": live_error,
+            "issues": validation.issues[:20],
+        },
     )
 
 

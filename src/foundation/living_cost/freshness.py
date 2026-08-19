@@ -1107,9 +1107,7 @@ def stamp_source_coverage_from_current_truth(coverage_path: Path) -> dict[str, A
                     f"coverage {year}.{name} is {actual!r}, expected {expected!r}; "
                     "do not alter evidence statuses to look better"
                 )
-        dimensions = (
-            coverage.get("status_dimensions", {}).get("by_year", {}).get(str(year), {})
-        )
+        dimensions = coverage.get("status_dimensions", {}).get("by_year", {}).get(str(year), {})
         if isinstance(dimensions, dict):
             for name, expected in {**validator_backed, **frozen_blockers}.items():
                 rec = dimensions.get(name)
