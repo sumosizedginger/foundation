@@ -1,9 +1,525 @@
 {
   "report_type": "living_cost_tax_coverage",
-  "generated_at": "2026-08-19T01:23:21+00:00",
+  "generated_at": "2026-08-19T03:50:17+00:00",
   "federal_2024_validated_tables": true,
   "federal_validation_gate": "Federal tax is VALIDATED only when IRS/SSA authorities are bound and FEDERAL_TAX_RULES match living_cost_federal_tax_inventory.json.",
   "federal_tax_evidence_status": "VALIDATED",
+  "state_tax_evidence_status": "INVENTORY_NOT_VALIDATED",
+  "state_tax_family_complete": false,
+  "state_tax_validated_2024_count": 8,
+  "state_tax_validated_2026_count": 8,
+  "completion_matrix": [
+    {
+      "state": "AL",
+      "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_freshness_status": "CURRENTNESS_PENDING",
+      "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
+      "remaining_issue": "STATE_TAX_MODEL_GAP:AL:2024:schedule_not_extracted; STATE_TAX_MODEL_GAP:AL:2026:schedule_not_extracted; STATE_TAX_2026_UNRESOLVED:AL"
+    },
+    {
+      "state": "AK",
+      "2024_evidence_status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
+      "2024_code_match_status": "STATE_CODE_MATCH",
+      "2026_evidence_status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
+      "2026_code_match_status": "STATE_CODE_MATCH",
+      "2026_freshness_status": "CURRENTNESS_PENDING",
+      "mandatory_payroll_status": "OWNER_TAX_METHOD_DECISION_REQUIRED",
+      "remaining_issue": ""
+    },
+    {
+      "state": "AZ",
+      "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_freshness_status": "CURRENTNESS_PENDING",
+      "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
+      "remaining_issue": "STATE_TAX_MODEL_GAP:AZ:2024:schedule_not_extracted; STATE_TAX_MODEL_GAP:AZ:2026:schedule_not_extracted; STATE_TAX_2026_UNRESOLVED:AZ"
+    },
+    {
+      "state": "AR",
+      "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_freshness_status": "CURRENTNESS_PENDING",
+      "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
+      "remaining_issue": "STATE_TAX_MODEL_GAP:AR:2024:schedule_not_extracted; STATE_TAX_MODEL_GAP:AR:2026:schedule_not_extracted; STATE_TAX_2026_UNRESOLVED:AR"
+    },
+    {
+      "state": "CA",
+      "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_freshness_status": "CURRENTNESS_PENDING",
+      "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
+      "remaining_issue": "STATE_TAX_MODEL_GAP:CA:2024:schedule_not_extracted; STATE_TAX_MODEL_GAP:CA:2026:schedule_not_extracted; STATE_TAX_2026_UNRESOLVED:CA"
+    },
+    {
+      "state": "CO",
+      "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_freshness_status": "CURRENTNESS_PENDING",
+      "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
+      "remaining_issue": "STATE_TAX_MODEL_GAP:CO:2024:schedule_not_extracted; STATE_TAX_MODEL_GAP:CO:2026:schedule_not_extracted; STATE_TAX_2026_UNRESOLVED:CO"
+    },
+    {
+      "state": "CT",
+      "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_freshness_status": "CURRENTNESS_PENDING",
+      "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
+      "remaining_issue": "STATE_TAX_MODEL_GAP:CT:2024:schedule_not_extracted; STATE_TAX_MODEL_GAP:CT:2026:schedule_not_extracted; STATE_TAX_2026_UNRESOLVED:CT"
+    },
+    {
+      "state": "DE",
+      "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_freshness_status": "CURRENTNESS_PENDING",
+      "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
+      "remaining_issue": "STATE_TAX_FIELD_AUTHORITY_UNBOUND:DE:2024:authority; STATE_TAX_FIELD_AUTHORITY_UNBOUND:DE:2026:authority; STATE_TAX_2026_UNRESOLVED:DE"
+    },
+    {
+      "state": "DC",
+      "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_freshness_status": "CURRENTNESS_PENDING",
+      "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
+      "remaining_issue": "STATE_TAX_FIELD_AUTHORITY_UNBOUND:DC:2024:authority; STATE_TAX_FIELD_AUTHORITY_UNBOUND:DC:2026:authority; STATE_TAX_2026_UNRESOLVED:DC"
+    },
+    {
+      "state": "FL",
+      "2024_evidence_status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
+      "2024_code_match_status": "STATE_CODE_MATCH",
+      "2026_evidence_status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
+      "2026_code_match_status": "STATE_CODE_MATCH",
+      "2026_freshness_status": "CURRENTNESS_PENDING",
+      "mandatory_payroll_status": "OWNER_TAX_METHOD_DECISION_REQUIRED",
+      "remaining_issue": ""
+    },
+    {
+      "state": "GA",
+      "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_freshness_status": "CURRENTNESS_PENDING",
+      "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
+      "remaining_issue": "STATE_TAX_MODEL_GAP:GA:2024:schedule_not_extracted; STATE_TAX_MODEL_GAP:GA:2026:schedule_not_extracted; STATE_TAX_2026_UNRESOLVED:GA"
+    },
+    {
+      "state": "HI",
+      "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_freshness_status": "CURRENTNESS_PENDING",
+      "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
+      "remaining_issue": "STATE_TAX_FIELD_AUTHORITY_UNBOUND:HI:2024:authority; STATE_TAX_FIELD_AUTHORITY_UNBOUND:HI:2026:authority; STATE_TAX_2026_UNRESOLVED:HI"
+    },
+    {
+      "state": "ID",
+      "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_freshness_status": "CURRENTNESS_PENDING",
+      "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
+      "remaining_issue": "STATE_TAX_MODEL_GAP:ID:2024:schedule_not_extracted; STATE_TAX_MODEL_GAP:ID:2026:schedule_not_extracted; STATE_TAX_2026_UNRESOLVED:ID"
+    },
+    {
+      "state": "IL",
+      "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_freshness_status": "CURRENTNESS_PENDING",
+      "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
+      "remaining_issue": "STATE_TAX_MODEL_GAP:IL:2024:schedule_not_extracted; STATE_TAX_MODEL_GAP:IL:2026:schedule_not_extracted; STATE_TAX_2026_UNRESOLVED:IL"
+    },
+    {
+      "state": "IN",
+      "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_freshness_status": "CURRENTNESS_PENDING",
+      "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
+      "remaining_issue": "STATE_TAX_MODEL_GAP:IN:2024:schedule_not_extracted; STATE_TAX_MODEL_GAP:IN:2026:schedule_not_extracted; STATE_TAX_2026_UNRESOLVED:IN"
+    },
+    {
+      "state": "IA",
+      "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_freshness_status": "CURRENTNESS_PENDING",
+      "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
+      "remaining_issue": "STATE_TAX_MODEL_GAP:IA:2024:schedule_not_extracted; STATE_TAX_MODEL_GAP:IA:2026:schedule_not_extracted; STATE_TAX_2026_UNRESOLVED:IA"
+    },
+    {
+      "state": "KS",
+      "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_freshness_status": "CURRENTNESS_PENDING",
+      "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
+      "remaining_issue": "STATE_TAX_MODEL_GAP:KS:2024:schedule_not_extracted; STATE_TAX_MODEL_GAP:KS:2026:schedule_not_extracted; STATE_TAX_2026_UNRESOLVED:KS"
+    },
+    {
+      "state": "KY",
+      "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_freshness_status": "CURRENTNESS_PENDING",
+      "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
+      "remaining_issue": "STATE_TAX_MODEL_GAP:KY:2024:schedule_not_extracted; STATE_TAX_MODEL_GAP:KY:2026:schedule_not_extracted; STATE_TAX_2026_UNRESOLVED:KY"
+    },
+    {
+      "state": "LA",
+      "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_freshness_status": "CURRENTNESS_PENDING",
+      "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
+      "remaining_issue": "STATE_TAX_FIELD_AUTHORITY_UNBOUND:LA:2024:authority; STATE_TAX_FIELD_AUTHORITY_UNBOUND:LA:2026:authority; STATE_TAX_2026_UNRESOLVED:LA"
+    },
+    {
+      "state": "ME",
+      "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_freshness_status": "CURRENTNESS_PENDING",
+      "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
+      "remaining_issue": "STATE_TAX_MODEL_GAP:ME:2024:schedule_not_extracted; STATE_TAX_MODEL_GAP:ME:2026:schedule_not_extracted; STATE_TAX_2026_UNRESOLVED:ME"
+    },
+    {
+      "state": "MD",
+      "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_freshness_status": "CURRENTNESS_PENDING",
+      "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
+      "remaining_issue": "STATE_TAX_MODEL_GAP:MD:2024:schedule_not_extracted; STATE_TAX_MODEL_GAP:MD:2026:schedule_not_extracted; STATE_TAX_2026_UNRESOLVED:MD"
+    },
+    {
+      "state": "MA",
+      "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_freshness_status": "CURRENTNESS_PENDING",
+      "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
+      "remaining_issue": "STATE_TAX_MODEL_GAP:MA:2024:schedule_not_extracted; STATE_TAX_MODEL_GAP:MA:2026:schedule_not_extracted; STATE_TAX_2026_UNRESOLVED:MA"
+    },
+    {
+      "state": "MI",
+      "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_freshness_status": "CURRENTNESS_PENDING",
+      "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
+      "remaining_issue": "STATE_TAX_FIELD_AUTHORITY_UNBOUND:MI:2024:authority; STATE_TAX_FIELD_AUTHORITY_UNBOUND:MI:2026:authority; STATE_TAX_2026_UNRESOLVED:MI"
+    },
+    {
+      "state": "MN",
+      "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_freshness_status": "CURRENTNESS_PENDING",
+      "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
+      "remaining_issue": "STATE_TAX_MODEL_GAP:MN:2024:schedule_not_extracted; STATE_TAX_MODEL_GAP:MN:2026:schedule_not_extracted; STATE_TAX_2026_UNRESOLVED:MN"
+    },
+    {
+      "state": "MS",
+      "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_freshness_status": "CURRENTNESS_PENDING",
+      "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
+      "remaining_issue": "STATE_TAX_FIELD_AUTHORITY_UNBOUND:MS:2024:authority; STATE_TAX_FIELD_AUTHORITY_UNBOUND:MS:2026:authority; STATE_TAX_2026_UNRESOLVED:MS"
+    },
+    {
+      "state": "MO",
+      "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_freshness_status": "CURRENTNESS_PENDING",
+      "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
+      "remaining_issue": "STATE_TAX_MODEL_GAP:MO:2024:schedule_not_extracted; STATE_TAX_MODEL_GAP:MO:2026:schedule_not_extracted; STATE_TAX_2026_UNRESOLVED:MO"
+    },
+    {
+      "state": "MT",
+      "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_freshness_status": "CURRENTNESS_PENDING",
+      "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
+      "remaining_issue": "STATE_TAX_MODEL_GAP:MT:2024:schedule_not_extracted; STATE_TAX_MODEL_GAP:MT:2026:schedule_not_extracted; STATE_TAX_2026_UNRESOLVED:MT"
+    },
+    {
+      "state": "NE",
+      "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_freshness_status": "CURRENTNESS_PENDING",
+      "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
+      "remaining_issue": "STATE_TAX_MODEL_GAP:NE:2024:schedule_not_extracted; STATE_TAX_MODEL_GAP:NE:2026:schedule_not_extracted; STATE_TAX_2026_UNRESOLVED:NE"
+    },
+    {
+      "state": "NV",
+      "2024_evidence_status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
+      "2024_code_match_status": "STATE_CODE_MATCH",
+      "2026_evidence_status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
+      "2026_code_match_status": "STATE_CODE_MATCH",
+      "2026_freshness_status": "CURRENTNESS_PENDING",
+      "mandatory_payroll_status": "OWNER_TAX_METHOD_DECISION_REQUIRED",
+      "remaining_issue": ""
+    },
+    {
+      "state": "NH",
+      "2024_evidence_status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
+      "2024_code_match_status": "STATE_CODE_MATCH",
+      "2026_evidence_status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
+      "2026_code_match_status": "STATE_CODE_MATCH",
+      "2026_freshness_status": "CURRENTNESS_PENDING",
+      "mandatory_payroll_status": "OWNER_TAX_METHOD_DECISION_REQUIRED",
+      "remaining_issue": ""
+    },
+    {
+      "state": "NJ",
+      "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_freshness_status": "CURRENTNESS_PENDING",
+      "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
+      "remaining_issue": "STATE_TAX_FIELD_AUTHORITY_UNBOUND:NJ:2024:authority; STATE_TAX_FIELD_AUTHORITY_UNBOUND:NJ:2026:authority; STATE_TAX_2026_UNRESOLVED:NJ"
+    },
+    {
+      "state": "NM",
+      "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_freshness_status": "CURRENTNESS_PENDING",
+      "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
+      "remaining_issue": "STATE_TAX_MODEL_GAP:NM:2024:schedule_not_extracted; STATE_TAX_MODEL_GAP:NM:2026:schedule_not_extracted; STATE_TAX_2026_UNRESOLVED:NM"
+    },
+    {
+      "state": "NY",
+      "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_freshness_status": "CURRENTNESS_PENDING",
+      "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
+      "remaining_issue": "STATE_TAX_MODEL_GAP:NY:2024:schedule_not_extracted; STATE_TAX_MODEL_GAP:NY:2026:schedule_not_extracted; STATE_TAX_2026_UNRESOLVED:NY"
+    },
+    {
+      "state": "NC",
+      "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_freshness_status": "CURRENTNESS_PENDING",
+      "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
+      "remaining_issue": "STATE_TAX_MODEL_GAP:NC:2024:schedule_not_extracted; STATE_TAX_MODEL_GAP:NC:2026:schedule_not_extracted; STATE_TAX_2026_UNRESOLVED:NC"
+    },
+    {
+      "state": "ND",
+      "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_freshness_status": "CURRENTNESS_PENDING",
+      "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
+      "remaining_issue": "STATE_TAX_FIELD_AUTHORITY_UNBOUND:ND:2024:authority; STATE_TAX_FIELD_AUTHORITY_UNBOUND:ND:2026:authority; STATE_TAX_2026_UNRESOLVED:ND"
+    },
+    {
+      "state": "OH",
+      "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_freshness_status": "CURRENTNESS_PENDING",
+      "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
+      "remaining_issue": "STATE_TAX_MODEL_GAP:OH:2024:schedule_not_extracted; STATE_TAX_MODEL_GAP:OH:2026:schedule_not_extracted; STATE_TAX_2026_UNRESOLVED:OH"
+    },
+    {
+      "state": "OK",
+      "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_freshness_status": "CURRENTNESS_PENDING",
+      "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
+      "remaining_issue": "STATE_TAX_FIELD_AUTHORITY_UNBOUND:OK:2024:authority; STATE_TAX_FIELD_AUTHORITY_UNBOUND:OK:2026:authority; STATE_TAX_2026_UNRESOLVED:OK"
+    },
+    {
+      "state": "OR",
+      "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_freshness_status": "CURRENTNESS_PENDING",
+      "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
+      "remaining_issue": "STATE_TAX_FIELD_AUTHORITY_UNBOUND:OR:2024:authority; STATE_TAX_FIELD_AUTHORITY_UNBOUND:OR:2026:authority; STATE_TAX_2026_UNRESOLVED:OR"
+    },
+    {
+      "state": "PA",
+      "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_freshness_status": "CURRENTNESS_PENDING",
+      "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
+      "remaining_issue": "STATE_TAX_MODEL_GAP:PA:2024:schedule_not_extracted; STATE_TAX_MODEL_GAP:PA:2026:schedule_not_extracted; STATE_TAX_2026_UNRESOLVED:PA"
+    },
+    {
+      "state": "RI",
+      "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_freshness_status": "CURRENTNESS_PENDING",
+      "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
+      "remaining_issue": "STATE_TAX_FIELD_AUTHORITY_UNBOUND:RI:2024:authority; STATE_TAX_FIELD_AUTHORITY_UNBOUND:RI:2026:authority; STATE_TAX_2026_UNRESOLVED:RI"
+    },
+    {
+      "state": "SC",
+      "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_freshness_status": "CURRENTNESS_PENDING",
+      "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
+      "remaining_issue": "STATE_TAX_FIELD_AUTHORITY_UNBOUND:SC:2024:authority; STATE_TAX_FIELD_AUTHORITY_UNBOUND:SC:2026:authority; STATE_TAX_2026_UNRESOLVED:SC"
+    },
+    {
+      "state": "SD",
+      "2024_evidence_status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
+      "2024_code_match_status": "STATE_CODE_MATCH",
+      "2026_evidence_status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
+      "2026_code_match_status": "STATE_CODE_MATCH",
+      "2026_freshness_status": "CURRENTNESS_PENDING",
+      "mandatory_payroll_status": "OWNER_TAX_METHOD_DECISION_REQUIRED",
+      "remaining_issue": ""
+    },
+    {
+      "state": "TN",
+      "2024_evidence_status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
+      "2024_code_match_status": "STATE_CODE_MATCH",
+      "2026_evidence_status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
+      "2026_code_match_status": "STATE_CODE_MATCH",
+      "2026_freshness_status": "CURRENTNESS_PENDING",
+      "mandatory_payroll_status": "OWNER_TAX_METHOD_DECISION_REQUIRED",
+      "remaining_issue": ""
+    },
+    {
+      "state": "TX",
+      "2024_evidence_status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
+      "2024_code_match_status": "STATE_CODE_MATCH",
+      "2026_evidence_status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
+      "2026_code_match_status": "STATE_CODE_MATCH",
+      "2026_freshness_status": "CURRENTNESS_PENDING",
+      "mandatory_payroll_status": "OWNER_TAX_METHOD_DECISION_REQUIRED",
+      "remaining_issue": ""
+    },
+    {
+      "state": "UT",
+      "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_freshness_status": "CURRENTNESS_PENDING",
+      "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
+      "remaining_issue": "STATE_TAX_MODEL_GAP:UT:2024:schedule_not_extracted; STATE_TAX_MODEL_GAP:UT:2026:schedule_not_extracted; STATE_TAX_2026_UNRESOLVED:UT"
+    },
+    {
+      "state": "VT",
+      "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_freshness_status": "CURRENTNESS_PENDING",
+      "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
+      "remaining_issue": "STATE_TAX_FIELD_AUTHORITY_UNBOUND:VT:2024:authority; STATE_TAX_FIELD_AUTHORITY_UNBOUND:VT:2026:authority; STATE_TAX_2026_UNRESOLVED:VT"
+    },
+    {
+      "state": "VA",
+      "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_freshness_status": "CURRENTNESS_PENDING",
+      "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
+      "remaining_issue": "STATE_TAX_FIELD_AUTHORITY_UNBOUND:VA:2024:authority; STATE_TAX_FIELD_AUTHORITY_UNBOUND:VA:2026:authority; STATE_TAX_2026_UNRESOLVED:VA"
+    },
+    {
+      "state": "WA",
+      "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_freshness_status": "CURRENTNESS_PENDING",
+      "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
+      "remaining_issue": "STATE_TAX_MODEL_GAP:WA:2024:high_agi_income_tax; STATE_TAX_MODEL_GAP:WA:2026:high_agi_income_tax; STATE_TAX_2026_UNRESOLVED:WA"
+    },
+    {
+      "state": "WV",
+      "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_freshness_status": "CURRENTNESS_PENDING",
+      "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
+      "remaining_issue": "STATE_TAX_FIELD_AUTHORITY_UNBOUND:WV:2024:authority; STATE_TAX_FIELD_AUTHORITY_UNBOUND:WV:2026:authority; STATE_TAX_2026_UNRESOLVED:WV"
+    },
+    {
+      "state": "WI",
+      "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_freshness_status": "CURRENTNESS_PENDING",
+      "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
+      "remaining_issue": "STATE_TAX_FIELD_AUTHORITY_UNBOUND:WI:2024:authority; STATE_TAX_FIELD_AUTHORITY_UNBOUND:WI:2026:authority; STATE_TAX_2026_UNRESOLVED:WI"
+    },
+    {
+      "state": "WY",
+      "2024_evidence_status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
+      "2024_code_match_status": "STATE_CODE_MATCH",
+      "2026_evidence_status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
+      "2026_code_match_status": "STATE_CODE_MATCH",
+      "2026_freshness_status": "CURRENTNESS_PENDING",
+      "mandatory_payroll_status": "OWNER_TAX_METHOD_DECISION_REQUIRED",
+      "remaining_issue": ""
+    }
+  ],
   "federal_2026_values_match_rev_proc_2025_32": true,
   "local_tax_classes": {
     "A": "geography is coterminous / tax applies throughout modeled county-equivalent; direct overlay may be appropriate",
@@ -15,7 +531,7 @@
     {
       "year": 2024,
       "state": "AL",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Ala. Code \u00a7 40-18-5",
       "brackets": [
         [
@@ -40,27 +556,27 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "AK",
-      "status": "NO_STATE_EARNED_INCOME_TAX",
-      "primary_source": "No general state earned-income tax",
+      "status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
+      "primary_source": "https://childsupport.alaska.gov/child-support-enforcement/information/faqs/child-support-enforcement-services-faq",
       "brackets": null,
       "rates": null,
       "deductions": null,
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "NO_STATE_EARNED_INCOME_TAX",
+      "implementation_status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "AZ",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Ariz. Rev. Stat. \u00a7 43-1011",
       "brackets": [
         [
@@ -75,13 +591,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "AR",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Ark. Code Ann. \u00a7 26-51-201",
       "brackets": [
         [
@@ -106,13 +622,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "CA",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Cal. Rev. & Tax Code \u00a7 17041",
       "brackets": [
         [
@@ -152,13 +668,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "CO",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Colo. Rev. Stat. \u00a7 39-22-104",
       "brackets": [
         [
@@ -173,13 +689,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "CT",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Conn. Gen. Stat. \u00a7 12-700",
       "brackets": [
         [
@@ -209,13 +725,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "DE",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "30 Del. C. \u00a7 1102",
       "brackets": [
         [
@@ -260,13 +776,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "DC",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "D.C. Code \u00a7 47-1806.03",
       "brackets": [
         [
@@ -296,27 +812,27 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "FL",
-      "status": "NO_STATE_EARNED_INCOME_TAX",
-      "primary_source": "No general state earned-income tax",
+      "status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
+      "primary_source": "https://floridarevenue.com/faq/Pages/FAQDetails.aspx?FAQID=1466",
       "brackets": null,
       "rates": null,
       "deductions": null,
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "NO_STATE_EARNED_INCOME_TAX",
+      "implementation_status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "GA",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "O.C.G.A. \u00a7 48-7-20",
       "brackets": [
         [
@@ -331,13 +847,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "HI",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Haw. Rev. Stat. \u00a7 235-51",
       "brackets": [
         [
@@ -392,13 +908,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "ID",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Idaho Code \u00a7 63-3024",
       "brackets": [
         [
@@ -413,13 +929,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "IL",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "35 ILCS 5/201",
       "brackets": [
         [
@@ -434,13 +950,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "IN",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Ind. Code \u00a7 6-3-2-1",
       "brackets": [
         [
@@ -455,13 +971,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "IA",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Iowa Code \u00a7 422.5",
       "brackets": [
         [
@@ -476,13 +992,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "KS",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Kan. Stat. Ann. \u00a7 79-32,110",
       "brackets": [
         [
@@ -507,13 +1023,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "KY",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Ky. Rev. Stat. \u00a7 141.020",
       "brackets": [
         [
@@ -528,13 +1044,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "LA",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "La. Rev. Stat. \u00a7 47:32",
       "brackets": [
         [
@@ -559,13 +1075,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "ME",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "36 M.R.S. \u00a7 5111",
       "brackets": [
         [
@@ -590,13 +1106,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "MD",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Md. Code Tax-Gen. \u00a7 10-105",
       "brackets": [
         [
@@ -631,13 +1147,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "MA",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Mass. Gen. Laws ch. 62 \u00a7 4",
       "brackets": [
         [
@@ -652,13 +1168,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "MI",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Mich. Comp. Laws \u00a7 206.51",
       "brackets": [
         [
@@ -673,13 +1189,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "MN",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Minn. Stat. \u00a7 290.06",
       "brackets": [
         [
@@ -704,13 +1220,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "MS",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Miss. Code Ann. \u00a7 27-7-5",
       "brackets": [
         [
@@ -730,13 +1246,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "MO",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Mo. Rev. Stat. \u00a7 143.011",
       "brackets": [
         [
@@ -786,13 +1302,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "MT",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Mont. Code Ann. \u00a7 15-30-2103",
       "brackets": [
         [
@@ -812,13 +1328,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "NE",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Neb. Rev. Stat. \u00a7 77-2715.03",
       "brackets": [
         [
@@ -848,41 +1364,41 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "NV",
-      "status": "NO_STATE_EARNED_INCOME_TAX",
-      "primary_source": "No general state earned-income tax",
+      "status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
+      "primary_source": "https://tax.nv.gov/about-nevada-department-of-taxation/income-tax-in-nevada/",
       "brackets": null,
       "rates": null,
       "deductions": null,
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "NO_STATE_EARNED_INCOME_TAX",
+      "implementation_status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "NH",
-      "status": "NO_STATE_EARNED_INCOME_TAX",
-      "primary_source": "No general state earned-income tax",
+      "status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
+      "primary_source": "https://www.gencourt.state.nh.us/legislation/2021/HB0002.html",
       "brackets": null,
       "rates": null,
       "deductions": null,
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "NO_STATE_EARNED_INCOME_TAX",
+      "implementation_status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "NJ",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "N.J. Stat. Ann. \u00a7 54A:2-1",
       "brackets": [
         [
@@ -917,13 +1433,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "NM",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "N.M. Stat. Ann. \u00a7 7-2-7",
       "brackets": [
         [
@@ -953,13 +1469,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "NY",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "N.Y. Tax Law \u00a7 601",
       "brackets": [
         [
@@ -994,13 +1510,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "NC",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "N.C. Gen. Stat. \u00a7 105-153.7",
       "brackets": [
         [
@@ -1015,13 +1531,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "ND",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "N.D. Cent. Code \u00a7 57-38-30.3",
       "brackets": [
         [
@@ -1046,13 +1562,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "OH",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Ohio Rev. Code \u00a7 5747.02",
       "brackets": [
         [
@@ -1077,13 +1593,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "OK",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Okla. Stat. tit. 68 \u00a7 2355",
       "brackets": [
         [
@@ -1123,13 +1639,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "OR",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Or. Rev. Stat. \u00a7 316.037",
       "brackets": [
         [
@@ -1159,13 +1675,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "PA",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "72 Pa. Stat. \u00a7 7302",
       "brackets": [
         [
@@ -1180,13 +1696,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "RI",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "R.I. Gen. Laws \u00a7 44-30-2.6",
       "brackets": [
         [
@@ -1211,13 +1727,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "SC",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "S.C. Code Ann. \u00a7 12-6-510",
       "brackets": [
         [
@@ -1242,55 +1758,55 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "SD",
-      "status": "NO_STATE_EARNED_INCOME_TAX",
-      "primary_source": "No general state earned-income tax",
+      "status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
+      "primary_source": "https://dor.sd.gov/individuals/taxes/",
       "brackets": null,
       "rates": null,
       "deductions": null,
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "NO_STATE_EARNED_INCOME_TAX",
+      "implementation_status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "TN",
-      "status": "NO_STATE_EARNED_INCOME_TAX",
-      "primary_source": "No general state earned-income tax",
+      "status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
+      "primary_source": "https://www.tn.gov/revenue/taxes/hall-income-tax.html",
       "brackets": null,
       "rates": null,
       "deductions": null,
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "NO_STATE_EARNED_INCOME_TAX",
+      "implementation_status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "TX",
-      "status": "NO_STATE_EARNED_INCOME_TAX",
-      "primary_source": "No general state earned-income tax",
+      "status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
+      "primary_source": "https://comptroller.texas.gov/economy/fiscal-notes/archive/2016/february/starting.php",
       "brackets": null,
       "rates": null,
       "deductions": null,
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "NO_STATE_EARNED_INCOME_TAX",
+      "implementation_status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "UT",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Utah Code \u00a7 59-10-104",
       "brackets": [
         [
@@ -1305,13 +1821,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "VT",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "32 V.S.A. \u00a7 5822",
       "brackets": [
         [
@@ -1336,13 +1852,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "VA",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Va. Code \u00a7 58.1-320",
       "brackets": [
         [
@@ -1372,27 +1888,27 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "WA",
-      "status": "NO_STATE_EARNED_INCOME_TAX",
-      "primary_source": "No general state earned-income tax",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
+      "primary_source": "candidate no-tax set; official verification required",
       "brackets": null,
       "rates": null,
       "deductions": null,
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "NO_STATE_EARNED_INCOME_TAX",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "WV",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "W. Va. Code \u00a7 11-21-4e",
       "brackets": [
         [
@@ -1427,13 +1943,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "WI",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Wis. Stat. \u00a7 71.06",
       "brackets": [
         [
@@ -1463,27 +1979,27 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2024,
       "state": "WY",
-      "status": "NO_STATE_EARNED_INCOME_TAX",
-      "primary_source": "No general state earned-income tax",
+      "status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
+      "primary_source": "https://www.wyo.gov/about-wyoming",
       "brackets": null,
       "rates": null,
       "deductions": null,
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "NO_STATE_EARNED_INCOME_TAX",
+      "implementation_status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
       "year": 2026,
       "state": "AL",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Ala. Code \u00a7 40-18-5",
       "brackets": [
         [
@@ -1508,27 +2024,27 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "AK",
-      "status": "NO_STATE_EARNED_INCOME_TAX",
-      "primary_source": "No general state earned-income tax",
+      "status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
+      "primary_source": "https://childsupport.alaska.gov/child-support-enforcement/information/faqs/child-support-enforcement-services-faq",
       "brackets": null,
       "rates": null,
       "deductions": null,
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "NO_STATE_EARNED_INCOME_TAX",
+      "implementation_status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "AZ",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Ariz. Rev. Stat. \u00a7 43-1011",
       "brackets": [
         [
@@ -1543,13 +2059,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "AR",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Ark. Code Ann. \u00a7 26-51-201",
       "brackets": [
         [
@@ -1574,13 +2090,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "CA",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Cal. Rev. & Tax Code \u00a7 17041",
       "brackets": [
         [
@@ -1620,13 +2136,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "CO",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Colo. Rev. Stat. \u00a7 39-22-104",
       "brackets": [
         [
@@ -1641,13 +2157,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "CT",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Conn. Gen. Stat. \u00a7 12-700",
       "brackets": [
         [
@@ -1677,13 +2193,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "DE",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "30 Del. C. \u00a7 1102",
       "brackets": [
         [
@@ -1728,13 +2244,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "DC",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "D.C. Code \u00a7 47-1806.03",
       "brackets": [
         [
@@ -1764,27 +2280,27 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "FL",
-      "status": "NO_STATE_EARNED_INCOME_TAX",
-      "primary_source": "No general state earned-income tax",
+      "status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
+      "primary_source": "https://floridarevenue.com/faq/Pages/FAQDetails.aspx?FAQID=1466",
       "brackets": null,
       "rates": null,
       "deductions": null,
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "NO_STATE_EARNED_INCOME_TAX",
+      "implementation_status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "GA",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "O.C.G.A. \u00a7 48-7-20",
       "brackets": [
         [
@@ -1799,13 +2315,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "HI",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Haw. Rev. Stat. \u00a7 235-51",
       "brackets": [
         [
@@ -1860,13 +2376,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "ID",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Idaho Code \u00a7 63-3024",
       "brackets": [
         [
@@ -1881,13 +2397,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "IL",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "35 ILCS 5/201",
       "brackets": [
         [
@@ -1902,13 +2418,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "IN",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Ind. Code \u00a7 6-3-2-1",
       "brackets": [
         [
@@ -1923,13 +2439,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "IA",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Iowa Code \u00a7 422.5",
       "brackets": [
         [
@@ -1944,13 +2460,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "KS",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Kan. Stat. Ann. \u00a7 79-32,110",
       "brackets": [
         [
@@ -1975,13 +2491,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "KY",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Ky. Rev. Stat. \u00a7 141.020",
       "brackets": [
         [
@@ -1996,13 +2512,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "LA",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "La. Rev. Stat. \u00a7 47:32",
       "brackets": [
         [
@@ -2027,13 +2543,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "ME",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "36 M.R.S. \u00a7 5111",
       "brackets": [
         [
@@ -2058,13 +2574,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "MD",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Md. Code Tax-Gen. \u00a7 10-105",
       "brackets": [
         [
@@ -2099,13 +2615,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "MA",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Mass. Gen. Laws ch. 62 \u00a7 4",
       "brackets": [
         [
@@ -2120,13 +2636,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "MI",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Mich. Comp. Laws \u00a7 206.51",
       "brackets": [
         [
@@ -2141,13 +2657,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "MN",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Minn. Stat. \u00a7 290.06",
       "brackets": [
         [
@@ -2172,13 +2688,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "MS",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Miss. Code Ann. \u00a7 27-7-5",
       "brackets": [
         [
@@ -2198,13 +2714,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "MO",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Mo. Rev. Stat. \u00a7 143.011",
       "brackets": [
         [
@@ -2254,13 +2770,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "MT",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Mont. Code Ann. \u00a7 15-30-2103",
       "brackets": [
         [
@@ -2280,13 +2796,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "NE",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Neb. Rev. Stat. \u00a7 77-2715.03",
       "brackets": [
         [
@@ -2316,41 +2832,41 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "NV",
-      "status": "NO_STATE_EARNED_INCOME_TAX",
-      "primary_source": "No general state earned-income tax",
+      "status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
+      "primary_source": "https://tax.nv.gov/about-nevada-department-of-taxation/income-tax-in-nevada/",
       "brackets": null,
       "rates": null,
       "deductions": null,
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "NO_STATE_EARNED_INCOME_TAX",
+      "implementation_status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "NH",
-      "status": "NO_STATE_EARNED_INCOME_TAX",
-      "primary_source": "No general state earned-income tax",
+      "status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
+      "primary_source": "https://www.gencourt.state.nh.us/rsa/html/V/77/77-mrg.htm",
       "brackets": null,
       "rates": null,
       "deductions": null,
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "NO_STATE_EARNED_INCOME_TAX",
+      "implementation_status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "NJ",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "N.J. Stat. Ann. \u00a7 54A:2-1",
       "brackets": [
         [
@@ -2385,13 +2901,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "NM",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "N.M. Stat. Ann. \u00a7 7-2-7",
       "brackets": [
         [
@@ -2421,13 +2937,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "NY",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "N.Y. Tax Law \u00a7 601",
       "brackets": [
         [
@@ -2462,13 +2978,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "NC",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "N.C. Gen. Stat. \u00a7 105-153.7",
       "brackets": [
         [
@@ -2483,13 +2999,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "ND",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "N.D. Cent. Code \u00a7 57-38-30.3",
       "brackets": [
         [
@@ -2514,13 +3030,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "OH",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Ohio Rev. Code \u00a7 5747.02",
       "brackets": [
         [
@@ -2545,13 +3061,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "OK",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Okla. Stat. tit. 68 \u00a7 2355",
       "brackets": [
         [
@@ -2591,13 +3107,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "OR",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Or. Rev. Stat. \u00a7 316.037",
       "brackets": [
         [
@@ -2627,13 +3143,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "PA",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "72 Pa. Stat. \u00a7 7302",
       "brackets": [
         [
@@ -2648,13 +3164,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "RI",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "R.I. Gen. Laws \u00a7 44-30-2.6",
       "brackets": [
         [
@@ -2679,13 +3195,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "SC",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "S.C. Code Ann. \u00a7 12-6-510",
       "brackets": [
         [
@@ -2710,55 +3226,55 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "SD",
-      "status": "NO_STATE_EARNED_INCOME_TAX",
-      "primary_source": "No general state earned-income tax",
+      "status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
+      "primary_source": "https://dor.sd.gov/individuals/taxes/",
       "brackets": null,
       "rates": null,
       "deductions": null,
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "NO_STATE_EARNED_INCOME_TAX",
+      "implementation_status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "TN",
-      "status": "NO_STATE_EARNED_INCOME_TAX",
-      "primary_source": "No general state earned-income tax",
+      "status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
+      "primary_source": "https://www.tn.gov/revenue/taxes/hall-income-tax.html",
       "brackets": null,
       "rates": null,
       "deductions": null,
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "NO_STATE_EARNED_INCOME_TAX",
+      "implementation_status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "TX",
-      "status": "NO_STATE_EARNED_INCOME_TAX",
-      "primary_source": "No general state earned-income tax",
+      "status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
+      "primary_source": "https://comptroller.texas.gov/economy/fiscal-notes/archive/2016/february/starting.php",
       "brackets": null,
       "rates": null,
       "deductions": null,
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "NO_STATE_EARNED_INCOME_TAX",
+      "implementation_status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "UT",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Utah Code \u00a7 59-10-104",
       "brackets": [
         [
@@ -2773,13 +3289,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "VT",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "32 V.S.A. \u00a7 5822",
       "brackets": [
         [
@@ -2804,13 +3320,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "VA",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Va. Code \u00a7 58.1-320",
       "brackets": [
         [
@@ -2840,27 +3356,27 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "WA",
-      "status": "NO_STATE_EARNED_INCOME_TAX",
-      "primary_source": "No general state earned-income tax",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
+      "primary_source": "candidate no-tax set; official verification required",
       "brackets": null,
       "rates": null,
       "deductions": null,
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "NO_STATE_EARNED_INCOME_TAX",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "WV",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "W. Va. Code \u00a7 11-21-4e",
       "brackets": [
         [
@@ -2895,13 +3411,13 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "WI",
-      "status": "INVENTORY_NOT_VALIDATED",
+      "status": "STATE_EVIDENCE_INCOMPLETE",
       "primary_source": "Wis. Stat. \u00a7 71.06",
       "brackets": [
         [
@@ -2931,21 +3447,21 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "INVENTORY_NOT_VALIDATED",
+      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     },
     {
       "year": 2026,
       "state": "WY",
-      "status": "NO_STATE_EARNED_INCOME_TAX",
-      "primary_source": "No general state earned-income tax",
+      "status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
+      "primary_source": "https://www.wyo.gov/about-wyoming",
       "brackets": null,
       "rates": null,
       "deductions": null,
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "NO_STATE_EARNED_INCOME_TAX",
+      "implementation_status": "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
       "federal_source": "IRS Revenue Procedure 2025-32 / SSA 2026 Baseline"
     }
   ],

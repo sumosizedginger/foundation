@@ -260,7 +260,9 @@ def test_empirical_blockers_unchanged():
         assert row["replacement"] == "FORMULA_FROZEN_INPUTS_PENDING"
         assert row["connectivity"] == "SOURCE_GAP"
         assert row["federal_tax"] == "VALIDATED"
-        assert row["state_tax"] == "SOURCE_GAP"
+        from foundation.living_cost.evidence_validators import state_tax_evidence_status
+
+        assert row["state_tax"] == state_tax_evidence_status()
         assert row["local_tax"] == "SOURCE_GAP"
 
 

@@ -24,6 +24,8 @@ from foundation.living_cost.evidence_validators import (
     federal_tax_evidence_status,
     meps_evidence_status,
     naic_evidence_status,
+    state_tax_evidence_status,
+    validate_state_tax_inventory,
 )
 from foundation.living_cost.freshness import (
     BLOCKER_NOTES,
@@ -635,7 +637,7 @@ def write_coverage(artifacts: list[RetrievedSourceArtifact]) -> dict:
             else _component_status(artifacts, f"bls_ce_{year}"),
             "rpp": _component_status(artifacts, f"bea_rpp_{year}"),
             "federal_tax": federal_tax_status,
-            "state_tax": "SOURCE_GAP",
+            "state_tax": state_tax_evidence_status(),
             "local_tax": "SOURCE_GAP",
         }
     blocking = []
@@ -974,6 +976,9 @@ def write_naic_and_federal_evidence() -> None:
         news_national=news_national,
     )
     write_federal_tax_inventory()
+    from foundation.sources.state_tax import write_state_tax_inventory
+
+    write_state_tax_inventory()
 
 
 def write_correction_side_reports() -> None:
@@ -1095,15 +1100,25 @@ def write_tax_coverage() -> None:
         "WI",
         "WY",
     ]
+    state_validation = validate_state_tax_inventory()
+    state_payload = state_validation.payload or {}
     rows = []
     for year in (2024, 2026):
         for st in states:
-            if st in NO_INCOME_TAX_STATES:
-                status = "NO_STATE_EARNED_INCOME_TAX"
-                source = "No general state earned-income tax"
+            cell = (
+                ((state_payload.get("jurisdictions") or {}).get(st) or {}).get("years") or {}
+            ).get(str(year)) or {}
+            if cell.get("tax_status") == "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX" and cell.get(
+                "parsed_ok"
+            ):
+                status = "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX"
+                source = str(((cell.get("official_authorities") or [{}])[0] or {}).get("url") or "")
             elif st in STATE_STATUTORY_SCHEDULES.get(year, {}):
-                status = "INVENTORY_NOT_VALIDATED"
+                status = cell.get("tax_status") or "INVENTORY_NOT_VALIDATED"
                 source = str(STATE_STATUTORY_SCHEDULES[year][st].get("source") or "")
+            elif st in NO_INCOME_TAX_STATES:
+                status = cell.get("tax_status") or "INVENTORY_NOT_VALIDATED"
+                source = "candidate no-tax set; official verification required"
             else:
                 status = "SOURCE_GAP"
                 source = ""
@@ -1135,6 +1150,11 @@ def write_tax_coverage() -> None:
             "FEDERAL_TAX_RULES match living_cost_federal_tax_inventory.json."
         ),
         "federal_tax_evidence_status": federal_tax_evidence_status(),
+        "state_tax_evidence_status": state_tax_evidence_status(),
+        "state_tax_family_complete": bool(state_payload.get("family_complete")),
+        "state_tax_validated_2024_count": state_payload.get("validated_2024_count"),
+        "state_tax_validated_2026_count": state_payload.get("validated_2026_count"),
+        "completion_matrix": state_payload.get("completion_matrix") or [],
         "federal_2026_values_match_rev_proc_2025_32": federal_tax_evidence_status() == "VALIDATED",
         "local_tax_classes": {
             "A": "geography is coterminous / tax applies throughout modeled county-equivalent; direct overlay may be appropriate",

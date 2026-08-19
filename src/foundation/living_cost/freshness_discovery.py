@@ -1605,29 +1605,74 @@ def discover_federal_tax() -> FreshnessCheck:
 
 
 def discover_state_tax() -> FreshnessCheck:
+    from foundation.living_cost.evidence_validators import (
+        state_tax_evidence_status,
+        validate_state_tax_inventory,
+    )
+    from foundation.sources.state_tax import (
+        discover_state_tax_live,
+        evaluate_state_tax_freshness,
+    )
+
+    validation = validate_state_tax_inventory()
+    evidence = state_tax_evidence_status()
+    payload = validation.payload or {}
+    artifacts = []
+    for item in payload.get("retrieved_artifacts") or []:
+        if not isinstance(item, dict) or not item.get("sha256"):
+            continue
+        artifacts.append(
+            _artifact_record(
+                artifact_id=str(item.get("filename") or item.get("key")),
+                url=item.get("url"),
+                sha256=item.get("sha256"),
+                retrieved_at=item.get("retrieved_at"),
+                validation_status="VALIDATED" if item.get("http_ok") else "UNAVAILABLE",
+            )
+        )
+    try:
+        live, live_error = discover_state_tax_live(payload)
+    except (OSError, RuntimeError, ValueError, requests.RequestException) as exc:
+        live, live_error = None, str(exc)
+    status, newer, reason = evaluate_state_tax_freshness(
+        inventory_valid=validation.ok,
+        live=live,
+        live_error=live_error,
+    )
+    if not validation.ok and status == "VERIFIED_CURRENT":
+        status = "CHECK_FAILED"
+        newer = None
+        reason = f"Inventory is not family-validated: {validation.issues[:6]}"
+    y2024 = int(payload.get("validated_2024_count") or 0)
+    y2026 = int(payload.get("validated_2026_count") or 0)
     return FreshnessCheck(
         source_id="state_tax_law",
         latest_checked_at=_now_iso(),
-        latest_authoritative_vintage_found="2024 and 2026 schedules in code",
-        selected_vintage="2024 and 2026 schedules in code",
-        selected_artifact=None,
-        newer_data_exists=None,
-        retrieval_validation_status="SOURCE_GAP",
-        reason_if_not_refreshed=(
-            "State schedule inventory is incomplete / unvalidated. "
-            "No programmatic 51-state official discovery of current-year statutes is bound. "
-            "MANUAL_VERIFICATION_REQUIRED for remaining states; evidence stays SOURCE_GAP."
-        ),
-        freshness_check_status="MANUAL_VERIFICATION_REQUIRED",
-        publisher="State revenue departments",
+        latest_authoritative_vintage_found=f"validated_cells_2024={y2024}/51 2026={y2026}/51",
+        selected_vintage="2024 and 2026 RULE_YEAR official inventory",
+        selected_artifact="living_cost_state_tax_inventory.json",
+        newer_data_exists=newer,
+        retrieval_validation_status=evidence,
+        reason_if_not_refreshed=reason,
+        freshness_check_status=status,
+        publisher="State revenue departments / District of Columbia OTR",
         landing_url=None,
-        selected_artifacts=(),
-        transformation_method="RULE_YEAR",
-        input_evidence_status="SOURCE_GAP",
+        selected_artifacts=tuple(artifacts),
+        transformation_method="RULE_YEAR; field-level official artifact provenance; no MSLC",
+        input_evidence_status=evidence,
         year_coverage=_year_coverage(
-            {"covered": False, "note": "state inventory incomplete"},
-            {"covered": False, "note": "state inventory incomplete"},
+            {
+                "covered": y2024 == 51 and validation.ok,
+                "source_data_year": 2024,
+                "note": "historical RULE_YEAR; family VALIDATED only if 51/51",
+            },
+            {
+                "covered": y2026 == 51 and validation.ok,
+                "source_data_year": 2026,
+                "note": "current RULE_YEAR; family VALIDATED only if 51/51",
+            },
         ),
+        extra={"live_currentness": live, "live_error": live_error, "issues": validation.issues[:20]},
     )
 
 

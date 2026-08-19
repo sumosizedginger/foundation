@@ -1076,29 +1076,57 @@ def stamp_source_coverage_from_current_truth(coverage_path: Path) -> dict[str, A
         federal_tax_evidence_status,
         meps_evidence_status,
         naic_evidence_status,
+        state_tax_evidence_status,
     )
 
-    required_blockers = {
+    validator_backed = {
         "health_oop": meps_evidence_status(),
         "mpg": epa_evidence_status(),
+        "insurance": naic_evidence_status(),
+        "federal_tax": federal_tax_evidence_status(),
+        "state_tax": state_tax_evidence_status(),
+    }
+    frozen_blockers = {
         "maintenance": "INCOMPLETE_PROVENANCE",
         "essentials": "INCOMPLETE_PROVENANCE",
         "recreation": "INCOMPLETE_PROVENANCE",
-        "insurance": naic_evidence_status(),
         "registration": "SOURCE_GAP",
         "replacement": "FORMULA_FROZEN_INPUTS_PENDING",
         "connectivity": "SOURCE_GAP",
-        "federal_tax": federal_tax_evidence_status(),
-        "state_tax": "SOURCE_GAP",
         "local_tax": "SOURCE_GAP",
     }
     for year, comps in coverage.get("coverage_by_year", {}).items():
-        for name, expected in required_blockers.items():
+        if not isinstance(comps, dict):
+            continue
+        for name, expected in validator_backed.items():
+            comps[name] = expected
+        for name, expected in frozen_blockers.items():
             actual = comps.get(name)
             if actual != expected:
                 raise ValueError(
                     f"coverage {year}.{name} is {actual!r}, expected {expected!r}; "
                     "do not alter evidence statuses to look better"
                 )
+        dimensions = (
+            coverage.get("status_dimensions", {}).get("by_year", {}).get(str(year), {})
+        )
+        if isinstance(dimensions, dict):
+            for name, expected in {**validator_backed, **frozen_blockers}.items():
+                rec = dimensions.get(name)
+                if isinstance(rec, dict):
+                    rec["evidence_status"] = expected
+    blocking: list[str] = []
+    allowed = {
+        "VALIDATED",
+        "MEASURED",
+        "MODELED_FROM_MEASURED_INPUTS",
+    }
+    for year, comps in coverage.get("coverage_by_year", {}).items():
+        if not isinstance(comps, dict):
+            continue
+        for name, status in comps.items():
+            if status not in allowed:
+                blocking.append(f"{year}:{name}:{status}")
+    coverage["blocking_components"] = blocking
     coverage_path.write_text(json.dumps(coverage, indent=2), encoding="utf-8")
     return coverage

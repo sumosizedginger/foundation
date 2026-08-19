@@ -878,7 +878,16 @@ def calculate_state_income_tax(gross: float, state: str, year: int = 2024) -> fl
     """Calculate statutory single state income tax for given state and year."""
     year_schedules = _state_schedules_for_year(year)
     st = state.upper()
-    if st in NO_INCOME_TAX_STATES or st == "US":
+    if st == "US":
+        return 0.0
+    if st in NO_INCOME_TAX_STATES:
+        from foundation.sources.state_tax import no_wage_tax_verified
+
+        if not no_wage_tax_verified(st, year):
+            raise ValueError(
+                f"State {st} is a no-wage-tax candidate for {year} but official "
+                "verification is unbound; unknown is not zero"
+            )
         return 0.0
 
     sched = year_schedules.get(st)

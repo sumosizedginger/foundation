@@ -1,9 +1,9 @@
 {
   "report_type": "living_cost_candidate_freshness",
-  "generated_at": "2026-08-19T02:40:50Z",
+  "generated_at": "2026-08-19T03:50:35Z",
   "schema_version": "2.4",
   "calculates_mslc": false,
-  "freshness_run_id": "6c158aa0eaa619a142fe51c06e27008ff59d4da6c562d65d06625ad7ad63dab7",
+  "freshness_run_id": "090e3fe9123c68d51a805084ab42d493473bb30673946ef0997b033b0209aa59",
   "required_families": [
     "acs_population_weights",
     "hud_fmr",
@@ -28,7 +28,7 @@
   "checks": {
     "acs_population_weights": {
       "source_id": "acs_population_weights",
-      "latest_checked_at": "2026-08-19T02:40:11Z",
+      "latest_checked_at": "2026-08-19T03:50:17Z",
       "latest_authoritative_vintage_found": "2024",
       "selected_vintage": "2024 ACS 5-Year B01001",
       "selected_artifact": "acsdt5y2024-b01001.dat",
@@ -116,7 +116,7 @@
     },
     "hud_fmr": {
       "source_id": "hud_fmr",
-      "latest_checked_at": "2026-08-19T02:40:12Z",
+      "latest_checked_at": "2026-08-19T03:50:18Z",
       "latest_authoritative_vintage_found": "FY2024 / FY2026",
       "selected_vintage": "FY2024 / FY2026",
       "selected_artifact": "FMR2024_final_revised.xlsx / FY26_FMRs_revised.xlsx",
@@ -189,7 +189,7 @@
     },
     "usda_food": {
       "source_id": "usda_food",
-      "latest_checked_at": "2026-08-19T02:40:13Z",
+      "latest_checked_at": "2026-08-19T03:50:19Z",
       "latest_authoritative_vintage_found": "USDA official monthly archives (2024 historical; official latest (2026, 5))",
       "selected_vintage": "USDA Low-Cost official monthly archive; 2026 uses official YTD months",
       "selected_artifact": "usda-lowcostplan-sept2007-present.xlsx",
@@ -551,7 +551,7 @@
     },
     "cms_marketplace_sbe": {
       "source_id": "cms_marketplace_sbe",
-      "latest_checked_at": "2026-08-19T02:40:15Z",
+      "latest_checked_at": "2026-08-19T03:50:20Z",
       "latest_authoritative_vintage_found": "PY2024 / PY2026 Exchange PUF + standalone SBE",
       "selected_vintage": "PY2024 / PY2026 federal Exchange PUF + year-specific standalone SBE",
       "selected_artifact": "cms_rate_puf / plan_puf / service_area_puf + SBE archives",
@@ -1008,7 +1008,7 @@
         "federal_exchange": {
           "kind": "federal_exchange",
           "landing_url": "https://www.cms.gov/marketplace/resources/data/public-use-files",
-          "checked_at": "2026-08-19T02:40:12Z",
+          "checked_at": "2026-08-19T03:50:18Z",
           "status": "VERIFIED_CURRENT",
           "plan_years_found": [
             2020,
@@ -1027,7 +1027,7 @@
         "sbe": {
           "kind": "sbe",
           "landing_url": "https://www.cms.gov/marketplace/resources/data/state-based-public-use-files",
-          "checked_at": "2026-08-19T02:40:15Z",
+          "checked_at": "2026-08-19T03:50:20Z",
           "status": "VERIFIED_CURRENT",
           "plan_years_found": [
             2020,
@@ -1048,7 +1048,7 @@
     },
     "meps_full_year_consolidated": {
       "source_id": "meps_full_year_consolidated",
-      "latest_checked_at": "2026-08-19T02:40:12Z",
+      "latest_checked_at": "2026-08-19T03:50:18Z",
       "latest_authoritative_vintage_found": "HC-251 / 2023",
       "selected_vintage": "HC-251 / 2023",
       "selected_artifact": "h251dat.zip",
@@ -1178,7 +1178,7 @@
     },
     "nhts_mileage": {
       "source_id": "nhts_mileage",
-      "latest_checked_at": "2026-08-19T02:40:11Z",
+      "latest_checked_at": "2026-08-19T03:50:18Z",
       "latest_authoritative_vintage_found": "2022 NHTS V2.1",
       "selected_vintage": "2022 NHTS V2.1",
       "selected_artifact": "nhts_2022_csv.zip",
@@ -1214,7 +1214,7 @@
     },
     "epa_vehicle": {
       "source_id": "epa_vehicle",
-      "latest_checked_at": "2026-08-19T02:40:12Z",
+      "latest_checked_at": "2026-08-19T03:50:18Z",
       "latest_authoritative_vintage_found": "EPA/DOE fueleconomy.gov vehicles.csv.zip",
       "selected_vintage": "EPA/DOE fueleconomy.gov vehicles.csv.zip",
       "selected_artifact": "epa_fueleconomy_vehicles.csv.zip",
@@ -1261,7 +1261,7 @@
     },
     "eia_gasoline": {
       "source_id": "eia_gasoline",
-      "latest_checked_at": "2026-08-19T02:40:18Z",
+      "latest_checked_at": "2026-08-19T03:50:20Z",
       "latest_authoritative_vintage_found": "EIA weekly retail gasoline through 2026-08-17",
       "selected_vintage": "EIA weekly retail gasoline through 2026-08-17",
       "selected_artifact": "pswrgvwall.xls",
@@ -1340,7 +1340,7 @@
     },
     "naic_auto_insurance": {
       "source_id": "naic_auto_insurance",
-      "latest_checked_at": "2026-08-19T02:40:50Z",
+      "latest_checked_at": "2026-08-19T03:50:35Z",
       "latest_authoritative_vintage_found": "AUT-PB 2022-2023",
       "selected_vintage": "AUT-PB 2022-2023",
       "selected_artifact": "publication-aut-pb-auto-insurance-database.pdf",
@@ -1418,7 +1418,7 @@
     },
     "bls_ce": {
       "source_id": "bls_ce",
-      "latest_checked_at": "2026-08-19T02:40:13Z",
+      "latest_checked_at": "2026-08-19T03:50:18Z",
       "latest_authoritative_vintage_found": "2024 Interview PUMD",
       "selected_vintage": "2024 Interview PUMD",
       "selected_artifact": "intrvw24.zip",
@@ -1454,7 +1454,7 @@
     },
     "fcc_broadband": {
       "source_id": "fcc_broadband",
-      "latest_checked_at": "2026-08-19T02:40:13Z",
+      "latest_checked_at": "2026-08-19T03:50:18Z",
       "latest_authoritative_vintage_found": null,
       "selected_vintage": null,
       "selected_artifact": null,
@@ -1481,7 +1481,7 @@
     },
     "mobile_price": {
       "source_id": "mobile_price",
-      "latest_checked_at": "2026-08-19T02:40:12Z",
+      "latest_checked_at": "2026-08-19T03:50:18Z",
       "latest_authoritative_vintage_found": null,
       "selected_vintage": null,
       "selected_artifact": null,
@@ -1517,7 +1517,7 @@
     },
     "bea_rpp": {
       "source_id": "bea_rpp",
-      "latest_checked_at": "2026-08-19T02:40:14Z",
+      "latest_checked_at": "2026-08-19T03:50:19Z",
       "latest_authoritative_vintage_found": "BEA SARPP All-items 2024 / current release February 19, 2026",
       "selected_vintage": "BEA SARPP All-items 2024 / current release February 19, 2026",
       "selected_artifact": "SARPP.zip",
@@ -1567,7 +1567,7 @@
     },
     "federal_tax_law": {
       "source_id": "federal_tax_law",
-      "latest_checked_at": "2026-08-19T02:40:13Z",
+      "latest_checked_at": "2026-08-19T03:50:18Z",
       "latest_authoritative_vintage_found": "IRS_RP_2023_34 / IRS_RP_2025_32",
       "selected_vintage": "2024 and 2026 statutory tables in code",
       "selected_artifact": "living_cost_federal_tax_inventory.json",
@@ -1681,7 +1681,7 @@
           "successor_rev_proc": null,
           "current_pub15_payroll_matches": true,
           "current_2026_inflation_authority": "Rev. Proc. 2025-32",
-          "current_authority_checked_at": "2026-08-19T02:40:15Z",
+          "current_authority_checked_at": "2026-08-19T03:50:20Z",
           "current_authority_source_url": "https://www.irs.gov/newsroom/topics-in-the-news",
           "current_authority_status": "IDENTIFIED",
           "current_authority_cited": [
@@ -1695,20 +1695,581 @@
     },
     "state_tax_law": {
       "source_id": "state_tax_law",
-      "latest_checked_at": "2026-08-19T02:40:13Z",
-      "latest_authoritative_vintage_found": "2024 and 2026 schedules in code",
-      "selected_vintage": "2024 and 2026 schedules in code",
-      "selected_artifact": null,
+      "latest_checked_at": "2026-08-19T03:50:18Z",
+      "latest_authoritative_vintage_found": "validated_cells_2024=8/51 2026=8/51",
+      "selected_vintage": "2024 and 2026 RULE_YEAR official inventory",
+      "selected_artifact": "living_cost_state_tax_inventory.json",
       "newer_data_exists": null,
-      "retrieval_validation_status": "SOURCE_GAP",
-      "reason_if_not_refreshed": "State schedule inventory is incomplete / unvalidated. No programmatic 51-state official discovery of current-year statutes is bound. MANUAL_VERIFICATION_REQUIRED for remaining states; evidence stays SOURCE_GAP.",
-      "freshness_check_status": "MANUAL_VERIFICATION_REQUIRED",
-      "publisher": "State revenue departments",
+      "retrieval_validation_status": "INVENTORY_NOT_VALIDATED",
+      "reason_if_not_refreshed": "2026 official currentness is incomplete for 43 jurisdictions. Cached cells may remain VALIDATED. unresolved=['AL', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'DC']",
+      "freshness_check_status": "CHECK_FAILED",
+      "publisher": "State revenue departments / District of Columbia OTR",
       "landing_url": null,
-      "selected_artifacts": [],
+      "selected_artifacts": [
+        {
+          "artifact_id": "st_ak_2024_no_wage_tax.html",
+          "filename": "st_ak_2024_no_wage_tax.html",
+          "url": "https://childsupport.alaska.gov/child-support-enforcement/information/faqs/child-support-enforcement-services-faq",
+          "sha256": "ae6b1397a09b90dc4c3bec05daf7fde2c26ae15bd61c7f26e643a4b9e631ce9b",
+          "retrieved_at": "2026-08-19T03:45:22+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_ak_2026_no_wage_tax.html",
+          "filename": "st_ak_2026_no_wage_tax.html",
+          "url": "https://childsupport.alaska.gov/child-support-enforcement/information/faqs/child-support-enforcement-services-faq",
+          "sha256": "ae6b1397a09b90dc4c3bec05daf7fde2c26ae15bd61c7f26e643a4b9e631ce9b",
+          "retrieved_at": "2026-08-19T03:45:22+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_fl_2024_no_wage_tax.html",
+          "filename": "st_fl_2024_no_wage_tax.html",
+          "url": "https://floridarevenue.com/faq/Pages/FAQDetails.aspx?FAQID=1466",
+          "sha256": "67be0a9aec0420574008566be5a55291d40028ff3b9bbc47ac1473b1ee555bdf",
+          "retrieved_at": "2026-08-19T03:45:24+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_fl_2026_no_wage_tax.html",
+          "filename": "st_fl_2026_no_wage_tax.html",
+          "url": "https://floridarevenue.com/faq/Pages/FAQDetails.aspx?FAQID=1466",
+          "sha256": "a21876b4171a2fafa449d52594f95a2854a942e0c0505fa3c619937fd10cc32c",
+          "retrieved_at": "2026-08-19T03:45:25+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_nv_2024_no_wage_tax.html",
+          "filename": "st_nv_2024_no_wage_tax.html",
+          "url": "https://tax.nv.gov/about-nevada-department-of-taxation/income-tax-in-nevada/",
+          "sha256": "8d562f8748666ec2a271d5d5acc4af2566be87c6a4b123af41c3f9253e542d4d",
+          "retrieved_at": "2026-08-19T03:45:25+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_nv_2026_no_wage_tax.html",
+          "filename": "st_nv_2026_no_wage_tax.html",
+          "url": "https://tax.nv.gov/about-nevada-department-of-taxation/income-tax-in-nevada/",
+          "sha256": "8d562f8748666ec2a271d5d5acc4af2566be87c6a4b123af41c3f9253e542d4d",
+          "retrieved_at": "2026-08-19T03:45:26+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_nh_2024_no_wage_tax.html",
+          "filename": "st_nh_2024_no_wage_tax.html",
+          "url": "https://www.gencourt.state.nh.us/legislation/2021/HB0002.html",
+          "sha256": "247e4aa35c6dbc8ca75e5c716ccd0514cc308d0aa878c6dc6364024bc8148ae4",
+          "retrieved_at": "2026-08-19T03:48:18+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_nh_2026_no_wage_tax.html",
+          "filename": "st_nh_2026_no_wage_tax.html",
+          "url": "https://www.gencourt.state.nh.us/rsa/html/V/77/77-mrg.htm",
+          "sha256": "674b78eeb4e0e13359d2e502893698ec2cbc86924483ce3fcf040d6464f33918",
+          "retrieved_at": "2026-08-19T03:48:19+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_sd_2024_no_wage_tax.html",
+          "filename": "st_sd_2024_no_wage_tax.html",
+          "url": "https://dor.sd.gov/individuals/taxes/",
+          "sha256": "16a8eac8900265ac0d5bcbd441a27e245951acdceabf3594243ae25fe3ca1f51",
+          "retrieved_at": "2026-08-19T03:45:29+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_sd_2026_no_wage_tax.html",
+          "filename": "st_sd_2026_no_wage_tax.html",
+          "url": "https://dor.sd.gov/individuals/taxes/",
+          "sha256": "78044cd15c7066d5732717c3a834a519c9edd744ae2642940548a9f6af8e8b30",
+          "retrieved_at": "2026-08-19T03:45:29+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_tn_2024_no_wage_tax.html",
+          "filename": "st_tn_2024_no_wage_tax.html",
+          "url": "https://www.tn.gov/revenue/taxes/hall-income-tax.html",
+          "sha256": "3d264eb77c177407709a0c3ae211bff62a662a1788318756ea5228f68900bb2e",
+          "retrieved_at": "2026-08-19T03:45:30+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_tn_2026_no_wage_tax.html",
+          "filename": "st_tn_2026_no_wage_tax.html",
+          "url": "https://www.tn.gov/revenue/taxes/hall-income-tax.html",
+          "sha256": "05a1aefea2889c55eb6766de2ef41967f0f181d96ae5d412cd2f9f54f680d3b5",
+          "retrieved_at": "2026-08-19T03:45:31+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_tx_2024_no_wage_tax.html",
+          "filename": "st_tx_2024_no_wage_tax.html",
+          "url": "https://comptroller.texas.gov/economy/fiscal-notes/archive/2016/february/starting.php",
+          "sha256": "81bd082330560330f34c6af553ee93fd4c3684e670f5f8c69fdb142591a906eb",
+          "retrieved_at": "2026-08-19T03:45:31+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_tx_2026_no_wage_tax.html",
+          "filename": "st_tx_2026_no_wage_tax.html",
+          "url": "https://comptroller.texas.gov/economy/fiscal-notes/archive/2016/february/starting.php",
+          "sha256": "81bd082330560330f34c6af553ee93fd4c3684e670f5f8c69fdb142591a906eb",
+          "retrieved_at": "2026-08-19T03:45:32+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_wa_2024_no_wage_tax.html",
+          "filename": "st_wa_2024_no_wage_tax.html",
+          "url": "https://dor.wa.gov/taxes-rates/income-tax",
+          "sha256": "f3475d8e627b33b7f74cae46be540819fe97e56850169282f1f950fbf77ad659",
+          "retrieved_at": "2026-08-19T03:45:32+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_wa_2026_no_wage_tax.html",
+          "filename": "st_wa_2026_no_wage_tax.html",
+          "url": "https://dor.wa.gov/taxes-rates/income-tax",
+          "sha256": "f3475d8e627b33b7f74cae46be540819fe97e56850169282f1f950fbf77ad659",
+          "retrieved_at": "2026-08-19T03:45:32+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_wy_2024_no_wage_tax.html",
+          "filename": "st_wy_2024_no_wage_tax.html",
+          "url": "https://www.wyo.gov/about-wyoming",
+          "sha256": "40bcc8c458dafa8b9466dea858074ae1dae8bda4ec7c3f49ea271d0715fa9520",
+          "retrieved_at": "2026-08-19T03:48:19+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_wy_2026_no_wage_tax.html",
+          "filename": "st_wy_2026_no_wage_tax.html",
+          "url": "https://www.wyo.gov/about-wyoming",
+          "sha256": "f36133898101ecbcbdc41223cc2c6f5e007d2ae68ba29a80710068293c478b4e",
+          "retrieved_at": "2026-08-19T03:48:20+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_al_2024_schedule.html",
+          "filename": "st_al_2024_schedule.html",
+          "url": "https://www.revenue.alabama.gov/individual-corporate/individual-income-tax/",
+          "sha256": "5081a1e66827b5456aeca05d45e6dc5b498493be6640346c65cfd554c0bac265",
+          "retrieved_at": "2026-08-19T03:28:32+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_al_2026_schedule.html",
+          "filename": "st_al_2026_schedule.html",
+          "url": "https://www.revenue.alabama.gov/individual-corporate/individual-income-tax/",
+          "sha256": "5081a1e66827b5456aeca05d45e6dc5b498493be6640346c65cfd554c0bac265",
+          "retrieved_at": "2026-08-19T03:28:34+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_az_2024_schedule.html",
+          "filename": "st_az_2024_schedule.html",
+          "url": "https://azdor.gov/individuals",
+          "sha256": "4444dca43a460adb8ebba47ed448975a5b1dfc3250db66073eaa0216f1cd7e20",
+          "retrieved_at": "2026-08-19T03:28:35+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_az_2026_schedule.html",
+          "filename": "st_az_2026_schedule.html",
+          "url": "https://azdor.gov/individuals",
+          "sha256": "e3c62b0d15a6f415c834d876a0e5b8395c92566b245bdd2c19e9e63279e83c2f",
+          "retrieved_at": "2026-08-19T03:28:35+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_ar_2024_schedule.html",
+          "filename": "st_ar_2024_schedule.html",
+          "url": "https://www.dfa.arkansas.gov/income-tax/",
+          "sha256": "617702a56dc4b43d49c02fdb2ec599ef49f4a00731ff70ec54e0ffc65ea3ee00",
+          "retrieved_at": "2026-08-19T03:28:37+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_ar_2026_schedule.html",
+          "filename": "st_ar_2026_schedule.html",
+          "url": "https://www.dfa.arkansas.gov/income-tax/",
+          "sha256": "95883e26e2fa0b72e70d384a80935b2a877c3aca12745075351f77f106a423ef",
+          "retrieved_at": "2026-08-19T03:28:38+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_ca_2024_schedule.html",
+          "filename": "st_ca_2024_schedule.html",
+          "url": "https://www.ftb.ca.gov/file/personal/index.html",
+          "sha256": "3bdad8f4705d81ad6df2b0ceea35107d3f6e27e0d62cd4580d9a20ff0403ac8a",
+          "retrieved_at": "2026-08-19T03:28:39+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_ca_2026_schedule.html",
+          "filename": "st_ca_2026_schedule.html",
+          "url": "https://www.ftb.ca.gov/file/personal/index.html",
+          "sha256": "7cef1ac8f6ea3086144d94688cc93e254214e421aa8f26d4c868015af51b28c7",
+          "retrieved_at": "2026-08-19T03:28:40+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_co_2024_schedule.html",
+          "filename": "st_co_2024_schedule.html",
+          "url": "https://tax.colorado.gov/individual-income-tax",
+          "sha256": "ee5fae61dbfc737ee90f60cc2a0684dfabb9f2f074deb9a698aa7dc8c024ed30",
+          "retrieved_at": "2026-08-19T03:28:41+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_co_2026_schedule.html",
+          "filename": "st_co_2026_schedule.html",
+          "url": "https://tax.colorado.gov/individual-income-tax",
+          "sha256": "ee5fae61dbfc737ee90f60cc2a0684dfabb9f2f074deb9a698aa7dc8c024ed30",
+          "retrieved_at": "2026-08-19T03:28:42+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_ct_2024_schedule.html",
+          "filename": "st_ct_2024_schedule.html",
+          "url": "https://portal.ct.gov/drs/individuals/individual-tax-information",
+          "sha256": "858fb949288b69c069a138746d7d6e605bc05d6cfae76a4732d1f7d209ab978c",
+          "retrieved_at": "2026-08-19T03:28:43+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_ct_2026_schedule.html",
+          "filename": "st_ct_2026_schedule.html",
+          "url": "https://portal.ct.gov/drs/individuals/individual-tax-information",
+          "sha256": "6cdf545f02d3d3fbb5170df6a99b845ebdacc71c9da8a4871a23ea1b90653e7f",
+          "retrieved_at": "2026-08-19T03:28:45+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_ga_2024_schedule.html",
+          "filename": "st_ga_2024_schedule.html",
+          "url": "https://dor.georgia.gov/taxes/individual-taxes",
+          "sha256": "66ae75bf528e5d8f8bd4323de670cf616c9881a7b6ebf095325d3990ad82eaeb",
+          "retrieved_at": "2026-08-19T03:28:49+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_ga_2026_schedule.html",
+          "filename": "st_ga_2026_schedule.html",
+          "url": "https://dor.georgia.gov/taxes/individual-taxes",
+          "sha256": "66ae75bf528e5d8f8bd4323de670cf616c9881a7b6ebf095325d3990ad82eaeb",
+          "retrieved_at": "2026-08-19T03:28:50+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_id_2024_schedule.html",
+          "filename": "st_id_2024_schedule.html",
+          "url": "https://tax.idaho.gov/taxes/income-tax/individual-income/",
+          "sha256": "abe46650215403a6a54936359b2e629ed58266abc198ae2b7ffa577878e24c27",
+          "retrieved_at": "2026-08-19T03:28:55+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_id_2026_schedule.html",
+          "filename": "st_id_2026_schedule.html",
+          "url": "https://tax.idaho.gov/taxes/income-tax/individual-income/",
+          "sha256": "36703ed6ed58bdc2cfdfcd5c387639476d5a654bac2c53e6a896d603da48adb7",
+          "retrieved_at": "2026-08-19T03:28:57+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_il_2024_schedule.html",
+          "filename": "st_il_2024_schedule.html",
+          "url": "https://tax.illinois.gov/individuals.html",
+          "sha256": "876e68c828ed7e3fa34672d60dbfdc77ae9f064d71fb92bca39c2e96e93c6130",
+          "retrieved_at": "2026-08-19T03:28:58+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_il_2026_schedule.html",
+          "filename": "st_il_2026_schedule.html",
+          "url": "https://tax.illinois.gov/individuals.html",
+          "sha256": "876e68c828ed7e3fa34672d60dbfdc77ae9f064d71fb92bca39c2e96e93c6130",
+          "retrieved_at": "2026-08-19T03:28:59+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_in_2024_schedule.html",
+          "filename": "st_in_2024_schedule.html",
+          "url": "https://www.in.gov/dor/individual-income-taxes/",
+          "sha256": "206a58895dea8e8495433017850185b3b4959b4bcf9334e328e8b1d03fb2e19b",
+          "retrieved_at": "2026-08-19T03:29:00+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_in_2026_schedule.html",
+          "filename": "st_in_2026_schedule.html",
+          "url": "https://www.in.gov/dor/individual-income-taxes/",
+          "sha256": "206a58895dea8e8495433017850185b3b4959b4bcf9334e328e8b1d03fb2e19b",
+          "retrieved_at": "2026-08-19T03:29:01+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_ia_2024_schedule.html",
+          "filename": "st_ia_2024_schedule.html",
+          "url": "https://revenue.iowa.gov/taxes/tax-guidance/individual-income-tax",
+          "sha256": "4d65711c7645de7c8fb966f1e1a8795a908e3f6182c9505f579bb0cb0e9f395c",
+          "retrieved_at": "2026-08-19T03:29:02+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_ia_2026_schedule.html",
+          "filename": "st_ia_2026_schedule.html",
+          "url": "https://revenue.iowa.gov/taxes/tax-guidance/individual-income-tax",
+          "sha256": "4d65711c7645de7c8fb966f1e1a8795a908e3f6182c9505f579bb0cb0e9f395c",
+          "retrieved_at": "2026-08-19T03:29:02+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_ks_2024_schedule.html",
+          "filename": "st_ks_2024_schedule.html",
+          "url": "https://www.ksrevenue.gov/taxind.html",
+          "sha256": "3dc3609960c70dcd4b3a42991821f1deffba828f9f6e20fea62bf3c89adeea7e",
+          "retrieved_at": "2026-08-19T03:29:04+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_ks_2026_schedule.html",
+          "filename": "st_ks_2026_schedule.html",
+          "url": "https://www.ksrevenue.gov/taxind.html",
+          "sha256": "3dc3609960c70dcd4b3a42991821f1deffba828f9f6e20fea62bf3c89adeea7e",
+          "retrieved_at": "2026-08-19T03:29:06+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_ky_2024_schedule.html",
+          "filename": "st_ky_2024_schedule.html",
+          "url": "https://revenue.ky.gov/Individual/Individual-Income-Tax/Pages/default.aspx",
+          "sha256": "db0f1305305a86aa16daeba16fc362d95a87c312b15c130e3f02af62420fdcde",
+          "retrieved_at": "2026-08-19T03:29:08+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_ky_2026_schedule.html",
+          "filename": "st_ky_2026_schedule.html",
+          "url": "https://revenue.ky.gov/Individual/Individual-Income-Tax/Pages/default.aspx",
+          "sha256": "372e90b4f729667628d958363d679f9864867139a7d33009b59cc4ec23bab2dc",
+          "retrieved_at": "2026-08-19T03:29:11+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_me_2024_schedule.html",
+          "filename": "st_me_2024_schedule.html",
+          "url": "https://www.maine.gov/revenue/taxes/income-estate-tax",
+          "sha256": "99fde2180eef06ecdfdd4331457e474249cddc6418cfcd4801848903dbb1952e",
+          "retrieved_at": "2026-08-19T03:29:15+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_me_2026_schedule.html",
+          "filename": "st_me_2026_schedule.html",
+          "url": "https://www.maine.gov/revenue/taxes/income-estate-tax",
+          "sha256": "99fde2180eef06ecdfdd4331457e474249cddc6418cfcd4801848903dbb1952e",
+          "retrieved_at": "2026-08-19T03:29:16+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_md_2024_schedule.html",
+          "filename": "st_md_2024_schedule.html",
+          "url": "https://www.marylandtaxes.gov/individual/income/index.php",
+          "sha256": "9d3c1afa35bd51e1b93fe60cdc9a46187a11b89b7fe8cc1a58cb16bdb86d8f8b",
+          "retrieved_at": "2026-08-19T03:29:22+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_md_2026_schedule.html",
+          "filename": "st_md_2026_schedule.html",
+          "url": "https://www.marylandtaxes.gov/individual/income/index.php",
+          "sha256": "981333a9f8764a14ea89e95b248947210c328dda5f782e3202f65bd87b1e7f2c",
+          "retrieved_at": "2026-08-19T03:29:27+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_ma_2024_schedule.html",
+          "filename": "st_ma_2024_schedule.html",
+          "url": "https://www.mass.gov/orgs/massachusetts-department-of-revenue",
+          "sha256": "1b30188e2e0cdfdceac0c89202842402695622e0982c4e213d372f58baee18e1",
+          "retrieved_at": "2026-08-19T03:29:28+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_ma_2026_schedule.html",
+          "filename": "st_ma_2026_schedule.html",
+          "url": "https://www.mass.gov/orgs/massachusetts-department-of-revenue",
+          "sha256": "1b30188e2e0cdfdceac0c89202842402695622e0982c4e213d372f58baee18e1",
+          "retrieved_at": "2026-08-19T03:29:28+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_mn_2024_schedule.html",
+          "filename": "st_mn_2024_schedule.html",
+          "url": "https://www.revenue.state.mn.us/individual-income-tax",
+          "sha256": "197aaec063fd11392385fe5424c8255fc46103a12fd02fa0be55c99f6326d0d5",
+          "retrieved_at": "2026-08-19T03:29:30+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_mn_2026_schedule.html",
+          "filename": "st_mn_2026_schedule.html",
+          "url": "https://www.revenue.state.mn.us/individual-income-tax",
+          "sha256": "966d6eda9072ebc20d8de594200b03fada24176fed5a02ed0be0116ba8bc045b",
+          "retrieved_at": "2026-08-19T03:29:31+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_mo_2024_schedule.html",
+          "filename": "st_mo_2024_schedule.html",
+          "url": "https://dor.mo.gov/taxation/individual/",
+          "sha256": "50ff1d735aca2457455578367dc2d5745f08bde6120bbdaae0321546b4ad4685",
+          "retrieved_at": "2026-08-19T03:29:32+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_mo_2026_schedule.html",
+          "filename": "st_mo_2026_schedule.html",
+          "url": "https://dor.mo.gov/taxation/individual/",
+          "sha256": "ded399ae6f3995fc4bde5ea9a0e46f1e065eb332082c0e42df4dcc7afc8b2b3c",
+          "retrieved_at": "2026-08-19T03:29:33+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_mt_2024_schedule.html",
+          "filename": "st_mt_2024_schedule.html",
+          "url": "https://mtrevenue.gov/taxes/individual-income-tax/",
+          "sha256": "b8106f6fc87459f38d2a5f53b5dfee3557af0f6176877cace8a6e5c8013a7b3d",
+          "retrieved_at": "2026-08-19T03:29:34+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_mt_2026_schedule.html",
+          "filename": "st_mt_2026_schedule.html",
+          "url": "https://mtrevenue.gov/taxes/individual-income-tax/",
+          "sha256": "b8106f6fc87459f38d2a5f53b5dfee3557af0f6176877cace8a6e5c8013a7b3d",
+          "retrieved_at": "2026-08-19T03:29:35+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_ne_2024_schedule.html",
+          "filename": "st_ne_2024_schedule.html",
+          "url": "https://revenue.nebraska.gov/individuals",
+          "sha256": "d4bfceea3ca4bf30bdc37cd3541119931690660a960a5befdfd1a06fa59fc390",
+          "retrieved_at": "2026-08-19T03:29:35+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_ne_2026_schedule.html",
+          "filename": "st_ne_2026_schedule.html",
+          "url": "https://revenue.nebraska.gov/individuals",
+          "sha256": "d4bfceea3ca4bf30bdc37cd3541119931690660a960a5befdfd1a06fa59fc390",
+          "retrieved_at": "2026-08-19T03:29:36+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_nm_2024_schedule.html",
+          "filename": "st_nm_2024_schedule.html",
+          "url": "https://www.tax.newmexico.gov/individuals/",
+          "sha256": "c7b8d198c48055d2c82d7d07ca935f8565fdfcacaac2ec4d69563d802db0fadd",
+          "retrieved_at": "2026-08-19T03:29:39+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_nm_2026_schedule.html",
+          "filename": "st_nm_2026_schedule.html",
+          "url": "https://www.tax.newmexico.gov/individuals/",
+          "sha256": "c7b8d198c48055d2c82d7d07ca935f8565fdfcacaac2ec4d69563d802db0fadd",
+          "retrieved_at": "2026-08-19T03:29:40+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_ny_2024_schedule.html",
+          "filename": "st_ny_2024_schedule.html",
+          "url": "https://www.tax.ny.gov/pit/",
+          "sha256": "79d6bb3876ccdb52b6bfecea896d5adea7bbabf454854225e38312a9e11e48dd",
+          "retrieved_at": "2026-08-19T03:29:41+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_ny_2026_schedule.html",
+          "filename": "st_ny_2026_schedule.html",
+          "url": "https://www.tax.ny.gov/pit/",
+          "sha256": "79d6bb3876ccdb52b6bfecea896d5adea7bbabf454854225e38312a9e11e48dd",
+          "retrieved_at": "2026-08-19T03:29:42+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_nc_2024_schedule.html",
+          "filename": "st_nc_2024_schedule.html",
+          "url": "https://www.ncdor.gov/taxes-forms/individual-income-tax",
+          "sha256": "01aa4e60c82715cff8f8b66657c88394e6e2c4a69a7a965d17b05101b37b45a9",
+          "retrieved_at": "2026-08-19T03:29:44+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_nc_2026_schedule.html",
+          "filename": "st_nc_2026_schedule.html",
+          "url": "https://www.ncdor.gov/taxes-forms/individual-income-tax",
+          "sha256": "01aa4e60c82715cff8f8b66657c88394e6e2c4a69a7a965d17b05101b37b45a9",
+          "retrieved_at": "2026-08-19T03:29:44+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_oh_2024_schedule.html",
+          "filename": "st_oh_2024_schedule.html",
+          "url": "https://tax.ohio.gov/individual/resources/individual-income-tax",
+          "sha256": "a8a98141cfcba2008848f1cc35e62176e711a095fc0216fb4fd8f594e637076f",
+          "retrieved_at": "2026-08-19T03:29:47+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_oh_2026_schedule.html",
+          "filename": "st_oh_2026_schedule.html",
+          "url": "https://tax.ohio.gov/individual/resources/individual-income-tax",
+          "sha256": "a8a98141cfcba2008848f1cc35e62176e711a095fc0216fb4fd8f594e637076f",
+          "retrieved_at": "2026-08-19T03:29:48+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_pa_2024_schedule.html",
+          "filename": "st_pa_2024_schedule.html",
+          "url": "https://www.revenue.pa.gov/TaxTypes/PIT/Pages/default.aspx",
+          "sha256": "eb46b6c43896735fc4804aad529591b53687cc690016b2dc6009d8c6b7241889",
+          "retrieved_at": "2026-08-19T03:45:54+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_pa_2026_schedule.html",
+          "filename": "st_pa_2026_schedule.html",
+          "url": "https://www.revenue.pa.gov/TaxTypes/PIT/Pages/default.aspx",
+          "sha256": "3f3be45a1b883ad15f7be1d92447740184064cff1efcac6dd4951d70dc0c95dc",
+          "retrieved_at": "2026-08-19T03:29:55+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_ut_2024_schedule.html",
+          "filename": "st_ut_2024_schedule.html",
+          "url": "https://tax.utah.gov/taxing/income",
+          "sha256": "aeff83051385b08706410245a1fd511305798c10b3fce7a8d8e5d7690b20f396",
+          "retrieved_at": "2026-08-19T03:30:01+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_ut_2026_schedule.html",
+          "filename": "st_ut_2026_schedule.html",
+          "url": "https://tax.utah.gov/taxing/income",
+          "sha256": "351923455736a571206c4ba82cd4ff34502de4781cc71a8b523d8e2ecce33a91",
+          "retrieved_at": "2026-08-19T03:30:02+00:00",
+          "validation_status": "VALIDATED"
+        }
+      ],
       "retrieved_at": null,
-      "transformation_method": "RULE_YEAR",
-      "input_evidence_status": "SOURCE_GAP",
+      "transformation_method": "RULE_YEAR; field-level official artifact provenance; no MSLC",
+      "input_evidence_status": "INVENTORY_NOT_VALIDATED",
       "months_included": null,
       "month_count": null,
       "first_month": null,
@@ -1719,21 +2280,96 @@
       "year_coverage": {
         "2024": {
           "covered": false,
-          "note": "state inventory incomplete",
+          "source_data_year": 2024,
+          "note": "historical RULE_YEAR; family VALIDATED only if 51/51",
           "project_cost_year": 2024
         },
         "2026": {
           "covered": false,
-          "note": "state inventory incomplete",
+          "source_data_year": 2026,
+          "note": "current RULE_YEAR; family VALIDATED only if 51/51",
           "project_cost_year": 2026
         }
       },
       "series_coverage": null,
-      "extra": null
+      "extra": {
+        "live_currentness": {
+          "verified_current_2026_count": 8,
+          "unresolved_2026": [
+            "AL",
+            "AZ",
+            "AR",
+            "CA",
+            "CO",
+            "CT",
+            "DE",
+            "DC",
+            "GA",
+            "HI",
+            "ID",
+            "IL",
+            "IN",
+            "IA",
+            "KS",
+            "KY",
+            "LA",
+            "ME",
+            "MD",
+            "MA",
+            "MI",
+            "MN",
+            "MS",
+            "MO",
+            "MT",
+            "NE",
+            "NJ",
+            "NM",
+            "NY",
+            "NC",
+            "ND",
+            "OH",
+            "OK",
+            "OR",
+            "PA",
+            "RI",
+            "SC",
+            "UT",
+            "VT",
+            "VA",
+            "WA",
+            "WV",
+            "WI"
+          ],
+          "all_2026_current": false
+        },
+        "live_error": null,
+        "issues": [
+          "STATE_TAX_CELL_UNPARSED:AL:2024:['STATE_TAX_MODEL_GAP:AL:2024:schedule_not_extracted']",
+          "STATE_TAX_CELL_UNRESOLVED:AL:2024",
+          "STATE_TAX_CELL_UNPARSED:AL:2026:['STATE_TAX_MODEL_GAP:AL:2026:schedule_not_extracted']",
+          "STATE_TAX_CELL_UNRESOLVED:AL:2026",
+          "STATE_TAX_CELL_UNPARSED:AZ:2024:['STATE_TAX_MODEL_GAP:AZ:2024:schedule_not_extracted']",
+          "STATE_TAX_CELL_UNRESOLVED:AZ:2024",
+          "STATE_TAX_CELL_UNPARSED:AZ:2026:['STATE_TAX_MODEL_GAP:AZ:2026:schedule_not_extracted']",
+          "STATE_TAX_CELL_UNRESOLVED:AZ:2026",
+          "STATE_TAX_CELL_UNPARSED:AR:2024:['STATE_TAX_MODEL_GAP:AR:2024:schedule_not_extracted']",
+          "STATE_TAX_CELL_UNRESOLVED:AR:2024",
+          "STATE_TAX_CELL_UNPARSED:AR:2026:['STATE_TAX_MODEL_GAP:AR:2026:schedule_not_extracted']",
+          "STATE_TAX_CELL_UNRESOLVED:AR:2026",
+          "STATE_TAX_CELL_UNPARSED:CA:2024:['STATE_TAX_MODEL_GAP:CA:2024:schedule_not_extracted']",
+          "STATE_TAX_CELL_UNRESOLVED:CA:2024",
+          "STATE_TAX_CELL_UNPARSED:CA:2026:['STATE_TAX_MODEL_GAP:CA:2026:schedule_not_extracted']",
+          "STATE_TAX_CELL_UNRESOLVED:CA:2026",
+          "STATE_TAX_CELL_UNPARSED:CO:2024:['STATE_TAX_MODEL_GAP:CO:2024:schedule_not_extracted']",
+          "STATE_TAX_CELL_UNRESOLVED:CO:2024",
+          "STATE_TAX_CELL_UNPARSED:CO:2026:['STATE_TAX_MODEL_GAP:CO:2026:schedule_not_extracted']",
+          "STATE_TAX_CELL_UNRESOLVED:CO:2026"
+        ]
+      }
     },
     "local_tax_law": {
       "source_id": "local_tax_law",
-      "latest_checked_at": "2026-08-19T02:40:13Z",
+      "latest_checked_at": "2026-08-19T03:50:18Z",
       "latest_authoritative_vintage_found": "MD county / NYC / Philadelphia verified; Harris County TX verified no local EIT",
       "selected_vintage": "partial verified inventory",
       "selected_artifact": null,
@@ -1771,7 +2407,7 @@
     },
     "vehicle_registration": {
       "source_id": "vehicle_registration",
-      "latest_checked_at": "2026-08-19T02:40:13Z",
+      "latest_checked_at": "2026-08-19T03:50:18Z",
       "latest_authoritative_vintage_found": null,
       "selected_vintage": null,
       "selected_artifact": null,
@@ -1807,7 +2443,7 @@
     },
     "vehicle_replacement": {
       "source_id": "vehicle_replacement",
-      "latest_checked_at": "2026-08-19T02:40:13Z",
+      "latest_checked_at": "2026-08-19T03:50:18Z",
       "latest_authoritative_vintage_found": null,
       "selected_vintage": null,
       "selected_artifact": null,
@@ -1834,7 +2470,7 @@
     },
     "od010_price_index": {
       "source_id": "od010_price_index",
-      "latest_checked_at": "2026-08-19T02:40:14Z",
+      "latest_checked_at": "2026-08-19T03:50:19Z",
       "latest_authoritative_vintage_found": null,
       "selected_vintage": null,
       "selected_artifact": null,
@@ -2628,8 +3264,8 @@
     2024,
     2026
   ],
-  "blocker_count": 75,
-  "gate_blocker_reason_count": 75,
+  "blocker_count": 77,
+  "gate_blocker_reason_count": 77,
   "empirical_blocker_family_count": 8,
   "empirical_blocker_families": [
     "bls_ce",
@@ -2704,8 +3340,10 @@
     "fcc_broadband:MISSING_YEAR_2024",
     "fcc_broadband:MISSING_YEAR_2026",
     "mobile_price:SOURCE_GAP",
-    "state_tax_law:MANUAL_VERIFICATION_REQUIRED",
-    "state_tax_law:SOURCE_GAP",
+    "state_tax_law:CHECK_FAILED",
+    "state_tax_law:INVENTORY_NOT_VALIDATED",
+    "state_tax_law:MISSING_YEAR_2024",
+    "state_tax_law:MISSING_YEAR_2026",
     "local_tax_law:MANUAL_VERIFICATION_REQUIRED",
     "local_tax_law:SOURCE_GAP",
     "vehicle_registration:SOURCE_GAP",
@@ -2732,7 +3370,6 @@
       "federal_tax_law"
     ],
     "manual_verification_required": [
-      "state_tax_law",
       "local_tax_law"
     ],
     "check_failed": [
@@ -2741,6 +3378,7 @@
       "epa_vehicle",
       "bls_ce",
       "fcc_broadband",
+      "state_tax_law",
       "od010_price_index"
     ],
     "source_gap": [
@@ -2765,7 +3403,7 @@
     "mobile_price": "SOURCE_GAP",
     "bea_rpp": "VERIFIED_CURRENT",
     "federal_tax_law": "VERIFIED_CURRENT",
-    "state_tax_law": "MANUAL_VERIFICATION_REQUIRED",
+    "state_tax_law": "CHECK_FAILED",
     "local_tax_law": "MANUAL_VERIFICATION_REQUIRED",
     "vehicle_registration": "SOURCE_GAP",
     "vehicle_replacement": "SOURCE_GAP",

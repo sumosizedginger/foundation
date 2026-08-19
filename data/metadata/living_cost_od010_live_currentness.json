@@ -5,6 +5,6 @@
   "reason": "live BLS retrieve failed: BLS API status=REQUEST_NOT_PROCESSED message=['Request could not be serviced, as the daily threshold for total number of requests allocated to the user with registration key  has been reached.']",
   "structural_table_bound": true,
   "report_type": "living_cost_od010_live_currentness",
-  "generated_at": "2026-08-19T02:40:21Z",
+  "generated_at": "2026-08-19T03:50:19Z",
   "calculates_mslc": false
 }

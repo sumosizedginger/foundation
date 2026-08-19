@@ -253,6 +253,10 @@ FEDERAL_TAX_INVENTORY_PATH = METADATA_DIR / "living_cost_federal_tax_inventory.j
 FEDERAL_TAX_REPORT_TYPE = "living_cost_federal_tax_inventory"
 FEDERAL_TAX_VALIDATED = "VALIDATED"
 FEDERAL_TAX_NOT_VALIDATED = "INVENTORY_NOT_VALIDATED"
+STATE_TAX_INVENTORY_PATH = METADATA_DIR / "living_cost_state_tax_inventory.json"
+STATE_TAX_REPORT_TYPE = "living_cost_state_tax_inventory"
+STATE_TAX_VALIDATED = "VALIDATED"
+STATE_TAX_NOT_VALIDATED = "INVENTORY_NOT_VALIDATED"
 
 
 def validate_naic_derivation(
@@ -559,3 +563,114 @@ def federal_tax_inventory_is_valid(report_path: Path | None = None) -> bool:
 
 def federal_tax_evidence_status(report_path: Path | None = None) -> str:
     return validate_federal_tax_inventory(report_path).evidence_status
+
+
+def validate_state_tax_inventory(
+    report_path: Path | None = None,
+) -> EvidenceValidation:
+    """State tax family is VALIDATED only when all 51 x 2 cells bind official artifacts."""
+    from foundation.sources.state_tax import ALL_JURISDICTIONS, TAX_YEARS, official_state_url
+
+    path = report_path or STATE_TAX_INVENTORY_PATH
+    issues: list[str] = []
+    payload = _load_json(path)
+    if payload is None:
+        return EvidenceValidation(
+            False, STATE_TAX_NOT_VALIDATED, ["STATE_TAX_INVENTORY_UNREADABLE"]
+        )
+    if payload.get("report_type") != STATE_TAX_REPORT_TYPE:
+        issues.append("STATE_TAX_REPORT_TYPE_INVALID")
+    if payload.get("calculates_mslc") is True:
+        issues.append("STATE_TAX_CLAIMS_MSLC")
+    jurisdictions = payload.get("jurisdictions")
+    if not isinstance(jurisdictions, dict):
+        return EvidenceValidation(
+            False, STATE_TAX_NOT_VALIDATED, issues + ["STATE_TAX_JURISDICTIONS_MISSING"], payload
+        )
+    artifacts = {
+        str(item.get("key")): item
+        for item in (payload.get("retrieved_artifacts") or [])
+        if isinstance(item, dict) and item.get("key")
+    }
+    for state in ALL_JURISDICTIONS:
+        rec = jurisdictions.get(state)
+        if not isinstance(rec, dict):
+            issues.append(f"STATE_TAX_JURISDICTION_MISSING:{state}")
+            continue
+        years = rec.get("years")
+        if not isinstance(years, dict):
+            issues.append(f"STATE_TAX_YEARS_MISSING:{state}")
+            continue
+        for year in TAX_YEARS:
+            cell = years.get(str(year))
+            if not isinstance(cell, dict):
+                issues.append(f"STATE_TAX_CELL_MISSING:{state}:{year}")
+                continue
+            if cell.get("jurisdiction") != state:
+                issues.append("STATE_TAX_AUTHORITY_JURISDICTION_MISMATCH")
+            if cell.get("tax_year") != year:
+                issues.append("STATE_TAX_AUTHORITY_YEAR_MISMATCH")
+            if cell.get("parsed_ok") is not True or cell.get("validation_issues"):
+                issues.append(
+                    f"STATE_TAX_CELL_UNPARSED:{state}:{year}:{cell.get('validation_issues')}"
+                )
+            status = cell.get("tax_status")
+            if status not in {
+                "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX",
+                "GENERAL_WAGE_INCOME_TAX",
+            }:
+                issues.append(f"STATE_TAX_CELL_UNRESOLVED:{state}:{year}")
+            authorities = cell.get("official_authorities") or []
+            if not authorities:
+                issues.append(f"STATE_TAX_FIELD_AUTHORITY_UNBOUND:{state}:{year}:authority")
+                continue
+            for field_name in ("standard_deduction",):
+                field = cell.get(field_name)
+                if status == "VERIFIED_NO_GENERAL_WAGE_INCOME_TAX":
+                    if not isinstance(field, dict):
+                        issues.append(
+                            f"STATE_TAX_FIELD_AUTHORITY_UNBOUND:{state}:{year}:{field_name}"
+                        )
+                        continue
+                    key = field.get("source_artifact_key")
+                    sha = field.get("source_sha256")
+                    art = artifacts.get(str(key))
+                    if not key or not isinstance(art, dict):
+                        issues.append(
+                            f"STATE_TAX_FIELD_AUTHORITY_UNBOUND:{state}:{year}:{field_name}"
+                        )
+                        continue
+                    if art.get("http_ok") is not True or not art.get("sha256"):
+                        issues.append(
+                            f"STATE_TAX_FIELD_AUTHORITY_UNBOUND:{state}:{year}:{field_name}"
+                        )
+                    if sha != art.get("sha256"):
+                        issues.append("STATE_TAX_AUTHORITY_SHA_MISMATCH")
+                    if not official_state_url(art.get("url")):
+                        issues.append(
+                            f"STATE_TAX_FIELD_AUTHORITY_UNBOUND:{state}:{year}:{field_name}"
+                        )
+                    if art.get("state") != state:
+                        issues.append("STATE_TAX_AUTHORITY_JURISDICTION_MISMATCH")
+                    if int(art.get("year") or 0) != year:
+                        issues.append("STATE_TAX_AUTHORITY_YEAR_MISMATCH")
+    if payload.get("family_complete") is not True or len(issues) > 0:
+        # Family VALIDATED only when every required cell is truthfully resolved.
+        ok = False
+    else:
+        ok = True
+    return EvidenceValidation(
+        ok,
+        STATE_TAX_VALIDATED if ok else STATE_TAX_NOT_VALIDATED,
+        issues,
+        payload,
+    )
+
+
+def state_tax_inventory_is_valid(report_path: Path | None = None) -> bool:
+    return validate_state_tax_inventory(report_path).ok
+
+
+def state_tax_evidence_status(report_path: Path | None = None) -> str:
+    result = validate_state_tax_inventory(report_path)
+    return result.evidence_status
