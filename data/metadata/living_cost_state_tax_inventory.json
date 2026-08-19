@@ -1,6 +1,6 @@
 {
   "report_type": "living_cost_state_tax_inventory",
-  "generated_at": "2026-08-19T17:32:42+00:00",
+  "generated_at": "2026-08-19T23:31:13+00:00",
   "filing_status": "SINGLE",
   "required_years": [
     2024,
@@ -60,7 +60,7 @@
     "WY"
   ],
   "jurisdiction_count": 51,
-  "validated_2024_count": 12,
+  "validated_2024_count": 15,
   "validated_2026_count": 11,
   "live_verified_current_2026_count": 0,
   "no_general_wage_tax_count": 9,
@@ -327,7 +327,7 @@
           "tax_year": 2024,
           "filing_status": "SINGLE",
           "wage_income_scope": true,
-          "tax_status": "STATE_EVIDENCE_INCOMPLETE",
+          "tax_status": "GENERAL_WAGE_INCOME_TAX",
           "official_authorities": [
             {
               "authority_id": "ST_AZ_2024_schedule",
@@ -340,32 +340,68 @@
               "authority_type": "statute",
               "role": "schedule",
               "source_artifact_key": "st_az_2024_schedule"
+            },
+            {
+              "authority_id": "ST_AZ_2024_form_instructions",
+              "publisher": "Arizona Department of Revenue / 2024 Form 140 booklet",
+              "url": "https://azdor.gov/sites/default/files/document/FORMS_INDIVIDUAL_2024_140Booklet.pdf",
+              "retrieved_at": "2026-08-19T23:25:54+00:00",
+              "sha256": "32d7b7597c926ef7afcda7dded77e68fe050904ab8cff3a88970d73137d2ef7c",
+              "authority_effective_date": null,
+              "effective_date": null,
+              "authority_type": "form_instructions",
+              "role": "form_instructions",
+              "source_artifact_key": "st_az_2024_form_140_booklet"
             }
           ],
-          "starting_income_definition": "ordinary wage income of a single independent adult",
-          "standard_deduction": null,
-          "personal_exemption": null,
+          "starting_income_definition": "Arizona taxable income after standard deduction",
+          "standard_deduction": {
+            "authority_id": "ST_AZ_2024",
+            "source_artifact_key": "st_az_2024_form_140_booklet",
+            "source_sha256": "32d7b7597c926ef7afcda7dded77e68fe050904ab8cff3a88970d73137d2ef7c",
+            "extraction_identity": "AZ_2024_standard_deduction",
+            "value": 14600.0,
+            "tax_year": 2024
+          },
+          "personal_exemption": {
+            "authority_id": "ST_AZ_2024",
+            "source_artifact_key": "st_az_2024_form_140_booklet",
+            "source_sha256": "32d7b7597c926ef7afcda7dded77e68fe050904ab8cff3a88970d73137d2ef7c",
+            "extraction_identity": "AZ_2024_personal_exemption",
+            "value": 0.0,
+            "tax_year": 2024
+          },
           "taxable_income_adjustments": [],
-          "brackets": [],
-          "rates": [],
+          "brackets": [
+            {
+              "authority_id": "ST_AZ_2024",
+              "source_artifact_key": "st_az_2024_form_140_booklet",
+              "source_sha256": "32d7b7597c926ef7afcda7dded77e68fe050904ab8cff3a88970d73137d2ef7c",
+              "extraction_identity": "AZ_2024_brackets",
+              "upper": null,
+              "rate": 0.025,
+              "tax_year": 2024
+            }
+          ],
+          "rates": [
+            0.025
+          ],
           "mandatory_surtaxes": [],
           "automatic_statutory_nonrefundable_personal_credits": [],
           "recapture_phaseout": null,
           "special_statutory_formula": null,
           "mandatory_employee_state_payroll_contributions": {
-            "status": "VERIFIED_NONE_OR_UNRESOLVED",
+            "status": "OWNER_TAX_METHOD_DECISION_REQUIRED",
             "contributions": [],
-            "notes": "Mandatory employee state payroll programs are inventoried separately from ordinary wage income tax. Employer-only taxes are excluded. Ambiguous inclusion of SDI/PFML in the frozen tax solver is recorded rather than silently chosen."
+            "notes": "Ordinary wage income tax evidence is inventoried separately from mandatory employee SDI/PFML/SUTA-employee programs. Those programs are not silently treated as zero or as PIT."
           },
-          "code_match_status": "STATE_EVIDENCE_INCOMPLETE",
-          "parsed_ok": false,
-          "validation_issues": [
-            "STATE_TAX_MODEL_GAP:AZ:2024:schedule_not_extracted"
-          ],
+          "code_match_status": "STATE_CODE_MATCH",
+          "parsed_ok": true,
+          "validation_issues": [],
           "authority_effective_date": null,
           "effective_date": null,
-          "rule_applies_to_tax_year": null,
-          "first_applicable_tax_year": null,
+          "rule_applies_to_tax_year": true,
+          "first_applicable_tax_year": 2024,
           "authority_checked_at": "2026-08-19T16:38:01+00:00",
           "currentness_status": "HISTORICAL_RULE_YEAR",
           "future_legislation": {
@@ -1825,46 +1861,70 @@
           "tax_year": 2024,
           "filing_status": "SINGLE",
           "wage_income_scope": true,
-          "tax_status": "STATE_EVIDENCE_INCOMPLETE",
+          "tax_status": "GENERAL_WAGE_INCOME_TAX",
           "official_authorities": [
             {
               "authority_id": "ST_IN_2024_schedule",
-              "publisher": "Indiana General Assembly / Ind. Code \u00a7 6-3-2-1",
-              "url": "https://iga.in.gov/laws/2024/ic/titles/6#6-3-2-1",
-              "retrieved_at": "2026-08-19T16:38:08+00:00",
-              "sha256": "cb5ffc6d8656074dad503b59104153ffb4b982894c544fc533e7916bdf8eb59f",
+              "publisher": "Indiana Department of Revenue / 2024 IT-40 instruction booklet",
+              "url": "https://forms.in.gov/Download.aspx?id=16379",
+              "retrieved_at": "2026-08-19T23:25:54+00:00",
+              "sha256": "baeb0f32c6838b49760c1330ed89abbe16033af1be6aedb14e83e0fd35395f6d",
               "authority_effective_date": null,
               "effective_date": null,
-              "authority_type": "statute",
+              "authority_type": "form_instructions",
               "role": "schedule",
               "source_artifact_key": "st_in_2024_schedule"
             }
           ],
-          "starting_income_definition": "ordinary wage income of a single independent adult",
-          "standard_deduction": null,
-          "personal_exemption": null,
+          "starting_income_definition": "Indiana adjusted gross income after personal exemption",
+          "standard_deduction": {
+            "authority_id": "ST_IN_2024",
+            "source_artifact_key": "st_in_2024_schedule",
+            "source_sha256": "baeb0f32c6838b49760c1330ed89abbe16033af1be6aedb14e83e0fd35395f6d",
+            "extraction_identity": "IN_2024_standard_deduction",
+            "value": 0.0,
+            "tax_year": 2024
+          },
+          "personal_exemption": {
+            "authority_id": "ST_IN_2024",
+            "source_artifact_key": "st_in_2024_schedule",
+            "source_sha256": "baeb0f32c6838b49760c1330ed89abbe16033af1be6aedb14e83e0fd35395f6d",
+            "extraction_identity": "IN_2024_personal_exemption",
+            "value": 1000.0,
+            "tax_year": 2024
+          },
           "taxable_income_adjustments": [],
-          "brackets": [],
-          "rates": [],
+          "brackets": [
+            {
+              "authority_id": "ST_IN_2024",
+              "source_artifact_key": "st_in_2024_schedule",
+              "source_sha256": "baeb0f32c6838b49760c1330ed89abbe16033af1be6aedb14e83e0fd35395f6d",
+              "extraction_identity": "IN_2024_brackets",
+              "upper": null,
+              "rate": 0.0305,
+              "tax_year": 2024
+            }
+          ],
+          "rates": [
+            0.0305
+          ],
           "mandatory_surtaxes": [],
           "automatic_statutory_nonrefundable_personal_credits": [],
           "recapture_phaseout": null,
           "special_statutory_formula": null,
           "mandatory_employee_state_payroll_contributions": {
-            "status": "VERIFIED_NONE_OR_UNRESOLVED",
+            "status": "OWNER_TAX_METHOD_DECISION_REQUIRED",
             "contributions": [],
-            "notes": "Mandatory employee state payroll programs are inventoried separately from ordinary wage income tax. Employer-only taxes are excluded. Ambiguous inclusion of SDI/PFML in the frozen tax solver is recorded rather than silently chosen."
+            "notes": "Ordinary wage income tax evidence is inventoried separately from mandatory employee SDI/PFML/SUTA-employee programs. Those programs are not silently treated as zero or as PIT."
           },
-          "code_match_status": "STATE_EVIDENCE_INCOMPLETE",
-          "parsed_ok": false,
-          "validation_issues": [
-            "STATE_TAX_MODEL_GAP:IN:2024:schedule_not_extracted"
-          ],
+          "code_match_status": "STATE_CODE_MATCH",
+          "parsed_ok": true,
+          "validation_issues": [],
           "authority_effective_date": null,
           "effective_date": null,
-          "rule_applies_to_tax_year": null,
-          "first_applicable_tax_year": null,
-          "authority_checked_at": "2026-08-19T16:38:08+00:00",
+          "rule_applies_to_tax_year": true,
+          "first_applicable_tax_year": 2024,
+          "authority_checked_at": "2026-08-19T23:25:54+00:00",
           "currentness_status": "HISTORICAL_RULE_YEAR",
           "future_legislation": {
             "tax_enacted": false,
@@ -1873,7 +1933,7 @@
             "tax_imposition_start": null,
             "effective_start": null,
             "first_tax_year": null,
-            "threshold": null,
+            "threshold": 1000000.0,
             "unknown_effective_year": false
           },
           "evidence_chain": null
@@ -1887,23 +1947,35 @@
           "official_authorities": [
             {
               "authority_id": "ST_IN_2026_schedule",
-              "publisher": "Indiana General Assembly / Ind. Code \u00a7 6-3-2-1",
-              "url": "https://iga.in.gov/laws/2026/ic/titles/6#6-3-2-1",
-              "retrieved_at": "2026-08-19T16:38:08+00:00",
-              "sha256": "cb5ffc6d8656074dad503b59104153ffb4b982894c544fc533e7916bdf8eb59f",
+              "publisher": "Indiana Department of Revenue / Schedule EZ (individual AGI tax-rate windows)",
+              "url": "https://forms.in.gov/Download.aspx?id=2750",
+              "retrieved_at": "2026-08-19T23:25:54+00:00",
+              "sha256": "bd6142014812c3112d7658103b04caad625a15332c946466e6c48752a3c0f258",
               "authority_effective_date": null,
               "effective_date": null,
-              "authority_type": "statute",
+              "authority_type": "form_instructions",
               "role": "schedule",
               "source_artifact_key": "st_in_2026_schedule"
             }
           ],
-          "starting_income_definition": "ordinary wage income of a single independent adult",
+          "starting_income_definition": "Indiana adjusted gross income",
           "standard_deduction": null,
           "personal_exemption": null,
           "taxable_income_adjustments": [],
-          "brackets": [],
-          "rates": [],
+          "brackets": [
+            {
+              "authority_id": "ST_IN_2026",
+              "source_artifact_key": "st_in_2026_schedule",
+              "source_sha256": "bd6142014812c3112d7658103b04caad625a15332c946466e6c48752a3c0f258",
+              "extraction_identity": "IN_2026_brackets",
+              "upper": null,
+              "rate": 0.0295,
+              "tax_year": 2026
+            }
+          ],
+          "rates": [
+            0.0295
+          ],
           "mandatory_surtaxes": [],
           "automatic_statutory_nonrefundable_personal_credits": [],
           "recapture_phaseout": null,
@@ -1913,7 +1985,7 @@
             "contributions": [],
             "notes": "Mandatory employee state payroll programs are inventoried separately from ordinary wage income tax. Employer-only taxes are excluded. Ambiguous inclusion of SDI/PFML in the frozen tax solver is recorded rather than silently chosen."
           },
-          "code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+          "code_match_status": "STATE_MODEL_INCOMPLETE",
           "parsed_ok": false,
           "validation_issues": [
             "STATE_TAX_MODEL_GAP:IN:2026:schedule_not_extracted"
@@ -1922,7 +1994,7 @@
           "effective_date": null,
           "rule_applies_to_tax_year": null,
           "first_applicable_tax_year": null,
-          "authority_checked_at": "2026-08-19T16:38:08+00:00",
+          "authority_checked_at": "2026-08-19T23:25:54+00:00",
           "currentness_status": "CURRENTNESS_PENDING",
           "future_legislation": {
             "tax_enacted": false,
@@ -2193,22 +2265,34 @@
             {
               "authority_id": "ST_KY_2024_schedule",
               "publisher": "Kentucky General Assembly / KRS 141.020",
-              "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=54091",
-              "retrieved_at": "2026-08-19T16:38:09+00:00",
-              "sha256": "3d168d54731eaee97b663994c3aed4463b849e94fb29c74836abbe2d4f321ace",
-              "authority_effective_date": "2023-06-29",
-              "effective_date": "2023-06-29",
+              "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=56339",
+              "retrieved_at": "2026-08-19T23:25:54+00:00",
+              "sha256": "ba8f7b25f40ff55012f8e1713d4b4b58fcee9ac5a14b116e7b77c9c6a27b6777",
+              "authority_effective_date": "2025-06-27",
+              "effective_date": "2025-06-27",
               "authority_type": "statute",
               "role": "schedule",
               "source_artifact_key": "st_ky_2024_schedule"
             }
           ],
-          "starting_income_definition": "ordinary wage income of a single independent adult",
+          "starting_income_definition": "Kentucky net income",
           "standard_deduction": null,
           "personal_exemption": null,
           "taxable_income_adjustments": [],
-          "brackets": [],
-          "rates": [],
+          "brackets": [
+            {
+              "authority_id": "ST_KY_2024",
+              "source_artifact_key": "st_ky_2024_schedule",
+              "source_sha256": "ba8f7b25f40ff55012f8e1713d4b4b58fcee9ac5a14b116e7b77c9c6a27b6777",
+              "extraction_identity": "KY_2024_brackets",
+              "upper": null,
+              "rate": 0.04,
+              "tax_year": 2024
+            }
+          ],
+          "rates": [
+            0.04
+          ],
           "mandatory_surtaxes": [],
           "automatic_statutory_nonrefundable_personal_credits": [],
           "recapture_phaseout": null,
@@ -2218,21 +2302,21 @@
             "contributions": [],
             "notes": "Mandatory employee state payroll programs are inventoried separately from ordinary wage income tax. Employer-only taxes are excluded. Ambiguous inclusion of SDI/PFML in the frozen tax solver is recorded rather than silently chosen."
           },
-          "code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+          "code_match_status": "STATE_MODEL_INCOMPLETE",
           "parsed_ok": false,
           "validation_issues": [
             "STATE_TAX_MODEL_GAP:KY:2024:schedule_not_extracted"
           ],
-          "authority_effective_date": "2023-06-29",
-          "effective_date": "2023-06-29",
+          "authority_effective_date": "2025-06-27",
+          "effective_date": "2025-06-27",
           "rule_applies_to_tax_year": null,
           "first_applicable_tax_year": null,
-          "authority_checked_at": "2026-08-19T16:38:09+00:00",
+          "authority_checked_at": "2026-08-19T23:25:54+00:00",
           "currentness_status": "HISTORICAL_RULE_YEAR",
           "future_legislation": {
             "tax_enacted": false,
             "tax_applies_to_year": false,
-            "authority_effective_date": "2023-06-29",
+            "authority_effective_date": "2025-06-27",
             "tax_imposition_start": null,
             "effective_start": null,
             "first_tax_year": null,
@@ -2251,22 +2335,34 @@
             {
               "authority_id": "ST_KY_2026_schedule",
               "publisher": "Kentucky General Assembly / KRS 141.020",
-              "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=54091",
-              "retrieved_at": "2026-08-19T16:38:09+00:00",
-              "sha256": "3d168d54731eaee97b663994c3aed4463b849e94fb29c74836abbe2d4f321ace",
-              "authority_effective_date": "2023-06-29",
-              "effective_date": "2023-06-29",
+              "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=56339",
+              "retrieved_at": "2026-08-19T23:25:54+00:00",
+              "sha256": "ba8f7b25f40ff55012f8e1713d4b4b58fcee9ac5a14b116e7b77c9c6a27b6777",
+              "authority_effective_date": "2025-06-27",
+              "effective_date": "2025-06-27",
               "authority_type": "statute",
               "role": "schedule",
               "source_artifact_key": "st_ky_2026_schedule"
             }
           ],
-          "starting_income_definition": "ordinary wage income of a single independent adult",
+          "starting_income_definition": "Kentucky net income",
           "standard_deduction": null,
           "personal_exemption": null,
           "taxable_income_adjustments": [],
-          "brackets": [],
-          "rates": [],
+          "brackets": [
+            {
+              "authority_id": "ST_KY_2026",
+              "source_artifact_key": "st_ky_2026_schedule",
+              "source_sha256": "ba8f7b25f40ff55012f8e1713d4b4b58fcee9ac5a14b116e7b77c9c6a27b6777",
+              "extraction_identity": "KY_2026_brackets",
+              "upper": null,
+              "rate": 0.035,
+              "tax_year": 2026
+            }
+          ],
+          "rates": [
+            0.035
+          ],
           "mandatory_surtaxes": [],
           "automatic_statutory_nonrefundable_personal_credits": [],
           "recapture_phaseout": null,
@@ -2276,21 +2372,21 @@
             "contributions": [],
             "notes": "Mandatory employee state payroll programs are inventoried separately from ordinary wage income tax. Employer-only taxes are excluded. Ambiguous inclusion of SDI/PFML in the frozen tax solver is recorded rather than silently chosen."
           },
-          "code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+          "code_match_status": "STATE_MODEL_INCOMPLETE",
           "parsed_ok": false,
           "validation_issues": [
             "STATE_TAX_MODEL_GAP:KY:2026:schedule_not_extracted"
           ],
-          "authority_effective_date": "2023-06-29",
-          "effective_date": "2023-06-29",
+          "authority_effective_date": "2025-06-27",
+          "effective_date": "2025-06-27",
           "rule_applies_to_tax_year": null,
           "first_applicable_tax_year": null,
-          "authority_checked_at": "2026-08-19T16:38:09+00:00",
+          "authority_checked_at": "2026-08-19T23:25:54+00:00",
           "currentness_status": "CURRENTNESS_PENDING",
           "future_legislation": {
             "tax_enacted": false,
             "tax_applies_to_year": false,
-            "authority_effective_date": "2023-06-29",
+            "authority_effective_date": "2025-06-27",
             "tax_imposition_start": null,
             "effective_start": null,
             "first_tax_year": null,
@@ -2793,46 +2889,82 @@
           "tax_year": 2024,
           "filing_status": "SINGLE",
           "wage_income_scope": true,
-          "tax_status": "STATE_EVIDENCE_INCOMPLETE",
+          "tax_status": "GENERAL_WAGE_INCOME_TAX",
           "official_authorities": [
             {
               "authority_id": "ST_MI_2024_schedule",
               "publisher": "Michigan Department of Treasury",
               "url": "https://www.michigan.gov/taxes/individual-income-tax",
-              "retrieved_at": null,
-              "sha256": null,
+              "retrieved_at": "2026-08-19T23:29:45+00:00",
+              "sha256": "2158918ccdfab0510adf089472b4da185e6572d886fb8e3bee183eeee581447f",
               "authority_effective_date": null,
               "effective_date": null,
               "authority_type": "dor_page",
               "role": "schedule",
               "source_artifact_key": "st_mi_2024_schedule"
+            },
+            {
+              "authority_id": "ST_MI_2024_form_instructions",
+              "publisher": "Michigan Department of Treasury / 2024 MI-1040 instructions",
+              "url": "https://www.michigan.gov/taxes/-/media/Project/Websites/taxes/Forms/IIT/TY2024/MI-1040-Instructions.pdf",
+              "retrieved_at": "2026-08-19T23:25:54+00:00",
+              "sha256": "70649c626de2e57ccc2ead002b8bbc5dab9c03c39fcb0fb88eda8d784ef1602a",
+              "authority_effective_date": null,
+              "effective_date": null,
+              "authority_type": "form_instructions",
+              "role": "form_instructions",
+              "source_artifact_key": "st_mi_2024_mi1040_instructions"
             }
           ],
-          "starting_income_definition": "ordinary wage income of a single independent adult",
-          "standard_deduction": null,
-          "personal_exemption": null,
+          "starting_income_definition": "Federal AGI less Michigan personal exemption",
+          "standard_deduction": {
+            "authority_id": "ST_MI_2024",
+            "source_artifact_key": "st_mi_2024_mi1040_instructions",
+            "source_sha256": "70649c626de2e57ccc2ead002b8bbc5dab9c03c39fcb0fb88eda8d784ef1602a",
+            "extraction_identity": "MI_2024_standard_deduction",
+            "value": 0.0,
+            "tax_year": 2024
+          },
+          "personal_exemption": {
+            "authority_id": "ST_MI_2024",
+            "source_artifact_key": "st_mi_2024_mi1040_instructions",
+            "source_sha256": "70649c626de2e57ccc2ead002b8bbc5dab9c03c39fcb0fb88eda8d784ef1602a",
+            "extraction_identity": "MI_2024_personal_exemption",
+            "value": 5600.0,
+            "tax_year": 2024
+          },
           "taxable_income_adjustments": [],
-          "brackets": [],
-          "rates": [],
+          "brackets": [
+            {
+              "authority_id": "ST_MI_2024",
+              "source_artifact_key": "st_mi_2024_mi1040_instructions",
+              "source_sha256": "70649c626de2e57ccc2ead002b8bbc5dab9c03c39fcb0fb88eda8d784ef1602a",
+              "extraction_identity": "MI_2024_brackets",
+              "upper": null,
+              "rate": 0.0425,
+              "tax_year": 2024
+            }
+          ],
+          "rates": [
+            0.0425
+          ],
           "mandatory_surtaxes": [],
           "automatic_statutory_nonrefundable_personal_credits": [],
           "recapture_phaseout": null,
           "special_statutory_formula": null,
           "mandatory_employee_state_payroll_contributions": {
-            "status": "VERIFIED_NONE_OR_UNRESOLVED",
+            "status": "OWNER_TAX_METHOD_DECISION_REQUIRED",
             "contributions": [],
-            "notes": "Mandatory employee state payroll programs are inventoried separately from ordinary wage income tax. Employer-only taxes are excluded. Ambiguous inclusion of SDI/PFML in the frozen tax solver is recorded rather than silently chosen."
+            "notes": "Ordinary wage income tax evidence is inventoried separately from mandatory employee SDI/PFML/SUTA-employee programs. Those programs are not silently treated as zero or as PIT."
           },
-          "code_match_status": "STATE_EVIDENCE_INCOMPLETE",
-          "parsed_ok": false,
-          "validation_issues": [
-            "STATE_TAX_FIELD_AUTHORITY_UNBOUND:MI:2024:authority"
-          ],
+          "code_match_status": "STATE_CODE_MATCH",
+          "parsed_ok": true,
+          "validation_issues": [],
           "authority_effective_date": null,
           "effective_date": null,
-          "rule_applies_to_tax_year": null,
-          "first_applicable_tax_year": null,
-          "authority_checked_at": null,
+          "rule_applies_to_tax_year": true,
+          "first_applicable_tax_year": 2024,
+          "authority_checked_at": "2026-08-19T23:29:45+00:00",
           "currentness_status": "HISTORICAL_RULE_YEAR",
           "future_legislation": {
             "tax_enacted": false,
@@ -2857,8 +2989,8 @@
               "authority_id": "ST_MI_2026_schedule",
               "publisher": "Michigan Department of Treasury",
               "url": "https://www.michigan.gov/taxes/individual-income-tax",
-              "retrieved_at": null,
-              "sha256": null,
+              "retrieved_at": "2026-08-19T23:29:45+00:00",
+              "sha256": "2158918ccdfab0510adf089472b4da185e6572d886fb8e3bee183eeee581447f",
               "authority_effective_date": null,
               "effective_date": null,
               "authority_type": "dor_page",
@@ -2884,13 +3016,13 @@
           "code_match_status": "STATE_EVIDENCE_INCOMPLETE",
           "parsed_ok": false,
           "validation_issues": [
-            "STATE_TAX_FIELD_AUTHORITY_UNBOUND:MI:2026:authority"
+            "STATE_TAX_MODEL_GAP:MI:2026:schedule_not_extracted"
           ],
           "authority_effective_date": null,
           "effective_date": null,
           "rule_applies_to_tax_year": null,
           "first_applicable_tax_year": null,
-          "authority_checked_at": null,
+          "authority_checked_at": "2026-08-19T23:29:45+00:00",
           "currentness_status": "CURRENTNESS_PENDING",
           "future_legislation": {
             "tax_enacted": false,
@@ -6536,13 +6668,13 @@
     },
     {
       "state": "AZ",
-      "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
-      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_evidence_status": "GENERAL_WAGE_INCOME_TAX",
+      "2024_code_match_status": "STATE_CODE_MATCH",
       "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
       "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
       "2026_freshness_status": "CURRENTNESS_PENDING",
       "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
-      "remaining_issue": "STATE_TAX_MODEL_GAP:AZ:2024:schedule_not_extracted; STATE_TAX_MODEL_GAP:AZ:2026:schedule_not_extracted; STATE_TAX_2026_UNRESOLVED:AZ"
+      "remaining_issue": "STATE_TAX_MODEL_GAP:AZ:2026:schedule_not_extracted; STATE_TAX_2026_UNRESOLVED:AZ"
     },
     {
       "state": "AR",
@@ -6656,13 +6788,13 @@
     },
     {
       "state": "IN",
-      "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
-      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_evidence_status": "GENERAL_WAGE_INCOME_TAX",
+      "2024_code_match_status": "STATE_CODE_MATCH",
       "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
-      "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_code_match_status": "STATE_MODEL_INCOMPLETE",
       "2026_freshness_status": "CURRENTNESS_PENDING",
       "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
-      "remaining_issue": "STATE_TAX_MODEL_GAP:IN:2024:schedule_not_extracted; STATE_TAX_MODEL_GAP:IN:2026:schedule_not_extracted; STATE_TAX_2026_UNRESOLVED:IN"
+      "remaining_issue": "STATE_TAX_MODEL_GAP:IN:2026:schedule_not_extracted; STATE_TAX_2026_UNRESOLVED:IN"
     },
     {
       "state": "IA",
@@ -6687,9 +6819,9 @@
     {
       "state": "KY",
       "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
-      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_code_match_status": "STATE_MODEL_INCOMPLETE",
       "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
-      "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_code_match_status": "STATE_MODEL_INCOMPLETE",
       "2026_freshness_status": "CURRENTNESS_PENDING",
       "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
       "remaining_issue": "STATE_TAX_MODEL_GAP:KY:2024:schedule_not_extracted; STATE_TAX_MODEL_GAP:KY:2026:schedule_not_extracted; STATE_TAX_2026_UNRESOLVED:KY"
@@ -6736,13 +6868,13 @@
     },
     {
       "state": "MI",
-      "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
-      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_evidence_status": "GENERAL_WAGE_INCOME_TAX",
+      "2024_code_match_status": "STATE_CODE_MATCH",
       "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
       "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
       "2026_freshness_status": "CURRENTNESS_PENDING",
       "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
-      "remaining_issue": "STATE_TAX_FIELD_AUTHORITY_UNBOUND:MI:2024:authority; STATE_TAX_FIELD_AUTHORITY_UNBOUND:MI:2026:authority; STATE_TAX_2026_UNRESOLVED:MI"
+      "remaining_issue": "STATE_TAX_MODEL_GAP:MI:2026:schedule_not_extracted; STATE_TAX_2026_UNRESOLVED:MI"
     },
     {
       "state": "MN",
@@ -7589,26 +7721,26 @@
       "key": "st_in_2024_schedule",
       "state": "IN",
       "year": 2024,
-      "url": "https://iga.in.gov/laws/2024/ic/titles/6#6-3-2-1",
+      "url": "https://forms.in.gov/Download.aspx?id=16379",
       "filename": "st_in_2024_schedule.html",
-      "sha256": "cb5ffc6d8656074dad503b59104153ffb4b982894c544fc533e7916bdf8eb59f",
-      "retrieved_at": "2026-08-19T16:38:08+00:00",
+      "sha256": "baeb0f32c6838b49760c1330ed89abbe16033af1be6aedb14e83e0fd35395f6d",
+      "retrieved_at": "2026-08-19T23:25:54+00:00",
       "http_ok": true,
-      "byte_size": 691,
-      "publisher": "Indiana General Assembly / Ind. Code \u00a7 6-3-2-1",
+      "byte_size": 2889362,
+      "publisher": "Indiana Department of Revenue / 2024 IT-40 instruction booklet",
       "role": "schedule"
     },
     {
       "key": "st_in_2026_schedule",
       "state": "IN",
       "year": 2026,
-      "url": "https://iga.in.gov/laws/2026/ic/titles/6#6-3-2-1",
+      "url": "https://forms.in.gov/Download.aspx?id=2750",
       "filename": "st_in_2026_schedule.html",
-      "sha256": "cb5ffc6d8656074dad503b59104153ffb4b982894c544fc533e7916bdf8eb59f",
-      "retrieved_at": "2026-08-19T16:38:08+00:00",
+      "sha256": "bd6142014812c3112d7658103b04caad625a15332c946466e6c48752a3c0f258",
+      "retrieved_at": "2026-08-19T23:25:54+00:00",
       "http_ok": true,
-      "byte_size": 691,
-      "publisher": "Indiana General Assembly / Ind. Code \u00a7 6-3-2-1",
+      "byte_size": 283472,
+      "publisher": "Indiana Department of Revenue / Schedule EZ (individual AGI tax-rate windows)",
       "role": "schedule"
     },
     {
@@ -7667,12 +7799,12 @@
       "key": "st_ky_2024_schedule",
       "state": "KY",
       "year": 2024,
-      "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=54091",
+      "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=56339",
       "filename": "st_ky_2024_schedule.html",
-      "sha256": "3d168d54731eaee97b663994c3aed4463b849e94fb29c74836abbe2d4f321ace",
-      "retrieved_at": "2026-08-19T16:38:09+00:00",
+      "sha256": "ba8f7b25f40ff55012f8e1713d4b4b58fcee9ac5a14b116e7b77c9c6a27b6777",
+      "retrieved_at": "2026-08-19T23:25:54+00:00",
       "http_ok": true,
-      "byte_size": 15075,
+      "byte_size": 98890,
       "publisher": "Kentucky General Assembly / KRS 141.020",
       "role": "schedule"
     },
@@ -7680,12 +7812,12 @@
       "key": "st_ky_2026_schedule",
       "state": "KY",
       "year": 2026,
-      "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=54091",
+      "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=56339",
       "filename": "st_ky_2026_schedule.html",
-      "sha256": "3d168d54731eaee97b663994c3aed4463b849e94fb29c74836abbe2d4f321ace",
-      "retrieved_at": "2026-08-19T16:38:09+00:00",
+      "sha256": "ba8f7b25f40ff55012f8e1713d4b4b58fcee9ac5a14b116e7b77c9c6a27b6777",
+      "retrieved_at": "2026-08-19T23:25:54+00:00",
       "http_ok": true,
-      "byte_size": 15075,
+      "byte_size": 98890,
       "publisher": "Kentucky General Assembly / KRS 141.020",
       "role": "schedule"
     },
@@ -7799,10 +7931,10 @@
       "year": 2024,
       "url": "https://www.michigan.gov/taxes/individual-income-tax",
       "filename": "st_mi_2024_schedule.html",
-      "sha256": null,
-      "retrieved_at": null,
-      "http_ok": false,
-      "byte_size": null,
+      "sha256": "2158918ccdfab0510adf089472b4da185e6572d886fb8e3bee183eeee581447f",
+      "retrieved_at": "2026-08-19T23:29:45+00:00",
+      "http_ok": true,
+      "byte_size": 386485,
       "publisher": "Michigan Department of Treasury",
       "role": "schedule"
     },
@@ -7812,10 +7944,10 @@
       "year": 2026,
       "url": "https://www.michigan.gov/taxes/individual-income-tax",
       "filename": "st_mi_2026_schedule.html",
-      "sha256": null,
-      "retrieved_at": null,
-      "http_ok": false,
-      "byte_size": null,
+      "sha256": "2158918ccdfab0510adf089472b4da185e6572d886fb8e3bee183eeee581447f",
+      "retrieved_at": "2026-08-19T23:29:45+00:00",
+      "http_ok": true,
+      "byte_size": 386485,
       "publisher": "Michigan Department of Treasury",
       "role": "schedule"
     },
@@ -8403,6 +8535,32 @@
       "byte_size": 570759,
       "publisher": "North Carolina Department of Revenue / 2026 withholding tables",
       "role": "standard_deduction"
+    },
+    {
+      "key": "st_az_2024_form_140_booklet",
+      "state": "AZ",
+      "year": 2024,
+      "url": "https://azdor.gov/sites/default/files/document/FORMS_INDIVIDUAL_2024_140Booklet.pdf",
+      "filename": "st_az_2024_form_140_booklet.pdf",
+      "sha256": "32d7b7597c926ef7afcda7dded77e68fe050904ab8cff3a88970d73137d2ef7c",
+      "retrieved_at": "2026-08-19T23:25:54+00:00",
+      "http_ok": true,
+      "byte_size": 929052,
+      "publisher": "Arizona Department of Revenue / 2024 Form 140 booklet",
+      "role": "form_instructions"
+    },
+    {
+      "key": "st_mi_2024_mi1040_instructions",
+      "state": "MI",
+      "year": 2024,
+      "url": "https://www.michigan.gov/taxes/-/media/Project/Websites/taxes/Forms/IIT/TY2024/MI-1040-Instructions.pdf",
+      "filename": "st_mi_2024_mi1040_instructions.pdf",
+      "sha256": "70649c626de2e57ccc2ead002b8bbc5dab9c03c39fcb0fb88eda8d784ef1602a",
+      "retrieved_at": "2026-08-19T23:25:54+00:00",
+      "http_ok": true,
+      "byte_size": 2443570,
+      "publisher": "Michigan Department of Treasury / 2024 MI-1040 instructions",
+      "role": "form_instructions"
     }
   ],
   "calculates_mslc": false,

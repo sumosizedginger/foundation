@@ -259,6 +259,8 @@ def compare_live_schedule_to_cell(
     """
     if not live_extracted:
         return "incomplete"
+    if live_extracted.get("complete") is not True:
+        return "incomplete"
     stored = modeled_schedule_from_cell(cell)
     if stored["has_deduction"]:
         live_ded = live_extracted.get("deduction")

@@ -1,9 +1,9 @@
 {
   "report_type": "living_cost_candidate_freshness",
-  "generated_at": "2026-08-19T20:53:55Z",
+  "generated_at": "2026-08-19T23:31:47Z",
   "schema_version": "2.4",
   "calculates_mslc": false,
-  "freshness_run_id": "40cad72a76208399fa0a7acb2c19d1c5948a740c015111df054e37277e1dbd6a",
+  "freshness_run_id": "c7569ea473ee5ffc4d361e9e74263912150d6747d82062653d0360f9aba64edf",
   "required_families": [
     "acs_population_weights",
     "hud_fmr",
@@ -28,7 +28,7 @@
   "checks": {
     "acs_population_weights": {
       "source_id": "acs_population_weights",
-      "latest_checked_at": "2026-08-19T20:52:50Z",
+      "latest_checked_at": "2026-08-19T23:31:28Z",
       "latest_authoritative_vintage_found": "2024",
       "selected_vintage": "2024 ACS 5-Year B01001",
       "selected_artifact": "acsdt5y2024-b01001.dat",
@@ -116,7 +116,7 @@
     },
     "hud_fmr": {
       "source_id": "hud_fmr",
-      "latest_checked_at": "2026-08-19T20:52:51Z",
+      "latest_checked_at": "2026-08-19T23:31:29Z",
       "latest_authoritative_vintage_found": "FY2024 / FY2026",
       "selected_vintage": "FY2024 / FY2026",
       "selected_artifact": "FMR2024_final_revised.xlsx / FY26_FMRs_revised.xlsx",
@@ -189,7 +189,7 @@
     },
     "usda_food": {
       "source_id": "usda_food",
-      "latest_checked_at": "2026-08-19T20:52:52Z",
+      "latest_checked_at": "2026-08-19T23:31:34Z",
       "latest_authoritative_vintage_found": "USDA official monthly archives (2024 historical; official latest (2026, 5))",
       "selected_vintage": "USDA Low-Cost official monthly archive; 2026 uses official YTD months",
       "selected_artifact": "usda-lowcostplan-sept2007-present.xlsx",
@@ -551,7 +551,7 @@
     },
     "cms_marketplace_sbe": {
       "source_id": "cms_marketplace_sbe",
-      "latest_checked_at": "2026-08-19T20:52:52Z",
+      "latest_checked_at": "2026-08-19T23:31:30Z",
       "latest_authoritative_vintage_found": "PY2024 / PY2026 Exchange PUF + standalone SBE",
       "selected_vintage": "PY2024 / PY2026 federal Exchange PUF + year-specific standalone SBE",
       "selected_artifact": "cms_rate_puf / plan_puf / service_area_puf + SBE archives",
@@ -1008,7 +1008,7 @@
         "federal_exchange": {
           "kind": "federal_exchange",
           "landing_url": "https://www.cms.gov/marketplace/resources/data/public-use-files",
-          "checked_at": "2026-08-19T20:52:51Z",
+          "checked_at": "2026-08-19T23:31:28Z",
           "status": "VERIFIED_CURRENT",
           "plan_years_found": [
             2020,
@@ -1027,7 +1027,7 @@
         "sbe": {
           "kind": "sbe",
           "landing_url": "https://www.cms.gov/marketplace/resources/data/state-based-public-use-files",
-          "checked_at": "2026-08-19T20:52:52Z",
+          "checked_at": "2026-08-19T23:31:30Z",
           "status": "VERIFIED_CURRENT",
           "plan_years_found": [
             2020,
@@ -1048,7 +1048,7 @@
     },
     "meps_full_year_consolidated": {
       "source_id": "meps_full_year_consolidated",
-      "latest_checked_at": "2026-08-19T20:52:51Z",
+      "latest_checked_at": "2026-08-19T23:31:29Z",
       "latest_authoritative_vintage_found": "HC-251 / 2023",
       "selected_vintage": "HC-251 / 2023",
       "selected_artifact": "h251dat.zip",
@@ -1178,7 +1178,7 @@
     },
     "nhts_mileage": {
       "source_id": "nhts_mileage",
-      "latest_checked_at": "2026-08-19T20:52:50Z",
+      "latest_checked_at": "2026-08-19T23:31:28Z",
       "latest_authoritative_vintage_found": "2022 NHTS V2.1",
       "selected_vintage": "2022 NHTS V2.1",
       "selected_artifact": "nhts_2022_csv.zip",
@@ -1214,7 +1214,7 @@
     },
     "epa_vehicle": {
       "source_id": "epa_vehicle",
-      "latest_checked_at": "2026-08-19T20:52:50Z",
+      "latest_checked_at": "2026-08-19T23:31:29Z",
       "latest_authoritative_vintage_found": "EPA/DOE fueleconomy.gov vehicles.csv.zip",
       "selected_vintage": "EPA/DOE fueleconomy.gov vehicles.csv.zip",
       "selected_artifact": "epa_fueleconomy_vehicles.csv.zip",
@@ -1261,7 +1261,7 @@
     },
     "eia_gasoline": {
       "source_id": "eia_gasoline",
-      "latest_checked_at": "2026-08-19T20:52:57Z",
+      "latest_checked_at": "2026-08-19T23:31:31Z",
       "latest_authoritative_vintage_found": "EIA weekly retail gasoline through 2026-08-17",
       "selected_vintage": "EIA weekly retail gasoline through 2026-08-17",
       "selected_artifact": "pswrgvwall.xls",
@@ -1340,7 +1340,7 @@
     },
     "naic_auto_insurance": {
       "source_id": "naic_auto_insurance",
-      "latest_checked_at": "2026-08-19T20:53:55Z",
+      "latest_checked_at": "2026-08-19T23:31:47Z",
       "latest_authoritative_vintage_found": "AUT-PB 2022-2023",
       "selected_vintage": "AUT-PB 2022-2023",
       "selected_artifact": "publication-aut-pb-auto-insurance-database.pdf",
@@ -1418,7 +1418,7 @@
     },
     "bls_ce": {
       "source_id": "bls_ce",
-      "latest_checked_at": "2026-08-19T20:52:51Z",
+      "latest_checked_at": "2026-08-19T23:31:29Z",
       "latest_authoritative_vintage_found": "2024 Interview PUMD",
       "selected_vintage": "2024 Interview PUMD",
       "selected_artifact": "intrvw24.zip",
@@ -1454,7 +1454,7 @@
     },
     "fcc_broadband": {
       "source_id": "fcc_broadband",
-      "latest_checked_at": "2026-08-19T20:52:51Z",
+      "latest_checked_at": "2026-08-19T23:31:29Z",
       "latest_authoritative_vintage_found": null,
       "selected_vintage": null,
       "selected_artifact": null,
@@ -1481,7 +1481,7 @@
     },
     "mobile_price": {
       "source_id": "mobile_price",
-      "latest_checked_at": "2026-08-19T20:52:51Z",
+      "latest_checked_at": "2026-08-19T23:31:29Z",
       "latest_authoritative_vintage_found": null,
       "selected_vintage": null,
       "selected_artifact": null,
@@ -1517,7 +1517,7 @@
     },
     "bea_rpp": {
       "source_id": "bea_rpp",
-      "latest_checked_at": "2026-08-19T20:52:52Z",
+      "latest_checked_at": "2026-08-19T23:31:30Z",
       "latest_authoritative_vintage_found": "BEA SARPP All-items 2024 / current release February 19, 2026",
       "selected_vintage": "BEA SARPP All-items 2024 / current release February 19, 2026",
       "selected_artifact": "SARPP.zip",
@@ -1567,7 +1567,7 @@
     },
     "federal_tax_law": {
       "source_id": "federal_tax_law",
-      "latest_checked_at": "2026-08-19T20:52:51Z",
+      "latest_checked_at": "2026-08-19T23:31:29Z",
       "latest_authoritative_vintage_found": "IRS_RP_2023_34 / IRS_RP_2025_32",
       "selected_vintage": "2024 and 2026 statutory tables in code",
       "selected_artifact": "living_cost_federal_tax_inventory.json",
@@ -1681,7 +1681,7 @@
           "successor_rev_proc": null,
           "current_pub15_payroll_matches": true,
           "current_2026_inflation_authority": "Rev. Proc. 2025-32",
-          "current_authority_checked_at": "2026-08-19T20:52:54Z",
+          "current_authority_checked_at": "2026-08-19T23:31:31Z",
           "current_authority_source_url": "https://www.irs.gov/newsroom/topics-in-the-news",
           "current_authority_status": "IDENTIFIED",
           "current_authority_cited": [
@@ -1695,8 +1695,8 @@
     },
     "state_tax_law": {
       "source_id": "state_tax_law",
-      "latest_checked_at": "2026-08-19T20:53:28Z",
-      "latest_authoritative_vintage_found": "validated_cells_2024=12/51 2026=11/51",
+      "latest_checked_at": "2026-08-19T23:31:46Z",
+      "latest_authoritative_vintage_found": "validated_cells_2024=15/51 2026=11/51",
       "selected_vintage": "2024 and 2026 RULE_YEAR official inventory",
       "selected_artifact": "living_cost_state_tax_inventory.json",
       "newer_data_exists": null,
@@ -2021,17 +2021,17 @@
         {
           "artifact_id": "st_in_2024_schedule.html",
           "filename": "st_in_2024_schedule.html",
-          "url": "https://iga.in.gov/laws/2024/ic/titles/6#6-3-2-1",
-          "sha256": "cb5ffc6d8656074dad503b59104153ffb4b982894c544fc533e7916bdf8eb59f",
-          "retrieved_at": "2026-08-19T16:38:08+00:00",
+          "url": "https://forms.in.gov/Download.aspx?id=16379",
+          "sha256": "baeb0f32c6838b49760c1330ed89abbe16033af1be6aedb14e83e0fd35395f6d",
+          "retrieved_at": "2026-08-19T23:25:54+00:00",
           "validation_status": "VALIDATED"
         },
         {
           "artifact_id": "st_in_2026_schedule.html",
           "filename": "st_in_2026_schedule.html",
-          "url": "https://iga.in.gov/laws/2026/ic/titles/6#6-3-2-1",
-          "sha256": "cb5ffc6d8656074dad503b59104153ffb4b982894c544fc533e7916bdf8eb59f",
-          "retrieved_at": "2026-08-19T16:38:08+00:00",
+          "url": "https://forms.in.gov/Download.aspx?id=2750",
+          "sha256": "bd6142014812c3112d7658103b04caad625a15332c946466e6c48752a3c0f258",
+          "retrieved_at": "2026-08-19T23:25:54+00:00",
           "validation_status": "VALIDATED"
         },
         {
@@ -2069,17 +2069,17 @@
         {
           "artifact_id": "st_ky_2024_schedule.html",
           "filename": "st_ky_2024_schedule.html",
-          "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=54091",
-          "sha256": "3d168d54731eaee97b663994c3aed4463b849e94fb29c74836abbe2d4f321ace",
-          "retrieved_at": "2026-08-19T16:38:09+00:00",
+          "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=56339",
+          "sha256": "ba8f7b25f40ff55012f8e1713d4b4b58fcee9ac5a14b116e7b77c9c6a27b6777",
+          "retrieved_at": "2026-08-19T23:25:54+00:00",
           "validation_status": "VALIDATED"
         },
         {
           "artifact_id": "st_ky_2026_schedule.html",
           "filename": "st_ky_2026_schedule.html",
-          "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=54091",
-          "sha256": "3d168d54731eaee97b663994c3aed4463b849e94fb29c74836abbe2d4f321ace",
-          "retrieved_at": "2026-08-19T16:38:09+00:00",
+          "url": "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=56339",
+          "sha256": "ba8f7b25f40ff55012f8e1713d4b4b58fcee9ac5a14b116e7b77c9c6a27b6777",
+          "retrieved_at": "2026-08-19T23:25:54+00:00",
           "validation_status": "VALIDATED"
         },
         {
@@ -2128,6 +2128,22 @@
           "url": "https://www.mass.gov/orgs/massachusetts-department-of-revenue",
           "sha256": "1b30188e2e0cdfdceac0c89202842402695622e0982c4e213d372f58baee18e1",
           "retrieved_at": "2026-08-19T03:29:28+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_mi_2024_schedule.html",
+          "filename": "st_mi_2024_schedule.html",
+          "url": "https://www.michigan.gov/taxes/individual-income-tax",
+          "sha256": "2158918ccdfab0510adf089472b4da185e6572d886fb8e3bee183eeee581447f",
+          "retrieved_at": "2026-08-19T23:29:45+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_mi_2026_schedule.html",
+          "filename": "st_mi_2026_schedule.html",
+          "url": "https://www.michigan.gov/taxes/individual-income-tax",
+          "sha256": "2158918ccdfab0510adf089472b4da185e6572d886fb8e3bee183eeee581447f",
+          "retrieved_at": "2026-08-19T23:29:45+00:00",
           "validation_status": "VALIDATED"
         },
         {
@@ -2313,6 +2329,22 @@
           "sha256": "56a00f942c48c51019c3b78d72da1f1cc04969890678c107fe9d0386c5d655be",
           "retrieved_at": "2026-08-19T16:31:40+00:00",
           "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_az_2024_form_140_booklet.pdf",
+          "filename": "st_az_2024_form_140_booklet.pdf",
+          "url": "https://azdor.gov/sites/default/files/document/FORMS_INDIVIDUAL_2024_140Booklet.pdf",
+          "sha256": "32d7b7597c926ef7afcda7dded77e68fe050904ab8cff3a88970d73137d2ef7c",
+          "retrieved_at": "2026-08-19T23:25:54+00:00",
+          "validation_status": "VALIDATED"
+        },
+        {
+          "artifact_id": "st_mi_2024_mi1040_instructions.pdf",
+          "filename": "st_mi_2024_mi1040_instructions.pdf",
+          "url": "https://www.michigan.gov/taxes/-/media/Project/Websites/taxes/Forms/IIT/TY2024/MI-1040-Instructions.pdf",
+          "sha256": "70649c626de2e57ccc2ead002b8bbc5dab9c03c39fcb0fb88eda8d784ef1602a",
+          "retrieved_at": "2026-08-19T23:25:54+00:00",
+          "validation_status": "VALIDATED"
         }
       ],
       "retrieved_at": null,
@@ -2446,8 +2478,6 @@
           "STATE_TAX_CELL_UNRESOLVED:AL:2024",
           "STATE_TAX_CELL_UNPARSED:AL:2026:['STATE_TAX_MODEL_GAP:AL:2026:schedule_not_extracted']",
           "STATE_TAX_CELL_UNRESOLVED:AL:2026",
-          "STATE_TAX_CELL_UNPARSED:AZ:2024:['STATE_TAX_MODEL_GAP:AZ:2024:schedule_not_extracted']",
-          "STATE_TAX_CELL_UNRESOLVED:AZ:2024",
           "STATE_TAX_CELL_UNPARSED:AZ:2026:['STATE_TAX_MODEL_GAP:AZ:2026:schedule_not_extracted']",
           "STATE_TAX_CELL_UNRESOLVED:AZ:2026",
           "STATE_TAX_CELL_UNPARSED:AR:2024:['STATE_TAX_MODEL_GAP:AR:2024:schedule_not_extracted']",
@@ -2461,23 +2491,25 @@
           "STATE_TAX_CELL_UNPARSED:CO:2024:['STATE_TAX_MODEL_GAP:CO:2024:schedule_not_extracted']",
           "STATE_TAX_CELL_UNRESOLVED:CO:2024",
           "STATE_TAX_CELL_UNPARSED:CO:2026:['STATE_TAX_MODEL_GAP:CO:2026:schedule_not_extracted']",
-          "STATE_TAX_CELL_UNRESOLVED:CO:2026"
+          "STATE_TAX_CELL_UNRESOLVED:CO:2026",
+          "STATE_TAX_CELL_UNPARSED:CT:2024:['STATE_TAX_MODEL_GAP:CT:2024:schedule_not_extracted']",
+          "STATE_TAX_CELL_UNRESOLVED:CT:2024"
         ],
-        "inventory_sha256": "3655dd92a20255a53cd6e13d5228dcb083d816f8ddd8bb4aae338873a887ec63",
-        "inventory_generated_at": "2026-08-19T17:32:42+00:00",
+        "inventory_sha256": "42ab5eda817eacdd400a2bd3a8827637e49aa5bf73b7448405dcb6c9f034d7ac",
+        "inventory_generated_at": "2026-08-19T23:31:13+00:00",
         "inventory_binding": {
           "ok": true,
           "issues": [],
-          "inventory_sha256": "3655dd92a20255a53cd6e13d5228dcb083d816f8ddd8bb4aae338873a887ec63",
-          "inventory_generated_at": "2026-08-19T17:32:42+00:00",
-          "freshness_inventory_sha": "3655dd92a20255a53cd6e13d5228dcb083d816f8ddd8bb4aae338873a887ec63",
-          "freshness_inventory_generated_at": "2026-08-19T17:32:42+00:00"
+          "inventory_sha256": "42ab5eda817eacdd400a2bd3a8827637e49aa5bf73b7448405dcb6c9f034d7ac",
+          "inventory_generated_at": "2026-08-19T23:31:13+00:00",
+          "freshness_inventory_sha": "42ab5eda817eacdd400a2bd3a8827637e49aa5bf73b7448405dcb6c9f034d7ac",
+          "freshness_inventory_generated_at": "2026-08-19T23:31:13+00:00"
         }
       }
     },
     "local_tax_law": {
       "source_id": "local_tax_law",
-      "latest_checked_at": "2026-08-19T20:52:51Z",
+      "latest_checked_at": "2026-08-19T23:31:29Z",
       "latest_authoritative_vintage_found": "MD county / NYC / Philadelphia verified; Harris County TX verified no local EIT",
       "selected_vintage": "partial verified inventory",
       "selected_artifact": null,
@@ -2515,7 +2547,7 @@
     },
     "vehicle_registration": {
       "source_id": "vehicle_registration",
-      "latest_checked_at": "2026-08-19T20:52:51Z",
+      "latest_checked_at": "2026-08-19T23:31:29Z",
       "latest_authoritative_vintage_found": null,
       "selected_vintage": null,
       "selected_artifact": null,
@@ -2551,7 +2583,7 @@
     },
     "vehicle_replacement": {
       "source_id": "vehicle_replacement",
-      "latest_checked_at": "2026-08-19T20:52:51Z",
+      "latest_checked_at": "2026-08-19T23:31:29Z",
       "latest_authoritative_vintage_found": null,
       "selected_vintage": null,
       "selected_artifact": null,
@@ -3388,15 +3420,15 @@
   "ready_for_private_candidate": false,
   "candidate_calculation_authorized": false,
   "living_cost_release_authorized": false,
-  "translation_index_bound": true,
+  "translation_index_bound": false,
   "silent_source_year_relabel": false,
   "candidate_inputs_bound": false,
   "required_project_cost_years": [
     2024,
     2026
   ],
-  "blocker_count": 64,
-  "gate_blocker_reason_count": 64,
+  "blocker_count": 73,
+  "gate_blocker_reason_count": 73,
   "empirical_blocker_family_count": 7,
   "empirical_blocker_families": [
     "bls_ce",
@@ -3408,6 +3440,7 @@
     "vehicle_replacement"
   ],
   "blockers": [
+    "OD010_TRANSLATION_INDEX_NOT_BOUND",
     "REQUIRED_CANDIDATE_INPUTS_NOT_BOUND",
     "CROSS_BIND:housing:2024:STRUCTURALLY_INCOMPLETE",
     "CROSS_BIND:housing:2026:STRUCTURALLY_INCOMPLETE",
@@ -3447,6 +3480,14 @@
     "CROSS_BIND:state_tax:2026:STRUCTURALLY_INCOMPLETE",
     "CROSS_BIND:local_tax:2024:STRUCTURALLY_INCOMPLETE",
     "CROSS_BIND:local_tax:2026:STRUCTURALLY_INCOMPLETE",
+    "OD010_CROSS_BIND:OD010_SERIES_COVERAGE_TOO_VAGUE",
+    "OD010_CROSS_BIND:health_oop:2024:SERIES_NOT_COVERED",
+    "OD010_CROSS_BIND:health_oop:2026:SERIES_NOT_COVERED",
+    "OD010_CROSS_BIND:insurance:2024:SERIES_NOT_COVERED",
+    "OD010_CROSS_BIND:insurance:2026:SERIES_NOT_COVERED",
+    "OD010_CROSS_BIND:maintenance:2026:SERIES_NOT_COVERED",
+    "OD010_CROSS_BIND:essentials:2026:SERIES_NOT_COVERED",
+    "OD010_CROSS_BIND:recreation:2026:SERIES_NOT_COVERED",
     "cms_marketplace_sbe:CHECK_FAILED",
     "nhts_mileage:CHECK_FAILED",
     "nhts_mileage:MISSING_YEAR_2024",

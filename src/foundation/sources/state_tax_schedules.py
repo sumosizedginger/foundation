@@ -103,21 +103,26 @@ def _extract_il(text: str, year: int) -> dict[str, Any] | None:
     rate_ok = "4.95 percent" in blob or "4.95%" in blob
     if not rate_ok:
         return None
+    # A 2025 IL-1040 booklet mentions April 15, 2026 as a due date. That is not
+    # tax-year 2026 identity for the exemption amount.
     exemption = None
-    m = re.search(
-        r"exemption(?: allowance)?(?: amount)?(?: is| of|:)?\s*\$?\s*(2,?775|2,?850|2,?775\.00)",
-        blob,
-    )
-    if m:
-        exemption = float(m.group(1).replace(",", ""))
-    else:
-        # 2024 IL-1040 instructions commonly tabulate $2,775.
-        if year == 2024 and re.search(r"\b2,?775\b", blob):
+    if year == 2024:
+        if re.search(
+            r"(?:personal )?exemption(?: allowance)?(?: amount)?(?: for tax year 2024)?(?: is| of|:)?\s*\$?\s*2,?775",
+            blob,
+        ) or ("2,775" in blob and "exemption" in blob and "2024" in blob):
             exemption = 2775.0
-        if year == 2026 and re.search(r"\b2,?850\b", blob):
-            exemption = 2850.0
-    year_ok = str(year) in blob or (year == 2026 and "effective july 1, 2017" in blob)
-    if not year_ok:
+    elif year == 2026:
+        m = re.search(
+            r"personal exemption amount for tax year 2026 is \$?([0-9,]+)",
+            blob,
+        )
+        if m:
+            exemption = float(m.group(1).replace(",", ""))
+    rate_year_ok = (year == 2024 and "2024" in blob) or (
+        year == 2026 and ("effective july 1, 2017" in blob or "2026 form il-1040" in blob)
+    )
+    if not rate_year_ok:
         return None
     if exemption is None:
         return {
@@ -192,112 +197,224 @@ def _extract_nc(text: str, year: int) -> dict[str, Any] | None:
 
 def _extract_az(text: str, year: int) -> dict[str, Any] | None:
     blob = _blob(text)
-    # Current law is a 2.5% flat rate for taxable years beginning from 2023.
-    m = re.search(
-        r"(2\.5|2\.50)\s*%.{0,40}(taxable year|tax year)|"
-        r"rate of (2\.5|2\.50)\s*%|"
-        r"two and one[- ]half percent|"
-        r"2\.5 percent of taxable income",
-        blob,
+    # A.R.S. 43-1041 $12,200 is the unindexed base, not the modeled year amount.
+    # Year-specific Form 140 booklet amounts are required. A 2025 booklet is
+    # not 2026 authority.
+    year_booklet = bool(
+        re.search(rf"{year} arizona standard deduction", blob)
+        or re.search(rf"{year} new tax rate of 2\.5", blob)
+        or (re.search(rf"{year} form 140", blob) and f"{year} arizona" in blob)
     )
-    if not m:
-        return None
-    year_ok = (
-        str(year) in blob
-        or "taxable years beginning from and after december 31, 2022" in blob
-        or "beginning from and after december 31, 2022" in blob
+    rate_ok = bool(
+        re.search(r"2\.5\s*%", blob)
+        or "2.5 percent" in blob
+        or "two and one-half percent" in blob
+        or "multiply line 45 by 2.5%" in blob
+        or "new tax rate of 2.5%" in blob
     )
-    if not year_ok:
+    if not rate_ok:
         return None
-    return {
-        "deduction": None,
-        "personal_exemption": None,
-        "brackets": [(INF, 0.025)],
-        "starting_income_base": "Arizona taxable income",
-        "complete": False,
-        "notes": "Flat rate parsed; Arizona standard deduction not on this artifact.",
-    }
+    historical_brackets = "2.59%" in blob and "2.5%" not in blob and "2.5 percent" not in blob
+    if historical_brackets and not year_booklet:
+        return None
+    deduction = None
+    if (
+        year == 2024
+        and year_booklet
+        and (
+            re.search(r"\$?\s*14,?600 for a single", blob)
+            or re.search(r"single \$\s*14,?600", blob)
+        )
+    ):
+        deduction = 14600.0
+    elif year == 2026 and "2026 arizona standard deduction" in blob:
+        m = re.search(r"2026 arizona standard deduction.{0,200}single \$\s*([0-9,]+)", blob)
+        if m:
+            deduction = float(m.group(1).replace(",", ""))
+        else:
+            m = re.search(
+                r"the 2026 arizona standard deduction amounts are:.{0,120}\$?\s*([0-9,]+) for a single",
+                blob,
+            )
+            if m:
+                deduction = float(m.group(1).replace(",", ""))
+    if deduction is None:
+        return {
+            "deduction": None,
+            "personal_exemption": None,
+            "brackets": [(INF, 0.025)],
+            "starting_income_base": "Arizona taxable income",
+            "complete": False,
+            "notes": "Flat rate parsed; Arizona year-specific standard deduction not on this artifact.",
+        }
+    return _complete_flat(
+        rate=0.025,
+        deduction=deduction,
+        personal_exemption=0.0,
+        starting_income_base="Arizona taxable income after standard deduction",
+        year_ok=True,
+        notes=(
+            "Arizona Form 140 single standard deduction; no taxpayer personal "
+            "exemption subtracted from income."
+        ),
+    )
 
 
 def _extract_in(text: str, year: int) -> dict[str, Any] | None:
     blob = _blob(text)
     rate = None
-    if year == 2024:
-        m = re.search(r"(2024|before january 1, 2025).{0,80}(3\.05|3\.05%)", blob)
-        if m or re.search(r"three and five[- ]hundredths percent", blob):
-            rate = 0.0305
-        if "3.05%" in blob or "3.05 percent" in blob:
-            rate = 0.0305
-    elif year == 2026:
-        m = re.search(r"(2026|after december 31, 2025).{0,80}(3\.00|3\.0%|2\.95|3%)", blob)
-        if re.search(r"calendar year 2026.{0,40}(3\.0|3\.00|2\.95)", blob):
-            m = re.search(r"calendar year 2026.{0,60}([0-9.]+)\s*%", blob)
-            if m:
-                rate = _pct(m.group(1))
-        if rate is None:
-            m = re.search(r"in 2026.{0,20}([0-9.]+)\s*%", blob)
-            if m:
-                rate = _pct(m.group(1))
-        if rate is None and re.search(r"three percent \(3", blob) and "2026" in blob:
-            rate = 0.03
+    # Official DOR Schedule EZ / IC 6-3-2-1 window table. Do not take the first
+    # percentage on a page that lists 2023–2027 rates.
+    if year == 2024 and (
+        re.search(
+            r"after dec(?:ember)?\.?\s*31,?\s*2023.{0,80}before jan(?:uary)?\.?\s*1,?\s*2025.{0,40}3\.05",
+            blob,
+        )
+        or re.search(r"3\.05%\s*\(\.0305\)", blob)
+    ):
+        rate = 0.0305
+    elif year == 2026 and (
+        re.search(
+            r"after dec(?:ember)?\.?\s*31,?\s*2025.{0,80}before jan(?:uary)?\.?\s*1,?\s*2027.{0,40}2\.95",
+            blob,
+        )
+        or re.search(r"calendar year 2026.{0,40}2\.95", blob)
+    ):
+        rate = 0.0295
     if rate is None:
         return None
-    return {
-        "deduction": None,
-        "personal_exemption": None,
-        "brackets": [(INF, rate)],
-        "starting_income_base": "Indiana adjusted gross income",
-        "complete": False,
-        "notes": "Flat rate parsed; personal exemption not on this artifact.",
-    }
+    exemption = None
+    if (
+        year == 2024
+        and (
+            re.search(r"indiana allows a \$1,000 exemption for you", blob)
+            or re.search(r"\$1,000 personal exemption", blob)
+        )
+    ) or (
+        year == 2026
+        and (
+            re.search(r"tax year 2026.{0,80}\$1,000 exemption for you", blob)
+            or re.search(r"2026 it-40.{0,200}\$1,000 exemption for you", blob)
+            or re.search(r"2026.{0,40}\$1,000 personal exemption", blob)
+        )
+    ):
+        exemption = 1000.0
+    if exemption is None:
+        return {
+            "deduction": None,
+            "personal_exemption": None,
+            "brackets": [(INF, rate)],
+            "starting_income_base": "Indiana adjusted gross income",
+            "complete": False,
+            "notes": "State AGI tax rate parsed; personal exemption not on this artifact. County tax is not included.",
+        }
+    return _complete_flat(
+        rate=rate,
+        deduction=0.0,
+        personal_exemption=exemption,
+        starting_income_base="Indiana adjusted gross income after personal exemption",
+        year_ok=True,
+        notes="Indiana state AGI tax only; county/local income tax is a separate family.",
+    )
 
 
 def _extract_ky(text: str, year: int) -> dict[str, Any] | None:
     blob = _blob(text)
     rate = None
-    if re.search(r"tax rate is four \(4\) percent", blob) or re.search(
-        r"\bfour \(4\) percent\b", blob
-    ):
-        rate = 0.04
-    m = re.search(r"rate of ([0-9.]+)\s*%", blob)
-    if m and year in (2024, 2026):
-        parsed = _pct(m.group(1))
-        if 0.03 <= parsed <= 0.06:
-            rate = parsed
+    # KRS 141.020 year windows. A page with 4.5%, 4%, and 3.5% must not let
+    # the first token win.
     if year == 2024 and re.search(
-        r"for taxable years beginning on or after january 1, 2024.{0,80}4%", blob
+        r"beginning on or after january 1, 2024, but before january 1, 2026, "
+        r"the tax shall be four percent \(4%\)",
+        blob,
     ):
         rate = 0.04
+    elif year == 2026 and re.search(
+        r"beginning on or after january 1, 2026, the tax shall be three and "
+        r"one-half percent \(3\.5%\)",
+        blob,
+    ):
+        rate = 0.035
     if rate is None:
         return None
-    year_ok = str(year) in blob or (year == 2024 and "2024" in blob) or rate == 0.04
-    if not year_ok:
-        return None
-    return {
-        "deduction": None,
-        "personal_exemption": None,
-        "brackets": [(INF, rate)],
-        "starting_income_base": "Kentucky taxable income",
-        "complete": False,
-        "notes": "Rate parsed; Kentucky standard deduction not on this artifact.",
-    }
+    deduction = None
+    if year == 2024:
+        m = re.search(
+            r"(?:for 2024|tax year 2024|2024.{0,40}).{0,40}standard deduction is \$?([0-9,]+)",
+            blob,
+        )
+        if m:
+            deduction = float(m.group(1).replace(",", ""))
+    elif year == 2026:
+        m = re.search(
+            r"(?:for 2026|tax year 2026|2026.{0,40}).{0,40}standard deduction is \$?([0-9,]+)",
+            blob,
+        )
+        if m:
+            deduction = float(m.group(1).replace(",", ""))
+    if deduction is None:
+        return {
+            "deduction": None,
+            "personal_exemption": None,
+            "brackets": [(INF, rate)],
+            "starting_income_base": "Kentucky net income",
+            "complete": False,
+            "notes": "Statutory rate parsed; year-specific standard deduction not on this artifact.",
+        }
+    return _complete_flat(
+        rate=rate,
+        deduction=deduction,
+        personal_exemption=0.0,
+        starting_income_base="Kentucky net income after standard deduction",
+        year_ok=True,
+    )
 
 
 def _extract_mi(text: str, year: int) -> dict[str, Any] | None:
     blob = _blob(text)
-    m = re.search(r"(4\.25|4\.05|3\.9)\s*%", blob)
-    if not m:
+    rate = None
+    exemption = None
+    # MCL 206.51 and instructions contain both 4.25% and 4.05% trigger language.
+    # Select only the rate legally identified for the requested tax year.
+    if year == 2024:
+        if re.search(r"income tax rate for 2024 is 4\.25", blob) or re.search(
+            r"for tax year 2024, the michigan income tax rate is 4\.25", blob
+        ):
+            rate = 0.0425
+        if re.search(
+            r"for tax year 2024, the personal and stillbirth exemption allowances are \$5,?600",
+            blob,
+        ) or re.search(r"exemption allowance of \$5,?600", blob):
+            exemption = 5600.0
+    elif year == 2026:
+        m_rate = re.search(r"income tax rate for 2026 is ([0-9.]+)", blob)
+        if m_rate:
+            rate = _pct(m_rate.group(1))
+        m_ex = re.search(
+            r"for tax year 2026, the personal(?: and stillbirth)? exemption allowances are \$([0-9,]+)",
+            blob,
+        )
+        if m_ex:
+            exemption = float(m_ex.group(1).replace(",", ""))
+    if rate is None:
         return None
-    if str(year) not in blob:
-        return None
-    return {
-        "deduction": None,
-        "personal_exemption": None,
-        "brackets": [(INF, _pct(m.group(1)))],
-        "starting_income_base": "Michigan taxable income",
-        "complete": False,
-        "notes": "Rate token found; exemption/deduction not confirmed.",
-    }
+    if exemption is None:
+        return {
+            "deduction": None,
+            "personal_exemption": None,
+            "brackets": [(INF, rate)],
+            "starting_income_base": "Michigan taxable income",
+            "complete": False,
+            "notes": "Year-specific rate parsed; personal exemption not on this artifact.",
+        }
+    return _complete_flat(
+        rate=rate,
+        deduction=0.0,
+        personal_exemption=exemption,
+        starting_income_base="Federal AGI less Michigan personal exemption",
+        year_ok=True,
+        notes="Michigan uses a personal exemption rather than a federal-style standard deduction on MI-1040.",
+    )
 
 
 def _extract_ut(text: str, year: int) -> dict[str, Any] | None:

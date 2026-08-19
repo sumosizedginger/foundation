@@ -689,6 +689,53 @@ def _live_ok(text: str):
     return fetch
 
 
+def test_taxing_incomplete_live_extraction_is_not_verified_current(
+    monkeypatch: object,
+) -> None:
+    """Matching subset fields with complete=False must not verify currentness."""
+    from foundation.sources import state_tax_currentness as currentness
+    from foundation.sources.state_tax_currentness import assess_2026_currentness
+
+    cell = {
+        "jurisdiction": "PA",
+        "tax_year": 2026,
+        "tax_status": STATUS_TAXING,
+        "parsed_ok": True,
+        "standard_deduction": {"value": 0.0},
+        "personal_exemption": {"value": 0.0},
+        "brackets": [{"upper": None, "rate": 0.0307}],
+        "rates": [0.0307],
+    }
+
+    def incomplete(_state: str, _year: int, _text: str) -> dict:
+        return {
+            "deduction": 0.0,
+            "personal_exemption": 0.0,
+            "brackets": [(float("inf"), 0.0307)],
+            "complete": False,
+            "notes": "subset match but extractor declares incomplete",
+        }
+
+    monkeypatch.setattr(
+        "foundation.sources.state_tax_schedules.extract_official_schedule",
+        incomplete,
+    )
+    assessed = assess_2026_currentness(
+        state="PA",
+        cell=cell,
+        live={
+            "ok": True,
+            "url": "https://www.pa.gov/pit",
+            "text": "Personal Income Tax Rates 2004 – Present 3.07%",
+            "error": None,
+        },
+        live_check_performed=True,
+    )
+    assert assessed["schedule_compare"] == "incomplete"
+    assert assessed["currentness_status"] != currentness.STATUS_VERIFIED_CURRENT
+    assert assessed["currentness_status"] == currentness.STATUS_CHECK_FAILED
+
+
 def test_taxing_historical_rate_with_different_2026_rate_is_not_current() -> None:
     """A leftover 3.99% on a page that states a different 2026 rate is not current."""
     inv = _taxing_inv(
@@ -807,6 +854,140 @@ def test_nc_2025_labeled_page_cannot_complete_or_verify_2026() -> None:
     assert live is not None
     assert live["live_verified_current_2026_count"] == 0
     assert live["verified_current_2026_count"] == 0
+
+
+def test_il_2024_exemption_does_not_copy_into_2026() -> None:
+    instr_2024 = (
+        "2024 Form IL-1040 Instructions. Income Tax Rate The Illinois income tax rate "
+        "is 4.95 percent (.0495). Exemption Allowance The personal exemption amount "
+        "for tax year 2024 is $2,775."
+    )
+    rec24 = extract_official_schedule("IL", 2024, instr_2024)
+    assert rec24 is not None and rec24["complete"] is True
+    assert rec24["brackets"][0][1] == 0.0495
+    assert rec24["personal_exemption"] == 2775.0
+    rec26_from_2024 = extract_official_schedule("IL", 2026, instr_2024)
+    assert rec26_from_2024 is None or rec26_from_2024.get("complete") is not True
+    instr_2025 = (
+        "2025 Form IL-1040 Instructions. The due date for filing your 2025 Form IL-1040 "
+        "and paying any tax you owe is April 15, 2026. Income Tax Rate The Illinois "
+        "income tax rate is 4.95 percent (.0495). Exemption Allowance The personal "
+        "exemption amount for tax year 2025 is $2,850."
+    )
+    rec26_from_2025 = extract_official_schedule("IL", 2026, instr_2025)
+    assert rec26_from_2025 is None or rec26_from_2025.get("complete") is not True
+    assert rec26_from_2025 is None or rec26_from_2025.get("personal_exemption") != 2850.0
+    rates = "Individual Income Tax Effective July 1, 2017: 4.95 percent of net income"
+    rec_rates = extract_official_schedule("IL", 2026, rates)
+    assert rec_rates is not None
+    assert rec_rates["complete"] is False
+    assert rec_rates["brackets"][0][1] == 0.0495
+
+
+def test_az_2024_form_140_schedule_and_wrong_year_rejection() -> None:
+    booklet_2024 = (
+        "The 2024 Arizona standard deduction amounts are: $ 14,600 for a single "
+        "taxpayer or a married taxpayer filing a separate return; 2024 New Tax Rate "
+        "of 2.5% for All Income Levels. If your filing status is: Your standard "
+        "deduction is: Single $ 14,600. Tax: Multiply line 45 by 2.5% (.025)."
+    )
+    rec24 = extract_official_schedule("AZ", 2024, booklet_2024)
+    assert rec24 is not None and rec24["complete"] is True
+    assert rec24["brackets"][0][1] == 0.025
+    assert rec24["deduction"] == 14600.0
+    booklet_2025 = (
+        "The 2025 Arizona standard deduction amounts are: $ 15,750 for a single "
+        "taxpayer. 2025 New Tax Rate of 2.5% for All Income Levels. Single $ 15,750."
+    )
+    rec24_from_2025 = extract_official_schedule("AZ", 2024, booklet_2025)
+    assert rec24_from_2025 is None or rec24_from_2025.get("complete") is not True
+    rec26_from_2025 = extract_official_schedule("AZ", 2026, booklet_2025)
+    assert rec26_from_2025 is None or rec26_from_2025.get("complete") is not True
+    rec26_from_2024 = extract_official_schedule("AZ", 2026, booklet_2024)
+    assert rec26_from_2024 is None or rec26_from_2024.get("complete") is not True
+    base_only = (
+        "43-1041 Optional standard deduction. In the case of a single person the "
+        "standard deduction is $12,200, subject to subsection H."
+    )
+    rec_base = extract_official_schedule("AZ", 2024, base_only)
+    assert rec_base is None or rec_base.get("deduction") != 12200.0
+    assert rec_base is None or rec_base.get("complete") is not True
+
+
+def test_in_year_windows_and_exemption_not_first_percentage() -> None:
+    ez = (
+        "Line 14. Multiply line 13 by the appropriate tax rate. The individual "
+        "income tax rate is as follows: After Dec. 31, 2016 and before Jan. 1, 2023 "
+        "3.23% After Dec. 31, 2022 and before Jan. 1, 2024 3.15% After Dec. 31, 2023 "
+        "and before Jan. 1, 2025 3.05% After Dec. 31, 2024 and before Jan. 1, 2026 3% "
+        "After Dec. 31, 2025 and before Jan. 1, 2027 2.95% After Dec. 31, 2026 2.9%"
+    )
+    rec24 = extract_official_schedule("IN", 2024, ez)
+    rec26 = extract_official_schedule("IN", 2026, ez)
+    assert rec24 is not None and rec24["brackets"][0][1] == 0.0305
+    assert rec26 is not None and rec26["brackets"][0][1] == 0.0295
+    assert rec24["complete"] is False
+    assert rec26["complete"] is False
+    booklet = (
+        "2024 IT-40 Full-Year Resident Individual Income Tax Booklet. "
+        "To figure your exemptions for filing requirement purposes, Indiana allows "
+        "a $1,000 exemption for you and a $1,000 exemption for your spouse. "
+        "Multiply the amount of income from the other state (that is subject to "
+        "Indiana tax) by 3.05% (.0305)."
+    )
+    rec24c = extract_official_schedule("IN", 2024, booklet)
+    assert rec24c is not None and rec24c["complete"] is True
+    assert rec24c["personal_exemption"] == 1000.0
+    assert rec24c["deduction"] == 0.0
+    rec26_from_2024 = extract_official_schedule("IN", 2026, booklet)
+    assert rec26_from_2024 is None or rec26_from_2024.get("complete") is not True
+
+
+def test_ky_2024_four_percent_not_later_3_5() -> None:
+    statute = (
+        "For taxable years beginning on or after January 1, 2023, but before January 1, "
+        "2024, the tax shall be four and one-half percent (4.5%) of net income. "
+        "(e) For taxable years beginning on or after January 1, 2024, but before January 1, "
+        "2026, the tax shall be four percent (4%) of net income. "
+        "(f) For taxable years beginning on or after January 1, 2026, the tax shall be three "
+        "and one-half percent (3.5%) of net income."
+    )
+    rec24 = extract_official_schedule("KY", 2024, statute)
+    rec26 = extract_official_schedule("KY", 2026, statute)
+    assert rec24 is not None and rec24["brackets"][0][1] == 0.04
+    assert rec26 is not None and rec26["brackets"][0][1] == 0.035
+    assert rec24["complete"] is False
+    assert rec26["complete"] is False
+    packet_2018 = "Kentucky Individual Income Tax Forms 2018 STANDARD DEDUCTION—For 2018, the standard deduction is $2,530."
+    rec_old = extract_official_schedule("KY", 2024, packet_2018)
+    assert rec_old is None
+
+
+def test_mi_2024_rate_is_not_historical_4_05() -> None:
+    instr = (
+        "For tax year 2024, the Michigan income tax rate is 4.25%. "
+        "The income tax rate for 2024 is 4.25 percent. "
+        "For tax year 2024, the personal and stillbirth exemption allowances are $5,600. "
+        "On line 9a, multiply the number of exemptions by your exemption allowance of $5,600. "
+        "A historical trigger reduced the rate to 4.05% in a prior year."
+    )
+    rec24 = extract_official_schedule("MI", 2024, instr)
+    assert rec24 is not None and rec24["complete"] is True
+    assert rec24["brackets"][0][1] == 0.0425
+    assert rec24["personal_exemption"] == 5600.0
+    assert rec24["deduction"] == 0.0
+    rec26 = extract_official_schedule("MI", 2026, instr)
+    assert rec26 is None or rec26.get("complete") is not True
+    rec26_hist = extract_official_schedule(
+        "MI",
+        2026,
+        "MCL 206.51 The rate is 4.25% unless the trigger applies in which case 4.05%. Tax year 2026.",
+    )
+    assert (
+        rec26_hist is None
+        or rec26_hist.get("brackets") is None
+        or rec26_hist.get("complete") is not True
+    )
 
 
 def test_inventory_sha_is_newline_invariant(tmp_path: Path) -> None:

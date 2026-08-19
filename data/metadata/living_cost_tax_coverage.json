@@ -1,12 +1,12 @@
 {
   "report_type": "living_cost_tax_coverage",
-  "generated_at": "2026-08-19T20:52:48+00:00",
+  "generated_at": "2026-08-19T23:31:27+00:00",
   "federal_2024_validated_tables": true,
   "federal_validation_gate": "Federal tax is VALIDATED only when IRS/SSA authorities are bound and FEDERAL_TAX_RULES match living_cost_federal_tax_inventory.json.",
   "federal_tax_evidence_status": "VALIDATED",
   "state_tax_evidence_status": "INVENTORY_NOT_VALIDATED",
   "state_tax_family_complete": false,
-  "state_tax_validated_2024_count": 12,
+  "state_tax_validated_2024_count": 15,
   "state_tax_validated_2026_count": 11,
   "completion_matrix": [
     {
@@ -31,13 +31,13 @@
     },
     {
       "state": "AZ",
-      "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
-      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_evidence_status": "GENERAL_WAGE_INCOME_TAX",
+      "2024_code_match_status": "STATE_CODE_MATCH",
       "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
       "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
       "2026_freshness_status": "CURRENTNESS_PENDING",
       "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
-      "remaining_issue": "STATE_TAX_MODEL_GAP:AZ:2024:schedule_not_extracted; STATE_TAX_MODEL_GAP:AZ:2026:schedule_not_extracted; STATE_TAX_2026_UNRESOLVED:AZ"
+      "remaining_issue": "STATE_TAX_MODEL_GAP:AZ:2026:schedule_not_extracted; STATE_TAX_2026_UNRESOLVED:AZ"
     },
     {
       "state": "AR",
@@ -151,13 +151,13 @@
     },
     {
       "state": "IN",
-      "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
-      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_evidence_status": "GENERAL_WAGE_INCOME_TAX",
+      "2024_code_match_status": "STATE_CODE_MATCH",
       "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
-      "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_code_match_status": "STATE_MODEL_INCOMPLETE",
       "2026_freshness_status": "CURRENTNESS_PENDING",
       "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
-      "remaining_issue": "STATE_TAX_MODEL_GAP:IN:2024:schedule_not_extracted; STATE_TAX_MODEL_GAP:IN:2026:schedule_not_extracted; STATE_TAX_2026_UNRESOLVED:IN"
+      "remaining_issue": "STATE_TAX_MODEL_GAP:IN:2026:schedule_not_extracted; STATE_TAX_2026_UNRESOLVED:IN"
     },
     {
       "state": "IA",
@@ -182,9 +182,9 @@
     {
       "state": "KY",
       "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
-      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_code_match_status": "STATE_MODEL_INCOMPLETE",
       "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
-      "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2026_code_match_status": "STATE_MODEL_INCOMPLETE",
       "2026_freshness_status": "CURRENTNESS_PENDING",
       "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
       "remaining_issue": "STATE_TAX_MODEL_GAP:KY:2024:schedule_not_extracted; STATE_TAX_MODEL_GAP:KY:2026:schedule_not_extracted; STATE_TAX_2026_UNRESOLVED:KY"
@@ -231,13 +231,13 @@
     },
     {
       "state": "MI",
-      "2024_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
-      "2024_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
+      "2024_evidence_status": "GENERAL_WAGE_INCOME_TAX",
+      "2024_code_match_status": "STATE_CODE_MATCH",
       "2026_evidence_status": "STATE_EVIDENCE_INCOMPLETE",
       "2026_code_match_status": "STATE_EVIDENCE_INCOMPLETE",
       "2026_freshness_status": "CURRENTNESS_PENDING",
       "mandatory_payroll_status": "VERIFIED_NONE_OR_UNRESOLVED",
-      "remaining_issue": "STATE_TAX_FIELD_AUTHORITY_UNBOUND:MI:2024:authority; STATE_TAX_FIELD_AUTHORITY_UNBOUND:MI:2026:authority; STATE_TAX_2026_UNRESOLVED:MI"
+      "remaining_issue": "STATE_TAX_MODEL_GAP:MI:2026:schedule_not_extracted; STATE_TAX_2026_UNRESOLVED:MI"
     },
     {
       "state": "MN",
@@ -576,7 +576,7 @@
     {
       "year": 2024,
       "state": "AZ",
-      "status": "STATE_EVIDENCE_INCOMPLETE",
+      "status": "GENERAL_WAGE_INCOME_TAX",
       "primary_source": "Ariz. Rev. Stat. \u00a7 43-1011",
       "brackets": [
         [
@@ -591,7 +591,7 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
+      "implementation_status": "GENERAL_WAGE_INCOME_TAX",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
@@ -956,7 +956,7 @@
     {
       "year": 2024,
       "state": "IN",
-      "status": "STATE_EVIDENCE_INCOMPLETE",
+      "status": "GENERAL_WAGE_INCOME_TAX",
       "primary_source": "Ind. Code \u00a7 6-3-2-1",
       "brackets": [
         [
@@ -971,7 +971,7 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
+      "implementation_status": "GENERAL_WAGE_INCOME_TAX",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {
@@ -1174,7 +1174,7 @@
     {
       "year": 2024,
       "state": "MI",
-      "status": "STATE_EVIDENCE_INCOMPLETE",
+      "status": "GENERAL_WAGE_INCOME_TAX",
       "primary_source": "Mich. Comp. Laws \u00a7 206.51",
       "brackets": [
         [
@@ -1189,7 +1189,7 @@
       "exemptions": null,
       "ordinary_credits": null,
       "unusual_mechanics": null,
-      "implementation_status": "STATE_EVIDENCE_INCOMPLETE",
+      "implementation_status": "GENERAL_WAGE_INCOME_TAX",
       "federal_source": "IRS Rev. Proc. 2023-34 / SSA 2024 Fact Sheet"
     },
     {

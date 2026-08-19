@@ -616,22 +616,22 @@ def authority_catalog() -> list[dict[str, Any]]:
             "statute",
         ),
         ("IN", 2024): (
-            "https://iga.in.gov/laws/2024/ic/titles/6#6-3-2-1",
-            "Indiana General Assembly / Ind. Code § 6-3-2-1",
-            "statute",
+            "https://forms.in.gov/Download.aspx?id=16379",
+            "Indiana Department of Revenue / 2024 IT-40 instruction booklet",
+            "form_instructions",
         ),
         ("IN", 2026): (
-            "https://iga.in.gov/laws/2026/ic/titles/6#6-3-2-1",
-            "Indiana General Assembly / Ind. Code § 6-3-2-1",
-            "statute",
+            "https://forms.in.gov/Download.aspx?id=2750",
+            "Indiana Department of Revenue / Schedule EZ (individual AGI tax-rate windows)",
+            "form_instructions",
         ),
         ("KY", 2024): (
-            "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=54091",
+            "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=56339",
             "Kentucky General Assembly / KRS 141.020",
             "statute",
         ),
         ("KY", 2026): (
-            "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=54091",
+            "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=56339",
             "Kentucky General Assembly / KRS 141.020",
             "statute",
         ),
@@ -753,6 +753,27 @@ def authority_catalog() -> list[dict[str, Any]]:
         publisher="North Carolina Department of Revenue / 2026 withholding tables",
         authority_type="withholding_schedule",
         slug="standard_deduction",
+    )
+    add(
+        "AZ",
+        2024,
+        "https://azdor.gov/sites/default/files/document/FORMS_INDIVIDUAL_2024_140Booklet.pdf",
+        role="form_instructions",
+        publisher="Arizona Department of Revenue / 2024 Form 140 booklet",
+        authority_type="form_instructions",
+        slug="form_140_booklet",
+    )
+    add(
+        "MI",
+        2024,
+        (
+            "https://www.michigan.gov/taxes/-/media/Project/Websites/taxes/Forms/IIT/"
+            "TY2024/MI-1040-Instructions.pdf"
+        ),
+        role="form_instructions",
+        publisher="Michigan Department of Treasury / 2024 MI-1040 instructions",
+        authority_type="form_instructions",
+        slug="mi1040_instructions",
     )
     return specs
 
