@@ -1551,7 +1551,7 @@ def discover_federal_tax() -> FreshnessCheck:
         )
     checked = _now_iso()
     try:
-        live, live_error = discover_federal_tax_live()
+        live, live_error = discover_federal_tax_live(payload)
     except (OSError, RuntimeError, ValueError, requests.RequestException) as exc:
         live, live_error = None, str(exc)
     status, newer, reason = evaluate_federal_tax_freshness(

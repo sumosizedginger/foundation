@@ -11,6 +11,7 @@ import hashlib
 import json
 import logging
 import re
+from collections.abc import Mapping
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -32,6 +33,8 @@ IRS_2026_NEWS_URL = (
     "https://www.irs.gov/newsroom/irs-releases-tax-inflation-adjustments-for-tax-year-2026"
     "-including-amendments-from-the-one-big-beautiful-bill"
 )
+IRS_TOPICS_IN_THE_NEWS_URL = "https://www.irs.gov/newsroom/topics-in-the-news"
+CURRENT_2026_INFLATION_AUTHORITY = "Rev. Proc. 2025-32"
 IRS_TOPIC_751_URL = "https://www.irs.gov/taxtopics/tc751"
 IRS_TOPIC_560_URL = "https://www.irs.gov/taxtopics/tc560"
 IRS_PUB15_2024_URL = "https://www.irs.gov/pub/irs-prior/p15--2024.pdf"
@@ -665,6 +668,227 @@ def write_federal_tax_inventory(output_path: Path | None = None) -> dict[str, An
     return payload
 
 
+def _normalize_rev_proc_id(token: str) -> str:
+    token = token.strip().replace(" ", "")
+    match = re.fullmatch(r"(?:20)?(\d{2})-(\d+)", token)
+    if not match:
+        return token
+    return f"20{match.group(1)}-{int(match.group(2))}"
+
+
+def parse_current_2026_inflation_authority(html: str | None) -> dict[str, Any]:
+    """Identify the applicable 2026 inflation-adjustment Rev. Proc. from a current IRS surface.
+
+    The historical October 2025 announcement is not used here.
+    """
+    empty = {
+        "current_2026_inflation_authority": None,
+        "current_authority_status": "NOT_FOUND",
+        "cited_authorities": [],
+        "section_found": False,
+        "successor_rev_proc": None,
+    }
+    if not html or not str(html).strip():
+        return empty
+    section_match = re.search(
+        r"<h2[^>]*>\s*Inflation adjustments for tax year 2026\s*</h2>(.*?)(?:<h2\b|$)",
+        html,
+        re.IGNORECASE | re.DOTALL,
+    )
+    if section_match:
+        section = section_match.group(1)
+        section_found = True
+    else:
+        text_match = re.search(
+            r"Inflation adjustments for tax year 2026(.{0,4000})",
+            html,
+            re.IGNORECASE | re.DOTALL,
+        )
+        if not text_match:
+            return empty
+        section = text_match.group(1)
+        section_found = True
+    cited: list[str] = []
+    for item in re.findall(
+        r"Rev(?:enue)?\.?\s*Proc(?:edure)?\.?\s*(\d{4}-\d+)",
+        section,
+        re.IGNORECASE,
+    ):
+        cited.append(_normalize_rev_proc_id(item))
+    for item in re.findall(r"RP-(\d{4}-\d+)", section, re.IGNORECASE):
+        cited.append(_normalize_rev_proc_id(item))
+    for yy, num in re.findall(r"rp-(\d{2})-(\d+)\.pdf", section, re.IGNORECASE):
+        cited.append(_normalize_rev_proc_id(f"{yy}-{num}"))
+    unique: list[str] = []
+    for item in cited:
+        if item not in unique:
+            unique.append(item)
+    if not unique:
+        return {
+            "current_2026_inflation_authority": None,
+            "current_authority_status": "AMBIGUOUS",
+            "cited_authorities": [],
+            "section_found": section_found,
+            "successor_rev_proc": None,
+        }
+    others = [item for item in unique if item != "2025-32"]
+    if others:
+        successor = others[0]
+        for item in others:
+            if item.startswith("2026-"):
+                successor = item
+                break
+        return {
+            "current_2026_inflation_authority": f"Rev. Proc. {successor}",
+            "current_authority_status": "IDENTIFIED",
+            "cited_authorities": unique,
+            "section_found": True,
+            "successor_rev_proc": f"Rev. Proc. {successor}",
+        }
+    return {
+        "current_2026_inflation_authority": CURRENT_2026_INFLATION_AUTHORITY,
+        "current_authority_status": "IDENTIFIED",
+        "cited_authorities": unique,
+        "section_found": True,
+        "successor_rev_proc": None,
+    }
+
+
+def captured_2026_payroll(inventory: Mapping[str, Any] | None) -> dict[str, Any] | None:
+    """Read 2026 payroll fields from one captured inventory payload. No duplicated literals."""
+    if not isinstance(inventory, Mapping):
+        return None
+    years = inventory.get("years")
+    if not isinstance(years, Mapping):
+        return None
+    rec = years.get("2026")
+    if not isinstance(rec, Mapping):
+        return None
+    oasdi = rec.get("oasdi") if isinstance(rec.get("oasdi"), Mapping) else {}
+    medicare = rec.get("medicare_hi") if isinstance(rec.get("medicare_hi"), Mapping) else {}
+    addl = (
+        rec.get("additional_medicare_tax")
+        if isinstance(rec.get("additional_medicare_tax"), Mapping)
+        else {}
+    )
+    captured = {
+        "oasdi_employee_rate": oasdi.get("employee_rate"),
+        "oasdi_taxable_maximum": oasdi.get("taxable_maximum"),
+        "medicare_hi_employee_rate": medicare.get("employee_rate"),
+        "medicare_no_limit": medicare.get("no_limit"),
+        "additional_medicare_threshold": addl.get("threshold"),
+        "additional_medicare_rate": addl.get("rate"),
+    }
+    if any(value is None for value in captured.values()):
+        return None
+    return captured
+
+
+def compare_live_pub15_to_inventory(
+    live_text: str | None,
+    inventory: Mapping[str, Any] | None,
+) -> bool | None:
+    """Compare live Publication 15 payroll fields to one captured 2026 inventory record.
+
+    Returns True on agreement, False on disagreement, None if either side is incomplete.
+    """
+    expected = captured_2026_payroll(inventory)
+    if expected is None or not live_text:
+        return None
+    live_rate = parse_employee_oasdi_rate(live_text)
+    live_cap = parse_oasdi_wage_base(live_text, 2026)
+    live_hi = parse_employee_medicare_rate(live_text)
+    live_no_limit = parse_medicare_no_limit(live_text)
+    live_addl = parse_additional_medicare(live_text)
+    if (
+        live_rate is None
+        or live_cap is None
+        or live_hi is None
+        or not live_no_limit
+        or live_addl is None
+        or live_addl.get("threshold") is None
+        or live_addl.get("rate") is None
+    ):
+        return None
+    return (
+        live_rate == expected["oasdi_employee_rate"]
+        and live_cap == expected["oasdi_taxable_maximum"]
+        and live_hi == expected["medicare_hi_employee_rate"]
+        and bool(live_no_limit) == bool(expected["medicare_no_limit"])
+        and live_addl["threshold"] == expected["additional_medicare_threshold"]
+        and live_addl["rate"] == expected["additional_medicare_rate"]
+    )
+
+
+def load_captured_federal_tax_inventory(
+    inventory: Mapping[str, Any] | None = None,
+) -> dict[str, Any] | None:
+    """Load one inventory payload. Callers must reuse this object for compare."""
+    if isinstance(inventory, Mapping):
+        return dict(inventory)
+    if not INVENTORY_PATH.is_file():
+        return None
+    try:
+        payload = json.loads(INVENTORY_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
+def assemble_federal_tax_live_currentness(
+    *,
+    listing_html: str | None,
+    current_authority_html: str | None,
+    current_authority_error: str | None,
+    live_pub15_text: str | None,
+    inventory: Mapping[str, Any] | None,
+    checked_at: str,
+    current_authority_source_url: str = IRS_TOPICS_IN_THE_NEWS_URL,
+) -> dict[str, Any]:
+    """Build live currentness from already-retrieved surfaces. Historical news is unused."""
+    listing = parse_pub15_listing(listing_html) if listing_html else {}
+    pub_year = listing.get("revision_year")
+    if current_authority_error and not current_authority_html:
+        authority = {
+            "current_2026_inflation_authority": None,
+            "current_authority_status": "UNRETRIEVED",
+            "cited_authorities": [],
+            "section_found": False,
+            "successor_rev_proc": None,
+        }
+    else:
+        authority = parse_current_2026_inflation_authority(current_authority_html)
+    successor = authority.get("successor_rev_proc")
+    identified = authority.get("current_2026_inflation_authority")
+    status = authority.get("current_authority_status")
+    rp_current: bool | None
+    if status == "IDENTIFIED" and identified == CURRENT_2026_INFLATION_AUTHORITY and not successor:
+        rp_current = True
+    elif status == "IDENTIFIED" and successor:
+        rp_current = False
+    elif status == "IDENTIFIED" and identified and identified != CURRENT_2026_INFLATION_AUTHORITY:
+        rp_current = False
+        successor = identified
+    else:
+        rp_current = None
+    payroll_match: bool | None = None
+    if pub_year == 2026 and live_pub15_text is not None:
+        payroll_match = compare_live_pub15_to_inventory(live_pub15_text, inventory)
+    return {
+        "pub15_revision_year": pub_year,
+        "rev_proc_2025_32_current": rp_current,
+        "successor_rev_proc": successor,
+        "current_pub15_payroll_matches": payroll_match,
+        "current_2026_inflation_authority": identified,
+        "current_authority_checked_at": checked_at,
+        "current_authority_source_url": current_authority_source_url,
+        "current_authority_status": status,
+        "current_authority_cited": authority.get("cited_authorities"),
+        "listing_url": IRS_PUBLICATIONS_LISTING_URL,
+        "news_url": IRS_2026_NEWS_URL,
+    }
+
+
 def evaluate_federal_tax_freshness(
     *,
     inventory_valid: bool,
@@ -690,11 +914,32 @@ def evaluate_federal_tax_freshness(
     successor = live.get("successor_rev_proc")
     rp_current = live.get("rev_proc_2025_32_current")
     payroll_match = live.get("current_pub15_payroll_matches")
+    authority_status = live.get("current_authority_status")
+    identified = live.get("current_2026_inflation_authority")
+    if authority_status in {"NOT_FOUND", "AMBIGUOUS", "UNRETRIEVED", "PARSE_FAILED"}:
+        return (
+            "CHECK_FAILED",
+            None,
+            (
+                "Current official IRS 2026 inflation-adjustment surface did not identify "
+                "the applicable authority. Cached inventory remains VALIDATED if previously bound. "
+                f"status={authority_status}."
+            ),
+        )
     if successor:
         return (
             "NEWER_AVAILABLE",
             True,
             f"Official IRS current material cites a superseding 2026 authority: {successor}.",
+        )
+    if identified and identified != CURRENT_2026_INFLATION_AUTHORITY:
+        return (
+            "NEWER_AVAILABLE",
+            True,
+            (
+                "Official IRS current 2026 inflation-adjustment surface identifies "
+                f"{identified}, not {CURRENT_2026_INFLATION_AUTHORITY}."
+            ),
         )
     if isinstance(pub_year, int) and pub_year > 2026:
         return (
@@ -730,6 +975,12 @@ def evaluate_federal_tax_freshness(
                 "Do not claim VERIFIED_CURRENT without a successful compare."
             ),
         )
+    if not inventory_valid:
+        return (
+            "CHECK_FAILED",
+            None,
+            "Federal tax inventory is not validated; VERIFIED_CURRENT is impossible.",
+        )
     if inventory_valid and pub_year == 2026 and rp_current is True and payroll_match is True:
         return (
             "VERIFIED_CURRENT",
@@ -747,64 +998,63 @@ def evaluate_federal_tax_freshness(
     )
 
 
-def discover_federal_tax_live() -> tuple[dict[str, Any] | None, str | None]:
-    """Targeted live IRS currentness. Does not use the generic IRB landing as proof."""
-    from foundation.living_cost.freshness_discovery import fetch_text
+def discover_federal_tax_live(
+    inventory: Mapping[str, Any] | None = None,
+    *,
+    listing_html: str | None = None,
+    current_authority_html: str | None = None,
+    live_pub15_text: str | None = None,
+    current_authority_error: str | None = None,
+) -> tuple[dict[str, Any] | None, str | None]:
+    """Targeted live IRS currentness from a current first-party surface.
 
-    try:
-        listing_html, _ = fetch_text(IRS_PUBLICATIONS_LISTING_URL)
-        news_html, _ = fetch_text(IRS_2026_NEWS_URL)
-    except (OSError, RuntimeError, ValueError) as exc:
-        return None, str(exc)
-    listing = parse_pub15_listing(listing_html)
-    pub_year = listing.get("revision_year")
-    successor = None
-    rp_hits = re.findall(
-        r"Rev(?:enue)?\.?\s*Proc(?:edure)?\.?\s*(\d{4}-\d+)", news_html, re.IGNORECASE
-    )
-    rp_norm = {item.replace(" ", "") for item in rp_hits}
-    rp_current = "2025-32" in rp_norm or "2025-32" in news_html
-    for item in sorted(rp_norm):
-        if item.startswith("2025-") and item != "2025-32":
-            successor = f"Rev. Proc. {item}"
-        if item.startswith("2026-"):
-            successor = f"Rev. Proc. {item}"
-    payroll_match: bool | None = None
-    if pub_year == 2026:
+    Does not treat the historical October 2025 announcement as proof of no successor.
+    Does not use the generic IRB landing as proof.
+    Payroll compare uses one captured validated inventory payload, not literals.
+    """
+    captured = load_captured_federal_tax_inventory(inventory)
+    checked_at = _now_iso()
+    listing_body = listing_html
+    authority_body = current_authority_html
+    authority_error = current_authority_error
+    pub15_text = live_pub15_text
+    if listing_body is None or (authority_body is None and authority_error is None):
+        from foundation.living_cost.freshness_discovery import fetch_text
+
         try:
-            from foundation.living_cost.freshness_currentness import download_temp_bytes
-            from foundation.living_cost.freshness_discovery import _BROWSER_HEADERS
-
-            tmp, _digest = download_temp_bytes(
-                IRS_PUB15_CURRENT_PDF_URL, headers=_BROWSER_HEADERS, suffix=".pdf"
-            )
-            try:
-                live_text = _extract_pdf_text(tmp)
-            finally:
-                tmp.unlink(missing_ok=True)
-            live_cap = parse_oasdi_wage_base(live_text, 2026)
-            live_rate = parse_employee_oasdi_rate(live_text)
-            live_hi = parse_employee_medicare_rate(live_text)
-            live_addl = parse_additional_medicare(live_text)
-            payroll_match = (
-                live_cap == 184500.0
-                and live_rate == 0.062
-                and live_hi == 0.0145
-                and live_addl is not None
-                and live_addl.get("threshold") == 200000.0
-                and live_addl.get("rate") == 0.009
-            )
+            if listing_body is None:
+                listing_body, _ = fetch_text(IRS_PUBLICATIONS_LISTING_URL)
         except (OSError, RuntimeError, ValueError) as exc:
-            logger.warning("live current Pub 15 compare failed: %s", exc)
-            payroll_match = None
-    return (
-        {
-            "pub15_revision_year": pub_year,
-            "rev_proc_2025_32_current": rp_current,
-            "successor_rev_proc": successor,
-            "current_pub15_payroll_matches": payroll_match,
-            "listing_url": IRS_PUBLICATIONS_LISTING_URL,
-            "news_url": IRS_2026_NEWS_URL,
-        },
-        None,
+            return None, str(exc)
+        if authority_body is None and authority_error is None:
+            try:
+                authority_body, checked_at = fetch_text(IRS_TOPICS_IN_THE_NEWS_URL)
+            except (OSError, RuntimeError, ValueError) as exc:
+                authority_error = str(exc)
+    if pub15_text is None:
+        listing = parse_pub15_listing(listing_body or "")
+        if listing.get("revision_year") == 2026:
+            try:
+                from foundation.living_cost.freshness_currentness import download_temp_bytes
+                from foundation.living_cost.freshness_discovery import _BROWSER_HEADERS
+
+                tmp, _digest = download_temp_bytes(
+                    IRS_PUB15_CURRENT_PDF_URL, headers=_BROWSER_HEADERS, suffix=".pdf"
+                )
+                try:
+                    pub15_text = _extract_pdf_text(tmp)
+                finally:
+                    tmp.unlink(missing_ok=True)
+            except (OSError, RuntimeError, ValueError) as exc:
+                logger.warning("live current Pub 15 compare failed: %s", exc)
+                pub15_text = None
+    live = assemble_federal_tax_live_currentness(
+        listing_html=listing_body,
+        current_authority_html=authority_body,
+        current_authority_error=authority_error,
+        live_pub15_text=pub15_text,
+        inventory=captured,
+        checked_at=checked_at,
+        current_authority_source_url=IRS_TOPICS_IN_THE_NEWS_URL,
     )
+    return live, None

@@ -509,3 +509,162 @@ def test_pub15_listing_parser_reads_official_2026_row():
     parsed = parse_pub15_listing(html)
     assert parsed["revision_year"] == 2026
     assert parsed["listed_pdf_url"].endswith("p15.pdf")
+
+
+HISTORICAL_OCT_2025_NEWS = """
+IR-2025-103, Oct. 9, 2025
+IRS releases tax inflation adjustments for tax year 2026
+Revenue Procedure 2025-32 provides details about these annual adjustments.
+"""
+
+CURRENT_SURFACE_2025_32 = """
+<h2>Inflation adjustments for tax year 2026</h2>
+<p>The IRS announced the tax year 2026 annual inflation adjustments.
+<a href="/pub/irs-drop/rp-25-32.pdf" title="RP-2025-32">Revenue Procedure 2025-32 PDF</a>
+provides details about these annual adjustments.</p>
+"""
+
+CURRENT_SURFACE_SUCCESSOR = """
+<h2>Inflation adjustments for tax year 2026</h2>
+<p>The IRS announced a modification of the tax year 2026 inflation adjustments.
+<a href="/pub/irs-drop/rp-26-14.pdf" title="RP-2026-14">Revenue Procedure 2026-14 PDF</a>
+supersedes Revenue Procedure 2025-32.</p>
+"""
+
+CURRENT_SURFACE_AMBIGUOUS = """
+<h2>Inflation adjustments for tax year 2026</h2>
+<p>The IRS will announce tax year 2026 inflation adjustments when available.</p>
+"""
+
+PUB15_2026_LISTING = (
+    "Publication 15 (2026), (Circular E), Employer's Tax Guide "
+    '<a href="https://www.irs.gov/pub/irs-pdf/p15.pdf">p15.pdf</a>'
+)
+
+PUB15_2026_PAYROLL_TEXT = """
+Social security and Medicare tax for 2026.
+The rate of social security tax on taxable wages is 6.2% each.
+The social security wage base limit is $184,500.
+The Medicare tax rate is 1.45% each.
+There is no wage base limit for Medicare tax.
+You must withhold a 0.9% Additional Medicare Tax from wages in excess of $200,000
+in a calendar year.
+"""
+
+
+def test_historical_news_cannot_override_current_successor_surface():
+    from foundation.sources.federal_tax import (
+        assemble_federal_tax_live_currentness,
+        evaluate_federal_tax_freshness,
+        parse_current_2026_inflation_authority,
+    )
+
+    parsed = parse_current_2026_inflation_authority(CURRENT_SURFACE_SUCCESSOR)
+    assert parsed["successor_rev_proc"] == "Rev. Proc. 2026-14"
+    assert "2025-32" in HISTORICAL_OCT_2025_NEWS
+    live = assemble_federal_tax_live_currentness(
+        listing_html=PUB15_2026_LISTING,
+        current_authority_html=CURRENT_SURFACE_SUCCESSOR,
+        current_authority_error=None,
+        live_pub15_text=PUB15_2026_PAYROLL_TEXT,
+        inventory=_valid_payload(),
+        checked_at="2026-08-19T00:00:00Z",
+    )
+    assert live["successor_rev_proc"] == "Rev. Proc. 2026-14"
+    status, newer, _reason = evaluate_federal_tax_freshness(
+        inventory_valid=True,
+        live=live,
+        live_error=None,
+    )
+    assert status != "VERIFIED_CURRENT"
+    assert status in {"NEWER_AVAILABLE", "CHECK_FAILED"}
+    assert newer is True
+
+
+def test_unretrieved_current_surface_is_check_failed_despite_historical_news():
+    from foundation.sources.federal_tax import (
+        assemble_federal_tax_live_currentness,
+        evaluate_federal_tax_freshness,
+    )
+
+    assert "2025-32" in HISTORICAL_OCT_2025_NEWS
+    live = assemble_federal_tax_live_currentness(
+        listing_html=PUB15_2026_LISTING,
+        current_authority_html=None,
+        current_authority_error="connection reset",
+        live_pub15_text=PUB15_2026_PAYROLL_TEXT,
+        inventory=_valid_payload(),
+        checked_at="2026-08-19T00:00:00Z",
+    )
+    assert live["current_authority_status"] == "UNRETRIEVED"
+    status, newer, _reason = evaluate_federal_tax_freshness(
+        inventory_valid=True,
+        live=live,
+        live_error=None,
+    )
+    assert status == "CHECK_FAILED"
+    assert newer is None
+
+
+def test_ambiguous_current_surface_is_check_failed():
+    from foundation.sources.federal_tax import (
+        assemble_federal_tax_live_currentness,
+        evaluate_federal_tax_freshness,
+    )
+
+    live = assemble_federal_tax_live_currentness(
+        listing_html=PUB15_2026_LISTING,
+        current_authority_html=CURRENT_SURFACE_AMBIGUOUS,
+        current_authority_error=None,
+        live_pub15_text=PUB15_2026_PAYROLL_TEXT,
+        inventory=_valid_payload(),
+        checked_at="2026-08-19T00:00:00Z",
+    )
+    assert live["current_authority_status"] == "AMBIGUOUS"
+    status, newer, _reason = evaluate_federal_tax_freshness(
+        inventory_valid=True,
+        live=live,
+        live_error=None,
+    )
+    assert status == "CHECK_FAILED"
+    assert newer is None
+
+
+def test_current_surface_2025_32_and_inventory_payroll_may_verify():
+    from foundation.sources.federal_tax import (
+        assemble_federal_tax_live_currentness,
+        evaluate_federal_tax_freshness,
+    )
+
+    inventory = _valid_payload()
+    live = assemble_federal_tax_live_currentness(
+        listing_html=PUB15_2026_LISTING,
+        current_authority_html=CURRENT_SURFACE_2025_32,
+        current_authority_error=None,
+        live_pub15_text=PUB15_2026_PAYROLL_TEXT,
+        inventory=inventory,
+        checked_at="2026-08-19T00:00:00Z",
+    )
+    assert live["current_2026_inflation_authority"] == "Rev. Proc. 2025-32"
+    assert live["rev_proc_2025_32_current"] is True
+    assert live["current_pub15_payroll_matches"] is True
+    status, newer, _reason = evaluate_federal_tax_freshness(
+        inventory_valid=True,
+        live=live,
+        live_error=None,
+    )
+    assert status == "VERIFIED_CURRENT"
+    assert newer is False
+
+
+def test_payroll_compare_uses_captured_inventory_not_literals():
+    from foundation.sources.federal_tax import compare_live_pub15_to_inventory
+
+    inventory = _valid_payload()
+    assert compare_live_pub15_to_inventory(PUB15_2026_PAYROLL_TEXT, inventory) is True
+    mutated = _valid_payload()
+    mutated["years"]["2026"]["oasdi"]["taxable_maximum"] = 999999.0
+    assert compare_live_pub15_to_inventory(PUB15_2026_PAYROLL_TEXT, mutated) is False
+    mutated_rate = _valid_payload()
+    mutated_rate["years"]["2026"]["oasdi"]["employee_rate"] = 0.099
+    assert compare_live_pub15_to_inventory(PUB15_2026_PAYROLL_TEXT, mutated_rate) is False
