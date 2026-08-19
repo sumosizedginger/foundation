@@ -1,133 +1,246 @@
-# THE FOUNDATION — FEDERAL TAX SUCCESSOR-DISCOVERY / LIVE-INVENTORY BINDING CLOSEOUT
+# THE FOUNDATION — 51-JURISDICTION STATE TAX EVIDENCE CAMPAIGN CLOSEOUT
+
+CURRENT AUDITED IMPLEMENTATION:
+41f5675257511045a5f1eb648bdf7e722d32d8f6
+
+Inventory-binding commit:
+dcaeb311aaa8b3b59cb15a026201075465503dde
+
+Format-only follow-up:
+41f5675257511045a5f1eb648bdf7e722d32d8f6
+
+FEDERAL TAX LAW REMAINS CLOSED.
+NAIC AUTO INSURANCE REMAINS CLOSED.
 
 OD-001 through OD-013 remain ACCEPTED / FROZEN.
 
-FIELD-LEVEL FEDERAL TAX EVIDENCE remains ACCEPTED. Not redesigned.
-
-NAIC AUTO INSURANCE remains CLOSED. Not reopened.
-
 NO MSLC.
+NO GAP.
+NO ADEQUACY.
+NO RANKINGS.
+NO NATIONAL MEDIAN.
+NO COMPOSITE.
 NO CANDIDATE ASSEMBLER.
-NO CANDIDATE AUTHORIZATION.
-NO RELEASE AUTHORIZATION.
+NO CANDIDATE INPUT BINDINGS.
 
-This pass was one narrow federal-tax currentness correction.
+==================================================
+WHAT CHANGED
+==================================================
 
-## FINAL SHA
+Replaced hardcoded `discover_state_tax() -> SOURCE_GAP /
+MANUAL_VERIFICATION_REQUIRED` with an official 50-state + DC
+RULE_YEAR inventory for 2024 and 2026.
 
-Implementation: `966202dc81d096b5b53c5660bf5a6f671d8d0cab`
+`STATE_STATUTORY_SCHEDULES` remain candidate implementation tables.
+They are not official evidence.
 
-Pushed to `origin/main`.
+Zero wage tax is recorded only when retrieved official text
+explicitly establishes that ordinary wages are not subject to a
+general state individual earned-income tax.
 
-Audited starting implementation: `e5aaa1fccf1f744adffffd572f576896c92d38a2`
+==================================================
+GITHUB ACTIONS ON FINAL SHA 41f5675
+==================================================
 
-## GitHub Actions (on 966202d)
+Tests & Code Quality
+32214010848
+success
 
-| Workflow                     | Run ID                                                                                | Conclusion |
-| ---------------------------- | ------------------------------------------------------------------------------------- | ---------- |
-| Tests & Code Quality         | [32209827225](https://github.com/sumosizedginger/foundation/actions/runs/32209827225) | success    |
-| Deploy Pages                 | [32209827285](https://github.com/sumosizedginger/foundation/actions/runs/32209827285) | success    |
-| Validate Living Cost Sources | [32209827387](https://github.com/sumosizedginger/foundation/actions/runs/32209827387) | success    |
+Validate Living Cost Sources
+32214010853
+success
 
-Tests & Code Quality pytest: **325 passed**, **5 skipped**, **1 warning** (`load_module` deprecation in `test_validation_cli_is_callable`).
+Deploy Pages
+32214010845
+success
 
-## Problem 1 — successor discovery
+Local pytest on the implementation:
+342 passed, 1 warning.
 
-`discover_federal_tax_live()` no longer treats the historical October 9, 2025 announcement (`IRS_2026_NEWS_URL`) as proof that Rev. Proc. 2025-32 remains current.
+==================================================
+INVENTORY
+==================================================
 
-Current first-party surface: official IRS Topics in the News
-`https://www.irs.gov/newsroom/topics-in-the-news`
+Artifact:
+data/metadata/living_cost_state_tax_inventory.json
 
-Live result from the current “Inflation adjustments for tax year 2026” section:
+Inventory SHA-256:
+80e62abe33e809bb6c18916e5c83d46e74f3bc7721ba605fe2202719f08ac3ed
 
-- current_2026_inflation_authority: **Rev. Proc. 2025-32**
-- current_authority_status: **IDENTIFIED**
-- current_authority_source_url: `https://www.irs.gov/newsroom/topics-in-the-news`
-- current_authority_checked_at: `2026-08-19T02:40:15Z`
-- successor_rev_proc: **null**
-- rev_proc_2025_32_current: **true**
+Retrieved official artifacts: 102
+http_ok: 70
+Official publishers/agencies recorded: 52
 
-The historical announcement may remain corroboration. It is not the successor scan.
+Jurisdictions required: 51
+Required years: 2024, 2026
 
-If the current surface is unretrieved, missing, or ambiguous: freshness `CHECK_FAILED`, `newer_data_exists=null`. Cached evidence may remain VALIDATED.
+2024 validated no-wage-tax cells: 8
+2026 validated no-wage-tax cells: 8
+2026 verified-current count: 8
+Family complete: false
+Family evidence status: INVENTORY_NOT_VALIDATED
+Family freshness status: CHECK_FAILED
 
-If the current surface identifies a later/modifying authority: `NEWER_AVAILABLE`, not `VERIFIED_CURRENT`.
+The family is not VALIDATED because 50 of 51 is not enough, and
+only the officially verified no-wage-tax cells are parsed_ok.
 
-## Problem 2 — live payroll compare
+==================================================
+NO-GENERAL-WAGE-INCOME-TAX JURISDICTIONS
+==================================================
 
-Live Publication 15 payroll is compared to one captured validated 2026 inventory payload. The compare no longer uses duplicated literals (`184500`, `0.062`, `0.0145`, `200000`, `0.009`).
+Official wording + SHA-bound artifacts confirmed both years:
 
-Compared fields:
+AK  Alaska Child Support Services FAQ
+    "Alaska has no personal income tax"
+FL  Florida DOR FAQ 1466
+    "Florida does not impose a personal income tax"
+NV  Nevada Department of Taxation income-tax page
+NH  2024: NH General Court HB 2 (2021) Interest and Dividends Tax
+    2026: RSA 77 entire chapter repealed eff. Jan. 1, 2025
+SD  South Dakota Department of Revenue
+TN  Tennessee DOR Hall Income Tax page
+    Hall tax imposed only on interest/dividends; repealed 2021+
+TX  Texas Comptroller Fiscal Notes
+    "Texas does not have a personal income tax"
+WY  wyo.gov About Wyoming
+    "Wyoming does not possess an individual or corporate income tax"
 
-- OASDI employee rate
-- OASDI taxable maximum
-- Medicare HI employee rate
-- Medicare no-wage-base condition
-- Additional Medicare threshold
-- Additional Medicare rate
+Engine may return $0 for those eight jurisdictions/years only after
+the inventory cell is `VERIFIED_NO_GENERAL_WAGE_INCOME_TAX` and
+`parsed_ok`. Removing the bound authority invalidates the cell.
 
-Live result: `current_pub15_payroll_matches=true`.
+==================================================
+WASHINGTON IS NOT ZERO
+==================================================
 
-Mutating a captured inventory payroll field while leaving the live Publication 15 fixture unchanged makes the compare false.
+Official Washington DOR income-tax page:
 
-## Federal tax status
+https://dor.wa.gov/taxes-rates/income-tax
 
-- retrieval_validation_status / evidence: **VALIDATED**
-- freshness_check_status: **VERIFIED_CURRENT**
-- newer_data_exists: **false**
+"The Washington state legislature recently enacted an income tax on
+individuals with an annual adjusted gross income of $1,000,000 or
+more."
 
-Inventory SHA: `14475b0aa4bed4342efb9337f90c0495dff849169b9fc3525188bf80168435ea`
+That is recorded as:
 
-Bound official bytes unchanged:
+STATE_TAX_MODEL_GAP:WA:2024:high_agi_income_tax
+STATE_TAX_MODEL_GAP:WA:2026:high_agi_income_tax
 
-- 2024 Rev. Proc. 2023-34 SHA: `544ba41c7ba64f77da521e0d174a7b7394dc72b5c7c73d10adb19952d5aaae57`
-- 2024 Publication 15 SHA: `3a15da95e39b24f2b6c61f4abc85298c897f57600c3508f9381fab7180a092e0`
-- 2026 Rev. Proc. 2025-32 SHA: `e9ada115fb43a4af5ea326ca91edd40ab0bf29b9be01d2c13d7b8fa96214635b`
-- 2026 Publication 15 SHA: `b46c3622439d8521e3a0faca4cd5b5ece3451b526f65f06a5e38d5c9f804c88b`
+WA remains in the candidate no-tax set but is not verified.
+`calculate_state_income_tax(..., "WA")` is fail-closed until the
+high-AGI mechanic is modeled from official authority.
 
-Numeric rules unchanged (from official IRS bytes):
+A separate DOR forms page still says Washington does not have a
+personal income tax. The more specific income-tax page controls.
+Do not flatten the conflict into $0.
 
-| Year | std deduction | first bracket | OASDI | OASDI cap | Medicare HI | Additional Medicare |
-| ---- | ------------- | ------------- | ----- | --------- | ----------- | ------------------- |
-| 2024 | 14600         | 11600 @ 10%   | 6.2%  | 168600    | 1.45% no limit | 0.9% above 200000 |
-| 2026 | 16100         | 12400 @ 10%   | 6.2%  | 184500    | 1.45% no limit | 0.9% above 200000 |
+==================================================
+TAXING JURISDICTIONS
+==================================================
 
-Field-level source-artifact / SHA validation preserved. Additional Medicare remains extracted evidence.
+Remaining 42 jurisdictions (41 states + DC) plus WA are not
+engine-usable official models.
 
-## Regenerated metadata
+Official DOR landing pages were retrieved where HTTP succeeded.
+Year-specific rate/bracket/deduction schedules were not extracted
+from those landing pages.
 
-- inventory generated_at: `2026-08-19T02:40:10+00:00`
-- source coverage generated_at: `2026-08-19T02:40:10+00:00`
-- candidate freshness generated_at: `2026-08-19T02:40:50Z`
-- freshness_run_id: `6c158aa0eaa619a142fe51c06e27008ff59d4da6c562d65d06625ad7ad63dab7`
-- empirical_blocker_family_count: **8**
-- gate_blocker_reason_count: **75**
+Those cells are:
 
-Empirical families: `bls_ce`, `fcc_broadband`, `local_tax_law`, `mobile_price`, `od010_price_index`, `state_tax_law`, `vehicle_registration`, `vehicle_replacement`.
+STATE_EVIDENCE_INCOMPLETE
+or STATE_TAX_FIELD_AUTHORITY_UNBOUND when the official URL failed
+or STATE_TAX_MODEL_GAP:<st>:<year>:schedule_not_extracted
 
-OD-010 remains honest `CHECK_FAILED` (BLS daily quota).
+Python `STATE_STATUTORY_SCHEDULES` numbers were not copied into the
+inventory as official evidence.
 
-BEA RPP naturally cleared to `VERIFIED_CURRENT` on this live freshness run. BEA was not redesigned.
+No refundable / means-tested credits were added.
+Local tax was not merged into state tax.
+LOCAL_TAX_RATES_BY_FIPS / OD-011 were not changed.
 
-NAIC remains `VALIDATED` / `VERIFIED_CURRENT`.
+Mandatory employee state payroll programs were inventoried as
+unresolved / owner-method-decision-required. Employer-only taxes
+were not treated as employee burden.
 
-## NAIC (unchanged)
+==================================================
+ENGINE / VALIDATOR
+==================================================
 
-- AUT-PB 2022-2023
-- source_data_year 2023
-- Table 5 Combined Average Premium
-- 51 jurisdictions
-- selected PDF SHA `34759655ce8e5387b48d523ebab89f9cd8f29d3f67c6d391838398b7d2659b78`
+`validate_state_tax_inventory()` is the single definition of
+VALIDATED. Coverage, tax coverage, and freshness all use it.
 
-## Locks
+Family VALIDATED requires all 51 x 2 cells resolved. 8 of 51 is
+not family VALIDATED.
 
-- candidate_calculation_authorized = false
-- living_cost.release_authorized = false
-- candidate_inputs_bound = false
-- states_modeled = 0
-- ready_for_private_candidate = false
-- no `living_cost_candidate_input_bindings.json`
+`calculate_state_income_tax()`:
+- unsupported year remains fail-closed
+- official no-wage-tax cell may return 0
+- unverified no-tax candidate raises; unknown is not zero
+- other missing official models remain fail-closed
 
-NO MSLC.
+==================================================
+OTHER LIVE SOURCES
+==================================================
 
-Stopped. Did not open state/local tax, FCC/mobile, registration, replacement, or BLS CE.
+Federal tax: VALIDATED / VERIFIED_CURRENT. Numbers unchanged.
+
+2024 standard deduction 14600
+2024 first bracket 11600 @ 10%
+2024 OASDI 6.2% / 168600
+2024 Medicare 1.45%
+2024 Additional Medicare 0.9% / 200000
+
+2026 standard deduction 16100 from official RP 2025-32
+2026 first bracket 12400 @ 10%
+2026 OASDI 6.2% / 184500
+2026 Medicare 1.45%
+2026 Additional Medicare 0.9% / 200000
+
+NAIC AUT-PB 2022-2023 remains VALIDATED / VERIFIED_CURRENT.
+
+OD-010 remains honest CHECK_FAILED (BLS daily quota).
+BEA RPP remains VERIFIED_CURRENT.
+Neither was redesigned.
+
+==================================================
+BLOCKERS AND LOCKS
+==================================================
+
+empirical_blocker_family_count before: 8
+empirical_blocker_family_count after: 8
+
+State tax remains a family blocker because the 51-jurisdiction
+family is not complete.
+
+gate_blocker_reason_count before: 75
+gate_blocker_reason_count after: 77
+
+candidate_calculation_authorized = false
+living_cost.release_authorized = false
+candidate_inputs_bound = false
+states_modeled = 0
+ready_for_private_candidate = false
+
+No living_cost_candidate_input_bindings.json.
+
+==================================================
+OWNER JUDGMENT STILL REQUIRED
+==================================================
+
+1. Washington high-AGI income tax: model the $1,000,000 threshold
+   or leave fail-closed.
+2. Year-specific official 2024 and 2026 rate/bracket booklets for
+   the remaining taxing jurisdictions.
+3. Failed official landing pages (HTTP 403/404/SSL) need replacement
+   official URLs.
+4. Whether mandatory employee SDI/PFML belongs in the frozen tax
+   solver.
+
+==================================================
+ABSOLUTE STOP
+==================================================
+
+Do not begin local tax, FCC/mobile, BLS CE, registration, or
+replacement.
+
+Do not authorize candidate calculation or release.
