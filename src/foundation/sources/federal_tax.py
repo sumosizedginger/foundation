@@ -1,7 +1,8 @@
-"""Retrieve and parse official IRS + SSA federal tax authorities.
+"""Retrieve and parse official IRS federal tax authorities.
 
 Validates statutory RULES for a single independent adult. Does not calculate
-gross-required income or an MSLC.
+gross-required income or an MSLC. Each inventory field is parsed from its
+designated year-specific artifact.
 """
 
 from __future__ import annotations
@@ -13,6 +14,7 @@ import re
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 logger = logging.getLogger(__name__)
 
@@ -22,8 +24,7 @@ METADATA_DIR = PROJECT_ROOT / "data" / "metadata"
 INVENTORY_PATH = METADATA_DIR / "living_cost_federal_tax_inventory.json"
 INVENTORY_REPORT_TYPE = "living_cost_federal_tax_inventory"
 
-# Official first-party artifacts. Discovered at runtime; these are the expected family.
-IRS_IRB_LANDING = "https://www.irs.gov/irb"
+IRS_PUBLICATIONS_LISTING_URL = "https://www.irs.gov/publications"
 IRS_RP_2023_34_URL = "https://www.irs.gov/pub/irs-drop/rp-23-34.pdf"
 IRS_RP_2025_32_URL = "https://www.irs.gov/pub/irs-drop/rp-25-32.pdf"
 IRS_IRB_2023_48_URL = "https://www.irs.gov/pub/irs-irbs/irb23-48.pdf"
@@ -31,16 +32,25 @@ IRS_2026_NEWS_URL = (
     "https://www.irs.gov/newsroom/irs-releases-tax-inflation-adjustments-for-tax-year-2026"
     "-including-amendments-from-the-one-big-beautiful-bill"
 )
+IRS_TOPIC_751_URL = "https://www.irs.gov/taxtopics/tc751"
+IRS_TOPIC_560_URL = "https://www.irs.gov/taxtopics/tc560"
+IRS_PUB15_2024_URL = "https://www.irs.gov/pub/irs-prior/p15--2024.pdf"
+IRS_PUB15_2026_PRIOR_URL = "https://www.irs.gov/pub/irs-prior/p15--2026.pdf"
+IRS_PUB15_CURRENT_PDF_URL = "https://www.irs.gov/pub/irs-pdf/p15.pdf"
 SSA_2024_PDF_URL = "https://www.ssa.gov/news/press/factsheets/colafacts2024.pdf"
 SSA_2026_PDF_URL = "https://www.ssa.gov/news/press/factsheets/colafacts2026.pdf"
 SSA_2026_HTML_URL = "https://www.ssa.gov/news/en/cola/factsheets/2026.html"
 SSA_CBB_URL = "https://www.ssa.gov/oact/cola/cbb.html"
 SSA_TAX_RATES_URL = "https://www.ssa.gov/oact/progdata/taxRates.html"
-IRS_TOPIC_751_URL = "https://www.irs.gov/taxtopics/tc751"
-IRS_TOPIC_560_URL = "https://www.irs.gov/taxtopics/tc560"
-IRS_PUB15_2024_URL = "https://www.irs.gov/pub/irs-prior/p15--2024.pdf"
 
-# Additional Medicare Tax is statutory IRC 3101(b)(2); threshold is not CPI-indexed.
+ALLOWED_AUTHORITY_HOSTS = frozenset({"www.irs.gov", "irs.gov", "www.ssa.gov", "ssa.gov"})
+
+INCOME_TAX_ARTIFACT_BY_YEAR = {2024: "irs_rp_2023_34", 2026: "irs_rp_2025_32"}
+PAYROLL_ARTIFACT_BY_YEAR = {2024: "irs_pub15_2024", 2026: "irs_pub15_2026"}
+INCOME_TAX_AUTHORITY_ID = {2024: "IRS_RP_2023_34", 2026: "IRS_RP_2025_32"}
+PAYROLL_AUTHORITY_ID = {2024: "IRS_PUB_15_2024", 2026: "IRS_PUB_15_2026"}
+
+# Comparison constants only. Never used to manufacture inventory evidence.
 ADDITIONAL_MEDICARE_RATE = 0.009
 ADDITIONAL_MEDICARE_THRESHOLD_SINGLE = 200000.0
 OASDI_EMPLOYEE_RATE = 0.062
@@ -59,6 +69,13 @@ def file_sha256(path: Path) -> str | None:
 
 def _now_iso() -> str:
     return datetime.now(UTC).replace(microsecond=0).isoformat()
+
+
+def official_authority_url(url: str | None) -> bool:
+    if not url:
+        return False
+    host = (urlparse(url).hostname or "").lower()
+    return host in ALLOWED_AUTHORITY_HOSTS
 
 
 def _extract_pdf_text(path: Path) -> str:
@@ -161,7 +178,6 @@ def parse_standard_deduction_single(text: str, year: int) -> float | None:
     match = re.search(pattern, text, re.IGNORECASE | re.DOTALL)
     if match:
         return float(match.group(1).replace(",", ""))
-    # 2026 RP also uses "beginning in 2026" near .14 Standard Deduction.
     alt = re.search(
         rf"Standard Deduction\.?\s+(?:For taxable years beginning in {year}|"
         rf"for any taxable year beginning in {year}).*?"
@@ -177,6 +193,7 @@ def parse_standard_deduction_single(text: str, year: int) -> float | None:
 
 def parse_single_brackets(text: str, year: int) -> list[tuple[float, float]] | None:
     """Parse TABLE 3 Section 1(j)(2)(C) unmarried ordinary brackets."""
+    del year
     marker = "TABLE 3 - Section 1(j)(2)(C)"
     idx = text.find(marker)
     if idx < 0:
@@ -188,7 +205,6 @@ def parse_single_brackets(text: str, year: int) -> list[tuple[float, float]] | N
     if not start:
         return None
     body = window[start.end() :]
-    # Stop at the next table's "If Taxable Income Is" so we take one complete schedule.
     nxt = re.search(r"If Taxable Income Is:", body, re.IGNORECASE)
     if nxt:
         body = body[: nxt.start()]
@@ -204,27 +220,28 @@ def parse_single_brackets(text: str, year: int) -> list[tuple[float, float]] | N
 
 
 def parse_oasdi_wage_base(text: str, year: int) -> float | None:
+    year_window = _year_payroll_window(text, year)
     patterns = (
+        r"social security wage base\s+limit is \$([0-9,]+)",
         rf"wage base \(\$([0-9,]+) for {year}\)",
         rf"for earnings in {year}[^\n]{{0,80}}\$([0-9,]+)",
         r"Social Security \(OASDI only\)[^\n]{0,40}\$([0-9,]+)",
         rf"maximum taxable earnings[^\n]{{0,80}}{year}[^\n]{{0,40}}\$([0-9,]+)",
         rf"contribution and benefit base[^\n]{{0,80}}{year}[^\n]{{0,40}}\$([0-9,]+)",
         r"social security wage base(?:\s+limit)?\s+is \$([0-9,]+)",
-        rf"(?:20{str(year)[2:]}|{year})[^$]{{0,80}}\$([0-9,]{{6,9}})",
     )
-    for pat in patterns:
-        match = re.search(pat, text, re.IGNORECASE)
-        if not match:
-            continue
-        try:
-            value = float(match.group(1).replace(",", ""))
-        except ValueError:
-            continue
-        if 100_000 <= value <= 300_000:
-            return value
-    # Table row: 2024 168,600
-    match = re.search(rf"\b{year}\b\s+\$?([0-9]{{3}},[0-9]{{3}})", text)
+    for blob in (year_window, text):
+        for pat in patterns:
+            match = re.search(pat, blob, re.IGNORECASE)
+            if not match:
+                continue
+            try:
+                value = float(match.group(1).replace(",", ""))
+            except ValueError:
+                continue
+            if 100_000 <= value <= 300_000:
+                return value
+    match = re.search(rf"\b{year}\b\s+\$?([0-9]{{3}},[0-9]{{3}})", year_window or text)
     if match:
         value = float(match.group(1).replace(",", ""))
         if 100_000 <= value <= 300_000:
@@ -233,6 +250,8 @@ def parse_oasdi_wage_base(text: str, year: int) -> float | None:
 
 
 def parse_employee_oasdi_rate(text: str) -> float | None:
+    if re.search(r"social security tax on taxable wages is 6\.2\s*%", text, re.IGNORECASE):
+        return 0.062
     if re.search(r"6\.2\s*percent", text, re.IGNORECASE):
         return 0.062
     if re.search(r"Social Security is 6\.2\s*%", text, re.IGNORECASE):
@@ -244,6 +263,10 @@ def parse_employee_oasdi_rate(text: str) -> float | None:
 
 
 def parse_employee_medicare_rate(text: str) -> float | None:
+    if re.search(r"Medicare tax rate is 1\.45\s*%", text, re.IGNORECASE):
+        return 0.0145
+    if re.search(r"tax rate for Medicare is 1\.45\s*%", text, re.IGNORECASE):
+        return 0.0145
     if re.search(r"1\.45\s*percent", text, re.IGNORECASE):
         return 0.0145
     match = re.search(r"Medicare[^%]{0,40}(1\.45)\s*%", text, re.IGNORECASE)
@@ -252,55 +275,164 @@ def parse_employee_medicare_rate(text: str) -> float | None:
     return None
 
 
+def parse_medicare_no_limit(text: str) -> bool:
+    return bool(
+        re.search(r"no wage\s+base\s+limit for Medicare", text, re.IGNORECASE)
+        or re.search(r"There is no wage\s+base\s+limit for Medicare", text, re.IGNORECASE)
+    )
+
+
 def parse_additional_medicare(text: str) -> dict[str, Any] | None:
-    if (
-        not re.search(r"additional 0\.9\s*percent", text, re.IGNORECASE)
-        and not re.search(r"0\.9\s*percent in Medicare", text, re.IGNORECASE)
-        and "additional medicare" not in text.lower()
-        and "0.9" not in text
+    """Parse Additional Medicare withholding from official text. No constant fill-in."""
+    if not (
+        re.search(r"additional medicare", text, re.IGNORECASE)
+        or re.search(r"additional 0\.9\s*percent", text, re.IGNORECASE)
+        or re.search(r"0\.9\s*percent in Medicare", text, re.IGNORECASE)
     ):
         return None
+    rate = None
+    if (
+        re.search(
+            r"(?:withhold a\s+)?0\.9\s*%\s+Additional Medicare",
+            text,
+            re.IGNORECASE,
+        )
+        or re.search(r"additional 0\.9\s*%", text, re.IGNORECASE)
+        or re.search(r"additional 0\.9\s*percent", text, re.IGNORECASE)
+        or re.search(r"0\.9\s*percent in Medicare", text, re.IGNORECASE)
+    ):
+        rate = 0.009
     thresh = None
     match = re.search(
-        r"more than \$([0-9,]+)\s*\(\$([0-9,]+) for married",
+        r"excess of \$([0-9,]+)\s+in a calendar year",
         text,
         re.IGNORECASE,
     )
     if match:
         thresh = float(match.group(1).replace(",", ""))
-    if thresh is None and re.search(r"\$200,000", text):
-        thresh = 200000.0
     if thresh is None:
+        match = re.search(
+            r"more than \$([0-9,]+)\s*\(\$([0-9,]+) for married",
+            text,
+            re.IGNORECASE,
+        )
+        if match:
+            thresh = float(match.group(1).replace(",", ""))
+    if thresh is None:
+        match = re.search(
+            r"Additional Medicare.{0,120}(?:excess of|more than)\s+\$([0-9,]+)",
+            text,
+            re.IGNORECASE | re.DOTALL,
+        )
+        if match:
+            thresh = float(match.group(1).replace(",", ""))
+    if rate is None or thresh is None:
         return None
     return {
         "applicable": True,
         "threshold": thresh,
-        "rate": ADDITIONAL_MEDICARE_RATE,
+        "rate": rate,
     }
 
 
-def retrieve_federal_tax_authorities() -> dict[str, Any]:
-    """Download official IRS/SSA artifacts into cache. Does not invent values."""
-    artifacts = {
-        "irs_rp_2023_34": _acquire("irs_rp_2023_34", IRS_RP_2023_34_URL, "irs_rp-23-34.pdf"),
-        "irs_irb_2023_48": _acquire("irs_irb_2023_48", IRS_IRB_2023_48_URL, "irs_irb23-48.pdf"),
-        "irs_rp_2025_32": _acquire("irs_rp_2025_32", IRS_RP_2025_32_URL, "irs_rp-25-32.pdf"),
-        "ssa_2024_factsheet": _acquire("ssa_cola_2024", SSA_2024_PDF_URL, "ssa_colafacts2024.pdf"),
-        "ssa_2026_factsheet_pdf": _acquire(
-            "ssa_cola_2026_pdf", SSA_2026_PDF_URL, "ssa_colafacts2026.pdf"
+def parse_pub15_identity(text: str) -> dict[str, Any]:
+    """Identify Publication 15 revision year from official PDF text."""
+    year = None
+    match = re.search(r"Publication 15\s*\((\d{4})\)", text, re.IGNORECASE)
+    if match:
+        year = int(match.group(1))
+    if year is None:
+        match = re.search(r"Employer's Tax Guide[^\n]{0,40}(\d{4})", text, re.IGNORECASE)
+        if match:
+            year = int(match.group(1))
+    if year is None:
+        match = re.search(r"p15/(\d{4})", text, re.IGNORECASE)
+        if match:
+            year = int(match.group(1))
+    if year is None:
+        match = re.search(r"Social security and Medicare tax for (\d{4})", text, re.IGNORECASE)
+        if match:
+            year = int(match.group(1))
+    return {
+        "title": "Publication 15 (Circular E), Employer's Tax Guide" if year else None,
+        "publication_year": year,
+    }
+
+
+def parse_pub15_listing(html: str) -> dict[str, Any]:
+    """Parse the official IRS publications listing for Publication 15."""
+    match = re.search(
+        r"Publication 15\s*\((\d{4})\).*?(?:href=)?[\"']?([^\"'\s>]*p15(?:--\d{4})?\.pdf)",
+        html,
+        re.IGNORECASE | re.DOTALL,
+    )
+    year = None
+    href = None
+    if match:
+        year = int(match.group(1))
+        href = match.group(2)
+    if year is None:
+        simple = re.search(r"Publication 15\s*\((\d{4})\)", html, re.IGNORECASE)
+        if simple:
+            year = int(simple.group(1))
+    if href and href.startswith("/"):
+        href = "https://www.irs.gov" + href
+    if href is None and year:
+        href = IRS_PUB15_CURRENT_PDF_URL
+    return {
+        "revision_year": year,
+        "listed_pdf_url": href,
+        "current_pdf_url": IRS_PUB15_CURRENT_PDF_URL,
+        "year_specific_prior_url": (
+            f"https://www.irs.gov/pub/irs-prior/p15--{year}.pdf" if year else None
         ),
-        "ssa_cbb": _acquire("ssa_cbb", SSA_CBB_URL, "ssa_cbb.html"),
-        "ssa_tax_rates": _acquire("ssa_tax_rates", SSA_TAX_RATES_URL, "ssa_taxRates.html"),
-        "ssa_2026_html": _acquire("ssa_cola_2026_html", SSA_2026_HTML_URL, "ssa_cola_2026.html"),
-        "irs_2026_news": _acquire("irs_2026_news", IRS_2026_NEWS_URL, "irs_2026_inflation.html"),
-        "irs_topic_751": _acquire("irs_topic_751", IRS_TOPIC_751_URL, "irs_tc751.html"),
-        "irs_topic_560": _acquire("irs_topic_560", IRS_TOPIC_560_URL, "irs_tc560.html"),
-        "irs_pub15_2024": _acquire("irs_pub15_2024", IRS_PUB15_2024_URL, "irs_p15_2024.pdf"),
     }
-    return artifacts
 
 
-def _text_for(art: dict[str, Any]) -> str:
+def discover_pub15_2026_url(listing_html: str | None = None) -> dict[str, Any]:
+    """Discover the official 2026 Publication 15 URL from the IRS listing."""
+    html = listing_html
+    retrieved_at = None
+    listing_error = None
+    if html is None:
+        try:
+            from foundation.living_cost.freshness_discovery import fetch_text
+
+            html, retrieved_at = fetch_text(IRS_PUBLICATIONS_LISTING_URL)
+        except (OSError, RuntimeError, ValueError) as exc:
+            listing_error = str(exc)
+            html = ""
+    parsed = parse_pub15_listing(html) if html else {}
+    year = parsed.get("revision_year")
+    chosen = None
+    chosen_kind = None
+    if year == 2026:
+        # Prefer the year-specific prior URL when the listing year is 2026.
+        chosen = parsed.get("year_specific_prior_url") or IRS_PUB15_2026_PRIOR_URL
+        chosen_kind = "year_specific_prior"
+    return {
+        "listing_url": IRS_PUBLICATIONS_LISTING_URL,
+        "listing_retrieved_at": retrieved_at,
+        "listing_error": listing_error,
+        "revision_year": year,
+        "resolved_url": chosen,
+        "url_kind": chosen_kind,
+        "current_pdf_url": IRS_PUB15_CURRENT_PDF_URL,
+        "fallback_current_if_prior_missing": year == 2026,
+    }
+
+
+def _year_payroll_window(text: str, year: int) -> str:
+    marker = rf"Social security and Medicare tax for {year}"
+    match = re.search(marker, text, re.IGNORECASE)
+    if not match:
+        return text
+    return text[match.start() : match.start() + 2500]
+
+
+def _text_for(art: dict[str, Any] | None) -> str:
+    if not art:
+        return ""
     path = Path(art["path"]) if art.get("path") else None
     if path is None or not path.is_file():
         return ""
@@ -309,125 +441,191 @@ def _text_for(art: dict[str, Any]) -> str:
     return path.read_text(encoding="utf-8", errors="replace")
 
 
-def build_federal_tax_inventory(artifacts: dict[str, Any] | None = None) -> dict[str, Any]:
-    """Parse official authorities into a year-by-year statutory inventory."""
-    arts = artifacts if artifacts is not None else retrieve_federal_tax_authorities()
-    text_2024 = "\n".join(
-        _text_for(arts[key])
-        for key in (
-            "irs_rp_2023_34",
-            "irs_irb_2023_48",
-            "ssa_2024_factsheet",
-            "ssa_cbb",
-            "ssa_tax_rates",
-            "irs_topic_751",
-            "irs_topic_560",
-            "irs_pub15_2024",
+def _field(
+    *,
+    authority_id: str,
+    source_artifact_key: str,
+    source_sha256: str | None,
+    extraction_identity: str,
+    **values: Any,
+) -> dict[str, Any]:
+    rec = {
+        "authority_id": authority_id,
+        "source_artifact_key": source_artifact_key,
+        "source_sha256": source_sha256,
+        "extraction_identity": extraction_identity,
+    }
+    rec.update(values)
+    return rec
+
+
+def retrieve_federal_tax_authorities() -> dict[str, Any]:
+    """Download official IRS/SSA artifacts into cache. Does not invent values."""
+    discovery = discover_pub15_2026_url()
+    pub15_2026_url = discovery.get("resolved_url") or IRS_PUB15_2026_PRIOR_URL
+    artifacts: dict[str, Any] = {
+        "irs_rp_2023_34": _acquire("irs_rp_2023_34", IRS_RP_2023_34_URL, "irs_rp-23-34.pdf"),
+        "irs_irb_2023_48": _acquire("irs_irb_2023_48", IRS_IRB_2023_48_URL, "irs_irb23-48.pdf"),
+        "irs_rp_2025_32": _acquire("irs_rp_2025_32", IRS_RP_2025_32_URL, "irs_rp-25-32.pdf"),
+        "irs_pub15_2024": _acquire("irs_pub15_2024", IRS_PUB15_2024_URL, "irs_p15_2024.pdf"),
+        "irs_pub15_2026": _acquire("irs_pub15_2026", pub15_2026_url, "irs_p15_2026.pdf"),
+        "irs_2026_news": _acquire("irs_2026_news", IRS_2026_NEWS_URL, "irs_2026_inflation.html"),
+        "irs_topic_751": _acquire("irs_topic_751", IRS_TOPIC_751_URL, "irs_tc751.html"),
+        "irs_topic_560": _acquire("irs_topic_560", IRS_TOPIC_560_URL, "irs_tc560.html"),
+        "ssa_2024_factsheet": _acquire("ssa_cola_2024", SSA_2024_PDF_URL, "ssa_colafacts2024.pdf"),
+        "ssa_2026_factsheet_pdf": _acquire(
+            "ssa_cola_2026_pdf", SSA_2026_PDF_URL, "ssa_colafacts2026.pdf"
+        ),
+        "ssa_cbb": _acquire("ssa_cbb", SSA_CBB_URL, "ssa_cbb.html"),
+        "ssa_tax_rates": _acquire("ssa_tax_rates", SSA_TAX_RATES_URL, "ssa_taxRates.html"),
+        "ssa_2026_html": _acquire("ssa_cola_2026_html", SSA_2026_HTML_URL, "ssa_cola_2026.html"),
+    }
+    pub15_2026 = artifacts["irs_pub15_2026"]
+    if not pub15_2026.get("http_ok") and discovery.get("fallback_current_if_prior_missing"):
+        artifacts["irs_pub15_2026"] = _acquire(
+            "irs_pub15_2026", IRS_PUB15_CURRENT_PDF_URL, "irs_p15_2026.pdf"
         )
-        if key in arts
+        artifacts["irs_pub15_2026"]["url_kind"] = "current_listing_p15_pdf"
+    else:
+        artifacts["irs_pub15_2026"]["url_kind"] = discovery.get("url_kind")
+    artifacts["irs_pub15_2026"]["listing_revision_year"] = discovery.get("revision_year")
+    artifacts["irs_pub15_2026"]["listing_url"] = IRS_PUBLICATIONS_LISTING_URL
+    artifacts["_pub15_discovery"] = discovery
+    return artifacts
+
+
+def _income_fields(year: int, art: dict[str, Any] | None) -> tuple[dict[str, Any], list[str]]:
+    issues: list[str] = []
+    text = _text_for(art)
+    key = INCOME_TAX_ARTIFACT_BY_YEAR[year]
+    authority = INCOME_TAX_AUTHORITY_ID[year]
+    sha = art.get("sha256") if art else None
+    std = parse_standard_deduction_single(text, year)
+    brackets = parse_single_brackets(text, year)
+    if std is None:
+        issues.append("STANDARD_DEDUCTION_UNPARSED")
+    if not brackets:
+        issues.append("BRACKETS_UNPARSED")
+    std_rec = _field(
+        value=std,
+        authority_id=authority,
+        source_artifact_key=key,
+        source_sha256=sha,
+        extraction_identity=f"rp_{year}_standard_deduction_unmarried",
     )
-    text_2026 = "\n".join(
-        _text_for(arts[key])
-        for key in (
-            "irs_rp_2025_32",
-            "irs_2026_news",
-            "ssa_2026_factsheet_pdf",
-            "ssa_2026_html",
-            "ssa_cbb",
-            "ssa_tax_rates",
-            "irs_topic_751",
-            "irs_topic_560",
+    br_recs = [
+        _field(
+            upper=None if cap == float("inf") else cap,
+            rate=rate,
+            authority_id=authority,
+            source_artifact_key=key,
+            source_sha256=sha,
+            extraction_identity=f"rp_{year}_table3_section_1j2c",
         )
-        if key in arts
+        for cap, rate in (brackets or [])
+    ]
+    return {"standard_deduction": std_rec, "income_tax_brackets": br_recs}, issues
+
+
+def _payroll_fields(year: int, art: dict[str, Any] | None) -> tuple[dict[str, Any], list[str]]:
+    issues: list[str] = []
+    text = _text_for(art)
+    key = PAYROLL_ARTIFACT_BY_YEAR[year]
+    authority = PAYROLL_AUTHORITY_ID[year]
+    sha = art.get("sha256") if art else None
+    identity = parse_pub15_identity(text) if text else {}
+    if art and art.get("http_ok") and identity.get("publication_year") not in {None, year}:
+        issues.append(f"PUB15_YEAR_MISMATCH:{identity.get('publication_year')}")
+    oasdi_rate = parse_employee_oasdi_rate(text)
+    oasdi_cap = parse_oasdi_wage_base(text, year)
+    hi_rate = parse_employee_medicare_rate(text)
+    no_limit = parse_medicare_no_limit(text)
+    addl = parse_additional_medicare(text)
+    if oasdi_rate is None:
+        issues.append("OASDI_RATE_UNPARSED")
+    if oasdi_cap is None:
+        issues.append("OASDI_WAGE_BASE_UNPARSED")
+    if hi_rate is None:
+        issues.append("MEDICARE_RATE_UNPARSED")
+    if not no_limit:
+        issues.append("MEDICARE_NO_LIMIT_UNPARSED")
+    if addl is None:
+        issues.append("ADDITIONAL_MEDICARE_UNPARSED")
+    oasdi = _field(
+        employee_rate=oasdi_rate,
+        taxable_maximum=oasdi_cap,
+        authority_id=authority,
+        source_artifact_key=key,
+        source_sha256=sha,
+        extraction_identity=f"pub15_{year}_oasdi",
+    )
+    medicare = _field(
+        employee_rate=hi_rate,
+        taxable_maximum=None,
+        no_limit=bool(no_limit),
+        authority_id=authority,
+        source_artifact_key=key,
+        source_sha256=sha,
+        extraction_identity=f"pub15_{year}_medicare_hi",
+    )
+    if addl is None:
+        addl_rec = _field(
+            applicable=False,
+            threshold=None,
+            rate=None,
+            authority_id=authority,
+            source_artifact_key=key,
+            source_sha256=sha,
+            extraction_identity=f"pub15_{year}_additional_medicare",
+        )
+    else:
+        addl_rec = _field(
+            applicable=True,
+            threshold=addl["threshold"],
+            rate=addl["rate"],
+            authority_id=authority,
+            source_artifact_key=key,
+            source_sha256=sha,
+            extraction_identity=f"pub15_{year}_additional_medicare",
+        )
+    return {
+        "oasdi": oasdi,
+        "medicare_hi": medicare,
+        "additional_medicare_tax": addl_rec,
+        "pub15_identity": identity,
+    }, issues
+
+
+def build_federal_tax_inventory(artifacts: dict[str, Any] | None = None) -> dict[str, Any]:
+    """Parse each field from its designated official artifact. No text-soup merge."""
+    arts = artifacts if artifacts is not None else retrieve_federal_tax_authorities()
+    discovery = (
+        arts.get("_pub15_discovery") if isinstance(arts.get("_pub15_discovery"), dict) else {}
     )
     years: dict[str, Any] = {}
-    for year, text, irs_keys, ssa_keys in (
-        (
-            2024,
-            text_2024,
-            ("irs_rp_2023_34", "irs_irb_2023_48"),
-            ("ssa_2024_factsheet", "ssa_cbb", "irs_pub15_2024", "irs_topic_751"),
-        ),
-        (
-            2026,
-            text_2026,
-            ("irs_rp_2025_32", "irs_2026_news"),
-            ("ssa_2026_factsheet_pdf", "ssa_2026_html", "ssa_cbb", "irs_topic_751"),
-        ),
+    for year, income_key, payroll_key in (
+        (2024, "irs_rp_2023_34", "irs_pub15_2024"),
+        (2026, "irs_rp_2025_32", "irs_pub15_2026"),
     ):
-        std = parse_standard_deduction_single(text, year)
-        brackets = parse_single_brackets(text, year)
-        oasdi_cap = parse_oasdi_wage_base(text, year)
-        oasdi_rate = parse_employee_oasdi_rate(text)
-        hi_rate = parse_employee_medicare_rate(text)
-        addl = parse_additional_medicare(text)
-        if addl is None and (hi_rate is not None or oasdi_rate is not None):
-            # Statutory IRC 3101(b)(2) is year-independent; record only when payroll docs exist.
-            addl = {
-                "applicable": True,
-                "threshold": ADDITIONAL_MEDICARE_THRESHOLD_SINGLE,
-                "rate": ADDITIONAL_MEDICARE_RATE,
-                "authority": "IRC 3101(b)(2); SSA COLA fact sheet additional 0.9 percent",
-                "from_payroll_text": False,
-            }
-        elif addl is not None:
-            addl["authority"] = "SSA COLA fact sheet / IRC 3101(b)(2)"
-            addl["from_payroll_text"] = True
-        issues: list[str] = []
-        if std is None:
-            issues.append("STANDARD_DEDUCTION_UNPARSED")
-        if not brackets:
-            issues.append("BRACKETS_UNPARSED")
-        if oasdi_cap is None:
-            issues.append("OASDI_WAGE_BASE_UNPARSED")
-        if oasdi_rate is None:
-            issues.append("OASDI_RATE_UNPARSED")
-        if hi_rate is None:
-            issues.append("MEDICARE_RATE_UNPARSED")
-        if addl is None:
-            issues.append("ADDITIONAL_MEDICARE_UNPARSED")
+        income, income_issues = _income_fields(year, arts.get(income_key))
+        payroll, payroll_issues = _payroll_fields(year, arts.get(payroll_key))
+        issues = income_issues + payroll_issues
         years[str(year)] = {
             "tax_year": year,
             "filing_status": "SINGLE",
-            "standard_deduction": {
-                "value": std,
-                "authority": "IRS Rev. Proc. 2023-34" if year == 2024 else "IRS Rev. Proc. 2025-32",
-                "source_artifact": list(irs_keys),
-            },
-            "income_tax_brackets": [
-                {
-                    "upper": None if c == float("inf") else c,
-                    "rate": r,
-                    "authority": "IRS Rev. Proc. 2023-34"
-                    if year == 2024
-                    else "IRS Rev. Proc. 2025-32",
-                }
-                for c, r in (brackets or [])
-            ],
-            "oasdi": {
-                "employee_rate": oasdi_rate,
-                "taxable_maximum": oasdi_cap,
-                "authority": "IRS Topic 751 / Publication 15 (SSA pages 403 from this client)",
-                "source_artifact": list(ssa_keys),
-            },
-            "medicare_hi": {
-                "employee_rate": hi_rate,
-                "taxable_maximum": None,
-                "no_limit": True,
-                "authority": "SSA / IRC 3101(b)(1)",
-            },
-            "additional_medicare_tax": addl
-            or {
-                "applicable": True,
-                "threshold": None,
-                "rate": None,
-                "authority": None,
-            },
+            "standard_deduction": income["standard_deduction"],
+            "income_tax_brackets": income["income_tax_brackets"],
+            "oasdi": payroll["oasdi"],
+            "medicare_hi": payroll["medicare_hi"],
+            "additional_medicare_tax": payroll["additional_medicare_tax"],
+            "pub15_identity": payroll.get("pub15_identity"),
             "issues": issues,
             "parsed_ok": not issues,
         }
     bound_artifacts = []
     for key, art in arts.items():
+        if key.startswith("_") or not isinstance(art, dict):
+            continue
         bound_artifacts.append(
             {
                 "key": key,
@@ -436,18 +634,27 @@ def build_federal_tax_inventory(artifacts: dict[str, Any] | None = None) -> dict
                 "sha256": art.get("sha256"),
                 "retrieved_at": art.get("retrieved_at"),
                 "http_ok": art.get("http_ok"),
+                "byte_size": art.get("byte_size"),
+                "document_identity": art.get("listing_revision_year")
+                if key == "irs_pub15_2026"
+                else None,
             }
         )
-    payload = {
+    return {
         "report_type": INVENTORY_REPORT_TYPE,
         "generated_at": _now_iso(),
         "filing_status": "SINGLE",
         "years": years,
         "retrieved_artifacts": bound_artifacts,
+        "pub15_2026_discovery": {
+            "listing_url": IRS_PUBLICATIONS_LISTING_URL,
+            "revision_year": discovery.get("revision_year"),
+            "resolved_url": (arts.get("irs_pub15_2026") or {}).get("url"),
+            "listing_error": discovery.get("listing_error"),
+        },
         "calculates_mslc": False,
         "headline_calculated": False,
     }
-    return payload
 
 
 def write_federal_tax_inventory(output_path: Path | None = None) -> dict[str, Any]:
@@ -456,3 +663,138 @@ def write_federal_tax_inventory(output_path: Path | None = None) -> dict[str, An
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.write_text(json.dumps(payload, indent=2), encoding="utf-8")
     return payload
+
+
+def evaluate_federal_tax_freshness(
+    *,
+    inventory_valid: bool,
+    live: dict[str, Any] | None,
+    live_error: str | None,
+) -> tuple[str, bool | None, str]:
+    """Separate evidence validity from live currentness.
+
+    Returns (freshness_check_status, newer_data_exists, reason).
+    """
+    if live_error:
+        return (
+            "CHECK_FAILED",
+            None,
+            (
+                "Live official IRS currentness discovery failed. "
+                f"Cached inventory remains {'VALIDATED' if inventory_valid else 'unvalidated'}. "
+                f"{live_error}"
+            ),
+        )
+    live = live or {}
+    pub_year = live.get("pub15_revision_year")
+    successor = live.get("successor_rev_proc")
+    rp_current = live.get("rev_proc_2025_32_current")
+    payroll_match = live.get("current_pub15_payroll_matches")
+    if successor:
+        return (
+            "NEWER_AVAILABLE",
+            True,
+            f"Official IRS current material cites a superseding 2026 authority: {successor}.",
+        )
+    if isinstance(pub_year, int) and pub_year > 2026:
+        return (
+            "NEWER_AVAILABLE",
+            True,
+            f"Official IRS publications listing now shows Publication 15 ({pub_year}).",
+        )
+    if isinstance(pub_year, int) and pub_year != 2026:
+        return (
+            "CHECK_FAILED",
+            None,
+            f"Official IRS publications listing Publication 15 revision is {pub_year}, not 2026.",
+        )
+    if rp_current is False:
+        return (
+            "NEWER_AVAILABLE",
+            True,
+            "Official IRS 2026 inflation-adjustment material no longer presents Rev. Proc. 2025-32.",
+        )
+    if payroll_match is False:
+        return (
+            "CHECK_FAILED",
+            None,
+            "Current official Publication 15 payroll values disagree with the bound 2026 inventory.",
+        )
+    if inventory_valid and pub_year == 2026 and rp_current is True and payroll_match is not False:
+        return (
+            "VERIFIED_CURRENT",
+            False,
+            (
+                "Targeted official IRS discovery confirms Publication 15 (2026) and "
+                "Rev. Proc. 2025-32 remain the applicable 2026 authorities, and current "
+                "Publication 15 payroll values agree with the bound inventory."
+            ),
+        )
+    return (
+        "CHECK_FAILED",
+        None,
+        f"Live IRS currentness was incomplete: {live}.",
+    )
+
+
+def discover_federal_tax_live() -> tuple[dict[str, Any] | None, str | None]:
+    """Targeted live IRS currentness. Does not use the generic IRB landing as proof."""
+    from foundation.living_cost.freshness_discovery import fetch_text
+
+    try:
+        listing_html, _ = fetch_text(IRS_PUBLICATIONS_LISTING_URL)
+        news_html, _ = fetch_text(IRS_2026_NEWS_URL)
+    except (OSError, RuntimeError, ValueError) as exc:
+        return None, str(exc)
+    listing = parse_pub15_listing(listing_html)
+    pub_year = listing.get("revision_year")
+    successor = None
+    rp_hits = re.findall(
+        r"Rev(?:enue)?\.?\s*Proc(?:edure)?\.?\s*(\d{4}-\d+)", news_html, re.IGNORECASE
+    )
+    rp_norm = {item.replace(" ", "") for item in rp_hits}
+    rp_current = "2025-32" in rp_norm or "2025-32" in news_html
+    for item in sorted(rp_norm):
+        if item.startswith("2025-") and item != "2025-32":
+            successor = f"Rev. Proc. {item}"
+        if item.startswith("2026-"):
+            successor = f"Rev. Proc. {item}"
+    payroll_match: bool | None = None
+    if pub_year == 2026:
+        try:
+            from foundation.living_cost.freshness_currentness import download_temp_bytes
+            from foundation.living_cost.freshness_discovery import _BROWSER_HEADERS
+
+            tmp, _digest = download_temp_bytes(
+                IRS_PUB15_CURRENT_PDF_URL, headers=_BROWSER_HEADERS, suffix=".pdf"
+            )
+            try:
+                live_text = _extract_pdf_text(tmp)
+            finally:
+                tmp.unlink(missing_ok=True)
+            live_cap = parse_oasdi_wage_base(live_text, 2026)
+            live_rate = parse_employee_oasdi_rate(live_text)
+            live_hi = parse_employee_medicare_rate(live_text)
+            live_addl = parse_additional_medicare(live_text)
+            payroll_match = (
+                live_cap == 184500.0
+                and live_rate == 0.062
+                and live_hi == 0.0145
+                and live_addl is not None
+                and live_addl.get("threshold") == 200000.0
+                and live_addl.get("rate") == 0.009
+            )
+        except (OSError, RuntimeError, ValueError) as exc:
+            logger.warning("live current Pub 15 compare failed: %s", exc)
+            payroll_match = None
+    return (
+        {
+            "pub15_revision_year": pub_year,
+            "rev_proc_2025_32_current": rp_current,
+            "successor_rev_proc": successor,
+            "current_pub15_payroll_matches": payroll_match,
+            "listing_url": IRS_PUBLICATIONS_LISTING_URL,
+            "news_url": IRS_2026_NEWS_URL,
+        },
+        None,
+    )

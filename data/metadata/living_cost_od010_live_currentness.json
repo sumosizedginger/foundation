@@ -1,18 +1,10 @@
 {
-  "freshness_check_status": "VERIFIED_CURRENT",
-  "currentness_status": "VERIFIED_CURRENT",
-  "translation_index_bound": true,
+  "freshness_check_status": "CHECK_FAILED",
+  "currentness_status": "CHECK_FAILED",
+  "translation_index_bound": false,
+  "reason": "live BLS retrieve failed: BLS API status=REQUEST_NOT_PROCESSED message=['Request could not be serviced, as the daily threshold for total number of requests allocated to the user with registration key  has been reached.']",
   "structural_table_bound": true,
-  "live_bls_request": "SUCCEEDED",
-  "raw_response_sha256": "4af99ff7b7969df4af0f8292bc54727f965d64d5936eb444c933036c4cf5f086",
-  "observation_set_sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
-  "table_observation_set_sha256": "a40175e7fffd11ce240db48d3db41336c8c2b21c4c02e3a5506b11e04967385d",
-  "live_latest_target_observation": "2026 July",
-  "table_target_observation": "2026 July",
-  "match_issues": [],
-  "cross_binding_ok": true,
-  "cross_binding_issues": [],
   "report_type": "living_cost_od010_live_currentness",
-  "generated_at": "2026-08-18T19:16:53Z",
+  "generated_at": "2026-08-19T01:23:24Z",
   "calculates_mslc": false
 }

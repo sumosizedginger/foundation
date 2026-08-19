@@ -1525,9 +1525,13 @@ def discover_federal_tax() -> FreshnessCheck:
         validate_federal_tax_inventory,
     )
     from foundation.living_cost.taxes import FEDERAL_TAX_RULES
+    from foundation.sources.federal_tax import (
+        IRS_PUBLICATIONS_LISTING_URL,
+        discover_federal_tax_live,
+        evaluate_federal_tax_freshness,
+    )
 
     years = sorted(FEDERAL_TAX_RULES)
-    irs = "https://www.irs.gov/irb"
     validation = validate_federal_tax_inventory()
     evidence = federal_tax_evidence_status()
     payload = validation.payload or {}
@@ -1545,51 +1549,24 @@ def discover_federal_tax() -> FreshnessCheck:
                 validation_status="VALIDATED" if item.get("http_ok") else "UNAVAILABLE",
             )
         )
+    checked = _now_iso()
     try:
-        html, checked = fetch_text(irs)
-        fetched = True
+        live, live_error = discover_federal_tax_live()
     except (OSError, RuntimeError, ValueError, requests.RequestException) as exc:
-        html = ""
-        checked = _now_iso()
-        fetched = False
-        fetch_err = str(exc)
-    else:
-        fetch_err = None
+        live, live_error = None, str(exc)
+    status, newer, reason = evaluate_federal_tax_freshness(
+        inventory_valid=validation.ok,
+        live=live,
+        live_error=live_error,
+    )
+    if not validation.ok and status == "VERIFIED_CURRENT":
+        status = "CHECK_FAILED"
+        newer = None
+        reason = f"Inventory is not validated: {validation.issues}."
     y2024_ok = bool((year_recs.get("2024") or {}).get("parsed_ok"))
     y2026_ok = bool((year_recs.get("2026") or {}).get("parsed_ok"))
-    if validation.ok:
-        status = "VERIFIED_CURRENT"
-        newer: bool | None = False
-        reason = (
-            "Primary IRS and SSA authorities are bound and FEDERAL_TAX_RULES "
-            "matches the official inventory for 2024 and 2026, including Additional "
-            "Medicare Tax. Unsupported tax years remain fail-closed."
-        )
-    elif not fetched:
-        status = "CHECK_FAILED"
-        newer = None
-        reason = (
-            f"IRS IRB landing could not be retrieved ({fetch_err}). "
-            f"Inventory issues: {validation.issues}."
-        )
-    elif any(str(i).startswith("FEDERAL_TAX_RULES_MISMATCH") for i in validation.issues) or any(
-        str(i).startswith("FEDERAL_TAX_MODEL_GAP") for i in validation.issues
-    ):
-        status = "CHECK_FAILED"
-        newer = None
-        reason = f"Federal tax inventory did not validate: {validation.issues}."
-    else:
-        status = "MANUAL_VERIFICATION_REQUIRED"
-        newer = None
-        reason = (
-            "IRS/SSA authorities were not fully parsed into a validated inventory. "
-            f"Issues: {validation.issues}."
-        )
-        if fetched and "html" not in html.lower() and "irs" not in html.lower():
-            status = "CHECK_FAILED"
-            reason = "IRS IRB response did not look like the official bulletin page."
-    auth_2024 = (year_recs.get("2024") or {}).get("standard_deduction", {}).get("authority")
-    auth_2026 = (year_recs.get("2026") or {}).get("standard_deduction", {}).get("authority")
+    auth_2024 = (year_recs.get("2024") or {}).get("standard_deduction", {}).get("authority_id")
+    auth_2026 = (year_recs.get("2026") or {}).get("standard_deduction", {}).get("authority_id")
     return FreshnessCheck(
         source_id="federal_tax_law",
         latest_checked_at=checked,
@@ -1600,16 +1577,16 @@ def discover_federal_tax() -> FreshnessCheck:
         retrieval_validation_status=evidence,
         reason_if_not_refreshed=reason,
         freshness_check_status=status,
-        publisher="Internal Revenue Service / SSA",
-        landing_url=irs,
+        publisher="Internal Revenue Service",
+        landing_url=IRS_PUBLICATIONS_LISTING_URL,
         selected_artifacts=tuple(artifacts),
-        transformation_method="RULE_YEAR; no silent fallback to another year",
+        transformation_method="RULE_YEAR; field-level IRS artifact provenance; no MSLC",
         input_evidence_status=evidence,
         year_coverage=_year_coverage(
             {
                 "covered": y2024_ok and validation.ok,
                 "source_data_year": 2024,
-                "note": "federal 2024 inventory vs FEDERAL_TAX_RULES",
+                "note": "federal 2024 inventory vs FEDERAL_TAX_RULES; historical RULE_YEAR",
             },
             {
                 "covered": y2026_ok and validation.ok,
@@ -1621,6 +1598,8 @@ def discover_federal_tax() -> FreshnessCheck:
             "rule_years_present": years,
             "validation_issues": validation.issues,
             "inventory_generated_at": payload.get("generated_at"),
+            "live_currentness": live,
+            "live_error": live_error,
         },
     )
 

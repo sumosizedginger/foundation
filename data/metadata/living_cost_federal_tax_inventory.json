@@ -1,79 +1,105 @@
 {
   "report_type": "living_cost_federal_tax_inventory",
-  "generated_at": "2026-08-18T20:50:00+00:00",
+  "generated_at": "2026-08-19T01:23:07+00:00",
   "filing_status": "SINGLE",
   "years": {
     "2024": {
       "tax_year": 2024,
       "filing_status": "SINGLE",
       "standard_deduction": {
-        "value": 14600.0,
-        "authority": "IRS Rev. Proc. 2023-34",
-        "source_artifact": [
-          "irs_rp_2023_34",
-          "irs_irb_2023_48"
-        ]
+        "authority_id": "IRS_RP_2023_34",
+        "source_artifact_key": "irs_rp_2023_34",
+        "source_sha256": "544ba41c7ba64f77da521e0d174a7b7394dc72b5c7c73d10adb19952d5aaae57",
+        "extraction_identity": "rp_2024_standard_deduction_unmarried",
+        "value": 14600.0
       },
       "income_tax_brackets": [
         {
+          "authority_id": "IRS_RP_2023_34",
+          "source_artifact_key": "irs_rp_2023_34",
+          "source_sha256": "544ba41c7ba64f77da521e0d174a7b7394dc72b5c7c73d10adb19952d5aaae57",
+          "extraction_identity": "rp_2024_table3_section_1j2c",
           "upper": 11600.0,
-          "rate": 0.1,
-          "authority": "IRS Rev. Proc. 2023-34"
+          "rate": 0.1
         },
         {
+          "authority_id": "IRS_RP_2023_34",
+          "source_artifact_key": "irs_rp_2023_34",
+          "source_sha256": "544ba41c7ba64f77da521e0d174a7b7394dc72b5c7c73d10adb19952d5aaae57",
+          "extraction_identity": "rp_2024_table3_section_1j2c",
           "upper": 47150.0,
-          "rate": 0.12,
-          "authority": "IRS Rev. Proc. 2023-34"
+          "rate": 0.12
         },
         {
+          "authority_id": "IRS_RP_2023_34",
+          "source_artifact_key": "irs_rp_2023_34",
+          "source_sha256": "544ba41c7ba64f77da521e0d174a7b7394dc72b5c7c73d10adb19952d5aaae57",
+          "extraction_identity": "rp_2024_table3_section_1j2c",
           "upper": 100525.0,
-          "rate": 0.22,
-          "authority": "IRS Rev. Proc. 2023-34"
+          "rate": 0.22
         },
         {
+          "authority_id": "IRS_RP_2023_34",
+          "source_artifact_key": "irs_rp_2023_34",
+          "source_sha256": "544ba41c7ba64f77da521e0d174a7b7394dc72b5c7c73d10adb19952d5aaae57",
+          "extraction_identity": "rp_2024_table3_section_1j2c",
           "upper": 191950.0,
-          "rate": 0.24,
-          "authority": "IRS Rev. Proc. 2023-34"
+          "rate": 0.24
         },
         {
+          "authority_id": "IRS_RP_2023_34",
+          "source_artifact_key": "irs_rp_2023_34",
+          "source_sha256": "544ba41c7ba64f77da521e0d174a7b7394dc72b5c7c73d10adb19952d5aaae57",
+          "extraction_identity": "rp_2024_table3_section_1j2c",
           "upper": 243725.0,
-          "rate": 0.32,
-          "authority": "IRS Rev. Proc. 2023-34"
+          "rate": 0.32
         },
         {
+          "authority_id": "IRS_RP_2023_34",
+          "source_artifact_key": "irs_rp_2023_34",
+          "source_sha256": "544ba41c7ba64f77da521e0d174a7b7394dc72b5c7c73d10adb19952d5aaae57",
+          "extraction_identity": "rp_2024_table3_section_1j2c",
           "upper": 609350.0,
-          "rate": 0.35,
-          "authority": "IRS Rev. Proc. 2023-34"
+          "rate": 0.35
         },
         {
+          "authority_id": "IRS_RP_2023_34",
+          "source_artifact_key": "irs_rp_2023_34",
+          "source_sha256": "544ba41c7ba64f77da521e0d174a7b7394dc72b5c7c73d10adb19952d5aaae57",
+          "extraction_identity": "rp_2024_table3_section_1j2c",
           "upper": null,
-          "rate": 0.37,
-          "authority": "IRS Rev. Proc. 2023-34"
+          "rate": 0.37
         }
       ],
       "oasdi": {
+        "authority_id": "IRS_PUB_15_2024",
+        "source_artifact_key": "irs_pub15_2024",
+        "source_sha256": "3a15da95e39b24f2b6c61f4abc85298c897f57600c3508f9381fab7180a092e0",
+        "extraction_identity": "pub15_2024_oasdi",
         "employee_rate": 0.062,
-        "taxable_maximum": 168600.0,
-        "authority": "IRS Topic 751 / Publication 15 (SSA pages 403 from this client)",
-        "source_artifact": [
-          "ssa_2024_factsheet",
-          "ssa_cbb",
-          "irs_pub15_2024",
-          "irs_topic_751"
-        ]
+        "taxable_maximum": 168600.0
       },
       "medicare_hi": {
+        "authority_id": "IRS_PUB_15_2024",
+        "source_artifact_key": "irs_pub15_2024",
+        "source_sha256": "3a15da95e39b24f2b6c61f4abc85298c897f57600c3508f9381fab7180a092e0",
+        "extraction_identity": "pub15_2024_medicare_hi",
         "employee_rate": 0.0145,
         "taxable_maximum": null,
-        "no_limit": true,
-        "authority": "SSA / IRC 3101(b)(1)"
+        "no_limit": true
       },
       "additional_medicare_tax": {
+        "authority_id": "IRS_PUB_15_2024",
+        "source_artifact_key": "irs_pub15_2024",
+        "source_sha256": "3a15da95e39b24f2b6c61f4abc85298c897f57600c3508f9381fab7180a092e0",
+        "extraction_identity": "pub15_2024_additional_medicare",
         "applicable": true,
         "threshold": 200000.0,
-        "rate": 0.009,
-        "authority": "SSA COLA fact sheet / IRC 3101(b)(2)",
-        "from_payroll_text": true
+        "rate": 0.009
+      },
+      "pub15_identity": {
+        "title": "Publication 15 (Circular E), Employer's Tax Guide",
+        "publication_year": 2024
       },
       "issues": [],
       "parsed_ok": true
@@ -82,73 +108,99 @@
       "tax_year": 2026,
       "filing_status": "SINGLE",
       "standard_deduction": {
-        "value": 16100.0,
-        "authority": "IRS Rev. Proc. 2025-32",
-        "source_artifact": [
-          "irs_rp_2025_32",
-          "irs_2026_news"
-        ]
+        "authority_id": "IRS_RP_2025_32",
+        "source_artifact_key": "irs_rp_2025_32",
+        "source_sha256": "e9ada115fb43a4af5ea326ca91edd40ab0bf29b9be01d2c13d7b8fa96214635b",
+        "extraction_identity": "rp_2026_standard_deduction_unmarried",
+        "value": 16100.0
       },
       "income_tax_brackets": [
         {
+          "authority_id": "IRS_RP_2025_32",
+          "source_artifact_key": "irs_rp_2025_32",
+          "source_sha256": "e9ada115fb43a4af5ea326ca91edd40ab0bf29b9be01d2c13d7b8fa96214635b",
+          "extraction_identity": "rp_2026_table3_section_1j2c",
           "upper": 12400.0,
-          "rate": 0.1,
-          "authority": "IRS Rev. Proc. 2025-32"
+          "rate": 0.1
         },
         {
+          "authority_id": "IRS_RP_2025_32",
+          "source_artifact_key": "irs_rp_2025_32",
+          "source_sha256": "e9ada115fb43a4af5ea326ca91edd40ab0bf29b9be01d2c13d7b8fa96214635b",
+          "extraction_identity": "rp_2026_table3_section_1j2c",
           "upper": 50400.0,
-          "rate": 0.12,
-          "authority": "IRS Rev. Proc. 2025-32"
+          "rate": 0.12
         },
         {
+          "authority_id": "IRS_RP_2025_32",
+          "source_artifact_key": "irs_rp_2025_32",
+          "source_sha256": "e9ada115fb43a4af5ea326ca91edd40ab0bf29b9be01d2c13d7b8fa96214635b",
+          "extraction_identity": "rp_2026_table3_section_1j2c",
           "upper": 105700.0,
-          "rate": 0.22,
-          "authority": "IRS Rev. Proc. 2025-32"
+          "rate": 0.22
         },
         {
+          "authority_id": "IRS_RP_2025_32",
+          "source_artifact_key": "irs_rp_2025_32",
+          "source_sha256": "e9ada115fb43a4af5ea326ca91edd40ab0bf29b9be01d2c13d7b8fa96214635b",
+          "extraction_identity": "rp_2026_table3_section_1j2c",
           "upper": 201775.0,
-          "rate": 0.24,
-          "authority": "IRS Rev. Proc. 2025-32"
+          "rate": 0.24
         },
         {
+          "authority_id": "IRS_RP_2025_32",
+          "source_artifact_key": "irs_rp_2025_32",
+          "source_sha256": "e9ada115fb43a4af5ea326ca91edd40ab0bf29b9be01d2c13d7b8fa96214635b",
+          "extraction_identity": "rp_2026_table3_section_1j2c",
           "upper": 256225.0,
-          "rate": 0.32,
-          "authority": "IRS Rev. Proc. 2025-32"
+          "rate": 0.32
         },
         {
+          "authority_id": "IRS_RP_2025_32",
+          "source_artifact_key": "irs_rp_2025_32",
+          "source_sha256": "e9ada115fb43a4af5ea326ca91edd40ab0bf29b9be01d2c13d7b8fa96214635b",
+          "extraction_identity": "rp_2026_table3_section_1j2c",
           "upper": 640600.0,
-          "rate": 0.35,
-          "authority": "IRS Rev. Proc. 2025-32"
+          "rate": 0.35
         },
         {
+          "authority_id": "IRS_RP_2025_32",
+          "source_artifact_key": "irs_rp_2025_32",
+          "source_sha256": "e9ada115fb43a4af5ea326ca91edd40ab0bf29b9be01d2c13d7b8fa96214635b",
+          "extraction_identity": "rp_2026_table3_section_1j2c",
           "upper": null,
-          "rate": 0.37,
-          "authority": "IRS Rev. Proc. 2025-32"
+          "rate": 0.37
         }
       ],
       "oasdi": {
+        "authority_id": "IRS_PUB_15_2026",
+        "source_artifact_key": "irs_pub15_2026",
+        "source_sha256": "b46c3622439d8521e3a0faca4cd5b5ece3451b526f65f06a5e38d5c9f804c88b",
+        "extraction_identity": "pub15_2026_oasdi",
         "employee_rate": 0.062,
-        "taxable_maximum": 184500.0,
-        "authority": "IRS Topic 751 / Publication 15 (SSA pages 403 from this client)",
-        "source_artifact": [
-          "ssa_2026_factsheet_pdf",
-          "ssa_2026_html",
-          "ssa_cbb",
-          "irs_topic_751"
-        ]
+        "taxable_maximum": 184500.0
       },
       "medicare_hi": {
+        "authority_id": "IRS_PUB_15_2026",
+        "source_artifact_key": "irs_pub15_2026",
+        "source_sha256": "b46c3622439d8521e3a0faca4cd5b5ece3451b526f65f06a5e38d5c9f804c88b",
+        "extraction_identity": "pub15_2026_medicare_hi",
         "employee_rate": 0.0145,
         "taxable_maximum": null,
-        "no_limit": true,
-        "authority": "SSA / IRC 3101(b)(1)"
+        "no_limit": true
       },
       "additional_medicare_tax": {
+        "authority_id": "IRS_PUB_15_2026",
+        "source_artifact_key": "irs_pub15_2026",
+        "source_sha256": "b46c3622439d8521e3a0faca4cd5b5ece3451b526f65f06a5e38d5c9f804c88b",
+        "extraction_identity": "pub15_2026_additional_medicare",
         "applicable": true,
         "threshold": 200000.0,
-        "rate": 0.009,
-        "authority": "SSA COLA fact sheet / IRC 3101(b)(2)",
-        "from_payroll_text": true
+        "rate": 0.009
+      },
+      "pub15_identity": {
+        "title": "Publication 15 (Circular E), Employer's Tax Guide",
+        "publication_year": 2026
       },
       "issues": [],
       "parsed_ok": true
@@ -161,7 +213,9 @@
       "filename": "irs_rp-23-34.pdf",
       "sha256": "544ba41c7ba64f77da521e0d174a7b7394dc72b5c7c73d10adb19952d5aaae57",
       "retrieved_at": "2026-08-18T20:39:09+00:00",
-      "http_ok": true
+      "http_ok": true,
+      "byte_size": 255987,
+      "document_identity": null
     },
     {
       "key": "irs_irb_2023_48",
@@ -169,7 +223,9 @@
       "filename": "irs_irb23-48.pdf",
       "sha256": "5cafae764dbb9b11d90f61300196543425f093acec48b970c45f4cfd79520e86",
       "retrieved_at": "2026-08-18T20:39:10+00:00",
-      "http_ok": true
+      "http_ok": true,
+      "byte_size": 810833,
+      "document_identity": null
     },
     {
       "key": "irs_rp_2025_32",
@@ -177,71 +233,9 @@
       "filename": "irs_rp-25-32.pdf",
       "sha256": "e9ada115fb43a4af5ea326ca91edd40ab0bf29b9be01d2c13d7b8fa96214635b",
       "retrieved_at": "2026-08-18T20:39:11+00:00",
-      "http_ok": true
-    },
-    {
-      "key": "ssa_2024_factsheet",
-      "url": "https://www.ssa.gov/news/press/factsheets/colafacts2024.pdf",
-      "filename": "ssa_colafacts2024.pdf",
-      "sha256": null,
-      "retrieved_at": null,
-      "http_ok": false
-    },
-    {
-      "key": "ssa_2026_factsheet_pdf",
-      "url": "https://www.ssa.gov/news/press/factsheets/colafacts2026.pdf",
-      "filename": "ssa_colafacts2026.pdf",
-      "sha256": null,
-      "retrieved_at": null,
-      "http_ok": false
-    },
-    {
-      "key": "ssa_cbb",
-      "url": "https://www.ssa.gov/oact/cola/cbb.html",
-      "filename": "ssa_cbb.html",
-      "sha256": null,
-      "retrieved_at": null,
-      "http_ok": false
-    },
-    {
-      "key": "ssa_tax_rates",
-      "url": "https://www.ssa.gov/oact/progdata/taxRates.html",
-      "filename": "ssa_taxRates.html",
-      "sha256": null,
-      "retrieved_at": null,
-      "http_ok": false
-    },
-    {
-      "key": "ssa_2026_html",
-      "url": "https://www.ssa.gov/news/en/cola/factsheets/2026.html",
-      "filename": "ssa_cola_2026.html",
-      "sha256": null,
-      "retrieved_at": null,
-      "http_ok": false
-    },
-    {
-      "key": "irs_2026_news",
-      "url": "https://www.irs.gov/newsroom/irs-releases-tax-inflation-adjustments-for-tax-year-2026-including-amendments-from-the-one-big-beautiful-bill",
-      "filename": "irs_2026_inflation.html",
-      "sha256": "41af03f6b46c87997f36276ba98ae6b63dc621f0cc4eca9d9546a34d74891e77",
-      "retrieved_at": "2026-08-18T20:39:14+00:00",
-      "http_ok": true
-    },
-    {
-      "key": "irs_topic_751",
-      "url": "https://www.irs.gov/taxtopics/tc751",
-      "filename": "irs_tc751.html",
-      "sha256": "ce8fee83e6758e56357d4dd1e7a2b91d7bdc6711efd02866c26471ed1bf72a7e",
-      "retrieved_at": "2026-08-18T20:44:45+00:00",
-      "http_ok": true
-    },
-    {
-      "key": "irs_topic_560",
-      "url": "https://www.irs.gov/taxtopics/tc560",
-      "filename": "irs_tc560.html",
-      "sha256": "bc6e3fd501952e3764cd93f3578d4cda36f22569446c09dcafa6086b6157675e",
-      "retrieved_at": "2026-08-18T20:44:46+00:00",
-      "http_ok": true
+      "http_ok": true,
+      "byte_size": 260406,
+      "document_identity": null
     },
     {
       "key": "irs_pub15_2024",
@@ -249,9 +243,107 @@
       "filename": "irs_p15_2024.pdf",
       "sha256": "3a15da95e39b24f2b6c61f4abc85298c897f57600c3508f9381fab7180a092e0",
       "retrieved_at": "2026-08-18T20:46:44+00:00",
-      "http_ok": true
+      "http_ok": true,
+      "byte_size": 1638730,
+      "document_identity": null
+    },
+    {
+      "key": "irs_pub15_2026",
+      "url": "https://www.irs.gov/pub/irs-prior/p15--2026.pdf",
+      "filename": "irs_p15_2026.pdf",
+      "sha256": "b46c3622439d8521e3a0faca4cd5b5ece3451b526f65f06a5e38d5c9f804c88b",
+      "retrieved_at": "2026-08-19T01:22:37+00:00",
+      "http_ok": true,
+      "byte_size": 1713916,
+      "document_identity": 2026
+    },
+    {
+      "key": "irs_2026_news",
+      "url": "https://www.irs.gov/newsroom/irs-releases-tax-inflation-adjustments-for-tax-year-2026-including-amendments-from-the-one-big-beautiful-bill",
+      "filename": "irs_2026_inflation.html",
+      "sha256": "41af03f6b46c87997f36276ba98ae6b63dc621f0cc4eca9d9546a34d74891e77",
+      "retrieved_at": "2026-08-18T20:39:14+00:00",
+      "http_ok": true,
+      "byte_size": 105332,
+      "document_identity": null
+    },
+    {
+      "key": "irs_topic_751",
+      "url": "https://www.irs.gov/taxtopics/tc751",
+      "filename": "irs_tc751.html",
+      "sha256": "ce8fee83e6758e56357d4dd1e7a2b91d7bdc6711efd02866c26471ed1bf72a7e",
+      "retrieved_at": "2026-08-18T20:44:45+00:00",
+      "http_ok": true,
+      "byte_size": 99975,
+      "document_identity": null
+    },
+    {
+      "key": "irs_topic_560",
+      "url": "https://www.irs.gov/taxtopics/tc560",
+      "filename": "irs_tc560.html",
+      "sha256": "bc6e3fd501952e3764cd93f3578d4cda36f22569446c09dcafa6086b6157675e",
+      "retrieved_at": "2026-08-18T20:44:46+00:00",
+      "http_ok": true,
+      "byte_size": 103494,
+      "document_identity": null
+    },
+    {
+      "key": "ssa_2024_factsheet",
+      "url": "https://www.ssa.gov/news/press/factsheets/colafacts2024.pdf",
+      "filename": "ssa_colafacts2024.pdf",
+      "sha256": null,
+      "retrieved_at": null,
+      "http_ok": false,
+      "byte_size": null,
+      "document_identity": null
+    },
+    {
+      "key": "ssa_2026_factsheet_pdf",
+      "url": "https://www.ssa.gov/news/press/factsheets/colafacts2026.pdf",
+      "filename": "ssa_colafacts2026.pdf",
+      "sha256": null,
+      "retrieved_at": null,
+      "http_ok": false,
+      "byte_size": null,
+      "document_identity": null
+    },
+    {
+      "key": "ssa_cbb",
+      "url": "https://www.ssa.gov/oact/cola/cbb.html",
+      "filename": "ssa_cbb.html",
+      "sha256": null,
+      "retrieved_at": null,
+      "http_ok": false,
+      "byte_size": null,
+      "document_identity": null
+    },
+    {
+      "key": "ssa_tax_rates",
+      "url": "https://www.ssa.gov/oact/progdata/taxRates.html",
+      "filename": "ssa_taxRates.html",
+      "sha256": null,
+      "retrieved_at": null,
+      "http_ok": false,
+      "byte_size": null,
+      "document_identity": null
+    },
+    {
+      "key": "ssa_2026_html",
+      "url": "https://www.ssa.gov/news/en/cola/factsheets/2026.html",
+      "filename": "ssa_cola_2026.html",
+      "sha256": null,
+      "retrieved_at": null,
+      "http_ok": false,
+      "byte_size": null,
+      "document_identity": null
     }
   ],
+  "pub15_2026_discovery": {
+    "listing_url": "https://www.irs.gov/publications",
+    "revision_year": 2026,
+    "resolved_url": "https://www.irs.gov/pub/irs-prior/p15--2026.pdf",
+    "listing_error": null
+  },
   "calculates_mslc": false,
   "headline_calculated": false
 }

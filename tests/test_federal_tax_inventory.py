@@ -226,3 +226,269 @@ def test_coverage_status_dimensions_use_federal_tax_validator():
             coverage["status_dimensions"]["by_year"][year]["federal_tax"]["evidence_status"]
             == expected
         )
+
+
+def _art(key: str, sha: str, *, ok: bool = True, url: str | None = None) -> dict:
+    return {
+        "key": key,
+        "url": url or f"https://www.irs.gov/pub/{key}.pdf",
+        "filename": f"{key}.pdf",
+        "sha256": sha,
+        "http_ok": ok,
+        "retrieved_at": "2026-01-01T00:00:00Z",
+    }
+
+
+def _field(value_key: str, value, key: str, sha: str, extra: dict | None = None) -> dict:
+    rec = {
+        value_key: value,
+        "authority_id": key.upper(),
+        "source_artifact_key": key,
+        "source_sha256": sha,
+        "extraction_identity": "test",
+    }
+    if extra:
+        rec.update(extra)
+    return rec
+
+
+def _complete_year(year: int, income_key: str, payroll_key: str, sha_income: str, sha_pay: str):
+    std = 14600.0 if year == 2024 else 16100.0
+    cap = 168600.0 if year == 2024 else 184500.0
+    brackets_caps = (
+        [11600.0, 47150.0, 100525.0, 191950.0, 243725.0, 609350.0]
+        if year == 2024
+        else [12400.0, 50400.0, 105700.0, 201775.0, 256225.0, 640600.0]
+    )
+    rates = [0.10, 0.12, 0.22, 0.24, 0.32, 0.35, 0.37]
+    return {
+        "parsed_ok": True,
+        "issues": [],
+        "standard_deduction": _field("value", std, income_key, sha_income),
+        "income_tax_brackets": [
+            _field("upper", cap_v, income_key, sha_income, extra={"rate": rate})
+            for cap_v, rate in zip(brackets_caps + [None], rates, strict=True)
+        ],
+        "oasdi": _field(
+            "employee_rate",
+            0.062,
+            payroll_key,
+            sha_pay,
+            extra={"taxable_maximum": cap},
+        ),
+        "medicare_hi": _field(
+            "employee_rate",
+            0.0145,
+            payroll_key,
+            sha_pay,
+            extra={"no_limit": True, "taxable_maximum": None},
+        ),
+        "additional_medicare_tax": _field(
+            "applicable",
+            True,
+            payroll_key,
+            sha_pay,
+            extra={"threshold": 200000.0, "rate": 0.009},
+        ),
+    }
+
+
+def _valid_payload() -> dict:
+    return {
+        "report_type": "living_cost_federal_tax_inventory",
+        "calculates_mslc": False,
+        "retrieved_artifacts": [
+            _art("irs_rp_2023_34", "sha24rp"),
+            _art("irs_rp_2025_32", "sha26rp"),
+            _art("irs_pub15_2024", "sha24p15"),
+            _art("irs_pub15_2026", "sha26p15"),
+        ],
+        "years": {
+            "2024": _complete_year(2024, "irs_rp_2023_34", "irs_pub15_2024", "sha24rp", "sha24p15"),
+            "2026": _complete_year(2026, "irs_rp_2025_32", "irs_pub15_2026", "sha26rp", "sha26p15"),
+        },
+    }
+
+
+def test_rev_procs_without_publication_15_fail(tmp_path: Path):
+    payload = _valid_payload()
+    payload["retrieved_artifacts"] = [
+        _art("irs_rp_2023_34", "sha24rp"),
+        _art("irs_rp_2025_32", "sha26rp"),
+    ]
+    path = tmp_path / "inv.json"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    result = validate_federal_tax_inventory(path)
+    assert result.ok is False
+    assert any("FEDERAL_TAX_FIELD_AUTHORITY_UNBOUND" in item for item in result.issues)
+
+
+def test_2026_pub15_missing_fails(tmp_path: Path):
+    payload = _valid_payload()
+    payload["retrieved_artifacts"] = [
+        item for item in payload["retrieved_artifacts"] if item["key"] != "irs_pub15_2026"
+    ]
+    path = tmp_path / "inv.json"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    result = validate_federal_tax_inventory(path)
+    assert result.ok is False
+    assert any("2026:oasdi" in item for item in result.issues)
+
+
+def test_http_ok_false_field_reference_fails(tmp_path: Path):
+    payload = _valid_payload()
+    for item in payload["retrieved_artifacts"]:
+        if item["key"] == "irs_pub15_2024":
+            item["http_ok"] = False
+    path = tmp_path / "inv.json"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    result = validate_federal_tax_inventory(path)
+    assert result.ok is False
+    assert any("FEDERAL_TAX_FIELD_AUTHORITY_UNBOUND:2024:" in item for item in result.issues)
+
+
+def test_nonexistent_artifact_key_fails(tmp_path: Path):
+    payload = _valid_payload()
+    payload["years"]["2024"]["oasdi"]["source_artifact_key"] = "not_a_real_key"
+    path = tmp_path / "inv.json"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    result = validate_federal_tax_inventory(path)
+    assert result.ok is False
+    assert "FEDERAL_TAX_FIELD_AUTHORITY_UNBOUND:2024:oasdi" in result.issues
+
+
+def test_field_sha_mismatch_fails(tmp_path: Path):
+    payload = _valid_payload()
+    payload["years"]["2024"]["standard_deduction"]["source_sha256"] = "other"
+    path = tmp_path / "inv.json"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    result = validate_federal_tax_inventory(path)
+    assert result.ok is False
+    assert "FEDERAL_TAX_FIELD_AUTHORITY_UNBOUND:2024:standard_deduction" in result.issues
+
+
+def test_2026_brackets_claiming_2023_34_fail(tmp_path: Path):
+    payload = _valid_payload()
+    for bracket in payload["years"]["2026"]["income_tax_brackets"]:
+        bracket["source_artifact_key"] = "irs_rp_2023_34"
+        bracket["source_sha256"] = "sha24rp"
+    path = tmp_path / "inv.json"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    result = validate_federal_tax_inventory(path)
+    assert result.ok is False
+    assert any(
+        "FEDERAL_TAX_FIELD_AUTHORITY_UNBOUND:2026:brackets" in item for item in result.issues
+    )
+
+
+def test_additional_medicare_without_source_fails(tmp_path: Path):
+    payload = _valid_payload()
+    payload["years"]["2024"]["additional_medicare_tax"] = {
+        "applicable": True,
+        "threshold": 200000.0,
+        "rate": 0.009,
+    }
+    path = tmp_path / "inv.json"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    result = validate_federal_tax_inventory(path)
+    assert result.ok is False
+    assert "FEDERAL_TAX_FIELD_AUTHORITY_UNBOUND:2024:additional_medicare_tax" in result.issues
+
+
+def test_two_arbitrary_hashed_artifacts_fail(tmp_path: Path):
+    payload = {
+        "report_type": "living_cost_federal_tax_inventory",
+        "calculates_mslc": False,
+        "retrieved_artifacts": [
+            _art("irs_irb_2023_48", "aa"),
+            _art("irs_topic_751", "bb", url="https://www.irs.gov/taxtopics/tc751"),
+        ],
+        "years": {
+            "2024": _complete_year(2024, "irs_rp_2023_34", "irs_pub15_2024", "sha24rp", "sha24p15"),
+            "2026": _complete_year(2026, "irs_rp_2025_32", "irs_pub15_2026", "sha26rp", "sha26p15"),
+        },
+    }
+    path = tmp_path / "inv.json"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    result = validate_federal_tax_inventory(path)
+    assert result.ok is False
+    assert any("FEDERAL_TAX_FIELD_AUTHORITY_UNBOUND" in item for item in result.issues)
+
+
+def test_complete_year_specific_authorities_may_validate(tmp_path: Path):
+    path = tmp_path / "inv.json"
+    path.write_text(json.dumps(_valid_payload()), encoding="utf-8")
+    result = validate_federal_tax_inventory(path)
+    assert result.ok is True
+    assert result.evidence_status == "VALIDATED"
+
+
+def test_live_failure_does_not_claim_verified_current():
+    from foundation.sources.federal_tax import evaluate_federal_tax_freshness
+
+    status, newer, reason = evaluate_federal_tax_freshness(
+        inventory_valid=True,
+        live=None,
+        live_error="connection reset",
+    )
+    assert status == "CHECK_FAILED"
+    assert newer is None
+    assert "VALIDATED" in reason
+    assert status != "VERIFIED_CURRENT"
+
+
+def test_newer_pub15_revision_is_not_verified_current():
+    from foundation.sources.federal_tax import evaluate_federal_tax_freshness
+
+    status, newer, _reason = evaluate_federal_tax_freshness(
+        inventory_valid=True,
+        live={
+            "pub15_revision_year": 2027,
+            "rev_proc_2025_32_current": True,
+            "successor_rev_proc": None,
+            "current_pub15_payroll_matches": True,
+        },
+        live_error=None,
+    )
+    assert status in {"NEWER_AVAILABLE", "CHECK_FAILED"}
+    assert status != "VERIFIED_CURRENT"
+    assert newer is True
+
+
+def test_agreeing_live_discovery_may_be_verified_current():
+    from foundation.sources.federal_tax import evaluate_federal_tax_freshness
+
+    status, newer, _reason = evaluate_federal_tax_freshness(
+        inventory_valid=True,
+        live={
+            "pub15_revision_year": 2026,
+            "rev_proc_2025_32_current": True,
+            "successor_rev_proc": None,
+            "current_pub15_payroll_matches": True,
+        },
+        live_error=None,
+    )
+    assert status == "VERIFIED_CURRENT"
+    assert newer is False
+
+
+def test_additional_medicare_is_not_invented_from_constants():
+    from foundation.sources.federal_tax import parse_additional_medicare
+
+    payroll_without_addl = (
+        "The rate of social security tax on taxable wages is 6.2% each. "
+        "The Medicare tax rate is 1.45% each."
+    )
+    assert parse_additional_medicare(payroll_without_addl) is None
+
+
+def test_pub15_listing_parser_reads_official_2026_row():
+    from foundation.sources.federal_tax import parse_pub15_listing
+
+    html = (
+        "Publication 15 (2026), (Circular E), Employer&#8217;s Tax Guide "
+        '<a href="https://www.irs.gov/pub/irs-pdf/p15.pdf">p15.pdf</a>'
+    )
+    parsed = parse_pub15_listing(html)
+    assert parsed["revision_year"] == 2026
+    assert parsed["listed_pdf_url"].endswith("p15.pdf")

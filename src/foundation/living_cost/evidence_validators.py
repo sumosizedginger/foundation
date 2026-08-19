@@ -348,11 +348,53 @@ def _brackets_match(code_brackets: list[Any], inventory_brackets: list[Any]) -> 
     return True
 
 
+def _federal_artifact_index(artifacts: Any) -> dict[str, dict[str, Any]]:
+    index: dict[str, dict[str, Any]] = {}
+    if not isinstance(artifacts, list):
+        return index
+    for item in artifacts:
+        if isinstance(item, dict) and isinstance(item.get("key"), str):
+            index[item["key"]] = item
+    return index
+
+
+def _resolve_field_authority(
+    *,
+    year: int,
+    field: str,
+    rec: dict[str, Any] | None,
+    artifacts: dict[str, dict[str, Any]],
+    allowed_keys: set[str],
+) -> list[str]:
+    from foundation.sources.federal_tax import official_authority_url
+
+    if not isinstance(rec, dict):
+        return [f"FEDERAL_TAX_FIELD_AUTHORITY_UNBOUND:{year}:{field}"]
+    key = rec.get("source_artifact_key")
+    sha = rec.get("source_sha256")
+    if not key or key not in artifacts:
+        return [f"FEDERAL_TAX_FIELD_AUTHORITY_UNBOUND:{year}:{field}"]
+    art = artifacts[key]
+    if key not in allowed_keys:
+        return [f"FEDERAL_TAX_FIELD_AUTHORITY_UNBOUND:{year}:{field}"]
+    if art.get("http_ok") is not True or not art.get("sha256"):
+        return [f"FEDERAL_TAX_FIELD_AUTHORITY_UNBOUND:{year}:{field}"]
+    if sha != art.get("sha256"):
+        return [f"FEDERAL_TAX_FIELD_AUTHORITY_UNBOUND:{year}:{field}"]
+    if not official_authority_url(art.get("url")):
+        return [f"FEDERAL_TAX_FIELD_AUTHORITY_UNBOUND:{year}:{field}"]
+    return []
+
+
 def validate_federal_tax_inventory(
     report_path: Path | None = None,
 ) -> EvidenceValidation:
-    """Federal tax is VALIDATED only when code tables match bound IRS/SSA inventory."""
+    """Federal tax is VALIDATED only when each field binds a year-specific IRS artifact."""
     from foundation.living_cost.taxes import FEDERAL_TAX_RULES
+    from foundation.sources.federal_tax import (
+        INCOME_TAX_ARTIFACT_BY_YEAR,
+        PAYROLL_ARTIFACT_BY_YEAR,
+    )
 
     path = report_path or FEDERAL_TAX_INVENTORY_PATH
     issues: list[str] = []
@@ -370,10 +412,7 @@ def validate_federal_tax_inventory(
         return EvidenceValidation(
             False, FEDERAL_TAX_NOT_VALIDATED, issues + ["FEDERAL_TAX_YEARS_MISSING"], payload
         )
-    artifacts = payload.get("retrieved_artifacts") or []
-    hashed = [a for a in artifacts if isinstance(a, dict) and a.get("sha256") and a.get("http_ok")]
-    if len(hashed) < 2:
-        issues.append("FEDERAL_TAX_AUTHORITIES_NOT_BOUND")
+    artifacts = _federal_artifact_index(payload.get("retrieved_artifacts"))
     for year in (2024, 2026):
         rec = years.get(str(year))
         if not isinstance(rec, dict):
@@ -384,31 +423,76 @@ def validate_federal_tax_inventory(
         if year not in FEDERAL_TAX_RULES:
             issues.append(f"FEDERAL_TAX_CODE_YEAR_MISSING:{year}")
             continue
+        income_keys = {INCOME_TAX_ARTIFACT_BY_YEAR[year]}
+        payroll_keys = {PAYROLL_ARTIFACT_BY_YEAR[year]}
         rules = FEDERAL_TAX_RULES[year]
-        std = (rec.get("standard_deduction") or {}).get("value")
-        if std is None or abs(float(rules["standard_deduction"]) - float(std)) > 0.01:
+        std = rec.get("standard_deduction") or {}
+        issues.extend(
+            _resolve_field_authority(
+                year=year,
+                field="standard_deduction",
+                rec=std if isinstance(std, dict) else None,
+                artifacts=artifacts,
+                allowed_keys=income_keys,
+            )
+        )
+        if (
+            not isinstance(std, dict)
+            or std.get("value") is None
+            or abs(float(rules["standard_deduction"]) - float(std["value"])) > 0.01
+        ):
             issues.append(f"FEDERAL_TAX_RULES_MISMATCH:{year}:standard_deduction")
         oasdi = rec.get("oasdi") or {}
+        issues.extend(
+            _resolve_field_authority(
+                year=year,
+                field="oasdi",
+                rec=oasdi if isinstance(oasdi, dict) else None,
+                artifacts=artifacts,
+                allowed_keys=payroll_keys,
+            )
+        )
         if (
-            oasdi.get("employee_rate") is None
+            not isinstance(oasdi, dict)
+            or oasdi.get("employee_rate") is None
             or abs(float(rules["ss_tax_rate"]) - float(oasdi["employee_rate"])) > 1e-12
         ):
             issues.append(f"FEDERAL_TAX_RULES_MISMATCH:{year}:oasdi_rate")
         if (
-            oasdi.get("taxable_maximum") is None
+            not isinstance(oasdi, dict)
+            or oasdi.get("taxable_maximum") is None
             or abs(float(rules["ss_wage_cap"]) - float(oasdi["taxable_maximum"])) > 0.01
         ):
             issues.append(f"FEDERAL_TAX_RULES_MISMATCH:{year}:oasdi_cap")
         hi = rec.get("medicare_hi") or {}
+        issues.extend(
+            _resolve_field_authority(
+                year=year,
+                field="medicare_hi",
+                rec=hi if isinstance(hi, dict) else None,
+                artifacts=artifacts,
+                allowed_keys=payroll_keys,
+            )
+        )
         if (
-            hi.get("employee_rate") is None
+            not isinstance(hi, dict)
+            or hi.get("employee_rate") is None
             or abs(float(rules["medicare_rate"]) - float(hi["employee_rate"])) > 1e-12
         ):
             issues.append(f"FEDERAL_TAX_RULES_MISMATCH:{year}:medicare_rate")
-        if hi.get("no_limit") is not True:
+        if not isinstance(hi, dict) or hi.get("no_limit") is not True:
             issues.append(f"FEDERAL_TAX_RULES_MISMATCH:{year}:medicare_cap")
         addl = rec.get("additional_medicare_tax") or {}
-        if addl.get("applicable") is not True:
+        issues.extend(
+            _resolve_field_authority(
+                year=year,
+                field="additional_medicare_tax",
+                rec=addl if isinstance(addl, dict) else None,
+                artifacts=artifacts,
+                allowed_keys=payroll_keys,
+            )
+        )
+        if not isinstance(addl, dict) or addl.get("applicable") is not True:
             issues.append(
                 f"FEDERAL_TAX_MODEL_GAP:{year}:additional_medicare_missing_from_inventory"
             )
@@ -431,6 +515,20 @@ def validate_federal_tax_inventory(
         inv_br = rec.get("income_tax_brackets") or []
         if not _brackets_match(list(rules["brackets"]), inv_br):
             issues.append(f"FEDERAL_TAX_RULES_MISMATCH:{year}:brackets")
+        if isinstance(inv_br, list):
+            for idx, bracket in enumerate(inv_br):
+                if not isinstance(bracket, dict):
+                    issues.append(f"FEDERAL_TAX_FIELD_AUTHORITY_UNBOUND:{year}:brackets")
+                    break
+                issues.extend(
+                    _resolve_field_authority(
+                        year=year,
+                        field=f"brackets:{idx}",
+                        rec=bracket,
+                        artifacts=artifacts,
+                        allowed_keys=income_keys,
+                    )
+                )
     if 2025 in FEDERAL_TAX_RULES:
         issues.append("FEDERAL_TAX_UNSUPPORTED_YEAR_PRESENT:2025")
     ok = not issues
