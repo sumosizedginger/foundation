@@ -1,16 +1,12 @@
-# THE FOUNDATION — 51-JURISDICTION STATE TAX EVIDENCE CAMPAIGN CLOSEOUT
+# THE FOUNDATION — STATE TAX WAVE 2 CLOSEOUT
+# WASHINGTON EFFECTIVE-YEAR CORRECTION
 
 CURRENT AUDITED IMPLEMENTATION:
-41f5675257511045a5f1eb648bdf7e722d32d8f6
-
-Inventory-binding commit:
-dcaeb311aaa8b3b59cb15a026201075465503dde
-
-Format-only follow-up:
-41f5675257511045a5f1eb648bdf7e722d32d8f6
+dafc23c3e334acbc7d03325d3ed3ab8cd0d424d3
 
 FEDERAL TAX LAW REMAINS CLOSED.
 NAIC AUTO INSURANCE REMAINS CLOSED.
+EIA REMAINS CLOSED.
 
 OD-001 through OD-013 remain ACCEPTED / FROZEN.
 
@@ -24,196 +20,142 @@ NO CANDIDATE ASSEMBLER.
 NO CANDIDATE INPUT BINDINGS.
 
 ==================================================
-WHAT CHANGED
-==================================================
-
-Replaced hardcoded `discover_state_tax() -> SOURCE_GAP /
-MANUAL_VERIFICATION_REQUIRED` with an official 50-state + DC
-RULE_YEAR inventory for 2024 and 2026.
-
-`STATE_STATUTORY_SCHEDULES` remain candidate implementation tables.
-They are not official evidence.
-
-Zero wage tax is recorded only when retrieved official text
-explicitly establishes that ordinary wages are not subject to a
-general state individual earned-income tax.
-
-==================================================
-GITHUB ACTIONS ON FINAL SHA 41f5675
+GITHUB ACTIONS ON FINAL SHA dafc23c
 ==================================================
 
 Tests & Code Quality
-32214010848
+32268707943
 success
 
 Validate Living Cost Sources
-32214010853
+32268707924
 success
 
 Deploy Pages
-32214010845
+32268708485
 success
 
-Local pytest on the implementation:
-342 passed, 1 warning.
+Local pytest:
+347 passed, 1 warning.
+
+==================================================
+WASHINGTON
+==================================================
+
+2024 status:
+VERIFIED_NO_GENERAL_WAGE_INCOME_TAX
+parsed_ok = true
+
+Authority:
+Initiative 2111 / Chapter 5, Laws of 2024
+https://lawfilesext.leg.wa.gov/biennium/2023-24/Pdf/Initiatives/Initiatives/Initiative%202111.sl.pdf
+SHA-256:
+db4e7e5f98602c99d87a4583ff1acf5d437793072a09e5c0006bc2c0c764d019
+
+Official text:
+"Neither the state nor any county, city, or other local jurisdiction
+in the state of Washington may tax any individual person on any form
+of personal income."
+Effective date: June 6, 2024.
+
+2026 status:
+VERIFIED_NO_GENERAL_WAGE_INCOME_TAX
+parsed_ok = true
+
+Authority:
+ESSB 6346 / Chapter 238, Laws of 2026
+https://lawfilesext.leg.wa.gov/biennium/2025-26/Pdf/Bills/Session%20Laws/Senate/6346-S.sl.pdf
+SHA-256:
+16a356b992ef94745143637d7868f424207e50be24ba2fb66b4e96743facbc37
+
+Official text:
+"Beginning January 1, 2028, a tax is imposed on the receipt of
+Washington taxable income."
+
+future_legislation (preserved, not applied backwards):
+tax_enacted = true
+tax_applies_to_year (2026) = false
+effective_start = 2028-01-01
+first_tax_year = 2028
+threshold = 1000000
+
+Washington remains in NO_INCOME_TAX_STATES for the 2024/2026 engine.
+Engine returns $0 for WA 2024 and WA 2026.
+Year 2028 remains UnsupportedTaxYearError.
+
+Undated "enacted a millionaire tax" DOR text without an effective year
+is fail-closed, not zero.
 
 ==================================================
 INVENTORY
 ==================================================
 
-Artifact:
 data/metadata/living_cost_state_tax_inventory.json
+SHA-256:
+9524334ffbbe87cfd7cc55c96c20a278beeda3eee2ed7ec549792271eb447193
 
-Inventory SHA-256:
-80e62abe33e809bb6c18916e5c83d46e74f3bc7721ba605fe2202719f08ac3ed
+validated 2024 cells: 9
+validated 2026 cells: 9
+2026 verified-current no-wage cells: 9
+no-general-wage-tax count (both years): 9
 
-Retrieved official artifacts: 102
-http_ok: 70
-Official publishers/agencies recorded: 52
+AK FL NV NH SD TN TX WA WY
 
-Jurisdictions required: 51
-Required years: 2024, 2026
+taxing cells newly closed this run: 0
+(Washington was a model-gap, now no-wage-tax; it was not a taxing-schedule close.)
 
-2024 validated no-wage-tax cells: 8
-2026 validated no-wage-tax cells: 8
-2026 verified-current count: 8
-Family complete: false
+taxing cells still unresolved: 42 jurisdictions x 2 years
+Landing-page retrieval is not parsed_ok.
+
 Family evidence status: INVENTORY_NOT_VALIDATED
-Family freshness status: CHECK_FAILED
+Family freshness: CHECK_FAILED
+family_complete: false
 
-The family is not VALIDATED because 50 of 51 is not enough, and
-only the officially verified no-wage-tax cells are parsed_ok.
-
-==================================================
-NO-GENERAL-WAGE-INCOME-TAX JURISDICTIONS
-==================================================
-
-Official wording + SHA-bound artifacts confirmed both years:
-
-AK  Alaska Child Support Services FAQ
-    "Alaska has no personal income tax"
-FL  Florida DOR FAQ 1466
-    "Florida does not impose a personal income tax"
-NV  Nevada Department of Taxation income-tax page
-NH  2024: NH General Court HB 2 (2021) Interest and Dividends Tax
-    2026: RSA 77 entire chapter repealed eff. Jan. 1, 2025
-SD  South Dakota Department of Revenue
-TN  Tennessee DOR Hall Income Tax page
-    Hall tax imposed only on interest/dividends; repealed 2021+
-TX  Texas Comptroller Fiscal Notes
-    "Texas does not have a personal income tax"
-WY  wyo.gov About Wyoming
-    "Wyoming does not possess an individual or corporate income tax"
-
-Engine may return $0 for those eight jurisdictions/years only after
-the inventory cell is `VERIFIED_NO_GENERAL_WAGE_INCOME_TAX` and
-`parsed_ok`. Removing the bound authority invalidates the cell.
+Python STATE_STATUTORY_SCHEDULES were not copied into official evidence.
+No engine schedule numbers were corrected this run because no official
+taxing-jurisdiction schedule was extracted.
 
 ==================================================
-WASHINGTON IS NOT ZERO
+MANDATORY EMPLOYEE PAYROLL
 ==================================================
 
-Official Washington DOR income-tax page:
+No-wage-tax cells remain:
 
-https://dor.wa.gov/taxes-rates/income-tax
+OWNER_TAX_METHOD_DECISION_REQUIRED
 
-"The Washington state legislature recently enacted an income tax on
-individuals with an annual adjusted gross income of $1,000,000 or
-more."
-
-That is recorded as:
-
-STATE_TAX_MODEL_GAP:WA:2024:high_agi_income_tax
-STATE_TAX_MODEL_GAP:WA:2026:high_agi_income_tax
-
-WA remains in the candidate no-tax set but is not verified.
-`calculate_state_income_tax(..., "WA")` is fail-closed until the
-high-AGI mechanic is modeled from official authority.
-
-A separate DOR forms page still says Washington does not have a
-personal income tax. The more specific income-tax page controls.
-Do not flatten the conflict into $0.
+for possible SDI/PFML/employee SUTA. Not treated as zero. Not added
+to ordinary state income tax. Not an owner decision this pass.
 
 ==================================================
-TAXING JURISDICTIONS
+TEXAS 2026 CURRENTNESS
 ==================================================
 
-Remaining 42 jurisdictions (41 states + DC) plus WA are not
-engine-usable official models.
+Texas Comptroller STAR pages for "No personal income tax in Texas"
+retrieve as JavaScript shells without the classification text.
 
-Official DOR landing pages were retrieved where HTTP succeeded.
-Year-specific rate/bracket/deduction schedules were not extracted
-from those landing pages.
-
-Those cells are:
-
-STATE_EVIDENCE_INCOMPLETE
-or STATE_TAX_FIELD_AUTHORITY_UNBOUND when the official URL failed
-or STATE_TAX_MODEL_GAP:<st>:<year>:schedule_not_extracted
-
-Python `STATE_STATUTORY_SCHEDULES` numbers were not copied into the
-inventory as official evidence.
-
-No refundable / means-tested credits were added.
-Local tax was not merged into state tax.
-LOCAL_TAX_RATES_BY_FIPS / OD-011 were not changed.
-
-Mandatory employee state payroll programs were inventoried as
-unresolved / owner-method-decision-required. Employer-only taxes
-were not treated as employee burden.
-
-==================================================
-ENGINE / VALIDATOR
-==================================================
-
-`validate_state_tax_inventory()` is the single definition of
-VALIDATED. Coverage, tax coverage, and freshness all use it.
-
-Family VALIDATED requires all 51 x 2 cells resolved. 8 of 51 is
-not family VALIDATED.
-
-`calculate_state_income_tax()`:
-- unsupported year remains fail-closed
-- official no-wage-tax cell may return 0
-- unverified no-tax candidate raises; unknown is not zero
-- other missing official models remain fail-closed
+The bound 2024/2026 Texas artifact remains the official Comptroller
+Fiscal Notes page that states Texas does not have a personal income
+tax. STAR could not replace it this run without weakening fail-closed
+behavior.
 
 ==================================================
 OTHER LIVE SOURCES
 ==================================================
 
 Federal tax: VALIDATED / VERIFIED_CURRENT. Numbers unchanged.
-
-2024 standard deduction 14600
-2024 first bracket 11600 @ 10%
-2024 OASDI 6.2% / 168600
-2024 Medicare 1.45%
-2024 Additional Medicare 0.9% / 200000
-
-2026 standard deduction 16100 from official RP 2025-32
-2026 first bracket 12400 @ 10%
-2026 OASDI 6.2% / 184500
-2026 Medicare 1.45%
-2026 Additional Medicare 0.9% / 200000
-
-NAIC AUT-PB 2022-2023 remains VALIDATED / VERIFIED_CURRENT.
-
-OD-010 remains honest CHECK_FAILED (BLS daily quota).
-BEA RPP remains VERIFIED_CURRENT.
-Neither was redesigned.
+NAIC: VALIDATED / VERIFIED_CURRENT. Unchanged.
+OD-010: live retrieve succeeded this run (VERIFIED_CURRENT).
+Not redesigned.
+BEA RPP: VERIFIED_CURRENT. Not redesigned.
 
 ==================================================
 BLOCKERS AND LOCKS
 ==================================================
 
-empirical_blocker_family_count before: 8
-empirical_blocker_family_count after: 8
+empirical_blocker_family_count: 7
+(state_tax_law remains a family blocker; OD-010 cleared on this live run)
 
-State tax remains a family blocker because the 51-jurisdiction
-family is not complete.
-
-gate_blocker_reason_count before: 75
-gate_blocker_reason_count after: 77
+gate_blocker_reason_count: 64
 
 candidate_calculation_authorized = false
 living_cost.release_authorized = false
@@ -222,25 +164,17 @@ states_modeled = 0
 ready_for_private_candidate = false
 
 No living_cost_candidate_input_bindings.json.
+NO MSLC.
 
 ==================================================
-OWNER JUDGMENT STILL REQUIRED
+REMAINING
 ==================================================
 
-1. Washington high-AGI income tax: model the $1,000,000 threshold
-   or leave fail-closed.
-2. Year-specific official 2024 and 2026 rate/bracket booklets for
-   the remaining taxing jurisdictions.
-3. Failed official landing pages (HTTP 403/404/SSL) need replacement
-   official URLs.
-4. Whether mandatory employee SDI/PFML belongs in the frozen tax
-   solver.
+42 taxing jurisdictions still lack extracted official 2024/2026
+SINGLE wage-earner schedules.
 
-==================================================
-ABSOLUTE STOP
-==================================================
+STATE_TAX_MODEL_GAP:<st>:<year>:schedule_not_extracted
+or STATE_TAX_FIELD_AUTHORITY_UNBOUND for failed official URLs.
 
-Do not begin local tax, FCC/mobile, BLS CE, registration, or
-replacement.
-
-Do not authorize candidate calculation or release.
+Do not begin local tax, FCC/mobile, BLS CE, registration, replacement,
+or candidate calculation.
