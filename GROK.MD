@@ -1,6 +1,8 @@
-# THE FOUNDATION — FEDERAL TAX FIELD-PROVENANCE + LIVE-CURRENTNESS CORRECTION
+# THE FOUNDATION — FEDERAL TAX SUCCESSOR-DISCOVERY / LIVE-INVENTORY BINDING CLOSEOUT
 
 OD-001 through OD-013 remain ACCEPTED / FROZEN.
+
+FIELD-LEVEL FEDERAL TAX EVIDENCE remains ACCEPTED. Not redesigned.
 
 NAIC AUTO INSURANCE remains CLOSED. Not reopened.
 
@@ -9,113 +11,105 @@ NO CANDIDATE ASSEMBLER.
 NO CANDIDATE AUTHORIZATION.
 NO RELEASE AUTHORIZATION.
 
-This pass was a narrow federal-tax evidence correction.
+This pass was one narrow federal-tax currentness correction.
 
 ## FINAL SHA
 
-Implementation: `e5aaa1fccf1f744adffffd572f576896c92d38a2`
+Implementation: `966202dc81d096b5b53c5660bf5a6f671d8d0cab`
 
 Pushed to `origin/main`.
 
-Field-provenance implementation: `751832355f8c50b2e47c017c3a697a5060af0712`
+Audited starting implementation: `e5aaa1fccf1f744adffffd572f576896c92d38a2`
 
-Payroll-compare fail-closed follow-up: `e5aaa1fccf1f744adffffd572f576896c92d38a2`
-
-Audited starting implementation: `5992047a08284430de7e3f907c974b24ea68aa84`
-
-## GitHub Actions (on e5aaa1f)
+## GitHub Actions (on 966202d)
 
 | Workflow                     | Run ID                                                                                | Conclusion |
 | ---------------------------- | ------------------------------------------------------------------------------------- | ---------- |
-| Tests & Code Quality         | [32206076477](https://github.com/sumosizedginger/foundation/actions/runs/32206076477) | success    |
-| Deploy Pages                 | [32206076475](https://github.com/sumosizedginger/foundation/actions/runs/32206076475) | success    |
-| Validate Living Cost Sources | [32206076471](https://github.com/sumosizedginger/foundation/actions/runs/32206076471) | success    |
+| Tests & Code Quality         | [32209827225](https://github.com/sumosizedginger/foundation/actions/runs/32209827225) | success    |
+| Deploy Pages                 | [32209827285](https://github.com/sumosizedginger/foundation/actions/runs/32209827285) | success    |
+| Validate Living Cost Sources | [32209827387](https://github.com/sumosizedginger/foundation/actions/runs/32209827387) | success    |
 
-Tests & Code Quality pytest: **320 passed**, **5 skipped**, **1 warning** (`load_module` deprecation in `test_validation_cli_is_callable`).
+Tests & Code Quality pytest: **325 passed**, **5 skipped**, **1 warning** (`load_module` deprecation in `test_validation_cli_is_callable`).
 
-The extra passing test versus 7518323 is `test_unknown_payroll_compare_is_not_verified_current`.
+## Problem 1 — successor discovery
 
-## Federal tax field provenance
+`discover_federal_tax_live()` no longer treats the historical October 9, 2025 announcement (`IRS_2026_NEWS_URL`) as proof that Rev. Proc. 2025-32 remains current.
 
-Global “>= 2 hashed artifacts” is gone. Every required field now carries:
+Current first-party surface: official IRS Topics in the News
+`https://www.irs.gov/newsroom/topics-in-the-news`
 
-- authority_id
-- source_artifact_key
-- source_sha256
-- extraction_identity
+Live result from the current “Inflation adjustments for tax year 2026” section:
 
-The validator resolves each reference: artifact exists, `http_ok=true`, SHA present, official IRS/SSA host, year-appropriate key, recorded SHA equals retrieved SHA. Missing/wrong references emit `FEDERAL_TAX_FIELD_AUTHORITY_UNBOUND:<year>:<field>`.
+- current_2026_inflation_authority: **Rev. Proc. 2025-32**
+- current_authority_status: **IDENTIFIED**
+- current_authority_source_url: `https://www.irs.gov/newsroom/topics-in-the-news`
+- current_authority_checked_at: `2026-08-19T02:40:15Z`
+- successor_rev_proc: **null**
+- rev_proc_2025_32_current: **true**
 
-Required authorities:
+The historical announcement may remain corroboration. It is not the successor scan.
 
-| Year | Income tax / standard deduction | Payroll |
-| ---- | ------------------------------- | ------- |
-| 2024 | IRS Rev. Proc. 2023-34          | IRS Publication 15 (2024) |
-| 2026 | IRS Rev. Proc. 2025-32          | IRS Publication 15 (2026) |
+If the current surface is unretrieved, missing, or ambiguous: freshness `CHECK_FAILED`, `newer_data_exists=null`. Cached evidence may remain VALIDATED.
 
-IRB 2023-48 and Topic 751 remain corroboration only. They cannot substitute for the Rev. Proc. or year-specific Publication 15.
+If the current surface identifies a later/modifying authority: `NEWER_AVAILABLE`, not `VERIFIED_CURRENT`.
 
-Each field is parsed from its designated official artifact. Unrelated IRS files are not concatenated into one parse soup.
+## Problem 2 — live payroll compare
 
-### Bound official bytes
+Live Publication 15 payroll is compared to one captured validated 2026 inventory payload. The compare no longer uses duplicated literals (`184500`, `0.062`, `0.0145`, `200000`, `0.009`).
+
+Compared fields:
+
+- OASDI employee rate
+- OASDI taxable maximum
+- Medicare HI employee rate
+- Medicare no-wage-base condition
+- Additional Medicare threshold
+- Additional Medicare rate
+
+Live result: `current_pub15_payroll_matches=true`.
+
+Mutating a captured inventory payroll field while leaving the live Publication 15 fixture unchanged makes the compare false.
+
+## Federal tax status
+
+- retrieval_validation_status / evidence: **VALIDATED**
+- freshness_check_status: **VERIFIED_CURRENT**
+- newer_data_exists: **false**
+
+Inventory SHA: `14475b0aa4bed4342efb9337f90c0495dff849169b9fc3525188bf80168435ea`
+
+Bound official bytes unchanged:
 
 - 2024 Rev. Proc. 2023-34 SHA: `544ba41c7ba64f77da521e0d174a7b7394dc72b5c7c73d10adb19952d5aaae57`
 - 2024 Publication 15 SHA: `3a15da95e39b24f2b6c61f4abc85298c897f57600c3508f9381fab7180a092e0`
 - 2026 Rev. Proc. 2025-32 SHA: `e9ada115fb43a4af5ea326ca91edd40ab0bf29b9be01d2c13d7b8fa96214635b`
 - 2026 Publication 15 SHA: `b46c3622439d8521e3a0faca4cd5b5ece3451b526f65f06a5e38d5c9f804c88b`
-- 2026 Pub 15 URL (year-specific prior, discovered from official IRS publications listing showing Publication 15 (2026)): `https://www.irs.gov/pub/irs-prior/p15--2026.pdf`
 
-Additional Medicare source artifact: Publication 15 for that tax year (`irs_pub15_2024` / `irs_pub15_2026`). Extracted from official text (“withhold a 0.9% Additional Medicare Tax … in excess of $200,000”). The Python constant is compared after extraction and does not manufacture the inventory record. Unparsed Additional Medicare is `ADDITIONAL_MEDICARE_UNPARSED`.
-
-SSA fact sheets still 403 from this client. They are recorded `http_ok=false` and are **not** counted as bound authorities.
-
-### Numeric rules
-
-These numbers come from the bound official IRS bytes, not from the prompt text.
+Numeric rules unchanged (from official IRS bytes):
 
 | Year | std deduction | first bracket | OASDI | OASDI cap | Medicare HI | Additional Medicare |
 | ---- | ------------- | ------------- | ----- | --------- | ----------- | ------------------- |
 | 2024 | 14600         | 11600 @ 10%   | 6.2%  | 168600    | 1.45% no limit | 0.9% above 200000 |
 | 2026 | 16100         | 12400 @ 10%   | 6.2%  | 184500    | 1.45% no limit | 0.9% above 200000 |
 
-2026 standard deduction **16100** is the value extracted from official Rev. Proc. 2025-32 bytes (`e9ada115…`). It was not adopted merely because a prompt listed 16100.
-
-Field-provenance validator result: **VALIDATED** (no issues).
-
-Inventory SHA: `e75de5101492ed4e22440a176fa9da4b6c681caf7aaf027a304d1365eb71b3d1`
-
-## Live currentness
-
-Evidence validity and freshness are separate.
-
-- retrieval_validation_status / evidence: **VALIDATED**
-- freshness_check_status: **VERIFIED_CURRENT**
-- newer_data_exists: **false**
-
-Targeted live discovery used the official IRS publications listing and the 2026 inflation-adjustment page — not `https://www.irs.gov/irb`. Live result: Publication 15 current revision is 2026; Rev. Proc. 2025-32 remains the cited 2026 inflation authority; current Publication 15 payroll values agree with the bound 2026 inventory.
-
-Fail-closed currentness (`evaluate_federal_tax_freshness`):
-
-- live discovery throws => evidence stays VALIDATED; freshness `CHECK_FAILED`; `newer_data_exists=null`
-- current Pub 15 revision newer than 2026 => `NEWER_AVAILABLE` / `CHECK_FAILED`, not `VERIFIED_CURRENT`
-- `current_pub15_payroll_matches is False` => `CHECK_FAILED`
-- `current_pub15_payroll_matches is None` => `CHECK_FAILED` (unknown compare is not agreement)
-- `VERIFIED_CURRENT` requires inventory valid AND Pub 15 revision 2026 AND Rev. Proc. 2025-32 current AND payroll compare `True`
-
-Adversarial tests A–I plus live-freshness tests, including `test_unknown_payroll_compare_is_not_verified_current`, cover that split.
+Field-level source-artifact / SHA validation preserved. Additional Medicare remains extracted evidence.
 
 ## Regenerated metadata
 
-- inventory generated_at: `2026-08-19T01:23:07+00:00`
-- source coverage generated_at: `2026-08-19T01:23:21+00:00`
-- candidate freshness generated_at: `2026-08-19T01:23:40Z`
-- freshness_run_id: `6acf95c874628bf13071da7925a88fa2cfb2b663272e2a7b3dd68898bab7bd9a`
+- inventory generated_at: `2026-08-19T02:40:10+00:00`
+- source coverage generated_at: `2026-08-19T02:40:10+00:00`
+- candidate freshness generated_at: `2026-08-19T02:40:50Z`
+- freshness_run_id: `6c158aa0eaa619a142fe51c06e27008ff59d4da6c562d65d06625ad7ad63dab7`
 - empirical_blocker_family_count: **8**
-- gate_blocker_reason_count: **76**
+- gate_blocker_reason_count: **75**
 
 Empirical families: `bls_ce`, `fcc_broadband`, `local_tax_law`, `mobile_price`, `od010_price_index`, `state_tax_law`, `vehicle_registration`, `vehicle_replacement`.
 
-OD-010 remains honest `CHECK_FAILED` (BLS daily quota). NAIC remains `VALIDATED` / `VERIFIED_CURRENT`.
+OD-010 remains honest `CHECK_FAILED` (BLS daily quota).
+
+BEA RPP naturally cleared to `VERIFIED_CURRENT` on this live freshness run. BEA was not redesigned.
+
+NAIC remains `VALIDATED` / `VERIFIED_CURRENT`.
 
 ## NAIC (unchanged)
 
