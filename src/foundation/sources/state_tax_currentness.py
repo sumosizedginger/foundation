@@ -4,6 +4,10 @@ Evidence validity (cached SHA-bound inventory) is not currentness.
 A 2026 cell is VERIFIED_CURRENT only when this module actually performs a
 first-party check during the current freshness run.
 
+Taxing cells require live official schedule extraction compared against every
+material modeled field. A rate token appearing somewhere on a page is not
+currentness.
+
 Does not calculate an MSLC.
 """
 
@@ -11,7 +15,7 @@ from __future__ import annotations
 
 import logging
 import re
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Mapping, Sequence
 from datetime import UTC, datetime
 from typing import Any
 
@@ -84,6 +88,83 @@ def fetch_with_run_cache(
     return rec
 
 
+def currentness_urls_for_cell(
+    state: str,
+    cell: Mapping[str, Any],
+    surfaces: Mapping[str, Mapping[str, Any]],
+) -> list[str]:
+    """Targeted URLs for one 2026 cell. Shared URLs are run-cached by the caller.
+
+    No-tax cells use the single currentness surface. Taxing cells also include
+    every bound official authority so live extraction can see all modeled fields.
+    """
+    from foundation.sources.state_tax import STATUS_TAXING
+
+    urls: list[str] = []
+    seen: set[str] = set()
+
+    def _add(url: object) -> None:
+        text = str(url or "").strip()
+        if text and text not in seen:
+            seen.add(text)
+            urls.append(text)
+
+    _add((surfaces.get(state) or {}).get("url"))
+    if cell.get("tax_status") == STATUS_TAXING:
+        for auth in cell.get("official_authorities") or []:
+            if isinstance(auth, dict):
+                _add(auth.get("url"))
+    return urls
+
+
+def collect_live_authority_text(
+    urls: Sequence[str],
+    *,
+    cache: dict[str, dict[str, Any]],
+    fetch_fn: FetchFn,
+) -> dict[str, Any]:
+    """GET each URL (run-cached). Fail closed if any targeted GET fails."""
+    if not urls:
+        return {
+            "ok": False,
+            "url": None,
+            "sha256": None,
+            "text": "",
+            "retrieved_at": _now_iso(),
+            "error": "no currentness URL",
+            "live_checked": True,
+        }
+    texts: list[str] = []
+    last_ok: dict[str, Any] | None = None
+    for url in urls:
+        rec = fetch_with_run_cache(url, cache=cache, fetch_fn=fetch_fn)
+        if rec.get("ok") is not True:
+            failed = dict(rec)
+            failed["ok"] = False
+            failed["url"] = url
+            return failed
+        texts.append(str(rec.get("text") or ""))
+        last_ok = rec
+    combined = "\n".join(texts)
+    if not combined.strip():
+        return {
+            "ok": False,
+            "url": urls[-1],
+            "sha256": None,
+            "text": "",
+            "retrieved_at": _now_iso(),
+            "error": "empty live currentness text",
+            "live_checked": True,
+        }
+    out = dict(last_ok or {})
+    out["ok"] = True
+    out["url"] = urls[0]
+    out["text"] = combined
+    out["live_checked"] = True
+    out["error"] = None
+    return out
+
+
 def parse_superseding_tax_year(text: str) -> dict[str, Any]:
     """Detect a newly described wage/personal income tax and its first year.
 
@@ -111,6 +192,111 @@ def parse_superseding_tax_year(text: str) -> dict[str, Any]:
     }
 
 
+def _field_numeric(field: Any) -> float | None:
+    if field is None:
+        return None
+    if isinstance(field, dict):
+        value = field.get("value")
+        if value is None:
+            return None
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            return None
+    if isinstance(field, (int, float)):
+        return float(field)
+    return None
+
+
+def _norm_brackets(brackets: Any) -> list[tuple[float | None, float]] | None:
+    if not brackets:
+        return None
+    out: list[tuple[float | None, float]] = []
+    for item in brackets:
+        cap: Any
+        rate: Any
+        if isinstance(item, dict):
+            cap = item.get("upper")
+            rate = item.get("rate")
+        elif isinstance(item, (list, tuple)) and len(item) >= 2:
+            cap, rate = item[0], item[1]
+        else:
+            return None
+        try:
+            rate_f = float(rate)
+        except (TypeError, ValueError):
+            return None
+        if cap in (None, float("inf")):
+            cap_f: float | None = None
+        else:
+            try:
+                cap_f = float(cap)
+            except (TypeError, ValueError):
+                return None
+        out.append((cap_f, rate_f))
+    return out
+
+
+def modeled_schedule_from_cell(cell: Mapping[str, Any]) -> dict[str, Any]:
+    """Material modeled fields that live currentness must re-establish."""
+    return {
+        "deduction": _field_numeric(cell.get("standard_deduction")),
+        "has_deduction": cell.get("standard_deduction") is not None,
+        "personal_exemption": _field_numeric(cell.get("personal_exemption")),
+        "has_exemption": cell.get("personal_exemption") is not None,
+        "brackets": _norm_brackets(cell.get("brackets")),
+    }
+
+
+def compare_live_schedule_to_cell(
+    cell: Mapping[str, Any],
+    live_extracted: Mapping[str, Any] | None,
+) -> str:
+    """Return 'match', 'differ', or 'incomplete'.
+
+    Compares every material field that exists on the stored cell. A live
+    extraction that cannot re-establish those fields is incomplete, not current.
+    """
+    if not live_extracted:
+        return "incomplete"
+    stored = modeled_schedule_from_cell(cell)
+    if stored["has_deduction"]:
+        live_ded = live_extracted.get("deduction")
+        if live_ded is None:
+            return "incomplete"
+        try:
+            if abs(float(live_ded) - float(stored["deduction"])) > 1e-6:
+                return "differ"
+        except (TypeError, ValueError):
+            return "incomplete"
+    if stored["has_exemption"]:
+        live_ex = live_extracted.get("personal_exemption")
+        if live_ex is None:
+            return "incomplete"
+        try:
+            if abs(float(live_ex) - float(stored["personal_exemption"])) > 1e-6:
+                return "differ"
+        except (TypeError, ValueError):
+            return "incomplete"
+    stored_br = stored["brackets"]
+    if stored_br:
+        live_br = _norm_brackets(live_extracted.get("brackets"))
+        if not live_br:
+            return "incomplete"
+        if len(live_br) != len(stored_br):
+            return "differ"
+        for (live_cap, live_rate), (stored_cap, stored_rate) in zip(
+            live_br, stored_br, strict=True
+        ):
+            if live_cap != stored_cap:
+                return "differ"
+            if abs(live_rate - stored_rate) > 1e-6:
+                return "differ"
+    elif not stored["has_deduction"] and not stored["has_exemption"]:
+        return "incomplete"
+    return "match"
+
+
 def assess_2026_currentness(
     *,
     state: str,
@@ -129,6 +315,7 @@ def assess_2026_currentness(
         "live_error": (live or {}).get("error"),
         "newer_data_exists": None,
         "currentness_status": STATUS_PENDING,
+        "schedule_compare": None,
     }
     if not live_check_performed:
         base["currentness_status"] = STATUS_PENDING
@@ -181,24 +368,19 @@ def assess_2026_currentness(
             return base
 
     if tax_status == STATUS_TAXING and evidence_valid:
-        official_rate = _cell_primary_rate(cell)
-        live_rate = _extract_live_rate(text, official_rate)
-        if official_rate is not None and live_rate is not None:
-            if abs(float(official_rate) - float(live_rate)) > 1e-6:
-                # Distinguish 2027+ change from 2026 change.
-                if re.search(r"(beginning|effective|for)\s+(tax\s+year\s+)?2027", text.lower()):
-                    base["currentness_status"] = STATUS_VERIFIED_CURRENT
-                    base["newer_data_exists"] = False
-                    return base
-                base["currentness_status"] = STATUS_NEWER_AVAILABLE
-                base["newer_data_exists"] = True
-                return base
+        from foundation.sources.state_tax_schedules import extract_official_schedule
+
+        live_extracted = extract_official_schedule(state, 2026, text)
+        comparison = compare_live_schedule_to_cell(cell, live_extracted)
+        base["schedule_compare"] = comparison
+        if comparison == "match":
+            # A clearly future 2027+ change does not invalidate a proven 2026 schedule.
             base["currentness_status"] = STATUS_VERIFIED_CURRENT
             base["newer_data_exists"] = False
             return base
-        if official_rate is not None and _rate_still_stated(text, official_rate):
-            base["currentness_status"] = STATUS_VERIFIED_CURRENT
-            base["newer_data_exists"] = False
+        if comparison == "differ":
+            base["currentness_status"] = STATUS_NEWER_AVAILABLE
+            base["newer_data_exists"] = True
             return base
         base["currentness_status"] = STATUS_CHECK_FAILED
         base["newer_data_exists"] = None
@@ -206,42 +388,6 @@ def assess_2026_currentness(
 
     base["currentness_status"] = STATUS_PENDING
     return base
-
-
-def _cell_primary_rate(cell: Mapping[str, Any]) -> float | None:
-    rates = cell.get("rates") or []
-    if rates and isinstance(rates[0], (int, float)):
-        return float(rates[0])
-    brackets = cell.get("brackets") or []
-    if brackets and isinstance(brackets[0], dict) and brackets[0].get("rate") is not None:
-        try:
-            return float(brackets[0]["rate"])
-        except (TypeError, ValueError):
-            return None
-    return None
-
-
-def _rate_still_stated(text: str, rate: float) -> bool:
-    pct = rate * 100.0
-    blob = re.sub(r"\s+", " ", text or "")
-    # Accept 3.07, 3.07%, 4.95 percent, 0.0307.
-    variants = {
-        f"{pct:.2f}",
-        f"{pct:.2f}%",
-        f"{pct:g}",
-        f"{pct:g} percent",
-        f"{rate:.4f}",
-    }
-    low = blob.lower()
-    return any(v.lower() in low for v in variants)
-
-
-def _extract_live_rate(text: str, expected: float | None) -> float | None:
-    if expected is None:
-        return None
-    if _rate_still_stated(text, expected):
-        return expected
-    return None
 
 
 def currentness_surfaces() -> dict[str, dict[str, Any]]:

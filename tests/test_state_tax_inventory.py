@@ -14,15 +14,19 @@ from foundation.living_cost.taxes import (
 from foundation.sources.state_tax import (
     ALL_JURISDICTIONS,
     STATUS_NO_WAGE_TAX,
+    STATUS_TAXING,
+    bind_state_tax_freshness_to_inventory,
     build_state_tax_inventory,
     detect_high_agi_income_tax,
     discover_state_tax_live,
     evaluate_state_tax_freshness,
+    inventory_file_sha256,
     no_wage_tax_verified,
     parse_authority_effective_date,
     parse_future_income_tax,
     parse_no_wage_tax,
     parse_preexisting_no_wage_tax,
+    state_tax_freshness_payload_binding,
     tax_applies_to_rule_year,
 )
 from foundation.sources.state_tax_schedules import extract_official_schedule
@@ -619,6 +623,255 @@ def test_nc_2026_engine_uses_official_after_2025_rate() -> None:
     assert abs(calculate_state_income_tax(40000.0, "NC", year=2026) - taxable * 0.0425) > 1.0
 
 
+def _taxing_inv(
+    *,
+    state: str = "PA",
+    cell: dict | None = None,
+    retrieved: list | None = None,
+) -> dict:
+    rec = {
+        "jurisdiction": state,
+        "tax_year": 2026,
+        "tax_status": STATUS_TAXING,
+        "parsed_ok": True,
+        "standard_deduction": {"value": 0.0},
+        "personal_exemption": {"value": 0.0},
+        "brackets": [{"upper": None, "rate": 0.0307}],
+        "rates": [0.0307],
+        "official_authorities": [
+            {"url": "https://www.pa.gov/agencies/revenue/pit", "sha256": "abc"}
+        ],
+    }
+    if cell:
+        rec.update(cell)
+    return {
+        "report_type": "living_cost_state_tax_inventory",
+        "generated_at": "2026-08-19T17:32:42+00:00",
+        "calculates_mslc": False,
+        "retrieved_artifacts": retrieved
+        or [
+            {
+                "key": "st_pa_2026_schedule",
+                "filename": "st_pa_2026_schedule.html",
+                "sha256": "abc",
+                "http_ok": True,
+            }
+        ],
+        "jurisdictions": {
+            st: {
+                "years": {
+                    "2024": {"tax_status": STATUS_NO_WAGE_TAX, "parsed_ok": False},
+                    "2026": rec
+                    if st == state
+                    else {
+                        "jurisdiction": st,
+                        "tax_year": 2026,
+                        "tax_status": "STATE_EVIDENCE_INCOMPLETE",
+                        "parsed_ok": False,
+                    },
+                }
+            }
+            for st in ALL_JURISDICTIONS
+        },
+    }
+
+
+def _live_ok(text: str):
+    def fetch(_url: str) -> dict:
+        return {
+            "ok": True,
+            "url": _url,
+            "text": text,
+            "error": None,
+            "live_checked": True,
+        }
+
+    return fetch
+
+
+def test_taxing_historical_rate_with_different_2026_rate_is_not_current() -> None:
+    """A leftover 3.99% on a page that states a different 2026 rate is not current."""
+    inv = _taxing_inv(
+        state="NC",
+        cell={
+            "standard_deduction": {"value": 12750.0},
+            "personal_exemption": None,
+            "brackets": [{"upper": None, "rate": 0.0399}],
+            "rates": [0.0399],
+            "official_authorities": [
+                {"url": "https://www.ncleg.gov/GS_105-153.7.html", "sha256": "statute"}
+            ],
+        },
+    )
+    text = (
+        "G.S. 105-153.7 Individual income tax imposed. "
+        "In 2025 3.99%. In 2026 4.10%. After 2025 3.99%. "
+        "For tax year 2026, the N.C. standard deduction for the single filing status ($12,750)"
+    )
+    live, err = discover_state_tax_live(inv, fetch_fn=_live_ok(text), perform_live=True)
+    assert err is None
+    assert live is not None
+    assert live["live_verified_current_2026_count"] == 0
+    assert live["verified_current_2026_count"] == 0
+    assert "NC" in live["newer_available_2026"] or "NC" in live["live_failed_2026"]
+
+
+def test_taxing_same_rate_changed_2026_deduction_is_not_current() -> None:
+    inv = _taxing_inv(
+        state="NC",
+        cell={
+            "standard_deduction": {"value": 12750.0},
+            "personal_exemption": None,
+            "brackets": [{"upper": None, "rate": 0.0399}],
+            "rates": [0.0399],
+            "official_authorities": [{"url": "https://www.ncdor.gov/withholding", "sha256": "wh"}],
+        },
+    )
+    text = (
+        "G.S. 105-153.7 After 2025 3.99%. "
+        "For tax year 2026, the N.C. standard deduction for the single filing status ($13,000)"
+    )
+    live, err = discover_state_tax_live(inv, fetch_fn=_live_ok(text), perform_live=True)
+    assert err is None
+    assert live is not None
+    assert live["live_verified_current_2026_count"] == 0
+    assert live["verified_current_2026_count"] == 0
+
+
+def test_taxing_progressive_one_rate_present_changed_brackets_is_not_current() -> None:
+    inv = _taxing_inv(
+        cell={
+            "standard_deduction": {"value": 0.0},
+            "personal_exemption": {"value": 0.0},
+            "brackets": [
+                {"upper": 10000.0, "rate": 0.0307},
+                {"upper": None, "rate": 0.0495},
+            ],
+            "rates": [0.0307, 0.0495],
+        }
+    )
+    text = "Personal Income Tax Rates Tax Year Rate 2004 – Present 3.07% 1993 – 2003 2.8%"
+    live, err = discover_state_tax_live(inv, fetch_fn=_live_ok(text), perform_live=True)
+    assert err is None
+    assert live is not None
+    assert live["live_verified_current_2026_count"] == 0
+    assert live["verified_current_2026_count"] == 0
+
+
+def test_taxing_exact_live_schedule_agreement_may_verify() -> None:
+    text = "Personal Income Tax Rates Tax Year Rate 2004 – Present 3.07% 1993 – 2003 2.8%"
+    live, err = discover_state_tax_live(_taxing_inv(), fetch_fn=_live_ok(text), perform_live=True)
+    assert err is None
+    assert live is not None
+    assert live["live_verified_current_2026_count"] == 1
+    assert live["all_2026_current"] is False
+
+
+def test_taxing_future_only_2027_change_does_not_invalidate_2026_schedule() -> None:
+    text = (
+        "Personal Income Tax Rates Tax Year Rate 2004 – Present 3.07% 1993 – 2003 2.8%. "
+        "Beginning tax year 2027 the rate is 4.00 percent."
+    )
+    live, err = discover_state_tax_live(_taxing_inv(), fetch_fn=_live_ok(text), perform_live=True)
+    assert err is None
+    assert live is not None
+    assert live["live_verified_current_2026_count"] == 1
+    assert live["newer_available_2026"] == []
+
+
+def test_nc_2025_labeled_page_cannot_complete_or_verify_2026() -> None:
+    statute = (
+        "G.S. 105-153.7 Individual income tax imposed. Taxable Years Beginning Tax "
+        "In 2022 4.99% In 2023 4.75% In 2024 4.5% In 2025 4.25% After 2025 3.99%."
+    )
+    ty2025 = (
+        "The following information applies to individuals for tax year 2025. "
+        "Single $12,750 N.C. standard deduction"
+    )
+    rec = extract_official_schedule("NC", 2026, statute + " " + ty2025)
+    assert rec is None or rec.get("complete") is not True
+    inv = _taxing_inv(
+        state="NC",
+        cell={
+            "standard_deduction": {"value": 12750.0},
+            "personal_exemption": None,
+            "brackets": [{"upper": None, "rate": 0.0399}],
+            "rates": [0.0399],
+            "official_authorities": [
+                {"url": "https://www.ncdor.gov/2025-landing", "sha256": "landing"}
+            ],
+        },
+    )
+    live, err = discover_state_tax_live(inv, fetch_fn=_live_ok(ty2025), perform_live=True)
+    assert err is None
+    assert live is not None
+    assert live["live_verified_current_2026_count"] == 0
+    assert live["verified_current_2026_count"] == 0
+
+
+def test_stale_freshness_cannot_claim_sync_with_newer_inventory(tmp_path: Path) -> None:
+    inventory = {
+        "report_type": "living_cost_state_tax_inventory",
+        "generated_at": "2026-08-19T17:32:42+00:00",
+        "retrieved_artifacts": [
+            {
+                "key": "st_nc_2026_standard_deduction",
+                "filename": "st_nc_2026_standard_deduction.html",
+                "sha256": "56a00f94",
+                "http_ok": True,
+            }
+        ],
+    }
+    path = tmp_path / "living_cost_state_tax_inventory.json"
+    path.write_text(json.dumps(inventory, indent=2), encoding="utf-8")
+    current_sha = inventory_file_sha256(path)
+    assert current_sha is not None
+    stale = bind_state_tax_freshness_to_inventory(
+        freshness_inventory_sha="0" * 64,
+        freshness_inventory_generated_at="2026-08-19T16:45:51Z",
+        selected_artifact_ids=["st_nc_2026_std_ded_page.html"],
+        inventory_path=path,
+        inventory_payload=inventory,
+    )
+    assert stale["ok"] is False
+    assert "STATE_TAX_FRESHNESS_INVENTORY_SHA_MISMATCH" in stale["issues"]
+    assert any("st_nc_2026_std_ded_page.html" in issue for issue in stale["issues"])
+    status, newer, reason = evaluate_state_tax_freshness(
+        inventory_valid=False,
+        live={"live_check_performed": True, "evidence_valid_2026_count": 11},
+        live_error=None,
+        inventory_binding=stale,
+    )
+    assert status == "CHECK_FAILED"
+    assert newer is None
+    assert "not bound" in reason.lower() or "stale" in reason.lower()
+    matched = bind_state_tax_freshness_to_inventory(
+        freshness_inventory_sha=current_sha,
+        freshness_inventory_generated_at="2026-08-19T17:32:42+00:00",
+        selected_artifact_ids=["st_nc_2026_standard_deduction.html"],
+        inventory_path=path,
+        inventory_payload=inventory,
+    )
+    assert matched["ok"] is True
+    freshness = {
+        "checks": {
+            "state_tax_law": {
+                "selected_artifacts": [
+                    {"artifact_id": "st_nc_2026_std_ded_page.html", "sha256": "old"}
+                ],
+                "extra": {
+                    "inventory_sha256": "deadbeef",
+                    "inventory_generated_at": "2026-08-19T16:45:51Z",
+                },
+            }
+        }
+    }
+    payload_binding = state_tax_freshness_payload_binding(
+        freshness, inventory_path=path, inventory_payload=inventory
+    )
+    assert payload_binding["ok"] is False
+
+
 def test_inventory_does_not_fabricate_effective_dates() -> None:
     payload = build_state_tax_inventory(artifacts={})
     fl = payload["jurisdictions"]["FL"]["years"]["2026"]
@@ -629,3 +882,20 @@ def test_inventory_does_not_fabricate_effective_dates() -> None:
     )
     # Unbound cell must not invent a RULE_YEAR start date.
     assert fl.get("authority_effective_date") is None
+
+
+def test_production_freshness_is_bound_to_current_inventory() -> None:
+    meta = Path(__file__).resolve().parents[1] / "data" / "metadata"
+    freshness = json.loads(
+        (meta / "living_cost_candidate_freshness.json").read_text(encoding="utf-8")
+    )
+    inventory_path = meta / "living_cost_state_tax_inventory.json"
+    binding = state_tax_freshness_payload_binding(freshness, inventory_path=inventory_path)
+    assert binding["ok"] is True, binding["issues"]
+    extra = ((freshness.get("checks") or {}).get("state_tax_law") or {}).get("extra") or {}
+    assert extra.get("inventory_sha256") == inventory_file_sha256(inventory_path)
+    artifacts = ((freshness.get("checks") or {}).get("state_tax_law") or {}).get(
+        "selected_artifacts"
+    ) or []
+    ids = [str(item.get("artifact_id") or item.get("filename") or "") for item in artifacts]
+    assert "st_nc_2026_std_ded_page.html" not in ids

@@ -1610,8 +1610,11 @@ def discover_state_tax() -> FreshnessCheck:
         validate_state_tax_inventory,
     )
     from foundation.sources.state_tax import (
+        INVENTORY_PATH,
+        bind_state_tax_freshness_to_inventory,
         discover_state_tax_live,
         evaluate_state_tax_freshness,
+        inventory_file_sha256,
     )
 
     validation = validate_state_tax_inventory()
@@ -1630,6 +1633,15 @@ def discover_state_tax() -> FreshnessCheck:
                 validation_status="VALIDATED" if item.get("http_ok") else "UNAVAILABLE",
             )
         )
+    inventory_sha = inventory_file_sha256(INVENTORY_PATH)
+    inventory_generated_at = payload.get("generated_at")
+    inventory_binding = bind_state_tax_freshness_to_inventory(
+        freshness_inventory_sha=inventory_sha,
+        freshness_inventory_generated_at=inventory_generated_at,
+        selected_artifact_ids=[str(item["artifact_id"]) for item in artifacts],
+        inventory_path=INVENTORY_PATH,
+        inventory_payload=payload,
+    )
     try:
         live, live_error = discover_state_tax_live(payload)
     except (OSError, RuntimeError, ValueError, requests.RequestException) as exc:
@@ -1638,6 +1650,7 @@ def discover_state_tax() -> FreshnessCheck:
         inventory_valid=validation.ok,
         live=live,
         live_error=live_error,
+        inventory_binding=inventory_binding,
     )
     if not validation.ok and status == "VERIFIED_CURRENT":
         status = "CHECK_FAILED"
@@ -1676,6 +1689,9 @@ def discover_state_tax() -> FreshnessCheck:
             "live_currentness": live,
             "live_error": live_error,
             "issues": validation.issues[:20],
+            "inventory_sha256": inventory_sha,
+            "inventory_generated_at": inventory_generated_at,
+            "inventory_binding": inventory_binding,
         },
     )
 

@@ -10,7 +10,7 @@ import hashlib
 import json
 import logging
 import re
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -1239,7 +1239,9 @@ def build_state_tax_inventory(
             field_sources = (official_sched or {}).get("field_sources") or {}
             fallback_art = primary if isinstance(primary, dict) else {}
 
-            def _field_art(name: str, sources: Mapping[str, Any], fallback: dict[str, Any]) -> dict[str, Any]:
+            def _field_art(
+                name: str, sources: Mapping[str, Any], fallback: dict[str, Any]
+            ) -> dict[str, Any]:
                 art = sources.get(name) or fallback
                 return art if isinstance(art, dict) else {}
 
@@ -1454,12 +1456,118 @@ def load_state_tax_inventory(
     return payload if isinstance(payload, dict) else None
 
 
+def inventory_file_sha256(path: Path | None = None) -> str | None:
+    """SHA-256 of the inventory file bytes. Sidecar hashes are not used."""
+    dest = path or INVENTORY_PATH
+    if not dest.is_file():
+        return None
+    return hashlib.sha256(dest.read_bytes()).hexdigest()
+
+
+def bind_state_tax_freshness_to_inventory(
+    *,
+    freshness_inventory_sha: str | None,
+    freshness_inventory_generated_at: str | None,
+    selected_artifact_ids: Sequence[str] | None = None,
+    inventory_path: Path | None = None,
+    inventory_payload: Mapping[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Fail closed when freshness describes a different inventory generation.
+
+    Counts copied from an older run are not proof of synchronization.
+    """
+    dest = inventory_path or INVENTORY_PATH
+    issues: list[str] = []
+    file_sha = inventory_file_sha256(dest)
+    payload: Mapping[str, Any]
+    if inventory_payload is not None:
+        payload = inventory_payload
+    elif dest.is_file():
+        try:
+            loaded = json.loads(dest.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            loaded = None
+        payload = loaded if isinstance(loaded, dict) else {}
+    else:
+        payload = {}
+        issues.append("STATE_TAX_FRESHNESS_INVENTORY_MISSING")
+    if not freshness_inventory_sha:
+        issues.append("STATE_TAX_FRESHNESS_INVENTORY_SHA_MISSING")
+    elif file_sha is None:
+        issues.append("STATE_TAX_FRESHNESS_INVENTORY_MISSING")
+    elif freshness_inventory_sha != file_sha:
+        issues.append("STATE_TAX_FRESHNESS_INVENTORY_SHA_MISMATCH")
+    generated_at = payload.get("generated_at")
+    if not freshness_inventory_generated_at:
+        issues.append("STATE_TAX_FRESHNESS_INVENTORY_GENERATED_AT_MISSING")
+    elif generated_at and freshness_inventory_generated_at != generated_at:
+        issues.append("STATE_TAX_FRESHNESS_INVENTORY_GENERATED_AT_MISMATCH")
+    inv_names: set[str] = set()
+    for item in payload.get("retrieved_artifacts") or []:
+        if not isinstance(item, dict):
+            continue
+        for key in ("filename", "key", "artifact_id"):
+            value = item.get(key)
+            if value:
+                inv_names.add(str(value))
+    for artifact_id in selected_artifact_ids or []:
+        if not artifact_id:
+            continue
+        if str(artifact_id) not in inv_names:
+            issues.append(f"STATE_TAX_FRESHNESS_STALE_ARTIFACT:{artifact_id}")
+    return {
+        "ok": not issues,
+        "issues": issues,
+        "inventory_sha256": file_sha,
+        "inventory_generated_at": generated_at,
+        "freshness_inventory_sha": freshness_inventory_sha,
+        "freshness_inventory_generated_at": freshness_inventory_generated_at,
+    }
+
+
+def state_tax_freshness_payload_binding(
+    freshness: Mapping[str, Any],
+    *,
+    inventory_path: Path | None = None,
+    inventory_payload: Mapping[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Bind a written freshness report to the inventory file it claims to describe."""
+    check = (freshness.get("checks") or {}).get("state_tax_law") or {}
+    extra = check.get("extra") or {}
+    ids: list[str] = []
+    for item in check.get("selected_artifacts") or []:
+        if not isinstance(item, dict):
+            continue
+        artifact_id = item.get("artifact_id") or item.get("filename")
+        if artifact_id:
+            ids.append(str(artifact_id))
+    return bind_state_tax_freshness_to_inventory(
+        freshness_inventory_sha=extra.get("inventory_sha256"),
+        freshness_inventory_generated_at=extra.get("inventory_generated_at"),
+        selected_artifact_ids=ids,
+        inventory_path=inventory_path,
+        inventory_payload=inventory_payload,
+    )
+
+
 def evaluate_state_tax_freshness(
     *,
     inventory_valid: bool,
     live: dict[str, Any] | None,
     live_error: str | None,
+    inventory_binding: Mapping[str, Any] | None = None,
 ) -> tuple[str, bool | None, str]:
+    if inventory_binding is not None and inventory_binding.get("ok") is not True:
+        issues = list(inventory_binding.get("issues") or [])
+        return (
+            "CHECK_FAILED",
+            None,
+            (
+                "State-tax freshness is not bound to the current inventory. "
+                "Cross-run stale freshness cannot claim synchronization. "
+                f"issues={issues[:8]}"
+            ),
+        )
     if live_error:
         return (
             "CHECK_FAILED",
@@ -1549,9 +1657,10 @@ def discover_state_tax_live(
         STATUS_NEWER_AVAILABLE,
         STATUS_VERIFIED_CURRENT,
         assess_2026_currentness,
+        collect_live_authority_text,
         currentness_surfaces,
+        currentness_urls_for_cell,
         default_fetch_currentness,
-        fetch_with_run_cache,
     )
 
     captured = load_state_tax_inventory(inventory)
@@ -1582,13 +1691,12 @@ def discover_state_tax_live(
             unresolved.append(state)
             pending.append(state)
             continue
-        surface = surfaces.get(state) or {}
-        url = surface.get("url")
-        if not url:
+        urls = currentness_urls_for_cell(state, rec, surfaces)
+        if not urls:
             live_failed.append(state)
             unresolved.append(state)
             continue
-        live = fetch_with_run_cache(url, cache=cache, fetch_fn=fetcher)
+        live = collect_live_authority_text(urls, cache=cache, fetch_fn=fetcher)
         assessed = assess_2026_currentness(
             state=state,
             cell=rec,
