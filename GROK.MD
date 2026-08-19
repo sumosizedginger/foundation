@@ -2,10 +2,10 @@
 # EFFECTIVE-DATE TRUTH + REAL CURRENTNESS + TAXING-STATE EXTRACTION
 
 IMPLEMENTATION SHA:
-5d8e9cc8a0d3ea80f897807c1f059fe24f284ce9
+4081cdb (NC field-provenance correction on 5d8e9cc)
 
 INVENTORY SHA:
-5dbac1efa42718f2f592035430c094ef44569e779b869016ee4633486de7ff19
+51d5291c60df6d6e29a82f68d45fad0ec5a72b8cca3294f24f4f2688f9383cca
 
 GITHUB ACTIONS (head 5d8e9cc):
 - Tests & Code Quality 32278258913 success
@@ -78,8 +78,11 @@ TAXING JURISDICTIONS
 new state/year cells closed:
   PA 2024  GENERAL_WAGE_INCOME_TAX  3.07%  deduction 0  STATE_CODE_MATCH
   PA 2026  GENERAL_WAGE_INCOME_TAX  3.07%  deduction 0  STATE_CODE_MATCH
-  NC 2024  GENERAL_WAGE_INCOME_TAX  4.50%  std ded 12750  STATE_CODE_MATCH
-  NC 2026  GENERAL_WAGE_INCOME_TAX  3.99%  std ded 12750  STATE_CODE_MATCH
+  NC 2024  GENERAL_WAGE_INCOME_TAX  4.50%  std ded 12750
+           rate SHA G.S. 105-153.7; deduction SHA 2024 D-400 Schedule A
+  NC 2026  GENERAL_WAGE_INCOME_TAX  3.99%  std ded 12750
+           rate SHA G.S. 105-153.7; deduction SHA 2026 withholding tables
+           (not the 2025-labeled DOR landing page)
   IL 2024  GENERAL_WAGE_INCOME_TAX  4.95%  personal exemption 2775  STATE_CODE_MATCH
 
 states fully closed for both years:
